@@ -1069,7 +1069,14 @@
           }
         } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
           window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
-            .then(function(res) { resolve(res); })
+            .then(function(res) { 
+              // Chuẩn hóa phản hồi API nếu bọc qua data
+              if (res && res.data !== undefined) {
+                resolve(res.data);
+              } else {
+                resolve(res);
+              }
+            })
             .catch(function(err) { reject(err); });
         } else {
           reject(new Error("Không tìm thấy kết nối Backend (GAS / api.js)"));
@@ -1210,7 +1217,7 @@
 
       try {
         var res = await callBackend("getAdminReports", [period], "getSummary", { period: period });
-        var payload = (res && res.data) ? res.data : res;
+        var payload = (res && res.d2cRevenue !== undefined) ? res : (res && res.data ? res.data : null);
         if (payload && payload.d2cRevenue !== undefined) {
           renderAdminSummaryData(payload);
         } else {
@@ -1311,7 +1318,7 @@
 
       try {
         var res = await callBackend("getAdminShippersWithPerformance", [period], "getShippers", { period: period });
-        var list = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+        var list = (res && Array.isArray(res)) ? res : (res && res.shippers ? res.shippers : (res && res.data ? res.data : []));
         renderShippersTableDirect(list);
       } catch (err) {
         console.error("Lỗi Shipper:", err);
@@ -1393,7 +1400,7 @@
 
       try {
         var res = await callBackend("getAdminCrmData", [], "getCRM", { period: "all" });
-        var list = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+        var list = (res && Array.isArray(res)) ? res : (res && res.crm ? res.crm : (res && res.data ? res.data : []));
         renderCrmTableDirect(list);
       } catch (err) {
         console.error("Lỗi CRM:", err);
@@ -1444,7 +1451,7 @@
 
       try {
         var res = await callBackend("getAdminInventoryData", [], "getCOGS", { period: currentPeriod });
-        var list = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+        var list = (res && Array.isArray(res)) ? res : (res && res.inventory ? res.inventory : (res && res.data ? res.data : []));
         renderInventoryTableDirect(list);
       } catch (err) {
         console.error("Lỗi COGS:", err);
@@ -1506,7 +1513,7 @@
     async function loadAdminMenuList() {
       try {
         var res = await callBackend("getAdminMenuList", [], "getMenu", {});
-        cachedMasterMenuList = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+        cachedMasterMenuList = (res && Array.isArray(res)) ? res : (res && res.menu ? res.menu : (res && res.data ? res.data : []));
         renderMasterMenuTable(cachedMasterMenuList);
         loadAdminDrinks();
         loadAdminToppings();
@@ -1566,7 +1573,7 @@
       if (!tbody) return;
       try {
         var res = await callBackend("getAdminToppingList", [], "getToppings", {});
-        var list = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+        var list = (res && Array.isArray(res)) ? res : (res && res.toppings ? res.toppings : (res && res.data ? res.data : []));
         renderToppingsTableDirect(list);
       } catch (err) {
         console.error("Lỗi Topping:", err);
@@ -1895,7 +1902,7 @@
 
       try {
         var res = await callBackend("getAdminWheelReviews", [], "getWheelReviews", {});
-        var list = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+        var list = (res && Array.isArray(res)) ? res : (res && res.reviews ? res.reviews : (res && res.data ? res.data : []));
         renderWheelReviewsTableDirect(list);
       } catch (err) {
         tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có lượt quay nào.</td></tr>";
@@ -1955,7 +1962,7 @@
     async function loadDynamicConfigToInputs() {
       try {
         var res = await callBackend("getStoreConfigDynamic", [], "getConfig", {});
-        var cfg = (res && res.data) ? res.data : res;
+        var cfg = (res && res.storeName !== undefined) ? res : (res && res.data ? res.data : null);
         if (!cfg) return;
         activeStoreConfigCache = cfg;
 
@@ -2074,7 +2081,7 @@
     async function loadGoldenHourAdmin() {
       try {
         var res = await callBackend("getGoldenHourStatus", [], "getGoldenHour", {});
-        var data = (res && res.data) ? res.data : res;
+        var data = (res && res.isActive !== undefined) ? res : (res && res.data ? res.data : null);
         if (data) {
           document.getElementById("chkGoldenHourActive").checked = data.isActive;
           document.getElementById("txtGoldenHourMsg").value = data.msg || "Freeship từ 2 phần + Tặng 1 Nước Suối cho bill từ 50k!";
@@ -2122,7 +2129,7 @@
     async function loadGamificationAdminData() {
       try {
         var res = await callBackend("getLoyaltyGamificationConfig", [], "getGamificationConfig", {});
-        var cfg = (res && res.data) ? res.data : res;
+        var cfg = (res && res.tiers !== undefined) ? res : (res && res.data ? res.data : null);
         if (!cfg) return;
         activeGamificationCfg = cfg;
         renderTierConfigTable(cfg.tiers);
@@ -2392,13 +2399,13 @@
     async function loadStoreStatus() {
       try {
         var res = await callBackend("getStoreStatus", [], "getStoreStatus", {});
-        var data = (res && res.data) ? res.data : res;
+        var data = (res && res.isClosed !== undefined) ? res : (res && res.data ? res.data : null);
         if (data) {
           document.getElementById("chkStoreClosed").checked = data.isClosed;
           document.getElementById("txtClosedMsg").value = data.message || "";
         }
         var cfgRes = await callBackend("getStoreConfigDynamic", [], "getConfig", {});
-        var cfg = (cfgRes && cfgRes.data) ? cfgRes.data : cfgRes;
+        var cfg = (cfgRes && cfgRes.autoOpenHour !== undefined) ? cfgRes : (cfgRes && cfgRes.data ? cfgRes.data : null);
         if (cfg) {
           if (document.getElementById("cfgAutoOpenHour")) document.getElementById("cfgAutoOpenHour").value = cfg.autoOpenHour !== undefined ? cfg.autoOpenHour : 6;
           if (document.getElementById("cfgAutoCloseHour")) document.getElementById("cfgAutoCloseHour").value = cfg.autoCloseHour !== undefined ? cfg.autoCloseHour : 22;
