@@ -652,7 +652,8 @@
       <button class="btn-grab-submit" onclick="closeModal('pwaModal')">Đã Hiểu</button>
     </div>
   </div>
-<script src="api.js"></script>
+
+  <script src="api.js"></script>
   <script>
     var STORE_COORDS = { lat: 11.285267, lng: 106.133347 };
     var ZALO_HOTLINE = "0969004693";
@@ -683,7 +684,6 @@
       { id: "giai-khat", name: "Trà & Giải Khát 1L" }
     ];
 
-    // TOPPING & SÚP KÈM THỰC CHIẾN
     var TOPPINGS = [
       { id: "soup_free", name: "Chén súp thanh ngọt (Kèm mì trộn)", price: 0, group: "soup", available: true },
       { id: "soup_trungcut", name: "Chén súp thêm 3 Trứng cút", price: 5000, group: "soup", available: true },
@@ -698,7 +698,6 @@
       { id: "t_tradao", name: "Trà Đào Cam Sả Khổng Lồ (1 Lít)", price: 25000, group: "topping", available: true }
     ];
 
-    // DANH SÁCH MÓN ĂN GỐC (LUÔN CÓ DỮ LIỆU BAN ĐẦU)
     var MENU_DATA = [
       { id: "m1", category: "mon-chinh", dishType: "kho", name: "Cơm Phủ Trứng Thịt Bằm (Traffic Maker)", price: 29000, priceD2C: 29000, priceApp: 33000, tag: "Bán chạy", desc: "Cơm dẻo thơm + trứng phủ lòng đào mượt + thịt bằm sốt đậm đà", img: "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=500", available: true },
       { id: "m2", category: "mon-chinh", dishType: "kho", name: "Mì Trộn Xúc Xích Trứng Đào", price: 27000, priceD2C: 27000, priceApp: 31000, tag: "Bán chạy", desc: "2 vắt mì dai ngon + xúc xích khía + trứng ốp la", img: "https://images.unsplash.com/photo-1552611052-33e04de081de?w=500", available: true },
@@ -731,15 +730,42 @@
     var isSpinning = false;
     var isStoreClosed = false;
 
+    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS VÀ RENDER
+    function isRunningInsideGAS() {
+      return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
+    }
+
+    function callBackend(gasFunctionName, gasArgsArray, apiActionName, apiPayloadObj) {
+      return new Promise(function(resolve, reject) {
+        if (isRunningInsideGAS()) {
+          var runner = google.script.run
+            .withSuccessHandler(function(res) { resolve(res); })
+            .withFailureHandler(function(err) { reject(err); });
+          if (typeof runner[gasFunctionName] === 'function') {
+            runner[gasFunctionName].apply(runner, gasArgsArray || []);
+          } else {
+            reject(new Error("Hàm " + gasFunctionName + " không tồn tại trong GAS"));
+          }
+        } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
+          window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
+            .then(function(res) { 
+              if (res && res.data !== undefined) resolve(res.data);
+              else resolve(res);
+            })
+            .catch(function(err) { reject(err); });
+        } else {
+          reject(new Error("Không tìm thấy kết nối Backend (GAS / api.js)"));
+        }
+      });
+    }
+
     function initClient() {
-      // 1. RENDER GIAO DIỆN TỨC THÌ TỪ DỮ LIỆU CÓ SẴN (CHỐNG MÀN HÌNH TRẮNG)
       renderCatNav();
       renderMenuItems();
       updateDynamicCalculations();
       drawWheel();
       initCRMData();
 
-      // 2. ĐỒNG BỘ NỀN VỚI MÁY CHỦ GOOGLE
       checkStoreActiveStatus();
       loadStoreConfigFromServer();
       loadMenuFromServer();
@@ -748,33 +774,31 @@
       checkGoldenHourSchedule();
     }
 
-    function checkStoreActiveStatus() {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(function(res) {
-          if (res && res.isClosed) {
-            isStoreClosed = true;
-            document.getElementById("closedStoreBanner").style.display = "block";
-            document.getElementById("closedStoreMsg").innerText = res.message || "Quán đang tạm nghỉ phục vụ.";
-          }
-        }).getStoreStatus();
-      }
+    async function checkStoreActiveStatus() {
+      try {
+        var res = await callBackend("getStoreStatus", [], "getStoreStatus", {});
+        if (res && res.isClosed) {
+          isStoreClosed = true;
+          document.getElementById("closedStoreBanner").style.display = "block";
+          document.getElementById("closedStoreMsg").innerText = res.message || "Quán đang tạm nghỉ phục vụ.";
+        }
+      } catch (e) {}
     }
 
-    function loadStoreConfigFromServer() {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(function(cfg) {
-          if (cfg) {
-            activeStoreConfig = Object.assign({}, activeStoreConfig, cfg);
-            ZALO_HOTLINE = cfg.phone || "0969004693";
-            MOMO_PAYMENT_PHONE = cfg.bankAccount || cfg.momoAccount || "0934220585";
-            if (cfg.centerCoords && cfg.centerCoords.lat) STORE_COORDS = cfg.centerCoords;
-            if (document.getElementById("dispStoreTitle")) document.getElementById("dispStoreTitle").innerText = cfg.storeName || "Mì Trộn & Cơm Trộn Thím 5";
-            if (document.getElementById("linkHotlineHeader")) document.getElementById("linkHotlineHeader").href = "tel:" + (cfg.phone || "0969004693");
-            if (document.getElementById("dispCopyMomoAcc")) document.getElementById("dispCopyMomoAcc").innerText = MOMO_PAYMENT_PHONE;
-            updateDynamicCalculations();
-          }
-        }).getStoreConfigDynamic();
-      }
+    async function loadStoreConfigFromServer() {
+      try {
+        var cfg = await callBackend("getStoreConfigDynamic", [], "getConfig", {});
+        if (cfg) {
+          activeStoreConfig = Object.assign({}, activeStoreConfig, cfg);
+          ZALO_HOTLINE = cfg.phone || "0969004693";
+          MOMO_PAYMENT_PHONE = cfg.bankAccount || cfg.momoAccount || "0934220585";
+          if (cfg.centerCoords && cfg.centerCoords.lat) STORE_COORDS = cfg.centerCoords;
+          if (document.getElementById("dispStoreTitle")) document.getElementById("dispStoreTitle").innerText = cfg.storeName || "Mì Trộn & Cơm Trộn Thím 5";
+          if (document.getElementById("linkHotlineHeader")) document.getElementById("linkHotlineHeader").href = "tel:" + (cfg.phone || "0969004693");
+          if (document.getElementById("dispCopyMomoAcc")) document.getElementById("dispCopyMomoAcc").innerText = MOMO_PAYMENT_PHONE;
+          updateDynamicCalculations();
+        }
+      } catch (e) {}
     }
 
     function playGoldenHourAlert() {
@@ -826,25 +850,25 @@
       });
     }
 
-    function loadMenuFromServer() {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(function(data) {
-          if (data && Array.isArray(data) && data.length > 0) {
-            MENU_DATA = data;
-            renderMenuItems();
-          }
-        }).getMenuDataFromSheet();
-      }
+    async function loadMenuFromServer() {
+      try {
+        var data = await callBackend("getAdminMenuList", [], "getMenu", {});
+        var list = (data && Array.isArray(data)) ? data : (data && data.menu ? data.menu : []);
+        if (list.length > 0) {
+          MENU_DATA = list;
+          renderMenuItems();
+        }
+      } catch (e) {}
     }
 
-    function loadToppingsFromServer() {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(function(data) {
-          if (data && Array.isArray(data) && data.length > 0) {
-            TOPPINGS = data;
-          }
-        }).getAdminToppingList();
-      }
+    async function loadToppingsFromServer() {
+      try {
+        var data = await callBackend("getAdminToppingList", [], "getToppings", {});
+        var list = (data && Array.isArray(data)) ? data : (data && data.toppings ? data.toppings : []);
+        if (list.length > 0) {
+          TOPPINGS = list;
+        }
+      } catch (e) {}
     }
 
     function renderMenuItems() {
@@ -857,7 +881,7 @@
       });
 
       if (items.length === 0) {
-        items = MENU_DATA; // Fallback an toàn nếu chưa phân loại category
+        items = MENU_DATA;
       }
 
       items.forEach(function(m) {
@@ -884,9 +908,6 @@
       });
     }
 
-    /**
-     * MỞ MODAL CHỌN MÓN ĐỘNG (THEO DẠNG MÓN: KHO / NUOC / AN-KEM / GIAI-KHAT)
-     */
     function openCustomModal(dishId) {
       if (isStoreClosed) { alert("🏖️ Quán đang tạm nghỉ phục vụ!"); return; }
       selectedDish = MENU_DATA.find(function(m){ return String(m.id) === String(dishId); });
@@ -901,7 +922,6 @@
 
       var dType = String(selectedDish.dishType || "kho").toLowerCase();
 
-      // Phân luồng hiển thị
       if (selectedDish.category === "giai-khat" || dType === "giai-khat") {
         document.getElementById("modSpicyBox").style.display = "none";
         document.getElementById("modSoupBox").style.display = "none";
@@ -917,7 +937,6 @@
         document.getElementById("modToppingBox").style.display = "block";
         renderFilteredToppings();
       } else {
-        // Món khô / trộn / cơm: Hiện đủ vị cay + súp ăn kèm
         document.getElementById("modSpicyBox").style.display = "block";
         document.getElementById("modSoupBox").style.display = "block";
         document.getElementById("modToppingBox").style.display = "block";
@@ -1042,15 +1061,11 @@
       updateDynamicCalculations();
     }
 
-    /**
-     * TÍNH TOÁN GIỎ HÀNG: XỬ LÝ DỨT ĐIỂM GIỎ TRỐNG 0Đ & FREESHIP THÔNG MINH
-     */
     function updateDynamicCalculations() {
       var totalItems = cart.length;
       var foodVal = cart.reduce(function(s, i){ return s + i.total; }, 0);
       var mainDishesCount = cart.filter(function(i){ return (i.dish.category === "mon-chinh" || i.dish.category === "dai-tiec"); }).length;
 
-      // 1. KHI GIỎ HÀNG TRỐNG (0 MÓN) -> HIỂN THỊ CHÍNH XÁC 0Đ
       if (totalItems === 0 || foodVal === 0) {
         currentBillTotalCalc = 0;
         if (document.getElementById("dtCartBadge")) document.getElementById("dtCartBadge").innerText = "0 món";
@@ -1076,7 +1091,6 @@
         return;
       }
 
-      // 2. KHI ĐÃ CHỌN MÓN VÀO GIỎ
       var sRules = activeStoreConfig.shippingRules || {
         baseDistKm: 2.0, baseFee: 12000, ratePerKm: 4500,
         subsidyTier1_MinBill: 100000, subsidyTier1_Amount: 15000,
@@ -1317,7 +1331,8 @@
       document.getElementById("checkoutModal").style.display = "flex";
     }
 
-    function submitOrder() {
+    // HÀM GỬI ĐƠN HÀNG CHUẨN DUAL-MODE (ĐẨY THẲNG BẾP & SHIPPER)
+    async function submitOrder() {
       if (isStoreClosed) { alert("🏖️ Quán đang tạm nghỉ!"); return; }
       var name = document.getElementById("custName").value.trim();
       var phone = document.getElementById("custPhone").value.trim();
@@ -1373,45 +1388,32 @@
       btn.innerText = "⏳ Đang gửi đơn về Bếp...";
       btn.disabled = true;
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            btn.innerText = "🚀 2. GỬI BẾP NẤU NGAY";
-            btn.disabled = false;
-            closeModal("checkoutModal");
-            document.getElementById("zaloConfirmModal").style.display = "flex";
-            cart = [];
-            currentOrderCode = "T5-" + Math.floor(1000 + Math.random() * 9000);
-            appliedVoucherDiscount = 0;
-            updateDynamicCalculations();
-            checkActiveTracking();
-          })
-          .withFailureHandler(function(err) {
-            alert("Lỗi gửi đơn: " + err.message);
-            btn.innerText = "🚀 2. GỬI BẾP NẤU NGAY";
-            btn.disabled = false;
-          })
-          .doPost({
-            postData: {
-              contents: JSON.stringify({
-                orderCode: currentOrderCode, name: name, phone: phone,
-                address: finalAddressText, distance: customerDist,
-                itemsSummary: itemsSummary, tasteNotes: tasteNotes,
-                paymentMethod: payMethod,
-                foodVal: foodVal, toppingVal: toppingVal,
-                voucherVal: appliedVoucherDiscount || 0,
-                mainDishesCount: mainDishesCount,
-                grandTotal: grandTotalNum, itemsCount: cart.length
-              })
-            }
-          });
-      } else {
+      var orderPayload = {
+        orderCode: currentOrderCode, name: name, phone: phone,
+        address: finalAddressText, distance: customerDist,
+        itemsSummary: itemsSummary, tasteNotes: tasteNotes,
+        paymentMethod: payMethod,
+        foodVal: foodVal, toppingVal: toppingVal,
+        voucherVal: appliedVoucherDiscount || 0,
+        mainDishesCount: mainDishesCount,
+        grandTotal: grandTotalNum, itemsCount: cart.length
+      };
+
+      try {
+        var res = await callBackend("executeOrderCreation", [orderPayload], "doPostOrder", orderPayload);
         btn.innerText = "🚀 2. GỬI BẾP NẤU NGAY";
         btn.disabled = false;
         closeModal("checkoutModal");
         document.getElementById("zaloConfirmModal").style.display = "flex";
         cart = [];
+        currentOrderCode = "T5-" + Math.floor(1000 + Math.random() * 9000);
+        appliedVoucherDiscount = 0;
         updateDynamicCalculations();
+        checkActiveTracking();
+      } catch (err) {
+        alert("Lỗi kết nối máy chủ Bếp: " + err.message);
+        btn.innerText = "🚀 2. GỬI BẾP NẤU NGAY";
+        btn.disabled = false;
       }
     }
 
@@ -1450,31 +1452,31 @@
       document.getElementById("trackOrderCode").innerText = last.code;
 
       if (!trackingTimer) {
-        trackingTimer = setInterval(function() {
-          if (typeof google !== 'undefined' && google.script && google.script.run) {
-            google.script.run.withSuccessHandler(function(res) {
-              if (res) {
-                var s = res.step;
-                for (var i = 1; i <= 4; i++) {
-                  var el = document.getElementById("step" + i);
-                  if (el) el.className = "step-item" + (i < s ? " completed" : (i === s ? " active" : ""));
-                }
-                var badge = document.getElementById("trackStatusBadge");
-                if (badge) {
-                  if (s === 0) { badge.innerText = "⏳ Chờ Ship Gọi"; badge.style.background = "#FEF3C7"; badge.style.color = "#92400E"; }
-                  else if (s === 1) { badge.innerText = "🔔 Tiếp Nhận"; badge.style.background = "#DCFCE7"; badge.style.color = "#15803D"; }
-                  else if (s === 2) { badge.innerText = "🍳 Bếp Nấu"; badge.style.background = "#FEF3C7"; badge.style.color = "#92400E"; }
-                  else if (s === 3) { badge.innerText = "🛵 Đang Giao"; badge.style.background = "#DBEAFE"; badge.style.color = "#1E40AF"; }
-                  else if (s === 4) { badge.innerText = "✅ Hoàn Tất"; badge.style.background = "#ECFDF5"; badge.style.color = "#065F46"; }
-                }
+        trackingTimer = setInterval(async function() {
+          try {
+            var res = await callBackend("getKitchenData", [], "getKitchenData", {});
+            var orders = (res && Array.isArray(res)) ? res : (res && res.orders ? res.orders : []);
+            var matchOrder = orders.find(function(o){ return o.code === last.code; });
+            var s = matchOrder ? Number(matchOrder.step) : 1;
 
-                if (s >= 4 && !last.isSpun) {
-                  var btnComp = document.getElementById("btnCustomerComplete");
-                  if (btnComp) btnComp.style.display = "block";
-                }
-              }
-            }).checkOrderStatusLive(last.code);
-          }
+            for (var i = 1; i <= 4; i++) {
+              var el = document.getElementById("step" + i);
+              if (el) el.className = "step-item" + (i < s ? " completed" : (i === s ? " active" : ""));
+            }
+            var badge = document.getElementById("trackStatusBadge");
+            if (badge) {
+              if (s === 0) { badge.innerText = "⏳ Chờ Ship Gọi"; badge.style.background = "#FEF3C7"; badge.style.color = "#92400E"; }
+              else if (s === 1) { badge.innerText = "🔔 Tiếp Nhận"; badge.style.background = "#DCFCE7"; badge.style.color = "#15803D"; }
+              else if (s === 2) { badge.innerText = "🍳 Bếp Nấu"; badge.style.background = "#FEF3C7"; badge.style.color = "#92400E"; }
+              else if (s === 3) { badge.innerText = "🛵 Đang Giao"; badge.style.background = "#DBEAFE"; badge.style.color = "#1E40AF"; }
+              else if (s === 4) { badge.innerText = "✅ Hoàn Tất"; badge.style.background = "#ECFDF5"; badge.style.color = "#065F46"; }
+            }
+
+            if (s >= 4 && !last.isSpun) {
+              var btnComp = document.getElementById("btnCustomerComplete");
+              if (btnComp) btnComp.style.display = "block";
+            }
+          } catch (e) {}
         }, 4000);
       }
     }
@@ -1540,7 +1542,7 @@
       }
     }
 
-    function startLuckySpin() {
+    async function startLuckySpin() {
       var phone = document.getElementById("wheelPhoneInput").value.trim();
       if (!phone || phone.length < 9) { alert("Vui lòng nhập Số Điện Thoại!"); return; }
       if (isSpinning) return;
@@ -1551,20 +1553,21 @@
       isSpinning = true;
       document.getElementById("btnSpinWheel").disabled = true;
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            if (res.status === "ALREADY_SPUN") {
-              isSpinning = false;
-              document.getElementById("btnSpinWheel").style.display = "none";
-              document.getElementById("wheelPrizeText").innerText = "🎉 " + res.prize;
-              document.getElementById("wheelCodeText").innerText = "MÃ: " + res.promoCode;
-              document.getElementById("wheelResultBox").style.display = "block";
-            } else {
-              executeSpinAnimation(res.prize, res.promoCode, orderCodeToSend);
-            }
-          }).spinLuckyWheelServer(phone, orderCodeToSend);
-      } else {
+      try {
+        var res = await callBackend("spinLuckyWheelServer", [phone, orderCodeToSend, 5, "Quay thưởng web"], "spinLuckyWheelServer", {
+          phone: phone, orderCode: orderCodeToSend, stars: 5, reviewText: "Khách quay thưởng may mắn"
+        });
+
+        if (res && res.status === "ALREADY_SPUN") {
+          isSpinning = false;
+          document.getElementById("btnSpinWheel").style.display = "none";
+          document.getElementById("wheelPrizeText").innerText = "🎉 " + res.prize;
+          document.getElementById("wheelCodeText").innerText = "MÃ: " + res.promoCode;
+          document.getElementById("wheelResultBox").style.display = "block";
+        } else {
+          executeSpinAnimation((res && res.prize) ? res.prize : "Chai Nước Suối", (res && res.promoCode) ? res.promoCode : "FREESUOI", orderCodeToSend);
+        }
+      } catch (e) {
         executeSpinAnimation("Chai Nước Suối", "FREESUOI", orderCodeToSend);
       }
     }
@@ -1622,7 +1625,6 @@
       document.getElementById(id).style.display = "none";
     }
 
-    // KHỞI ĐỘNG HỆ THỐNG
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", initClient);
     } else {
