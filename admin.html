@@ -1051,7 +1051,6 @@
       { type: "SHIP", name: "Hỗ Trợ Cước Ship 10.000đ", code: "FREESHIP10K", cost: 10000, weight: 2, color: "#C2410C", textColor: "#FFFFFF" }
     ];
 
-    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS NỘI BỘ VÀ REST API RENDER
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -1070,7 +1069,6 @@
         } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
           window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
             .then(function(res) { 
-              // Chuẩn hóa phản hồi API nếu bọc qua data
               if (res && res.data !== undefined) {
                 resolve(res.data);
               } else {
@@ -1119,7 +1117,6 @@
       }
     });
 
-    // 1. XÁC THỰC MÃ PIN QUẢN TRỊ
     async function handleAdminLogin() {
       var pin = document.getElementById("adminPinAuthInput").value.trim();
       var err = document.getElementById("authErrorMsg");
@@ -1210,7 +1207,6 @@
       renderWheelSlotsBuilder();
     }
 
-    // 2. DOANH THU & P&L
     async function loadAllAdminData(period) {
       period = period || 'all';
       setStatusLog("Đang tính toán số liệu kỳ: " + period + "...", false);
@@ -1309,7 +1305,6 @@
       });
     }
 
-    // 3. QUẢN TRỊ SHIPPER
     async function loadAdminShippersList(period) {
       period = period || 'all';
       setStatusLog("Đang tải danh sách tài xế kỳ: " + period + "...", false);
@@ -1393,7 +1388,6 @@
       }
     }
 
-    // 4. MINI CRM KHÁCH HÀNG
     async function loadAdminCrmData() {
       var tbody = document.getElementById("adminCrmTbody");
       if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải dữ liệu CRM...</td></tr>";
@@ -1444,7 +1438,6 @@
       setStatusLog("Đã nạp danh bạ CRM thành công.", false);
     }
 
-    // 5. NHẬP KHO COGS
     async function loadAdminInventoryData() {
       var tbody = document.getElementById("adminInventoryTbody");
       if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải dữ liệu nhập kho...</td></tr>";
@@ -1509,7 +1502,6 @@
       }
     }
 
-    // 6. MENU MÓN CHÍNH, TOPPING & NƯỚC UỐNG
     async function loadAdminMenuList() {
       try {
         var res = await callBackend("getAdminMenuList", [], "getMenu", {});
@@ -1887,7 +1879,7 @@
 
       setStatusLog("Đang lưu cấu hình Vòng Quay mới...", false);
       try {
-        var res = await callBackend("saveWheelPrizesConfigServer", [dynamicWheelSlots], "saveWheelConfig", { slots: dynamicWheelSlots });
+        var res = await callBackend("saveWheelPrizesConfigServer", [dynamicWheelSlots], "saveWheelConfig", { slots: JSON.stringify(dynamicWheelSlots) });
         alert((res && res.message) ? res.message : "Đã lưu cấu hình Vòng Quay thành công!");
         setStatusLog("Đã lưu cấu hình Vòng Quay thành công!", false);
       } catch (err) {
@@ -2030,7 +2022,7 @@
 
       setStatusLog("Đang lưu công thức và cập nhật Menu...", false);
       try {
-        var res = await callBackend("updateDynamicPricingSettings", [payload, activeAdminSession.pin], "updatePricingSettings", { payload: payload, pin: activeAdminSession.pin });
+        var res = await callBackend("updateDynamicPricingSettings", [payload, activeAdminSession.pin], "updatePricingSettings", { payload: JSON.stringify(payload), adminPin: activeAdminSession.pin });
         alert((res && res.message) ? res.message : "Đã đồng bộ công thức mới thành công!");
         setStatusLog("Đã đồng bộ công thức mới thành công!", false);
         loadDynamicConfigToInputs();
@@ -2190,7 +2182,7 @@
 
       setStatusLog("Đang lưu chiến dịch marketing...", false);
       try {
-        var res = await callBackend("saveLoyaltyGamificationConfig", [activeGamificationCfg], "saveGamificationConfig", { config: activeGamificationCfg });
+        var res = await callBackend("saveLoyaltyGamificationConfig", [activeGamificationCfg], "saveGamificationConfig", { config: JSON.stringify(activeGamificationCfg) });
         alert("🎉 " + ((res && res.message) ? res.message : "Chiến dịch marketing đã được kích hoạt!"));
         setStatusLog("Chiến dịch marketing đã được kích hoạt!", false);
       } catch (err) {
@@ -2280,7 +2272,9 @@
         webAppUrl: document.getElementById("cfgStoreWebUrl").value.trim(),
         taxReportEmails: document.getElementById("cfgTaxReportEmails").value.trim(),
         foodCostRateD2C: 0.35,
-        taxRateDefault: (taxPercentInput / 100)
+        taxRateDefault: (taxPercentInput / 100),
+        autoOpenHour: parseInt(document.getElementById("cfgAutoOpenHour") ? document.getElementById("cfgAutoOpenHour").value : 6, 10),
+        autoCloseHour: parseInt(document.getElementById("cfgAutoCloseHour") ? document.getElementById("cfgAutoCloseHour").value : 22, 10)
       };
 
       if (!newCfg.storeName || !newCfg.phone || !newCfg.bankAccount) { 
@@ -2293,7 +2287,10 @@
       setStatusLog("Đang lưu và đồng bộ toàn hệ thống...", false);
       try {
         await callBackend("updateGoldenHourStatus", [isGolden, goldenMsg], "updateGoldenHour", { isActive: isGolden, msg: goldenMsg });
-        var res = await callBackend("saveStoreConfigDynamic", [newCfg], "saveConfig", { config: newCfg });
+        
+        // CẬP NHẬT MỚI: Dùng JSON.stringify bọc payload để chống gãy dữ liệu qua GET
+        var res = await callBackend("saveStoreConfigDynamic", [newCfg], "saveConfig", { payload: JSON.stringify(newCfg) });
+        
         alert("✅ " + ((res && res.message) ? res.message : "Đã đồng bộ cấu hình thành công!"));
         loadDynamicConfigToInputs();
         setStatusLog("Đã đồng bộ toàn hệ thống thành công!", false);
@@ -2422,7 +2419,7 @@
       setStatusLog("Đang lưu trạng thái và khung giờ bán...", false);
       try {
         await callBackend("updateStoreStatus", [isClosed, msg], "updateStoreStatus", { isClosed: isClosed, message: msg });
-        await callBackend("saveStoreConfigDynamic", [{ autoOpenHour: openH, autoCloseHour: closeH }], "saveConfig", { config: { autoOpenHour: openH, autoCloseHour: closeH } });
+        await callBackend("saveStoreConfigDynamic", [{ autoOpenHour: openH, autoCloseHour: closeH }], "saveConfig", { payload: JSON.stringify({ autoOpenHour: openH, autoCloseHour: closeH }) });
         alert("✅ Đã cập nhật trạng thái quán và khung giờ bán (" + openH + "h - " + closeH + "h) thành công!");
         closeModal("storeStatusModal");
         setStatusLog("Hệ thống sẵn sàng phục vụ theo khung giờ mới.", false);
