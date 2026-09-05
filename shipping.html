@@ -140,12 +140,39 @@
       </div>
     </div>
   </div>
-<script src="api.js"></script>
+
+  <script src="api.js"></script>
   <script>
     var currentLast4 = "";
     var autoRefreshTimer = null;
     var cachedOrdersList = [];
     var currentActiveFilter = 'all';
+
+    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG NHẬN DIỆN GAS HOẶC WEB TĨNH RENDER
+    function isRunningInsideGAS() {
+      return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
+    }
+
+    function callBackend(gasFunctionName, gasArgsArray, apiActionName, apiPayloadObj) {
+      return new Promise(function(resolve, reject) {
+        if (isRunningInsideGAS()) {
+          var runner = google.script.run
+            .withSuccessHandler(function(res) { resolve(res); })
+            .withFailureHandler(function(err) { reject(err); });
+          if (typeof runner[gasFunctionName] === 'function') {
+            runner[gasFunctionName].apply(runner, gasArgsArray || []);
+          } else {
+            reject(new Error("Hàm " + gasFunctionName + " không tồn tại trong GAS"));
+          }
+        } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
+          window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
+            .then(function(res) { resolve(res); })
+            .catch(function(err) { reject(err); });
+        } else {
+          reject(new Error("Không tìm thấy kết nối Backend (GAS / api.js)"));
+        }
+      });
+    }
 
     function initShipperApp() {
       var savedLast4 = localStorage.getItem("thim5_shipper_last4");
@@ -180,23 +207,33 @@
       loadShipperOrders();
 
       if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-      autoRefreshTimer = setInterval(loadShipperOrders, 5000); // Tự động cập nhật mỗi 5s
+      autoRefreshTimer = setInterval(loadShipperOrders, 5000); // Tự động làm mới mỗi 5 giây
     }
 
-    function loadShipperOrders() {
+    async function loadShipperOrders() {
       if (!currentLast4) return;
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            if (res && res.orders) {
-              cachedOrdersList = res.orders;
-              renderOrders();
-            }
-          })
-          .withFailureHandler(function(err) {
-            console.error("Lỗi tải đơn Shipper:", err);
-          })
-          .getShipperOrders(currentLast4);
+      try {
+        var res = await callBackend("getShipperOrders", [currentLast4], "getShipperOrders", { last4: currentLast4 });
+        
+        // Bóc tách dữ liệu an toàn cho cả hai cấu trúc phản hồi
+        if (res && Array.isArray(res.orders)) {
+          cachedOrdersList = res.orders;
+        } else if (res && res.data && Array.isArray(res.data.orders)) {
+          cachedOrdersList = res.data.orders;
+        } else if (Array.isArray(res)) {
+          cachedOrdersList = res;
+        } else {
+          cachedOrdersList = [];
+        }
+
+        if (res && res.shipper) {
+          if (res.shipper.name) document.getElementById("dispShipperName").innerText = "Tài Xế: " + res.shipper.name;
+          if (res.shipper.phone) document.getElementById("dispShipperPhone").innerText = "SĐT: " + res.shipper.phone;
+        }
+
+        renderOrders();
+      } catch (err) {
+        console.error("Lỗi nạp cuốc xe Shipper:", err);
       }
     }
 
@@ -211,7 +248,7 @@
       var container = document.getElementById("ordersContainer");
       if (!container) return;
 
-      var completedOrders = cachedOrdersList.filter(function(o){ return o.step === 4; });
+      var completedOrders = cachedOrdersList.filter(function(o){ return Number(o.step) === 4 || o.status === "Hoàn Tất"; });
       var totalShipEarn = completedOrders.reduce(function(sum, o){ return sum + (Number(o.shipFee) || 0); }, 0);
 
       document.getElementById("dispCompletedCount").innerText = completedOrders.length + " đơn";
@@ -219,43 +256,43 @@
 
       var displayList = cachedOrdersList;
       if (currentActiveFilter === 'wait_verify') {
-        displayList = cachedOrdersList.filter(function(o){ return o.step === 0; });
+        displayList = cachedOrdersList.filter(function(o){ return Number(o.step) === 0; });
       } else if (currentActiveFilter === 'delivering') {
-        displayList = cachedOrdersList.filter(function(o){ return o.step === 3; });
+        displayList = cachedOrdersList.filter(function(o){ return Number(o.step) === 3; });
       } else if (currentActiveFilter === 'completed') {
-        displayList = cachedOrdersList.filter(function(o){ return o.step === 4; });
+        displayList = cachedOrdersList.filter(function(o){ return Number(o.step) === 4 || o.status === "Hoàn Tất"; });
       } else {
-        // Mặc định hiện đơn đang xử lý
-        displayList = cachedOrdersList.filter(function(o){ return o.step < 4; });
+        // Tab Tất Cả: Hiển thị các đơn đang cần giao (chưa hoàn tất)
+        displayList = cachedOrdersList.filter(function(o){ return Number(o.step) < 4 && o.status !== "Hoàn Tất"; });
       }
 
       if (displayList.length === 0) {
-        container.innerHTML = "<div class='order-card' style='text-align:center; color:var(--muted); padding:30px;'>Không có cuốc xe nào trong mục này.<br><small>Hệ thống tự động lắng nghe đơn mới mỗi 5 giây...</small></div>";
+        container.innerHTML = "<div class='order-card' style='text-align:center; color:var(--muted); padding:35px;'>Không có cuốc xe nào trong mục này.<br><small>Hệ thống tự động lắng nghe đơn mới mỗi 5 giây...</small></div>";
         return;
       }
 
       var html = "";
       displayList.forEach(function(o) {
-        var isStep0 = (o.step === 0);
-        var isDelivering = (o.step === 3);
-        var isCompleted = (o.step === 4);
-        var isMoMo = (o.method === "CK_VIETQR" || o.method === "MOMO");
+        var stepNum = Number(o.step);
+        var isStep0 = (stepNum === 0);
+        var isDelivering = (stepNum === 3);
+        var isCompleted = (stepNum === 4 || o.status === "Hoàn Tất");
+        var isMoMo = (o.method === "CK_VIETQR" || o.method === "MOMO" || o.method === "BANK");
 
         var storeNavUrl = o.storeGpsUrl || "https://www.google.com/maps/dir/?api=1&destination=11.285267,106.133347";
-        var custNavUrl = o.customerGpsUrl || ("https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(o.address));
+        var custNavUrl = o.customerGpsUrl || ("https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent((o.address || "Hòa Thành, Tây Ninh")));
 
-        var formattedItemsHtml = o.items.split(" | ").map(function(itemText){
+        var formattedItemsHtml = (o.items || '').split(" | ").map(function(itemText){
           return `<div style="margin-bottom:2px;">• ${itemText}</div>`;
         }).join("");
 
-        // TÍNH TOÁN BÙ SHIP MINH BẠCH CHO TÀI XẾ
         var shipFeeEarn = Number(o.shipFee) || 12000;
-        var shipDisplayNote = (o.finalShipFee === 0 || o.shipFee === 0)
+        var shipDisplayNote = (Number(o.finalShipFee) === 0 || Number(o.shipFee) === 0)
           ? `<span style="color:#34D399; font-weight:800;">${shipFeeEarn.toLocaleString('vi-VN')}đ (Quán Trợ Giá 100%)</span>`
           : `<span style="color:var(--gold); font-weight:800;">${shipFeeEarn.toLocaleString('vi-VN')}đ</span>`;
 
         html += `
-          <div class="order-card step${o.step}">
+          <div class="order-card step${stepNum}">
             <div class="order-header">
               <span class="order-code">${o.code} (${o.dist || 1.5} km)</span>
               <span class="order-badge ${isStep0 ? 'badge-step0' : (isDelivering ? 'badge-delivering' : (isCompleted ? 'badge-done' : 'badge-wait'))}">
@@ -328,67 +365,79 @@
     }
 
     /**
-     * CÁC HÀM XỬ LÝ HÀNH ĐỘNG CỦA SHIPPER
+     * CÁC HÀM XỬ LÝ HÀNH ĐỘNG CỦA SHIPPER (DUAL-MODE)
      */
-    function verifyCodOrder(orderCode) {
+    async function verifyCodOrder(orderCode) {
       var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "");
       var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "");
       var shipperLabel = sName + " (" + sPhone + ")";
 
       if (!confirm("Xác nhận bạn đã gọi điện cho khách và khách đồng ý nhận đơn " + orderCode + "?")) return;
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function() {
-            alert("✅ Đã xác minh COD thành công! Bếp đã nhận lệnh nấu món.");
-            loadShipperOrders();
-          })
-          .shipperVerifyCodOrderSuccess(orderCode, shipperLabel);
+      try {
+        await callBackend("shipperVerifyCodOrderSuccess", [orderCode, shipperLabel], "shipperVerifyCodOrderSuccess", {
+          orderCode: orderCode,
+          shipperInfo: shipperLabel
+        });
+        alert("✅ Đã xác minh COD thành công! Bếp đã nhận lệnh nấu món.");
+        loadShipperOrders();
+      } catch (err) {
+        alert("Lỗi xác minh COD: " + err.message);
       }
     }
 
-    function takeOrder(orderCode) {
+    async function takeOrder(orderCode) {
       var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "");
       var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "");
       var shipperLabel = sName + " (" + sPhone + ")";
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function() {
-            loadShipperOrders();
-          })
-          .shipperUpdateStep(orderCode, shipperLabel, 3);
+      try {
+        await callBackend("shipperUpdateStep", [orderCode, shipperLabel, 3], "shipperUpdateStep", {
+          orderCode: orderCode,
+          shipperName: shipperLabel,
+          stepNumber: 3
+        });
+        loadShipperOrders();
+      } catch (err) {
+        alert("Lỗi nhận đơn: " + err.message);
       }
     }
 
-    function completeOrder(orderCode) {
+    async function completeOrder(orderCode) {
       if (!confirm("Xác nhận đã giao đơn " + orderCode + " tận tay khách hàng?")) return;
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function() {
-            alert("🎉 Đã hoàn tất cuốc giao đơn " + orderCode + "!");
-            loadShipperOrders();
-          })
-          .shipperUpdateStep(orderCode, "", 4);
+
+      try {
+        await callBackend("shipperUpdateStep", [orderCode, "", 4], "shipperUpdateStep", {
+          orderCode: orderCode,
+          shipperName: "",
+          stepNumber: 4
+        });
+        alert("🎉 Đã hoàn tất cuốc giao đơn " + orderCode + "!");
+        loadShipperOrders();
+      } catch (err) {
+        alert("Lỗi hoàn tất đơn: " + err.message);
       }
     }
 
-    function cancelOrder(orderCode) {
+    async function cancelOrder(orderCode) {
       var reason = prompt("Nhập lý do sự cố (VD: Hỏng xe, thủng lốp, khách không nghe máy...):", "Hỏng xe đột xuất");
       if (!reason || !reason.trim()) return;
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function() {
-            alert("⚠️ Đã nhả đơn về bếp để điều phối tài xế khác!");
-            loadShipperOrders();
-          })
-          .shipperReleaseOrder(orderCode, reason);
+      try {
+        await callBackend("shipperReleaseOrder", [orderCode, reason], "shipperReleaseOrder", {
+          orderCode: orderCode,
+          reason: reason
+        });
+        alert("⚠️ Đã nhả đơn về bếp để điều phối tài xế khác!");
+        loadShipperOrders();
+      } catch (err) {
+        alert("Lỗi trả đơn: " + err.message);
       }
     }
 
     function handleLogout() {
       if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      autoRefreshTimer = null;
       localStorage.removeItem("thim5_shipper_last4");
       currentLast4 = "";
       document.getElementById("mainScreen").style.display = "none";
