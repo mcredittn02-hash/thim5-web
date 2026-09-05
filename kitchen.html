@@ -501,6 +501,7 @@
       var shipName = "Tài xế nội bộ";
       var shipPhone = "0969004693";
       
+      // Tách Họ tên và SĐT từ chuỗi "Nguyễn Hải Âu (0934220585)" do Shipper đã chốt
       if (currentShipper && currentShipper !== "undefined" && currentShipper !== "Chưa gán" && currentShipper !== "Chờ Gán") {
         var parts = currentShipper.split("(");
         shipName = parts[0].trim();
