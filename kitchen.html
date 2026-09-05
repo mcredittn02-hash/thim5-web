@@ -107,8 +107,7 @@
     .btn-cancel-order:hover { background: #991B1B; color: #fff; }
 
     .shipper-assign-box { display: flex; gap: 6px; }
-    .shipper-select { flex: 1; padding: 8px; background: #0F172A; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 11px; outline: none; font-weight: 700; }
-    .btn-assign { background: var(--blue); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+    .btn-assign { background: var(--blue); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; white-space: nowrap; width: 100%; }
 
     .status-badge { text-align: center; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: 800; }
     .status-badge.step0 { background: rgba(245, 158, 11, 0.2); color: #FDE047; }
@@ -179,12 +178,6 @@
     var currentFilter = 'all';
     var kdsPollingTimer = null;
 
-    var cachedShippers = [
-      { name: "Nguyễn Hải Âu", phone: "0969004693" },
-      { name: "Trần Minh Nam", phone: "0968222862" },
-      { name: "Tài Xế Ruột Hòa Thành", phone: "0934220585" }
-    ];
-
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -252,7 +245,6 @@
     function initKDS() {
       updateLiveClock();
       setInterval(updateLiveClock, 1000);
-      loadShippersFromServer();
       loadKitchenOrders();
       if (!kdsPollingTimer) {
         kdsPollingTimer = setInterval(loadKitchenOrders, 3500);
@@ -324,18 +316,6 @@
           osc2.stop(audioCtx.currentTime + 0.35);
         }, 200);
       } catch(e) {}
-    }
-
-    async function loadShippersFromServer() {
-      try {
-        var res = await callBackend("getAdminShippersWithPerformance", ['all'], "getShippers", { period: 'all' });
-        var list = (res && res.data) ? res.data : (Array.isArray(res) ? res : (res && res.shippers ? res.shippers : []));
-        if (list && list.length > 0) {
-          cachedShippers = list.map(function(s){ return { name: s.name, phone: s.phone }; });
-        }
-      } catch (err) {
-        console.warn("Dùng danh sách Shipper mặc định:", err);
-      }
     }
 
     async function loadKitchenOrders() {
@@ -438,10 +418,6 @@
           return `<div style="margin-bottom:4px; padding-bottom:4px; border-bottom:1px dashed #1E293B;">${itemText}</div>`;
         }).join("");
 
-        var shipperOptionsHtml = cachedShippers.map(function(s){
-          return `<option value="${s.name}|${s.phone}">🛵 ${s.name} (${s.phone})</option>`;
-        }).join("");
-
         html += `
           <div class="order-card ${stepClass}">
             <div>
@@ -480,10 +456,10 @@
               ` : (stepNum === 2 ? `
                 <div class="status-badge step2">🔥 Bếp đang nấu trên chảo...</div>
                 <div class="shipper-assign-box">
-                  <select class="shipper-select" id="ship_select_${cleanCode}">
-                    ${shipperOptionsHtml}
-                  </select>
-                  <button class="btn-assign" onclick="handleKitchenAssign('${cleanCode}')">Gán Giao</button>
+                  <div style="flex: 1; padding: 8px; background: #0F172A; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 11px; font-weight: 700;">
+                    🛵 ${o.shipper && o.shipper !== 'Chưa gán' && o.shipper !== 'Chờ Gán' ? o.shipper : 'Tài xế nội bộ'}
+                  </div>
+                  <button class="btn-assign" onclick="handleKitchenAssign('${cleanCode}', '${o.shipper}')">Giao Đơn</button>
                 </div>
               ` : `
                 <div class="status-badge step3">🛵 Đang giao bởi: <strong>${o.shipper || 'Shipper'}</strong></div>
@@ -520,13 +496,16 @@
       }
     }
 
-    async function handleKitchenAssign(orderCode) {
+    async function handleKitchenAssign(orderCode, currentShipper) {
       var cleanCode = String(orderCode || "").trim();
-      var select = document.getElementById("ship_select_" + cleanCode);
-      if (!select) return;
-      var parts = select.value.split("|");
-      var shipName = parts[0];
-      var shipPhone = parts[1];
+      var shipName = "Tài xế nội bộ";
+      var shipPhone = "0969004693";
+      
+      if (currentShipper && currentShipper !== "undefined" && currentShipper !== "Chưa gán" && currentShipper !== "Chờ Gán") {
+        var parts = currentShipper.split("(");
+        shipName = parts[0].trim();
+        if (parts[1]) shipPhone = parts[1].replace(")", "").trim();
+      }
 
       try {
         await callBackend("kitchenAssignShipper", [cleanCode, shipName, shipPhone], "kitchenAssignShipper", {
