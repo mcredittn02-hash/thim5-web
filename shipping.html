@@ -47,6 +47,7 @@
     /* ORDER CARD */
     .order-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 14px; margin-bottom: 12px; position: relative; }
     .order-card.step0 { border-left: 6px solid var(--warning); background: #182234; }
+    .order-card.step1 { border-left: 6px solid var(--danger); }
     .order-card.step2 { border-left: 6px solid var(--primary); }
     .order-card.step3 { border-left: 6px solid var(--blue); }
     .order-card.step4 { border-left: 6px solid var(--success); opacity: 0.85; }
@@ -55,7 +56,7 @@
     .order-code { font-size: 14px; font-weight: 900; color: var(--gold); }
     .order-badge { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 8px; }
     .badge-step0 { background: rgba(245, 158, 11, 0.2); color: #FDE047; }
-    .badge-wait { background: rgba(234, 88, 12, 0.2); color: #FB923C; }
+    .badge-wait { background: rgba(239, 68, 68, 0.2); color: #FCA5A5; }
     .badge-delivering { background: rgba(37, 99, 235, 0.2); color: #93C5FD; }
     .badge-done { background: rgba(16, 185, 129, 0.2); color: #34D399; }
 
@@ -125,7 +126,7 @@
       <div class="filter-tabs-bar">
         <button class="tab-filter-btn active" data-filter="all" onclick="changeFilter('all', this)">🌐 Tất Cả</button>
         <button class="tab-filter-btn" data-filter="wait_verify" onclick="changeFilter('wait_verify', this)">⏳ Cần Gọi Xác Minh</button>
-        <button class="tab-filter-btn" data-filter="delivering" onclick="changeFilter('delivering', this)">🛵 Đang Giao</button>
+        <button class="tab-filter-btn" data-filter="delivering" onclick="changeFilter('delivering', this)">🛵 Chờ Lấy & Giao</button>
         <button class="tab-filter-btn" data-filter="completed" onclick="changeFilter('completed', this)">✅ Đã Giao Xong</button>
       </div>
 
@@ -146,6 +147,7 @@
     var cachedOrdersList = [];
     var currentActiveFilter = 'all';
 
+    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG NHẬN DIỆN GAS HOẶC WEB TĨNH RENDER
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -257,10 +259,12 @@
       if (currentActiveFilter === 'wait_verify') {
         displayList = cachedOrdersList.filter(function(o){ return Number(o.step) === 0; });
       } else if (currentActiveFilter === 'delivering') {
-        displayList = cachedOrdersList.filter(function(o){ return Number(o.step) === 3; });
+        // Gom cả Step 1 (Bếp đang nhận) và Step 2 (Bếp đang nấu) và Step 3 (Đang giao) vào để Shipper theo dõi
+        displayList = cachedOrdersList.filter(function(o){ return Number(o.step) >= 1 && Number(o.step) <= 3; });
       } else if (currentActiveFilter === 'completed') {
         displayList = cachedOrdersList.filter(function(o){ return Number(o.step) === 4 || o.status === "Hoàn Tất"; });
       } else {
+        // Tab Tất Cả: Hiển thị các đơn đang cần giao (chưa hoàn tất)
         displayList = cachedOrdersList.filter(function(o){ return Number(o.step) < 4 && o.status !== "Hoàn Tất"; });
       }
 
@@ -274,6 +278,8 @@
         var cleanCode = String(o.code || "").trim();
         var stepNum = Number(o.step);
         var isStep0 = (stepNum === 0);
+        var isStep1 = (stepNum === 1);
+        var isStep2 = (stepNum === 2);
         var isDelivering = (stepNum === 3);
         var isCompleted = (stepNum === 4 || o.status === "Hoàn Tất");
         var isMoMo = (o.method === "CK_VIETQR" || o.method === "MOMO" || o.method === "BANK");
@@ -290,13 +296,14 @@
           ? `<span style="color:#34D399; font-weight:800;">${shipFeeEarn.toLocaleString('vi-VN')}đ (Quán Trợ Giá 100%)</span>`
           : `<span style="color:var(--gold); font-weight:800;">${shipFeeEarn.toLocaleString('vi-VN')}đ</span>`;
 
+        var badgeClass = isStep0 ? 'badge-step0' : (isStep1 ? 'badge-wait' : (isStep2 ? 'badge-wait' : (isDelivering ? 'badge-delivering' : 'badge-done')));
+        var badgeText = isStep0 ? '⏳ Chờ Xác Minh COD' : (isStep1 ? '🔔 Bếp Đang Tiếp Nhận' : (isStep2 ? '🍳 Bếp Đang Nấu' : (isDelivering ? '🛵 Đang Giao' : '✅ Đã Hoàn Tất')));
+
         html += `
           <div class="order-card step${stepNum}">
             <div class="order-header">
               <span class="order-code">${cleanCode} (${o.dist || 1.5} km)</span>
-              <span class="order-badge ${isStep0 ? 'badge-step0' : (isDelivering ? 'badge-delivering' : (isCompleted ? 'badge-done' : 'badge-wait'))}">
-                ${isStep0 ? '⏳ Chờ Xác Minh COD' : (isDelivering ? '🛵 Đang Giao' : (isCompleted ? '✅ Đã Hoàn Tất' : '🍳 Bếp Đang Nấu'))}
-              </span>
+              <span class="order-badge ${badgeClass}">${badgeText}</span>
             </div>
 
             <div class="order-row"><span>Khách hàng:</span><strong>${o.name}</strong></div>
@@ -343,9 +350,9 @@
               <button class="btn-action btn-verify" id="btn_verify_${cleanCode}" onclick="verifyCodOrder('${cleanCode}')">
                 📞 Đã Gọi Khách Xác Nhận ➔ Báo Bếp Nấu
               </button>
-            ` : (!isDelivering && !isCompleted ? `
+            ` : (isStep1 || isStep2 ? `
               <button class="btn-action btn-take" onclick="takeOrder('${cleanCode}')">
-                🛵 Nhận Cuốc Xe Giao Đơn Này
+                🛵 Đã Lấy Món ➔ Bắt Đầu Đi Giao
               </button>
             ` : (isDelivering ? `
               <button class="btn-action btn-done" onclick="completeOrder('${cleanCode}')">
@@ -376,7 +383,7 @@
       }
 
       try {
-        var res = await callBackend("shipperVerifyCodOrderSuccess", [cleanCode, shipperLabel], "shipperVerifyCodOrderSuccess", {
+        await callBackend("shipperVerifyCodOrderSuccess", [cleanCode, shipperLabel], "shipperVerifyCodOrderSuccess", {
           orderCode: cleanCode,
           shipperInfo: shipperLabel
         });
@@ -405,7 +412,7 @@
         });
         loadShipperOrders();
       } catch (err) {
-        alert("Lỗi nhận đơn: " + err.message);
+        alert("Lỗi cập nhật đi giao: " + err.message);
       }
     }
 
