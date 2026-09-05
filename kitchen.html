@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🍳 Bếp KDS • Thím 5 Hòa Thành</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #EA580C; --primary-dark: #C2410C;
+      --bg: #0F172A; --card: #1E293B; --card-border: #334155;
+      --text: #F8FAFC; --muted: #94A3B8;
+      --success: #10B981; --warning: #F59E0B; --danger: #EF4444; --blue: #2563EB; --momo: #A50064;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding: 12px; font-size: 13px; }
+
+    /* MÀN HÌNH KHÓA BẢO MẬT BẾP (CHỐNG LỘ LINK) */
+    #kdsAuthOverlay {
+      position: fixed; inset: 0; background: #0F172A; z-index: 9999;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .auth-card {
+      background: #1E293B; border: 2px solid var(--primary); border-radius: 16px;
+      max-width: 340px; width: 100%; padding: 24px; text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+    .auth-icon { font-size: 38px; margin-bottom: 8px; }
+    .auth-title { font-size: 17px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .auth-sub { font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+    .pin-input {
+      width: 100%; padding: 10px; font-size: 22px; font-weight: 900; text-align: center;
+      letter-spacing: 6px; border: 2px solid #334155; border-radius: 10px;
+      background: #0F172A; color: #FDE047; outline: none; margin-bottom: 12px;
+    }
+    .pin-input:focus { border-color: var(--primary); }
+    .btn-auth {
+      width: 100%; background: var(--primary); color: #fff; border: none;
+      padding: 11px; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer;
+    }
+    .auth-err { color: var(--danger); font-size: 11px; margin-top: 8px; display: none; font-weight: 700; }
+
+    /* HEADER KDS BAR */
+    .kds-header {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #1E293B; border: 1px solid var(--card-border); padding: 12px 16px;
+      border-radius: var(--radius); margin-bottom: 12px; flex-wrap: wrap; gap: 10px;
+    }
+    .kds-brand { display: flex; align-items: center; gap: 10px; }
+    .kds-brand h1 { font-size: 16px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 6px; }
+    .kds-badge-count { background: var(--primary); color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; }
+
+    .kds-controls { display: flex; align-items: center; gap: 10px; }
+    .btn-sound { background: var(--success); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .btn-sound.muted { background: #475569; }
+    .btn-lock { background: #334155; color: var(--muted); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; }
+    .clock-display { font-size: 14px; font-weight: 800; color: #FDE047; letter-spacing: 1px; }
+
+    /* THANH LỌC TRẠNG THÁI NHANH (KHOA HỌC CHO BẾP) */
+    .kds-filter-tabs {
+      display: flex; gap: 8px; overflow-x: auto; white-space: nowrap;
+      margin-bottom: 14px; padding-bottom: 2px; scrollbar-width: none;
+    }
+    .kds-filter-tabs::-webkit-scrollbar { display: none; }
+    .filter-tab-btn {
+      padding: 7px 14px; background: #1E293B; border: 1px solid var(--card-border);
+      border-radius: 20px; color: var(--muted); font-size: 11.5px; font-weight: 700;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: .2s;
+    }
+    .filter-tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 10px rgba(234, 88, 12, 0.4); }
+
+    /* GRID DANH SÁCH ĐƠN BẾP */
+    .orders-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+    .order-card { background: var(--card); border: 2px solid var(--card-border); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: .2s; }
+    .order-card.step0 { border-color: #64748B; border-left: 6px solid #F59E0B; background: #182234; }
+    .order-card.step1 { border-color: var(--danger); border-left: 6px solid var(--danger); box-shadow: 0 0 12px rgba(239, 68, 68, 0.25); }
+    .order-card.step2 { border-color: var(--warning); border-left: 6px solid var(--warning); }
+    .order-card.step3 { border-color: var(--blue); border-left: 6px solid var(--blue); opacity: 0.88; }
+
+    .card-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px dashed var(--card-border); margin-bottom: 8px; }
+    .order-code { font-size: 15px; font-weight: 800; color: #FDE047; }
+    .order-time { font-size: 11px; color: var(--muted); font-weight: 600; }
+
+    .pay-badge { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 6px; }
+    .pay-badge.momo { background: rgba(16, 185, 129, 0.2); color: #34D399; border: 1px solid var(--success); }
+    .pay-badge.cod { background: rgba(245, 158, 11, 0.2); color: #FDE047; border: 1px solid #D97706; }
+
+    .customer-info { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+    .customer-info strong { color: var(--text); }
+
+    .items-box { background: #0F172A; border-radius: 8px; padding: 10px; margin: 8px 0; border: 1px solid var(--card-border); }
+    .items-title { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+    .items-content { font-size: 13px; font-weight: 800; color: #fff; line-height: 1.6; }
+
+    .taste-box { background: rgba(234, 88, 12, 0.15); border: 1px dashed var(--primary); border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; font-size: 11px; color: #FDBA74; }
+    .taste-box strong { color: #fff; }
+
+    /* ACTION BUTTONS */
+    .card-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+    .btn-kds { width: 100%; padding: 11px; border: none; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: .2s; }
+    .btn-accept { background: var(--danger); color: #fff; animation: pulseRed 2s infinite; }
+    @keyframes pulseRed { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+    .btn-locked-step0 { background: #334155; color: #94A3B8; cursor: not-allowed; border: 1px dashed #64748B; }
+    .btn-cancel-order { background: #334155; color: #FCA5A5; border: 1px dashed #EF4444; padding: 7px; font-size: 11px; }
+    .btn-cancel-order:hover { background: #991B1B; color: #fff; }
+
+    .shipper-assign-box { display: flex; gap: 6px; }
+    .shipper-select { flex: 1; padding: 8px; background: #0F172A; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 11px; outline: none; font-weight: 700; }
+    .btn-assign { background: var(--blue); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+
+    .status-badge { text-align: center; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+    .status-badge.step0 { background: rgba(245, 158, 11, 0.2); color: #FDE047; }
+    .status-badge.step2 { background: rgba(245, 158, 11, 0.2); color: #FDE047; }
+    .status-badge.step3 { background: rgba(37, 99, 235, 0.2); color: #93C5FD; }
+  </style>
+</head>
+<body>
+
+  <!-- MÀN HÌNH KHÓA BẢO MẬT BẾP (CHỐNG LỘ LINK) -->
+  <div id="kdsAuthOverlay">
+    <div class="auth-card">
+      <div class="auth-icon">🍳</div>
+      <h2 class="auth-title">BẾP KDS THÍM 5</h2>
+      <p class="auth-sub">Nhập mã PIN Quản lý (1985) để mở trạm Bếp:</p>
+      <input type="password" id="kdsPinInput" maxlength="4" placeholder="••••" class="pin-input" autofocus />
+      <button class="btn-auth" onclick="handleKdsAuthLogin()">
+        🔓 MỞ TRẠM BẾP
+      </button>
+      <p id="kdsAuthError" class="auth-err"></p>
+    </div>
+  </div>
+
+  <!-- HEADER BAR -->
+  <header class="kds-header">
+    <div class="kds-brand">
+      <h1>🍳 BẾP KDS THÍM 5</h1>
+      <span class="kds-badge-count" id="dispOrderCount">0 ĐƠN ĐANG XỬ LÝ</span>
+    </div>
+    <div class="kds-controls">
+      <button class="btn-sound" id="btnSoundToggle" onclick="toggleSound()">🔔 Âm Báo: BẬT</button>
+      <div class="clock-display" id="kdsLiveClock">00:00:00</div>
+      <button class="btn-lock" onclick="handleKdsLockOut()" title="Khóa màn hình Bếp">🔒 Khóa</button>
+    </div>
+  </header>
+
+  <!-- THANH LỌC TRẠNG THÁI NHANH -->
+  <div class="kds-filter-tabs">
+    <button class="filter-tab-btn active" data-filter="all" onclick="changeKdsFilter('all', this)">
+      🌐 Tất Cả Đơn (<span id="countAll">0</span>)
+    </button>
+    <button class="filter-tab-btn" data-filter="need_cook" onclick="changeKdsFilter('need_cook', this)">
+      🔥 Cần Nấu Ngay (<span id="countNeedCook" style="color:#EF4444; font-weight:900;">0</span>)
+    </button>
+    <button class="filter-tab-btn" data-filter="cooking" onclick="changeKdsFilter('cooking', this)">
+      🍳 Đang Nấu Chảo (<span id="countCooking" style="color:#FDE047;">0</span>)
+    </button>
+    <button class="filter-tab-btn" data-filter="wait_cod" onclick="changeKdsFilter('wait_cod', this)">
+      ⏳ Chờ Ship Chốt COD (<span id="countWaitCod">0</span>)
+    </button>
+  </div>
+
+  <!-- GRID ORDER LIST -->
+  <main class="orders-grid" id="kitchenOrdersGrid">
+    <div style="grid-column: 1/-1; text-align:center; padding:50px 20px; color:var(--muted);">
+      ⏳ Đang đồng bộ dữ liệu Bếp KDS thời gian thực...
+    </div>
+  </main>
+<script src="api.js"></script>
+  <script>
+    var isSoundEnabled = true;
+    var audioCtx = null;
+    var knownOrderCodes = [];
+    var isInitialLoad = true;
+    var rawOrdersCache = [];
+    var currentFilter = 'all';
+    var kdsPollingTimer = null;
+
+    var cachedShippers = [
+      { name: "Nguyễn Hải Âu", phone: "0969004693" },
+      { name: "Trần Minh Nam", phone: "0968222862" },
+      { name: "Vill/GrabExpress", phone: "0969004693" }
+    ];
+
+    /**
+     * 1. XÁC THỰC MÃ PIN BẢO MẬT BẾP (PIN 1985 HOẶC 2026)
+     */
+    function checkKdsAuth() {
+      var savedPin = localStorage.getItem("thim5_kds_auth");
+      if (savedPin === "1985" || savedPin === "2026") {
+        document.getElementById("kdsAuthOverlay").style.display = "none";
+        initKDS();
+      } else {
+        document.getElementById("kdsAuthOverlay").style.display = "flex";
+      }
+    }
+
+    function handleKdsAuthLogin() {
+      var pin = document.getElementById("kdsPinInput").value.trim();
+      var err = document.getElementById("kdsAuthError");
+      err.style.display = "none";
+
+      if (pin === "1985" || pin === "2026") {
+        localStorage.setItem("thim5_kds_auth", pin);
+        document.getElementById("kdsAuthOverlay").style.display = "none";
+        initAudioContext();
+        initKDS();
+      } else {
+        err.innerText = "❌ Sai mã PIN Bếp! Vui lòng nhập đúng PIN Quản lý (1985).";
+        err.style.display = "block";
+      }
+    }
+
+    function handleKdsLockOut() {
+      if (confirm("Khóa màn hình trạm Bếp KDS?")) {
+        localStorage.removeItem("thim5_kds_auth");
+        if (kdsPollingTimer) clearInterval(kdsPollingTimer);
+        document.getElementById("kdsPinInput").value = "";
+        document.getElementById("kdsAuthOverlay").style.display = "flex";
+      }
+    }
+
+    /**
+     * 2. KHỞI CHẠY TRẠM BẾP KDS
+     */
+    function initKDS() {
+      updateLiveClock();
+      setInterval(updateLiveClock, 1000);
+      loadShippersFromServer();
+      loadKitchenOrders();
+      if (!kdsPollingTimer) {
+        kdsPollingTimer = setInterval(loadKitchenOrders, 4000); // Tự động cập nhật mỗi 4s
+      }
+      document.body.addEventListener('click', initAudioContext, { once: true });
+    }
+
+    function initAudioContext() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      } catch(e) {}
+    }
+
+    function updateLiveClock() {
+      var now = new Date();
+      var h = String(now.getHours()).padStart(2, '0');
+      var m = String(now.getMinutes()).padStart(2, '0');
+      var s = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById("kdsLiveClock").innerText = h + ":" + m + ":" + s;
+    }
+
+    function toggleSound() {
+      isSoundEnabled = !isSoundEnabled;
+      var btn = document.getElementById("btnSoundToggle");
+      if (isSoundEnabled) {
+        btn.className = "btn-sound";
+        btn.innerText = "🔔 Âm Báo: BẬT";
+        playBeepSound();
+      } else {
+        btn.className = "btn-sound muted";
+        btn.innerText = "🔕 Âm Báo: TẮT";
+      }
+    }
+
+    function playBeepSound() {
+      if (!isSoundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        var osc1 = audioCtx.createOscillator();
+        var gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain1.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start();
+        osc1.stop(audioCtx.currentTime + 0.25);
+
+        setTimeout(function() {
+          var osc2 = audioCtx.createOscillator();
+          var gain2 = audioCtx.createGain();
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(1174.66, audioCtx.currentTime);
+          gain2.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+          osc2.connect(gain2);
+          gain2.connect(audioCtx.destination);
+          osc2.start();
+          osc2.stop(audioCtx.currentTime + 0.35);
+        }, 200);
+      } catch(e) {}
+    }
+
+    function loadShippersFromServer() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(list) {
+          if (list && list.length > 0) {
+            cachedShippers = list.map(function(s){ return { name: s.name, phone: s.phone }; });
+          }
+        }).getAdminShippersWithPerformance('all');
+      }
+    }
+
+    function loadKitchenOrders() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            rawOrdersCache = (res && res.orders) ? res.orders : [];
+            updateFilterCounts(rawOrdersCache);
+            renderKitchenUI();
+          })
+          .withFailureHandler(function(err) {
+            console.error("Lỗi KDS:", err);
+          })
+          .getKitchenData();
+      }
+    }
+
+    /**
+     * 3. ĐẾM VÀ LỌC TRẠNG THÁI ĐƠN HÀNG
+     */
+    function updateFilterCounts(orders) {
+      var activeOrders = orders.filter(function(o){ return o.status !== "Đã Hủy" && o.step >= 0 && o.step <= 3; });
+      var cNeed = 0, cCooking = 0, cWait = 0;
+
+      activeOrders.forEach(function(o) {
+        if (o.step === 1) cNeed++;
+        else if (o.step === 2) cCooking++;
+        else if (o.step === 0) cWait++;
+      });
+
+      document.getElementById("countAll").innerText = activeOrders.length;
+      document.getElementById("countNeedCook").innerText = cNeed;
+      document.getElementById("countCooking").innerText = cCooking;
+      document.getElementById("countWaitCod").innerText = cWait;
+      document.getElementById("dispOrderCount").innerText = activeOrders.length + " ĐƠN ĐANG XỬ LÝ";
+    }
+
+    function changeKdsFilter(filterKey, btnElement) {
+      currentFilter = filterKey;
+      document.querySelectorAll(".filter-tab-btn").forEach(function(b){ b.classList.remove("active"); });
+      if (btnElement) btnElement.classList.add("active");
+      renderKitchenUI();
+    }
+
+    /**
+     * 4. RENDER GIAO DIỆN THỰC CHIẾN BẾP
+     */
+    function renderKitchenUI() {
+      var grid = document.getElementById("kitchenOrdersGrid");
+      var activeOrders = rawOrdersCache.filter(function(o){ return o.status !== "Đã Hủy" && o.step >= 0 && o.step <= 3; });
+
+      // Lọc danh sách theo Tab đang chọn
+      var displayOrders = activeOrders;
+      if (currentFilter === 'need_cook') {
+        displayOrders = activeOrders.filter(function(o){ return o.step === 1; });
+      } else if (currentFilter === 'cooking') {
+        displayOrders = activeOrders.filter(function(o){ return o.step === 2; });
+      } else if (currentFilter === 'wait_cod') {
+        displayOrders = activeOrders.filter(function(o){ return o.step === 0; });
+      }
+
+      var currentCodes = activeOrders.map(function(o){ return o.code; });
+      if (!isInitialLoad) {
+        var hasNewOrder = currentCodes.some(function(code){ return knownOrderCodes.indexOf(code) === -1; });
+        if (hasNewOrder) {
+          playBeepSound();
+        }
+      } else {
+        isInitialLoad = false;
+      }
+      knownOrderCodes = currentCodes;
+
+      if (displayOrders.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1/-1; text-align:center; padding:60px 20px;">
+            <div style="font-size:42px; margin-bottom:10px;">🎉</div>
+            <h3 style="color:var(--success); font-size:16px;">KHÔNG CÓ ĐƠN NÀO TRONG MỤC NÀY!</h3>
+            <p style="color:var(--muted); font-size:12px; margin-top:4px;">Bếp KDS đang tự động lắng nghe đơn hàng mới từ Web/Zalo...</p>
+          </div>
+        `;
+        return;
+      }
+
+      var html = "";
+      displayOrders.forEach(function(o) {
+        var stepClass = "step" + o.step;
+        var isMoMo = (o.method === "CK_VIETQR" || o.method === "MOMO");
+        var payBadgeHtml = isMoMo 
+          ? `<span class="pay-badge momo">💳 Đã Quét QR (Đã Thu Tiền • Nấu Gấp)</span>` 
+          : `<span class="pay-badge cod">💵 COD: Thu ${Number(o.total || 0).toLocaleString('vi-VN')}đ</span>`;
+
+        var formattedItemsHtml = o.items.split(" | ").map(function(itemText){
+          return `<div style="margin-bottom:4px; padding-bottom:4px; border-bottom:1px dashed #1E293B;">${itemText}</div>`;
+        }).join("");
+
+        var shipperOptionsHtml = cachedShippers.map(function(s){
+          return `<option value="${s.name}|${s.phone}">🛵 ${s.name} (${s.phone})</option>`;
+        }).join("");
+
+        html += `
+          <div class="order-card ${stepClass}">
+            <div>
+              <div class="card-header">
+                <span class="order-code">${o.code}</span>
+                <span class="order-time">⏰ ${o.time}</span>
+              </div>
+
+              <div>${payBadgeHtml}</div>
+
+              <div class="customer-info">
+                Khách: <strong>${o.name}</strong> • SĐT: <strong>${o.phone}</strong> • Cự ly: <strong>${o.dist || 1.5} km</strong>
+              </div>
+
+              <div class="items-box">
+                <div class="items-title">Món & Topping Đã Đặt:</div>
+                <div class="items-content">${formattedItemsHtml}</div>
+              </div>
+
+              <div class="taste-box">
+                🌶️ <strong>Khẩu vị khách dặn:</strong> ${o.taste || 'Chuẩn vị Thím 5'}
+              </div>
+            </div>
+
+            <div class="card-actions">
+              ${o.step === 0 ? `
+                <div class="status-badge step0">⏳ Đơn COD: Chờ Shipper gọi điện chốt đơn</div>
+                <button class="btn-kds btn-locked-step0" disabled>
+                  🔒 Bếp Chờ Ship Xác Minh (Chưa Nấu)
+                </button>
+              ` : (o.step === 1 ? `
+                <button class="btn-kds btn-accept" onclick="handleKitchenAccept('${o.code}')">
+                  🍳 BẤM NHẬN NẤU ĐƠN NÀY
+                </button>
+              ` : (o.step === 2 ? `
+                <div class="status-badge step2">🔥 Bếp đang nấu trên chảo...</div>
+                <div class="shipper-assign-box">
+                  <select class="shipper-select" id="ship_select_${o.code}">
+                    ${shipperOptionsHtml}
+                  </select>
+                  <button class="btn-assign" onclick="handleKitchenAssign('${o.code}')">Gán Giao</button>
+                </div>
+              ` : `
+                <div class="status-badge step3">🛵 Đang giao bởi: <strong>${o.shipper || 'Shipper'}</strong></div>
+              `))}
+
+              <!-- NÚT HỦY ĐƠN TRỰC TIẾP TẠI BẾP (LOẠI TRỪ DOANH THU) -->
+              <button class="btn-kds btn-cancel-order" onclick="handleKitchenCancel('${o.code}')">
+                🚫 Hủy Đơn Này (Khách Báo Zalo / Hết Món)
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html;
+    }
+
+    /**
+     * 5. CÁC HÀM XỬ LÝ HÀNH ĐỘNG CỦA ĐẦU BẾP
+     */
+    function handleKitchenAccept(orderCode) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function() {
+            loadKitchenOrders();
+          })
+          .kitchenAcceptOrder(orderCode);
+      }
+    }
+
+    function handleKitchenAssign(orderCode) {
+      var select = document.getElementById("ship_select_" + orderCode);
+      if (!select) return;
+      var parts = select.value.split("|");
+      var shipName = parts[0];
+      var shipPhone = parts[1];
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function() {
+            loadKitchenOrders();
+          })
+          .kitchenAssignShipper(orderCode, shipName, shipPhone);
+      }
+    }
+
+    function handleKitchenCancel(orderCode) {
+      var reason = prompt("Nhập lý do hủy đơn " + orderCode + " (VD: Khách nhắn Zalo hủy, Đặt trùng, Hết nguyên liệu...):", "Khách nhắn Zalo hủy");
+      if (reason === null || !reason.trim()) return;
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function() {
+            alert("✅ Đã hủy đơn " + orderCode + " thành công! Đơn đã được trừ khỏi doanh thu.");
+            loadKitchenOrders();
+          })
+          .kitchenCancelOrder(orderCode, reason);
+      }
+    }
+
+    // Khởi chạy kiểm tra mã PIN bảo mật khi tải trang
+    window.onload = checkKdsAuth;
+  </script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Điều Phối Shipper • Thím 5 Hòa Thành</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #EA580C; --primary-dark: #C2410C; --bg: #0F172A; --card: #1E293B;
+      --text: #F8FAFC; --muted: #94A3B8; --border: #334155; --success: #10B981; --danger: #EF4444; --blue: #2563EB;
+      --warning: #F59E0B; --gold: #FDE047; --radius: 14px; --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding: 12px; font-size: 13px; line-height: 1.4; }
+    .container { max-width: 600px; margin: 0 auto; }
+
+    /* MÀN HÌNH ĐĂNG NHẬP 4 SỐ CUỐI */
+    .auth-card { background: var(--card); border-radius: var(--radius); border: 2px solid var(--primary); box-shadow: var(--shadow); padding: 28px 18px; text-align: center; margin-top: 50px; }
+    .auth-icon { width: 58px; height: 58px; background: rgba(234, 88, 12, 0.2); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 12px; }
+    .auth-title { font-size: 17px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .auth-sub { font-size: 11.5px; color: var(--muted); margin-bottom: 16px; }
+    .auth-input { width: 100%; max-width: 220px; padding: 11px; font-size: 22px; font-weight: 900; text-align: center; letter-spacing: 5px; border: 2px solid var(--border); border-radius: 10px; outline: none; margin-bottom: 14px; background: #0F172A; color: var(--gold); }
+    .auth-input:focus { border-color: var(--primary); }
+
+    /* APP HEADER */
+    .app-header { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .shipper-info h2 { font-size: 14px; font-weight: 800; color: var(--gold); }
+    .shipper-info p { font-size: 11px; color: var(--muted); }
+    .btn-logout { background: #0F172A; color: var(--muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+    /* KPI THU NHẬP & NỢ COD */
+    .kpi-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .kpi-box { background: #1E293B; border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; }
+    .kpi-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+    .kpi-val { font-size: 17px; font-weight: 900; color: #fff; margin-top: 2px; }
+    .kpi-val.green { color: #34D399; }
+    .kpi-val.gold { color: var(--gold); }
+
+    /* THANH LỌC CUỐC XE NHANH */
+    .filter-tabs-bar { display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; margin-bottom: 10px; padding-bottom: 2px; scrollbar-width: none; }
+    .filter-tabs-bar::-webkit-scrollbar { display: none; }
+    .tab-filter-btn { padding: 6px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; font-size: 11px; font-weight: 800; color: var(--muted); cursor: pointer; transition: .2s; }
+    .tab-filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* CARD ĐƠN HÀNG */
+    .order-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 14px; margin-bottom: 12px; position: relative; }
+    .order-card.step0 { border-left: 6px solid var(--warning); background: #182234; }
+    .order-card.step2 { border-left: 6px solid var(--primary); }
+    .order-card.step3 { border-left: 6px solid var(--blue); }
+    .order-card.step4 { border-left: 6px solid var(--success); opacity: 0.85; }
+
+    .order-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px dashed var(--border); margin-bottom: 8px; }
+    .order-code { font-size: 14px; font-weight: 900; color: var(--gold); }
+    .order-badge { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 8px; }
+    .badge-step0 { background: rgba(245, 158, 11, 0.2); color: #FDE047; }
+    .badge-wait { background: rgba(234, 88, 12, 0.2); color: #FB923C; }
+    .badge-delivering { background: rgba(37, 99, 235, 0.2); color: #93C5FD; }
+    .badge-done { background: rgba(16, 185, 129, 0.2); color: #34D399; }
+
+    .order-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+    .order-row strong { color: #fff; }
+    .order-items-box { background: #0F172A; border-radius: 8px; padding: 8px 10px; margin: 8px 0; border: 1px solid var(--border); font-size: 11.5px; line-height: 1.5; color: #E2E8F0; }
+
+    /* HỘP TÀI CHÍNH MINH BẠCH BÙ SHIP & COD */
+    .fin-box { background: #0F172A; border: 1px dashed var(--warning); border-radius: 8px; padding: 8px 10px; margin: 8px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; }
+    .fin-item { display: flex; flex-direction: column; }
+    .fin-item span { color: var(--muted); font-size: 10px; }
+    .fin-item strong { font-size: 12px; margin-top: 1px; }
+
+    /* NÚT ĐỊNH VỊ GPS VỆ TINH 1-CHẠM */
+    .gps-nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .btn-gps-nav { text-align: center; padding: 9px 6px; border-radius: 8px; font-weight: 800; text-decoration: none; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; transition: .2s; }
+    .btn-gps-store { background: #EA580C; color: #fff; }
+    .btn-gps-customer { background: #2563EB; color: #fff; }
+    .btn-gps-nav:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .btn-action { width: 100%; padding: 11px; border: none; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; transition: .2s; }
+    .btn-verify { background: var(--warning); color: #0F172A; }
+    .btn-take { background: var(--primary); color: #fff; }
+    .btn-done { background: var(--success); color: #fff; }
+    .btn-cancel { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger); font-size: 11px; padding: 7px; }
+    .btn-call { background: rgba(37, 99, 235, 0.15); border: 1px solid var(--blue); color: #93C5FD; text-decoration: none; padding: 8px; border-radius: 8px; font-size: 11px; font-weight: 800; text-align: center; display: block; margin-top: 6px; }
+
+    .btn-refresh { width: 100%; background: #1E293B; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- MÀN HÌNH ĐĂNG NHẬP 4 SỐ CUỐI ĐIỆN THOẠI -->
+    <div id="authScreen" class="auth-card">
+      <div class="auth-icon">🛵</div>
+      <h2 class="auth-title">TRẠM SHIPPER THÍM 5</h2>
+      <p class="auth-sub">Nhập 4 số cuối số điện thoại để nhận cuốc xe:</p>
+      <input type="tel" id="shipperPinInput" class="auth-input" maxlength="4" placeholder="0585" autofocus />
+      <button class="btn-action btn-take" style="max-width:220px; margin:0 auto;" onclick="handleShipperLogin()">
+        Vào Nhận Đơn ➔
+      </button>
+      <p id="loginError" style="color:var(--danger); font-size:11px; margin-top:8px; display:none; font-weight:bold;"></p>
+    </div>
+
+    <!-- MÀN HÌNH ĐIỀU PHỐI ĐƠN HÀNG CHÍNH -->
+    <div id="mainScreen" style="display:none;">
+      <header class="app-header">
+        <div class="shipper-info">
+          <h2 id="dispShipperName">Tài Xế: Đang nạp...</h2>
+          <p id="dispShipperPhone">SĐT: ...</p>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()">Đăng Xuất</button>
+      </header>
+
+      <!-- BẢNG KPI & THU NHẬP SHIPPER -->
+      <div class="kpi-strip">
+        <div class="kpi-box">
+          <div class="kpi-label">Đơn Hoàn Tất Hôm Nay</div>
+          <div class="kpi-val green" id="dispCompletedCount">0 đơn</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">Tiền Ship Thực Nhận</div>
+          <div class="kpi-val gold" id="dispTotalShipEarn">0đ</div>
+        </div>
+      </div>
+
+      <!-- THANH TABS LỌC NHANH CUỐC XE -->
+      <div class="filter-tabs-bar">
+        <button class="tab-filter-btn active" data-filter="all" onclick="changeFilter('all', this)">🌐 Tất Cả</button>
+        <button class="tab-filter-btn" data-filter="wait_verify" onclick="changeFilter('wait_verify', this)">⏳ Cần Gọi Xác Minh</button>
+        <button class="tab-filter-btn" data-filter="delivering" onclick="changeFilter('delivering', this)">🛵 Đang Giao</button>
+        <button class="tab-filter-btn" data-filter="completed" onclick="changeFilter('completed', this)">✅ Đã Giao Xong</button>
+      </div>
+
+      <button class="btn-refresh" onclick="loadShipperOrders()">🔄 Làm Mới Danh Sách Cuốc Xe</button>
+
+      <div id="ordersContainer">
+        <div class="order-card" style="text-align:center; color:var(--muted); padding:30px;">
+          ⏳ Đang đồng bộ danh sách đơn từ Bếp Thím 5...
+        </div>
+      </div>
+    </div>
+  </div>
+<script src="api.js"></script>
+  <script>
+    var currentLast4 = "";
+    var autoRefreshTimer = null;
+    var cachedOrdersList = [];
+    var currentActiveFilter = 'all';
+
+    function initShipperApp() {
+      var savedLast4 = localStorage.getItem("thim5_shipper_last4");
+      if (savedLast4 && savedLast4.length === 4) {
+        document.getElementById("shipperPinInput").value = savedLast4;
+        handleShipperLogin();
+      }
+    }
+
+    function handleShipperLogin() {
+      var pin = document.getElementById("shipperPinInput").value.trim().replace(/\D/g, '');
+      var errBox = document.getElementById("loginError");
+      errBox.style.display = "none";
+
+      if (pin.length < 4) {
+        errBox.innerText = "Vui lòng nhập đủ 4 số cuối số điện thoại!";
+        errBox.style.display = "block";
+        return;
+      }
+
+      currentLast4 = pin;
+      localStorage.setItem("thim5_shipper_last4", currentLast4);
+
+      var sName = (currentLast4 === "0585" || currentLast4 === "4693") ? "Nguyễn Hải Âu" : (currentLast4 === "2862" ? "Trần Minh Nam" : "Tài Xế (" + currentLast4 + ")");
+      var sPhone = (currentLast4 === "0585") ? "0934.220.585" : (currentLast4 === "4693") ? "0969.004.693" : (currentLast4 === "2862" ? "0968.222.862" : ("09xx.xxx." + currentLast4));
+
+      document.getElementById("authScreen").style.display = "none";
+      document.getElementById("mainScreen").style.display = "block";
+      document.getElementById("dispShipperName").innerText = "Tài Xế: " + sName;
+      document.getElementById("dispShipperPhone").innerText = "SĐT: " + sPhone;
+
+      loadShipperOrders();
+
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      autoRefreshTimer = setInterval(loadShipperOrders, 5000); // Tự động cập nhật mỗi 5s
+    }
+
+    function loadShipperOrders() {
+      if (!currentLast4) return;
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.orders) {
+              cachedOrdersList = res.orders;
+              renderOrders();
+            }
+          })
+          .withFailureHandler(function(err) {
+            console.error("Lỗi tải đơn Shipper:", err);
+          })
+          .getShipperOrders(currentLast4);
+      }
+    }
+
+    function changeFilter(filterKey, btnElement) {
+      currentActiveFilter = filterKey;
+      document.querySelectorAll(".tab-filter-btn").forEach(function(b){ b.classList.remove("active"); });
+      if (btnElement) btnElement.classList.add("active");
+      renderOrders();
+    }
+
+    function renderOrders() {
+      var container = document.getElementById("ordersContainer");
+      if (!container) return;
+
+      var completedOrders = cachedOrdersList.filter(function(o){ return o.step === 4; });
+      var totalShipEarn = completedOrders.reduce(function(sum, o){ return sum + (Number(o.shipFee) || 0); }, 0);
+
+      document.getElementById("dispCompletedCount").innerText = completedOrders.length + " đơn";
+      document.getElementById("dispTotalShipEarn").innerText = totalShipEarn.toLocaleString('vi-VN') + "đ";
+
+      var displayList = cachedOrdersList;
+      if (currentActiveFilter === 'wait_verify') {
+        displayList = cachedOrdersList.filter(function(o){ return o.step === 0; });
+      } else if (currentActiveFilter === 'delivering') {
+        displayList = cachedOrdersList.filter(function(o){ return o.step === 3; });
+      } else if (currentActiveFilter === 'completed') {
+        displayList = cachedOrdersList.filter(function(o){ return o.step === 4; });
+      } else {
+        // Mặc định hiện đơn đang xử lý
+        displayList = cachedOrdersList.filter(function(o){ return o.step < 4; });
+      }
+
+      if (displayList.length === 0) {
+        container.innerHTML = "<div class='order-card' style='text-align:center; color:var(--muted); padding:30px;'>Không có cuốc xe nào trong mục này.<br><small>Hệ thống tự động lắng nghe đơn mới mỗi 5 giây...</small></div>";
+        return;
+      }
+
+      var html = "";
+      displayList.forEach(function(o) {
+        var isStep0 = (o.step === 0);
+        var isDelivering = (o.step === 3);
+        var isCompleted = (o.step === 4);
+        var isMoMo = (o.method === "CK_VIETQR" || o.method === "MOMO");
+
+        var storeNavUrl = o.storeGpsUrl || "https://www.google.com/maps/dir/?api=1&destination=11.285267,106.133347";
+        var custNavUrl = o.customerGpsUrl || ("https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(o.address));
+
+        var formattedItemsHtml = o.items.split(" | ").map(function(itemText){
+          return `<div style="margin-bottom:2px;">• ${itemText}</div>`;
+        }).join("");
+
+        // TÍNH TOÁN BÙ SHIP MINH BẠCH CHO TÀI XẾ
+        var shipFeeEarn = Number(o.shipFee) || 12000;
+        var shipDisplayNote = (o.finalShipFee === 0 || o.shipFee === 0)
+          ? `<span style="color:#34D399; font-weight:800;">${shipFeeEarn.toLocaleString('vi-VN')}đ (Quán Trợ Giá 100%)</span>`
+          : `<span style="color:var(--gold); font-weight:800;">${shipFeeEarn.toLocaleString('vi-VN')}đ</span>`;
+
+        html += `
+          <div class="order-card step${o.step}">
+            <div class="order-header">
+              <span class="order-code">${o.code} (${o.dist || 1.5} km)</span>
+              <span class="order-badge ${isStep0 ? 'badge-step0' : (isDelivering ? 'badge-delivering' : (isCompleted ? 'badge-done' : 'badge-wait'))}">
+                ${isStep0 ? '⏳ Chờ Xác Minh COD' : (isDelivering ? '🛵 Đang Giao' : (isCompleted ? '✅ Đã Hoàn Tất' : '🍳 Bếp Đang Nấu'))}
+              </span>
+            </div>
+
+            <div class="order-row"><span>Khách hàng:</span><strong>${o.name}</strong></div>
+            <div class="order-row"><span>Địa chỉ:</span><strong style="text-align:right; max-width:70%;">${o.address}</strong></div>
+
+            <div class="order-items-box">
+              <div style="font-weight:bold; margin-bottom:4px; color:var(--gold);">Món & Topping:</div>
+              ${formattedItemsHtml}
+              <div style="color:var(--muted); margin-top:4px;"><strong>Khẩu vị:</strong> ${o.taste || 'Chuẩn vị Thím 5'}</div>
+            </div>
+
+            <!-- BẢNG TÀI CHÍNH THỰC NHẬN CỦA SHIPPER -->
+            <div class="fin-box">
+              <div class="fin-item">
+                <span>Thanh toán:</span>
+                <strong style="color:${isMoMo ? '#34D399' : '#FDE047'};">${isMoMo ? '💳 Đã Quét VietQR' : '💵 Tiền Mặt (COD)'}</strong>
+              </div>
+              <div class="fin-item">
+                <span>Tiền ship thực nhận:</span>
+                ${shipDisplayNote}
+              </div>
+              ${!isMoMo ? `
+                <div class="fin-item" style="grid-column: 1/-1; border-top:1px dashed var(--border); padding-top:4px; margin-top:2px;">
+                  <span>Ứng Bếp tiền món: <strong style="color:#fff;">${Number(o.advanceToKitchen || (o.total - o.shipFee)).toLocaleString('vi-VN')}đ</strong> • Thu khách: <strong style="color:#EF4444; font-size:13px;">${Number(o.collectFromCustomer || o.total).toLocaleString('vi-VN')}đ</strong></span>
+                </div>
+              ` : `
+                <div class="fin-item" style="grid-column: 1/-1; border-top:1px dashed var(--border); padding-top:4px; margin-top:2px; color:#34D399;">
+                  <span>🎉 Đơn đã thanh toán online: <strong>Không cần thu tiền mặt của khách!</strong></span>
+                </div>
+              `}
+            </div>
+
+            <!-- CỤM 2 NÚT ĐỊNH VỊ GPS VỆ TINH 1-CHẠM -->
+            <div class="gps-nav-grid">
+              <a href="${storeNavUrl}" target="_blank" class="btn-gps-nav btn-gps-store">
+                📍 1. Đến Bếp Lấy Món
+              </a>
+              <a href="${custNavUrl}" target="_blank" class="btn-gps-nav btn-gps-customer">
+                🛵 2. Dẫn Đường Giao Khách
+              </a>
+            </div>
+
+            <a href="tel:${o.phone}" class="btn-call">📞 Bấm Gọi Cho Khách (${o.phone})</a>
+
+            ${isStep0 ? `
+              <button class="btn-action btn-verify" onclick="verifyCodOrder('${o.code}')">
+                📞 Đã Gọi Khách Xác Nhận ➔ Báo Bếp Nấu
+              </button>
+            ` : (!isDelivering && !isCompleted ? `
+              <button class="btn-action btn-take" onclick="takeOrder('${o.code}')">
+                🛵 Nhận Cuốc Xe Giao Đơn Này
+              </button>
+            ` : (isDelivering ? `
+              <button class="btn-action btn-done" onclick="completeOrder('${o.code}')">
+                ✅ Đã Giao Xong & Thu Đủ Tiền
+              </button>
+              <button class="btn-action btn-cancel" onclick="cancelOrder('${o.code}')">
+                ⚠️ Báo Hỏng Xe / Trả Đơn Về Bếp
+              </button>
+            ` : ''))}
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    /**
+     * CÁC HÀM XỬ LÝ HÀNH ĐỘNG CỦA SHIPPER
+     */
+    function verifyCodOrder(orderCode) {
+      var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "");
+      var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "");
+      var shipperLabel = sName + " (" + sPhone + ")";
+
+      if (!confirm("Xác nhận bạn đã gọi điện cho khách và khách đồng ý nhận đơn " + orderCode + "?")) return;
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function() {
+            alert("✅ Đã xác minh COD thành công! Bếp đã nhận lệnh nấu món.");
+            loadShipperOrders();
+          })
+          .shipperVerifyCodOrderSuccess(orderCode, shipperLabel);
+      }
+    }
+
+    function takeOrder(orderCode) {
+      var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "");
+      var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "");
+      var shipperLabel = sName + " (" + sPhone + ")";
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function() {
+            loadShipperOrders();
+          })
+          .shipperUpdateStep(orderCode, shipperLabel, 3);
+      }
+    }
+
+    function completeOrder(orderCode) {
+      if (!confirm("Xác nhận đã giao đơn " + orderCode + " tận tay khách hàng?")) return;
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function() {
+            alert("🎉 Đã hoàn tất cuốc giao đơn " + orderCode + "!");
+            loadShipperOrders();
+          })
+          .shipperUpdateStep(orderCode, "", 4);
+      }
+    }
+
+    function cancelOrder(orderCode) {
+      var reason = prompt("Nhập lý do sự cố (VD: Hỏng xe, thủng lốp, khách không nghe máy...):", "Hỏng xe đột xuất");
+      if (!reason || !reason.trim()) return;
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function() {
+            alert("⚠️ Đã nhả đơn về bếp để điều phối tài xế khác!");
+            loadShipperOrders();
+          })
+          .shipperReleaseOrder(orderCode, reason);
+      }
+    }
+
+    function handleLogout() {
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      localStorage.removeItem("thim5_shipper_last4");
+      currentLast4 = "";
+      document.getElementById("mainScreen").style.display = "none";
+      document.getElementById("authScreen").style.display = "block";
+      document.getElementById("shipperPinInput").value = "";
+    }
+
+    window.onload = initShipperApp;
+  </script>
+</body>
+</html>

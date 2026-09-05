@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>🎡 Vòng Quay May Mắn • Thím 5 Tây Ninh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0F172A; --card-bg: #1E293B; --border: #334155;
+      --text: #F8FAFC; --text-muted: #94A3B8;
+      --primary: #EA580C; --primary-dark: #C2410C;
+      --success: #10B981; --warning: #F59E0B; --danger: #EF4444;
+      --gold: #FDE047; --radius: 20px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+    .wheel-card { background: var(--card-bg); border: 2px solid var(--border); border-radius: var(--radius); width: 100%; max-width: 440px; padding: 24px 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); position: relative; }
+    .brand-tag { display: inline-block; background: rgba(234, 88, 12, 0.2); color: var(--primary); font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; border: 1px solid var(--primary); margin-bottom: 8px; }
+    .wheel-title { font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+    .wheel-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; }
+
+    .order-tag-box { background: #0F172A; border: 1px dashed var(--border); border-radius: 8px; padding: 6px 10px; font-size: 11px; color: var(--gold); margin-bottom: 12px; display: inline-block; }
+
+    .star-rating { display: flex; justify-content: center; gap: 8px; font-size: 30px; cursor: pointer; color: #475569; margin-bottom: 10px; }
+    .star-rating span.active { color: var(--gold); text-shadow: 0 0 10px rgba(253, 224, 71, 0.6); }
+
+    .form-input { width: 100%; padding: 10px 14px; background: #0F172A; border: 1px solid var(--border); border-radius: 10px; color: #fff; font-size: 12px; outline: none; margin-bottom: 8px; text-align: center; font-weight: 700; }
+    .form-textarea { width: 100%; padding: 8px 12px; background: #0F172A; border: 1px solid var(--border); border-radius: 10px; color: #fff; font-size: 11px; outline: none; margin-bottom: 12px; resize: none; text-align: center; }
+
+    .wheel-wrapper { position: relative; width: 260px; height: 260px; margin: 0 auto 16px; }
+    .wheel-canvas { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #334155; box-shadow: 0 0 25px rgba(234, 88, 12, 0.4); transition: transform 4.5s cubic-bezier(0.15, 0.9, 0.1, 1.0); }
+    .wheel-pointer { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 22px solid var(--danger); z-index: 10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+    .wheel-center-pin { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #0F172A; border: 3px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; z-index: 5; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+
+    .btn-spin { width: 100%; background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%); color: #fff; border: none; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4); transition: .2s; }
+    .btn-spin:disabled { background: #475569; cursor: not-allowed; box-shadow: none; color: #94A3B8; }
+
+    .result-box { display: none; background: rgba(16, 185, 129, 0.15); border: 2px dashed var(--success); border-radius: 14px; padding: 14px; margin-top: 14px; text-align: center; }
+    .result-title { font-size: 15px; font-weight: 800; color: #34D399; margin-bottom: 4px; }
+    .result-code { font-size: 13px; font-weight: 800; color: var(--gold); background: #0F172A; padding: 6px 14px; border-radius: 8px; display: inline-block; margin: 6px 0; border: 1px solid var(--border); }
+    .btn-use-now { display: block; width: 100%; background: var(--primary); color: #fff; text-decoration: none; padding: 11px; border-radius: 10px; font-size: 12px; font-weight: 800; margin-top: 10px; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="wheel-card">
+    <span class="brand-tag">MÌ TRỘN THÍM 5 • HÒA THÀNH</span>
+    <h2 class="wheel-title">VÒNG QUAY MAY MẮN 🎁</h2>
+    <p class="wheel-desc">Đánh giá độ ngon & quay nhận ngay Topping, Nước Giải Khát hoặc Mã Giảm Giá cho đơn tiếp theo:</p>
+
+    <div class="order-tag-box" id="dispOrderTag">
+      Đơn hàng: <strong id="currentOrderLabel">T5-LUCKY</strong>
+    </div>
+
+    <div class="star-rating" id="starContainer">
+      <span class="active" onclick="setStars(1)">★</span>
+      <span class="active" onclick="setStars(2)">★</span>
+      <span class="active" onclick="setStars(3)">★</span>
+      <span class="active" onclick="setStars(4)">★</span>
+      <span class="active" onclick="setStars(5)">★</span>
+    </div>
+
+    <input type="tel" class="form-input" id="custPhoneInput" placeholder="Số điện thoại nhận mã quà tặng" />
+    <input type="text" class="form-textarea" id="custReviewInput" placeholder="Góp ý cho bếp (Mì nóng giòn, sốt vừa vị...)" />
+
+    <div class="wheel-wrapper">
+      <div class="wheel-pointer"></div>
+      <div class="wheel-center-pin">🍜</div>
+      <canvas id="wheelCanvas" class="wheel-canvas" width="260" height="260"></canvas>
+    </div>
+
+    <button class="btn-spin" id="btnSpin" onclick="startSpin()">🎡 QUAY SĂN QUÀ NGAY</button>
+
+    <div class="result-box" id="resultBox">
+      <div class="result-title" id="wonPrizeName">Chúc Mừng Bạn!</div>
+      <p style="font-size:11px; color:var(--text-muted);">Mã ưu đãi đã được lưu tự động cho lần đặt tới:</p>
+      <div class="result-code" id="wonPromoCode">FREESUOI</div>
+      <p style="font-size:10px; color:#A7F3D0;" id="resultNoticeText">⏰ Mã giảm giá sẽ tự động kích hoạt khi bạn bấm vào menu!</p>
+      <button class="btn-use-now" onclick="goToMenuWithPromo()">👉 Dùng Mã Đặt Món Ngay</button>
+    </div>
+  </div>
+<script src="api.js"></script>
+  <script>
+    // BỘ PHẦN THƯỞNG DỰ PHÒNG CHUẨN NẾU CHƯA CÓ KẾT NỐI SERVER
+    var DEFAULT_FALLBACK_SEGMENTS = [
+      { text: "May mắn lần sau", color: "#334155", textColor: "#94A3B8", code: "LUCK" },
+      { text: "Voucher 5.000đ", color: "#EA580C", textColor: "#FFFFFF", code: "GIAM5K" },
+      { text: "Trứng Lòng Đào", color: "#F59E0B", textColor: "#0F172A", code: "FREETRUNG" },
+      { text: "Chai Nước Suối", color: "#10B981", textColor: "#FFFFFF", code: "FREESUOI" },
+      { text: "Voucher 20.000đ", color: "#C2410C", textColor: "#FFFFFF", code: "GIAM20K" }
+    ];
+
+    var activePrizeSegments = DEFAULT_FALLBACK_SEGMENTS;
+    var currentRating = 5;
+    var isSpinning = false;
+    var activeOrderCode = "T5-LUCKY";
+    var wonCodeToSave = "";
+
+    function initWheelPage() {
+      // 1. Tải cấu hình động các ô quà từ Backend do Admin thiết lập
+      loadDynamicPrizesConfig();
+
+      // 2. Nhận diện đơn hàng và số điện thoại khách hàng cũ
+      var lastOrder = JSON.parse(localStorage.getItem("thim5_last_order") || "null");
+      var crm = JSON.parse(localStorage.getItem("thim5_crm") || "{}");
+
+      if (lastOrder && lastOrder.code) {
+        activeOrderCode = lastOrder.code;
+        document.getElementById("currentOrderLabel").innerText = activeOrderCode;
+        if (lastOrder.phone) document.getElementById("custPhoneInput").value = lastOrder.phone;
+
+        if (lastOrder.isSpun === true) {
+          document.getElementById("btnSpin").style.display = "none";
+          document.getElementById("wonPrizeName").innerText = "🎉 Quà Của Bạn: " + (lastOrder.prizeName || "Đã nhận quà");
+          document.getElementById("wonPromoCode").innerText = "MÃ: " + (lastOrder.promoCode || "FREESUOI");
+          document.getElementById("resultNoticeText").innerText = "⚠️ Đơn hàng này đã quay nhận thưởng!";
+          document.getElementById("resultBox").style.display = "block";
+        }
+      } else if (crm.phone) {
+        document.getElementById("custPhoneInput").value = crm.phone;
+      }
+    }
+
+    /**
+     * TẢI CẤU HÌNH VÒNG QUAY ĐỘNG TỪ SERVER
+     */
+    function loadDynamicPrizesConfig() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(prizes) {
+            if (prizes && Array.isArray(prizes) && prizes.length >= 4) {
+              activePrizeSegments = prizes;
+            }
+            drawCanvasWheel();
+          })
+          .withFailureHandler(function() {
+            drawCanvasWheel();
+          })
+          .getWheelPrizesConfigDynamic();
+      } else {
+        drawCanvasWheel();
+      }
+    }
+
+    function setStars(starCount) {
+      currentRating = starCount;
+      var stars = document.querySelectorAll("#starContainer span");
+      stars.forEach(function(s, idx) {
+        if (idx < starCount) s.classList.add("active");
+        else s.classList.remove("active");
+      });
+    }
+
+    /**
+     * THUẬT TOÁN VẼ VÒNG QUAY ĐỘNG THEO SỐ LƯỢNG Ô (5 HOẶC 6 Ô)
+     */
+    function drawCanvasWheel() {
+      var canvas = document.getElementById("wheelCanvas");
+      if (!canvas) return;
+      var ctx = canvas.getContext("2d");
+      var numSegments = activePrizeSegments.length;
+      var anglePerSegment = (2 * Math.PI) / numSegments;
+
+      ctx.clearRect(0, 0, 260, 260);
+
+      for (var i = 0; i < numSegments; i++) {
+        var startAngle = i * anglePerSegment - Math.PI / 2;
+        var endAngle = startAngle + anglePerSegment;
+
+        ctx.beginPath();
+        ctx.moveTo(130, 130);
+        ctx.arc(130, 130, 125, startAngle, endAngle);
+        ctx.fillStyle = activePrizeSegments[i].color || (i % 2 === 0 ? "#EA580C" : "#1E293B");
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#0F172A";
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(130, 130);
+        ctx.rotate(startAngle + anglePerSegment / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = activePrizeSegments[i].textColor || "#FFFFFF";
+        ctx.font = "bold " + (numSegments > 6 ? "9px" : "10px") + " Plus Jakarta Sans";
+        ctx.fillText(activePrizeSegments[i].text, 116, 4);
+        ctx.restore();
+      }
+    }
+
+    function startSpin() {
+      var phone = document.getElementById("custPhoneInput").value.trim();
+      var reviewText = document.getElementById("custReviewInput").value.trim();
+
+      if (!phone || phone.length < 9) {
+        alert("Vui lòng nhập Số Điện Thoại nhận quà!");
+        return;
+      }
+
+      if (isSpinning) return;
+      isSpinning = true;
+      document.getElementById("btnSpin").disabled = true;
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res.status === "ALREADY_SPUN") {
+              isSpinning = false;
+              document.getElementById("btnSpin").style.display = "none";
+              document.getElementById("wonPrizeName").innerText = "🎉 " + res.prize;
+              document.getElementById("wonPromoCode").innerText = "MÃ: " + res.promoCode;
+              document.getElementById("resultNoticeText").innerText = "⚠️ " + res.message;
+              document.getElementById("resultBox").style.display = "block";
+            } else {
+              executeWheelAnimation(res.prize, res.promoCode);
+            }
+          })
+          .withFailureHandler(function(err) {
+            isSpinning = false;
+            document.getElementById("btnSpin").disabled = false;
+            alert("Lỗi kết nối vòng quay: " + err.message);
+          })
+          .spinLuckyWheelServer(phone, activeOrderCode, currentRating, reviewText);
+      } else {
+        executeWheelAnimation("Tặng 1 Chai Nước Suối", "FREESUOI");
+      }
+    }
+
+    /**
+     * THUẬT TOÁN ĐIỀU KHIỂN GÓC DỪNG CHÍNH XÁC THEO MÃ CODE
+     */
+    function executeWheelAnimation(prizeName, promoCode) {
+      wonCodeToSave = promoCode;
+      var canvas = document.getElementById("wheelCanvas");
+      var numSegments = activePrizeSegments.length;
+      var targetIdx = 0;
+
+      // Tìm chính xác vị trí ô theo promoCode trả về từ backend
+      for (var i = 0; i < numSegments; i++) {
+        if (activePrizeSegments[i].code === promoCode) {
+          targetIdx = i;
+          break;
+        }
+      }
+
+      var degPerSegment = 360 / numSegments;
+      // Kim chỉ ở góc trên cùng (0 độ / đỉnh Canvas). Vòng quay quay theo chiều kim đồng hồ.
+      var stopDegree = 360 * 5 + (360 - (targetIdx * degPerSegment + degPerSegment / 2));
+
+      canvas.style.transform = "rotate(" + stopDegree + "deg)";
+
+      setTimeout(function() {
+        isSpinning = false;
+        document.getElementById("btnSpin").style.display = "none";
+        document.getElementById("wonPrizeName").innerText = "🎉 Trúng Thưởng: " + prizeName;
+        document.getElementById("wonPromoCode").innerText = "MÃ: " + promoCode;
+        document.getElementById("resultBox").style.display = "block";
+
+        var last = JSON.parse(localStorage.getItem("thim5_last_order") || "{}");
+        last.isSpun = true;
+        last.prizeName = prizeName;
+        last.promoCode = promoCode;
+        localStorage.setItem("thim5_last_order", JSON.stringify(last));
+      }, 4600);
+    }
+
+    function goToMenuWithPromo() {
+      if (wonCodeToSave) {
+        localStorage.setItem("thim5_auto_voucher", wonCodeToSave);
+      }
+      window.location.href = "?page=index";
+    }
+
+    if (document.readyState === "loading") { 
+      document.addEventListener("DOMContentLoaded", initWheelPage); 
+    } else { 
+      initWheelPage(); 
+    }
+  </script>
+</body>
+</html>
