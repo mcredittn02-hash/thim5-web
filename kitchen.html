@@ -17,7 +17,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding: 12px; font-size: 13px; }
 
-    /* MÀN HÌNH KHÓA BẢO MẬT BẾP (CHỐNG LỘ LINK) */
+    /* MÀN HÌNH KHÓA PIN */
     #kdsAuthOverlay {
       position: fixed; inset: 0; background: #0F172A; z-index: 9999;
       display: flex; align-items: center; justify-content: center; padding: 16px;
@@ -42,7 +42,7 @@
     }
     .auth-err { color: var(--danger); font-size: 11px; margin-top: 8px; display: none; font-weight: 700; }
 
-    /* HEADER KDS BAR */
+    /* HEADER KDS */
     .kds-header {
       display: flex; justify-content: space-between; align-items: center;
       background: #1E293B; border: 1px solid var(--card-border); padding: 12px 16px;
@@ -58,7 +58,7 @@
     .btn-lock { background: #334155; color: var(--muted); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; }
     .clock-display { font-size: 14px; font-weight: 800; color: #FDE047; letter-spacing: 1px; }
 
-    /* THANH LỌC TRẠNG THÁI NHANH */
+    /* TABS LỌC NHANH */
     .kds-filter-tabs {
       display: flex; gap: 8px; overflow-x: auto; white-space: nowrap;
       margin-bottom: 14px; padding-bottom: 2px; scrollbar-width: none;
@@ -71,7 +71,7 @@
     }
     .filter-tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 10px rgba(234, 88, 12, 0.4); }
 
-    /* GRID DANH SÁCH ĐƠN BẾP */
+    /* GRID ĐƠN */
     .orders-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
     .order-card { background: var(--card); border: 2px solid var(--card-border); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: .2s; }
     .order-card.step0 { border-color: #64748B; border-left: 6px solid #F59E0B; background: #182234; }
@@ -112,13 +112,14 @@
 
     .status-badge { text-align: center; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: 800; }
     .status-badge.step0 { background: rgba(245, 158, 11, 0.2); color: #FDE047; }
+    .status-badge.step1 { background: rgba(239, 68, 68, 0.2); color: #FCA5A5; }
     .status-badge.step2 { background: rgba(245, 158, 11, 0.2); color: #FDE047; }
     .status-badge.step3 { background: rgba(37, 99, 235, 0.2); color: #93C5FD; }
   </style>
 </head>
 <body>
 
-  <!-- MÀN HÌNH KHÓA BẢO MẬT BẾP (CHỐNG LỘ LINK) -->
+  <!-- AUTH PIN OVERLAY -->
   <div id="kdsAuthOverlay">
     <div class="auth-card">
       <div class="auth-icon">🍳</div>
@@ -132,7 +133,7 @@
     </div>
   </div>
 
-  <!-- HEADER BAR -->
+  <!-- HEADER -->
   <header class="kds-header">
     <div class="kds-brand">
       <h1>🍳 BẾP KDS THÍM 5</h1>
@@ -145,7 +146,7 @@
     </div>
   </header>
 
-  <!-- THANH LỌC TRẠNG THÁI NHANH -->
+  <!-- FILTER TABS -->
   <div class="kds-filter-tabs">
     <button class="filter-tab-btn active" data-filter="all" onclick="changeKdsFilter('all', this)">
       🌐 Tất Cả Đơn (<span id="countAll">0</span>)
@@ -184,7 +185,6 @@
       { name: "Tài Xế Ruột Hòa Thành", phone: "0934220585" }
     ];
 
-    // CẦU NỐI DUAL-ENGINE CHUẨN HOÁ GIỮA GAS NỘI BỘ VÀ WEB RENDER
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -198,21 +198,21 @@
           if (typeof runner[gasFunctionName] === 'function') {
             runner[gasFunctionName].apply(runner, gasArgsArray || []);
           } else {
-            reject(new Error("Hàm " + gasFunctionName + " không tồn tại trong GAS"));
+            reject(new Error("Hàm " + gasFunctionName + " không tồn tại"));
           }
         } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
           window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
-            .then(function(res) { resolve(res); })
+            .then(function(res) { 
+              if (res && res.data !== undefined) resolve(res.data);
+              else resolve(res);
+            })
             .catch(function(err) { reject(err); });
         } else {
-          reject(new Error("Không tìm thấy kết nối Backend (GAS / api.js)"));
+          reject(new Error("Không tìm thấy kết nối Backend"));
         }
       });
     }
 
-    /**
-     * 1. XÁC THỰC MÃ PIN BẢO MẬT BẾP (PIN 1985 HOẶC 2026)
-     */
     function checkKdsAuth() {
       var savedPin = localStorage.getItem("thim5_kds_auth");
       if (savedPin === "1985" || savedPin === "2026") {
@@ -249,16 +249,13 @@
       }
     }
 
-    /**
-     * 2. KHỞI CHẠY TRẠM BẾP KDS
-     */
     function initKDS() {
       updateLiveClock();
       setInterval(updateLiveClock, 1000);
       loadShippersFromServer();
       loadKitchenOrders();
       if (!kdsPollingTimer) {
-        kdsPollingTimer = setInterval(loadKitchenOrders, 4000); // Tự động cập nhật mỗi 4 giây
+        kdsPollingTimer = setInterval(loadKitchenOrders, 3500);
       }
       document.body.addEventListener('click', initAudioContext, { once: true });
     }
@@ -306,7 +303,7 @@
         var gain1 = audioCtx.createGain();
         osc1.type = 'sine';
         osc1.frequency.setValueAtTime(880, audioCtx.currentTime);
-        gain1.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain1.gain.setValueAtTime(0.35, audioCtx.currentTime);
         gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
         osc1.connect(gain1);
         gain1.connect(audioCtx.destination);
@@ -319,7 +316,7 @@
           var gain2 = audioCtx.createGain();
           osc2.type = 'sine';
           osc2.frequency.setValueAtTime(1174.66, audioCtx.currentTime);
-          gain2.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain2.gain.setValueAtTime(0.35, audioCtx.currentTime);
           gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
           osc2.connect(gain2);
           gain2.connect(audioCtx.destination);
@@ -344,7 +341,6 @@
     async function loadKitchenOrders() {
       try {
         var res = await callBackend("getKitchenData", [], "getKitchenData", {});
-        // Bóc tách mảng đơn an toàn dù backend trả về mảng trực tiếp hay bọc object
         var orders = [];
         if (Array.isArray(res)) {
           orders = res;
@@ -361,9 +357,6 @@
       }
     }
 
-    /**
-     * 3. ĐẾM VÀ LỌC TRẠNG THÁI ĐƠN HÀNG
-     */
     function updateFilterCounts(orders) {
       var activeOrders = (orders || []).filter(function(o){ return o.status !== "Đã Hủy" && Number(o.step) >= 0 && Number(o.step) <= 3; });
       var cNeed = 0, cCooking = 0, cWait = 0;
@@ -395,9 +388,6 @@
       renderKitchenUI();
     }
 
-    /**
-     * 4. RENDER GIAO DIỆN THỰC CHIẾN BẾP
-     */
     function renderKitchenUI() {
       var grid = document.getElementById("kitchenOrdersGrid");
       if (!grid) return;
@@ -412,7 +402,7 @@
         displayOrders = activeOrders.filter(function(o){ return Number(o.step) === 0; });
       }
 
-      var currentCodes = activeOrders.map(function(o){ return o.code; });
+      var currentCodes = activeOrders.map(function(o){ return String(o.code || '').trim(); });
       if (!isInitialLoad) {
         var hasNewOrder = currentCodes.some(function(code){ return knownOrderCodes.indexOf(code) === -1; });
         if (hasNewOrder) {
@@ -423,7 +413,6 @@
       }
       knownOrderCodes = currentCodes;
 
-      // XỬ LÝ EMPTY STATE (HẾT BỊ TREO CHỮ "ĐANG ĐỒNG BỘ")
       if (displayOrders.length === 0) {
         grid.innerHTML = `
           <div style="grid-column: 1/-1; text-align:center; padding:60px 20px;">
@@ -437,6 +426,7 @@
 
       var html = "";
       displayOrders.forEach(function(o) {
+        var cleanCode = String(o.code || '').trim();
         var stepNum = Number(o.step);
         var stepClass = "step" + stepNum;
         var isMoMo = (o.method === "CK_VIETQR" || o.method === "MOMO" || o.method === "BANK");
@@ -456,7 +446,7 @@
           <div class="order-card ${stepClass}">
             <div>
               <div class="card-header">
-                <span class="order-code">${o.code}</span>
+                <span class="order-code">${cleanCode}</span>
                 <span class="order-time">⏰ ${o.time}</span>
               </div>
 
@@ -483,23 +473,23 @@
                   🔒 Bếp Chờ Ship Xác Minh (Chưa Nấu)
                 </button>
               ` : (stepNum === 1 ? `
-                <button class="btn-kds btn-accept" onclick="handleKitchenAccept('${o.code}')">
+                <div class="status-badge step1">🔥 Đã xác nhận / Đã thanh toán!</div>
+                <button class="btn-kds btn-accept" id="btn_cook_${cleanCode}" onclick="handleKitchenAccept('${cleanCode}')">
                   🍳 BẤM NHẬN NẤU ĐƠN NÀY
                 </button>
               ` : (stepNum === 2 ? `
                 <div class="status-badge step2">🔥 Bếp đang nấu trên chảo...</div>
                 <div class="shipper-assign-box">
-                  <select class="shipper-select" id="ship_select_${o.code}">
+                  <select class="shipper-select" id="ship_select_${cleanCode}">
                     ${shipperOptionsHtml}
                   </select>
-                  <button class="btn-assign" onclick="handleKitchenAssign('${o.code}')">Gán Giao</button>
+                  <button class="btn-assign" onclick="handleKitchenAssign('${cleanCode}')">Gán Giao</button>
                 </div>
               ` : `
                 <div class="status-badge step3">🛵 Đang giao bởi: <strong>${o.shipper || 'Shipper'}</strong></div>
               `))}
 
-              <!-- NÚT HỦY ĐƠN TRỰC TIẾP TẠI BẾP -->
-              <button class="btn-kds btn-cancel-order" onclick="handleKitchenCancel('${o.code}')">
+              <button class="btn-kds btn-cancel-order" onclick="handleKitchenCancel('${cleanCode}')">
                 🚫 Hủy Đơn Này (Khách Báo Zalo / Hết Món)
               </button>
             </div>
@@ -510,28 +500,37 @@
       grid.innerHTML = html;
     }
 
-    /**
-     * 5. CÁC HÀM XỬ LÝ HÀNH ĐỘNG CỦA ĐẦU BẾP (CHẠY CẢ TRÊN GAS VÀ RENDER)
-     */
     async function handleKitchenAccept(orderCode) {
+      var cleanCode = String(orderCode || "").trim();
+      var btn = document.getElementById("btn_cook_" + cleanCode);
+      if (btn) {
+        btn.innerText = "⏳ Đang chuyển sang chảo nấu...";
+        btn.disabled = true;
+      }
+
       try {
-        await callBackend("kitchenAcceptOrder", [orderCode], "kitchenAcceptOrder", { orderCode: orderCode });
+        await callBackend("kitchenAcceptOrder", [cleanCode], "kitchenAcceptOrder", { orderCode: cleanCode });
         loadKitchenOrders();
       } catch (err) {
         alert("Lỗi nhận nấu: " + err.message);
+        if (btn) {
+          btn.innerText = "🍳 BẤM NHẬN NẤU ĐƠN NÀY";
+          btn.disabled = false;
+        }
       }
     }
 
     async function handleKitchenAssign(orderCode) {
-      var select = document.getElementById("ship_select_" + orderCode);
+      var cleanCode = String(orderCode || "").trim();
+      var select = document.getElementById("ship_select_" + cleanCode);
       if (!select) return;
       var parts = select.value.split("|");
       var shipName = parts[0];
       var shipPhone = parts[1];
 
       try {
-        await callBackend("kitchenAssignShipper", [orderCode, shipName, shipPhone], "kitchenAssignShipper", {
-          orderCode: orderCode,
+        await callBackend("kitchenAssignShipper", [cleanCode, shipName, shipPhone], "kitchenAssignShipper", {
+          orderCode: cleanCode,
           shipperName: shipName,
           shipperPhone: shipPhone
         });
@@ -542,15 +541,16 @@
     }
 
     async function handleKitchenCancel(orderCode) {
-      var reason = prompt("Nhập lý do hủy đơn " + orderCode + " (VD: Khách nhắn Zalo hủy, Hết món...):", "Khách nhắn Zalo hủy");
+      var cleanCode = String(orderCode || "").trim();
+      var reason = prompt("Nhập lý do hủy đơn " + cleanCode + " (VD: Khách nhắn Zalo hủy, Hết món...):", "Khách nhắn Zalo hủy");
       if (reason === null || !reason.trim()) return;
 
       try {
-        var res = await callBackend("kitchenCancelOrder", [orderCode, reason], "kitchenCancelOrder", {
-          orderCode: orderCode,
+        var res = await callBackend("kitchenCancelOrder", [cleanCode, reason], "kitchenCancelOrder", {
+          orderCode: cleanCode,
           reason: reason
         });
-        alert("✅ Đã hủy đơn " + orderCode + " thành công! Đơn đã được trừ khỏi doanh thu.");
+        alert("✅ Đã hủy đơn " + cleanCode + " thành công!");
         loadKitchenOrders();
       } catch (err) {
         alert("Lỗi hủy đơn: " + err.message);
