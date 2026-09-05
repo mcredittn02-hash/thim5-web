@@ -558,8 +558,8 @@
           <button type="button" class="btn-grab-submit" style="background:#0F172A; padding:7px; font-size:10px; margin:4px 0;" onclick="downloadQrCodeImage()">
             📥 Tải Ảnh QR Về Máy (Để Quét Trong App Bank)
           </button>
-          <button type="button" class="btn-copy-chip" onclick="copyValueText(MOMO_PAYMENT_PHONE, 'Đã copy STK MoMo 0934220585!')">
-            <span>📋 STK: <strong id="dispCopyMomoAcc">0934220585</strong></span>
+          <button type="button" class="btn-copy-chip" onclick="copyDynamicBankAccount()">
+            <span>📋 STK: <strong id="dispCopyMomoAcc">Đang tải...</strong></span>
             <span style="color:var(--grab-green); font-size:9px;">Sao chép</span>
           </button>
         </div>
@@ -662,7 +662,10 @@
       storeName: "Mì Trộn & Cơm Trộn Thím 5",
       phone: "0969004693",
       address: "Nguyễn Văn Linh, TX. Hòa Thành, Tây Ninh",
+      bankAccount: "0934220585",
       momoAccount: "0934220585",
+      bankBin: "970422",
+      accountHolderName: "NGUYEN HAI AU",
       momoName: "NGUYEN HAI AU",
       d2cDiscountRate: 0.12,
       maxPromoBudgetRate: 0.15,
@@ -799,6 +802,11 @@
           updateDynamicCalculations();
         }
       } catch (e) {}
+    }
+
+    function copyDynamicBankAccount() {
+      var acc = MOMO_PAYMENT_PHONE || (activeStoreConfig && (activeStoreConfig.bankAccount || activeStoreConfig.momoAccount)) || "0934220585";
+      copyValueText(acc, "Đã copy STK: " + acc);
     }
 
     function playGoldenHourAlert() {
@@ -1247,7 +1255,7 @@
       if (!qrBox || !qrImg) return;
       if (payMethod === "CK_VIETQR" && grandTotal > 0) {
         qrBox.style.display = "block";
-        var momoAcc = MOMO_PAYMENT_PHONE || "0934220585";
+        var momoAcc = MOMO_PAYMENT_PHONE || (activeStoreConfig && (activeStoreConfig.bankAccount || activeStoreConfig.momoAccount)) || "0934220585";
         var momoName = encodeURIComponent(activeStoreConfig.accountHolderName || activeStoreConfig.momoName || "NGUYEN HAI AU");
         var bankBinCode = activeStoreConfig.bankBin || "970422";
         qrImg.src = "https://img.vietqr.io/image/" + bankBinCode + "-" + momoAcc + "-compact2.png?amount=" + grandTotal + "&addInfo=" + currentOrderCode + "&accountName=" + momoName;
@@ -1367,13 +1375,14 @@
       localStorage.setItem("thim5_last_order", JSON.stringify({ code: currentOrderCode, phone: phone, time: new Date().getTime(), step: initialStep, isSpun: false }));
       localStorage.setItem("thim5_crm", JSON.stringify({ name: name, phone: phone, address: detailAddr }));
 
+      var momoAccFinal = MOMO_PAYMENT_PHONE || (activeStoreConfig && (activeStoreConfig.bankAccount || activeStoreConfig.momoAccount)) || "0934220585";
       latestBillText = "🍜 *ĐƠN HÀNG THÍM 5 • MÃ: " + currentOrderCode + "*\n"
         + "👤 Khách hàng: " + name + " (" + phone + ")\n"
         + "📍 Địa chỉ: " + (detailAddr || "Hòa Thành, Tây Ninh") + "\n"
         + "-----------------------------\n"
         + "🍲 *CHI TIẾT MÓN ĐẶT:*\n" + billZaloItemsText + "\n"
         + "-----------------------------\n"
-        + "💳 Thanh toán: " + (payMethod === 'COD' ? "Tiền mặt khi nhận hàng (COD)" : "Đã chuyển khoản VietQR (" + (activeStoreConfig.bankAccount || MOMO_PAYMENT_PHONE) + ")") + "\n"
+        + "💳 Thanh toán: " + (payMethod === 'COD' ? "Tiền mặt khi nhận hàng (COD)" : "Đã chuyển khoản VietQR (" + momoAccFinal + ")") + "\n"
         + "💰 *TỔNG THANH TOÁN: " + grandTotalNum.toLocaleString('vi-VN') + "đ*\n"
         + "👉 Bếp xác nhận đơn và làm nóng giòn giúp mình nhé!";
 
@@ -1437,6 +1446,7 @@
       window.open(zaloUrl, "_blank");
     }
 
+    // TỐI ƯU HÓA: DÙNG CHECKORDERSTATUSLIVE QUÉT TRỰC TIẾP MÃ ĐƠN TRÁNH BỊ TREO HOÀN TẤT
     function checkActiveTracking() {
       var last = JSON.parse(localStorage.getItem("thim5_last_order") || "null");
       var tCard = document.getElementById("trackingCard");
@@ -1454,10 +1464,8 @@
       if (!trackingTimer) {
         trackingTimer = setInterval(async function() {
           try {
-            var res = await callBackend("getKitchenData", [], "getKitchenData", {});
-            var orders = (res && Array.isArray(res)) ? res : (res && res.orders ? res.orders : []);
-            var matchOrder = orders.find(function(o){ return o.code === last.code; });
-            var s = matchOrder ? Number(matchOrder.step) : 1;
+            var res = await callBackend("checkOrderStatusLive", [last.code], "checkOrderStatusLive", { orderCode: last.code });
+            var s = (res && res.step !== undefined) ? Number(res.step) : (res ? Number(res) : 1);
 
             for (var i = 1; i <= 4; i++) {
               var el = document.getElementById("step" + i);
@@ -1469,7 +1477,7 @@
               else if (s === 1) { badge.innerText = "🔔 Tiếp Nhận"; badge.style.background = "#DCFCE7"; badge.style.color = "#15803D"; }
               else if (s === 2) { badge.innerText = "🍳 Bếp Nấu"; badge.style.background = "#FEF3C7"; badge.style.color = "#92400E"; }
               else if (s === 3) { badge.innerText = "🛵 Đang Giao"; badge.style.background = "#DBEAFE"; badge.style.color = "#1E40AF"; }
-              else if (s === 4) { badge.innerText = "✅ Hoàn Tất"; badge.style.background = "#ECFDF5"; badge.style.color = "#065F46"; }
+              else if (s >= 4) { badge.innerText = "✅ Hoàn Tất"; badge.style.background = "#ECFDF5"; badge.style.color = "#065F46"; }
             }
 
             if (s >= 4 && !last.isSpun) {
@@ -1477,7 +1485,7 @@
               if (btnComp) btnComp.style.display = "block";
             }
           } catch (e) {}
-        }, 4000);
+        }, 3500);
       }
     }
 
