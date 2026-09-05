@@ -274,7 +274,7 @@
       </div>
     </section>
 
-    <!-- TAB 2: MENU MÓN CHÍNH (CÓ PHÂN TẦNG VÀ DẠNG THỨC MÓN) -->
+    <!-- TAB 2: MENU MÓN CHÍNH -->
     <section id="tab_menu" class="tab-panel">
       <div class="card">
         <div class="card-title">
@@ -460,7 +460,7 @@
       </div>
     </section>
 
-    <!-- TAB 8: MINI CRM (ĐÃ BỎ MỐC QUÀ TÍCH LŨY TẶNG MÂM 0Đ, QUY CHUẨN HUY HIỆU ĐỘNG) -->
+    <!-- TAB 8: MINI CRM KHÁCH HÀNG -->
     <section id="tab_crm" class="tab-panel">
       <div class="card">
         <div class="card-title">
@@ -499,10 +499,9 @@
           </div>
         </div>
         <p style="font-size:11px; color:var(--muted); margin-top:-6px; margin-bottom:12px;">
-          💡 Quản lý chọn quà từ 3 nhóm (Topping, Nước uống, Bù Ship). Hệ thống tự chia tỷ lệ xác suất nghịch đảo với Food Cost để tổng chi phí quà $\le 5\%$ AOV.
+          💡 Quản lý chọn quà từ 3 nhóm (Topping, Nước uống, Bù Ship). Hệ thống tự chia tỷ lệ xác suất nghịch đảo với Food Cost để tổng chi phí quà &le; 5% AOV.
         </p>
 
-        <!-- LƯỚI 6 CARD CHỌN QUÀ -->
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:10px; margin-bottom:12px;" id="wheelSlotsContainer"></div>
       </div>
 
@@ -530,13 +529,13 @@
       </div>
     </section>
 
-    <!-- TAB 10: CÀI ĐẶT LÕI HỆ THỐNG (CHỈ SUPER ADMIN ANH HẢI ÂU MỚI MỞ ĐƯỢC) -->
+    <!-- TAB 10: CÀI ĐẶT LÕI HỆ THỐNG -->
     <section id="tab_settings" class="tab-panel">
       <div class="card">
         <div class="card-title"><span>⚙️ Cài Đặt Ngân Hàng, Thuế HKD Động (4.5%), Email Kế Toán & Chiến Dịch</span></div>
         <div style="max-width:850px;">
           
-          <!-- KHỐI 0: BẢNG ĐIỀU HÀNH THAM SỐ TÀI CHÍNH & ĐỊNH GIÁ NGƯỢC -->
+          <!-- KHỐI 0: BẢNG ĐIỀU HÀNH THAM SỐ TÀI CHÍNH -->
           <div style="background:#0F172A; border:2px solid var(--gold); border-radius:14px; padding:16px; margin-bottom:16px; box-shadow: 0 4px 20px rgba(253, 224, 71, 0.15);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px dashed #334155; padding-bottom:8px;">
               <div>
@@ -580,7 +579,7 @@
               </div>
             </div>
 
-            <!-- 3. BẬC THANG HỖ TRỢ PHÍ SHIP & FREESHIP 0Đ -->
+            <!-- 3. BẬC THANG HỖ TRỢ PHÍ SHIP -->
             <div style="background:#1E293B; border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid #334155;">
               <label style="color:#34D399; font-weight:800; font-size:12px; display:block; margin-bottom:6px;">
                 3. Bậc thang hỗ trợ phí ship (Vượt tiền ship thực tế sẽ hiển thị 0đ Freeship):
@@ -612,7 +611,7 @@
             </button>
           </div>
 
-          <!-- KHỐI 1: CẤU HÌNH THUẾ HKD ĐỘNG & EMAIL BÁO CÁO THUẾ 23H59 -->
+          <!-- KHỐI 1: CẤU HÌNH THUẾ HKD & EMAIL BÁO CÁO THUẾ -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
             <strong style="color:var(--gold); font-size:13px;">📋 CẤU HÌNH THUẾ HỘ KINH DOANH & BÁO CÁO KÊ KHAI (23H59)</strong>
             <p style="font-size:10px; color:var(--muted); margin-top:2px; margin-bottom:10px;">Chỉ Super Admin mới có quyền điều chỉnh thuế suất và danh sách email nhận báo cáo thuế hàng ngày</p>
@@ -632,16 +631,12 @@
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
-              <button class="btn btn-blue" onclick="handleManualSendTaxReport()">
-                📧 Xuất & Gửi Báo Cáo Thuế Hôm Nay Ngay
-              </button>
-              <button class="btn btn-dark" onclick="handleActivateTaxAutoTrigger()">
-                ⏰ Kích Hoạt Tự Động Gửi Lúc 23:59
-              </button>
+              <button class="btn btn-blue" onclick="handleManualSendTaxReport()">📧 Xuất & Gửi Báo Cáo Thuế Hôm Nay Ngay</button>
+              <button class="btn btn-dark" onclick="handleActivateTaxAutoTrigger()">⏰ Kích Hoạt Tự Động Gửi Lúc 23:59</button>
             </div>
           </div>
 
-          <!-- KHỐI 2: CẤU HÌNH KHUNG GIỜ VÀNG & CHUÔNG BÁO -->
+          <!-- KHỐI 2: KHUNG GIỜ VÀNG -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <div>
@@ -659,7 +654,7 @@
             </div>
           </div>
 
-          <!-- KHỐI 3: QUẢN TRỊ MARKETING & GAMIFICATION ĐỘNG -->
+          <!-- KHỐI 3: MARKETING & GAMIFICATION ĐỘNG -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <div>
@@ -669,7 +664,6 @@
               <button class="btn btn-blue btn-sm" onclick="loadGamificationAdminData()">🔄 Tải Lại Config</button>
             </div>
 
-            <!-- Bảng 5 Cấp Bậc Huy Hiệu -->
             <div style="background:#1E293B; border-radius:10px; padding:10px; margin-bottom:10px; border:1px solid #334155;">
               <label style="color:#38BDF8; font-weight:bold; font-size:11px; display:block; margin-bottom:6px;">1. Bảng 5 Cấp Bậc Huy Hiệu Theo Tháng (Mốc 2 - 4 - 7 - 12 đơn):</label>
               <div class="table-responsive">
@@ -689,7 +683,6 @@
               </div>
             </div>
 
-            <!-- Quà Nước Đóng Chai Kéo Ticket Size -->
             <div style="background:#1E293B; border-radius:10px; padding:10px; margin-bottom:10px; border:1px solid #334155;">
               <label style="color:#34D399; font-weight:bold; font-size:11px; display:block; margin-bottom:6px;">2. Ngưỡng Tặng Nước Đóng Chai Kéo Ticket Size (AOV):</label>
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
@@ -710,7 +703,6 @@
               </div>
             </div>
 
-            <!-- Giới Thiệu Bạn Bè Referral -->
             <div style="background:#1E293B; border-radius:10px; padding:10px; margin-bottom:10px; border:1px solid #334155;">
               <label style="color:#F472B6; font-weight:bold; font-size:11px; display:block; margin-bottom:6px;">3. Chiến Dịch Giới Thiệu Bạn Mới (Viral Referral):</label>
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
@@ -730,7 +722,7 @@
             </button>
           </div>
 
-          <!-- KHỐI 4: TÀI KHOẢN NGÂN HÀNG & VIETQR NAPAS247 -->
+          <!-- KHỐI 4: TÀI KHOẢN NGÂN HÀNG & VIETQR -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
             <strong style="color:var(--gold); font-size:13px;">💳 TÀI KHOẢN NGÂN HÀNG / VÍ VIETQR NHẬN TIỀN KHÁCH</strong>
             <p style="font-size:10px; color:var(--muted); margin-top:2px; margin-bottom:10px;">Tự động sinh mã VietQR chuẩn Napas247 cho đơn hàng D2C</p>
@@ -769,7 +761,7 @@
             </div>
           </div>
 
-          <!-- KHỐI 5: MÃ QR ĐỘNG TỰ ĐỔI LINK THEO CẤU TRÚC WEB MỚI -->
+          <!-- KHỐI 5: MÃ QR ĐỘNG -->
           <div class="qr-card-box">
             <strong style="color:var(--gold); font-size:13px;">📱 MÃ QR ĐẶT MÓN ĐỘNG CỦA QUÁN (IN ẤN / STANDEE)</strong>
             <p style="font-size:10px; color:var(--muted); margin-top:2px;">Tự động cập nhật lại mã QR mỗi khi thay đổi địa chỉ Web quán</p>
@@ -789,7 +781,7 @@
 
           <hr style="border:0; border-top:1px dashed #334155; margin:16px 0;" />
 
-          <!-- KHỐI 6: THÔNG TIN VẬN HÀNH & ĐỔI MÃ PIN 2 LEVEL -->
+          <!-- KHỐI 6: THÔNG TIN VẬN HÀNH & ĐỔI MÃ PIN -->
           <div class="form-group">
             <label>Tên Quán Quản Trị:</label>
             <input type="text" class="form-input" id="cfgStoreName" value="Mì Trộn & Cơm Trộn Thím 5" />
@@ -815,7 +807,7 @@
             <button class="btn btn-blue btn-sm" onclick="getCurrentLocationGps()">📍 Lấy Tọa Độ Vị Trí Hiện Tại</button>
           </div>
 
-          <!-- ĐỔI PIN LEVEL 1 (QUẢN LÝ / CHỦ QUÁN) -->
+          <!-- ĐỔI PIN LEVEL 1 -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:10px; padding:12px; margin-bottom:12px;">
             <label style="color:#93C5FD; font-weight:800;">🔑 Đổi Mã PIN Level 1 (Chủ quán/Quản lý ca):</label>
             <div style="display:flex; gap:6px; margin-top:4px;">
@@ -824,7 +816,7 @@
             </div>
           </div>
 
-          <!-- ĐỔI SUPER PIN LEVEL 2 (CẦN XÁC THỰC EMAIL OTP) -->
+          <!-- ĐỔI SUPER PIN LEVEL 2 -->
           <div style="background:#0F172A; border:1px solid var(--gold); border-radius:10px; padding:12px; margin-bottom:12px;">
             <label style="color:var(--gold); font-weight:800;">👑 Đổi Mã PIN Super Admin Level 2 (Bảo mật OTP Gmail):</label>
             <p style="font-size:10px; color:var(--muted); margin-bottom:8px;">Bấm nút bên dưới để nhận mã OTP gửi về Email chính chủ trước khi đổi PIN:</p>
@@ -884,7 +876,7 @@
     </div>
   </div>
 
-  <!-- MODAL THÊM/SỬA MÓN (CÓ DẠNG MÓN: KHO / NUOC / AN-KEM / GIAI-KHAT) -->
+  <!-- MODAL THÊM/SỬA MÓN -->
   <div class="modal" id="dishModal">
     <div class="modal-sheet">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -906,7 +898,6 @@
         </div>
       </div>
 
-      <!-- PHÂN TẦNG MA TRẬN AOV -->
       <div class="form-group">
         <label>Phân Loại Ma Trận Menu (Định vị kéo AOV):</label>
         <select class="form-input" id="dishCatInput">
@@ -919,7 +910,6 @@
         </select>
       </div>
 
-      <!-- DẠNG THỨC MÓN ĂN ĐỂ BẬT TẮT SÚP & GU CAY THÔNG MINH -->
       <div class="form-group">
         <label style="color:var(--gold);">Dạng Thức Món Ăn (Để hiển thị Súp & Gu vị thông minh ngoài Web):</label>
         <select class="form-input" id="dishTypeInput">
@@ -963,7 +953,7 @@
     </div>
   </div>
 
-  <!-- MODAL NHẬP LIỆU HÀNG LOẠT (7 TRƯỜNG KÈM NÚT TẢI FILE MẪU CHỐNG TRÀN) -->
+  <!-- MODAL NHẬP LIỆU HÀNG LOẠT -->
   <div class="modal" id="importMediaModal">
     <div class="modal-sheet" style="max-width: 620px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -973,15 +963,12 @@
 
       <input type="hidden" id="currentImportType" value="MENU" />
 
-      <!-- KHỐI TẢI FILE MẪU CHỐNG TRÀN HỆ THỐNG -->
       <div style="background:#0F172A; border:1px solid #334155; border-radius:10px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
         <div>
           <strong style="color:#38BDF8; font-size:12px;">📋 Bước 1: Dùng file mẫu chuẩn 7 cột</strong>
           <p style="font-size:10px; color:var(--muted); margin-top:2px;">Hệ thống tự nhận diện cột, tự loại bỏ cột rác ngoài chuẩn</p>
         </div>
-        <button class="btn btn-blue btn-sm" onclick="downloadMenuCsvTemplate()">
-          📥 Tải File Mẫu (.CSV)
-        </button>
+        <button class="btn btn-blue btn-sm" onclick="downloadMenuCsvTemplate()">📥 Tải File Mẫu (.CSV)</button>
       </div>
 
       <div style="background:#1E293B; border:1px dashed var(--gold); border-radius:10px; padding:10px; margin-bottom:12px; font-size:11px; color:#E2E8F0; line-height:1.5;">
@@ -1009,7 +996,7 @@
     </div>
   </div>
 
-  <!-- MODAL BẬT/TẮT NGHỈ BÁN & CÀI ĐẶT KHUNG GIỜ HOẠT ĐỘNG TỰ ĐỘNG -->
+  <!-- MODAL BẬT/TẮT NGHỈ BÁN -->
   <div class="modal" id="storeStatusModal">
     <div class="modal-sheet">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -1017,10 +1004,9 @@
         <button onclick="closeModal('storeStatusModal')" style="background:none; border:none; font-size:16px; cursor:pointer; color:#fff;">✕</button>
       </div>
       
-      <!-- CÀI ĐẶT KHUNG GIỜ HOẠT ĐỘNG HẰNG NGÀY -->
       <div style="background:#0F172A; border:1px solid #334155; border-radius:10px; padding:12px; margin-bottom:12px;">
         <strong style="color:var(--gold); font-size:12px; display:block; margin-bottom:6px;">⏰ Khung Giờ Bếp Phục Vụ Hằng Ngày:</strong>
-        <p style="font-size:10.5px; color:var(--muted); margin-bottom:10px;">Ngoài khung giờ này, web sẽ tự động khóa giỏ hàng và hiện thông báo nghỉ ngơi tái tạo năng lượng.</p>
+        <p style="font-size:10.5px; color:var(--muted); margin-bottom:10px;">Ngoài khung giờ này, web sẽ tự động khóa giỏ hàng và hiện thông báo nghỉ ngơi.</p>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
           <div class="form-group" style="margin-bottom:0;">
             <label>Giờ Mở Cửa (0 - 23h):</label>
@@ -1033,7 +1019,6 @@
         </div>
       </div>
 
-      <!-- NÚT GẠT NGHỈ BÁN ĐỘT XUẤT THỦ CÔNG -->
       <div class="form-group">
         <label style="display:flex; align-items:center; gap:8px; font-weight:800; cursor:pointer;">
           <input type="checkbox" id="chkStoreClosed" style="width:18px; height:18px;" />
@@ -1047,7 +1032,8 @@
       <button class="btn btn-success" style="width:100%; padding:10px;" onclick="saveStoreStatusSubmit()">💾 Lưu Trạng Thái & Khung Giờ Quán</button>
     </div>
   </div>
-<script src="api.js"></script>
+
+  <script src="api.js"></script>
   <script>
     var currentPeriod = 'all';
     var currentShipperPeriod = 'all';
@@ -1056,7 +1042,6 @@
     var cachedMasterMenuList = [];
     var activeStoreConfigCache = null;
 
-    // Danh sách 6 ô cấu hình Vòng Quay May Mắn động (Tab 9)
     var dynamicWheelSlots = [
       { type: "LUCK", name: "May mắn lần sau", code: "LUCK", cost: 0, weight: 18, color: "#334155", textColor: "#94A3B8" },
       { type: "DRINK", name: "1 Chai Nước Suối Ướp Lạnh", code: "FREESUOI", cost: 2000, weight: 32, color: "#10B981", textColor: "#FFFFFF" },
@@ -1065,6 +1050,32 @@
       { type: "DRINK", name: "1 Lon Pepsi Ướp Lạnh", code: "FREEPEPSI", cost: 8200, weight: 6, color: "#2563EB", textColor: "#FFFFFF" },
       { type: "SHIP", name: "Hỗ Trợ Cước Ship 10.000đ", code: "FREESHIP10K", cost: 10000, weight: 2, color: "#C2410C", textColor: "#FFFFFF" }
     ];
+
+    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS NỘI BỘ VÀ REST API RENDER
+    function isRunningInsideGAS() {
+      return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
+    }
+
+    function callBackend(gasFunctionName, gasArgsArray, apiActionName, apiPayloadObj) {
+      return new Promise(function(resolve, reject) {
+        if (isRunningInsideGAS()) {
+          var runner = google.script.run
+            .withSuccessHandler(function(res) { resolve(res); })
+            .withFailureHandler(function(err) { reject(err); });
+          if (typeof runner[gasFunctionName] === 'function') {
+            runner[gasFunctionName].apply(runner, gasArgsArray || []);
+          } else {
+            reject(new Error("Hàm " + gasFunctionName + " không tồn tại trong GAS"));
+          }
+        } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
+          window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
+            .then(function(res) { resolve(res); })
+            .catch(function(err) { reject(err); });
+        } else {
+          reject(new Error("Không tìm thấy kết nối Backend (GAS / api.js)"));
+        }
+      });
+    }
 
     document.addEventListener("DOMContentLoaded", function() {
       var savedPin = localStorage.getItem("thim5_admin_active_pin");
@@ -1110,27 +1121,22 @@
       if (!pin) { err.innerText = "Vui lòng nhập mã PIN!"; err.style.display = "block"; return; }
 
       try {
-        var authRes = null;
-        if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-          authRes = await window.Thim5API.callGAS("verifyAdminRole", { pin: pin });
-        } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.withSuccessHandler(processAuthSuccess).verifyAdminRole(pin);
-          return;
+        var auth = await callBackend("verifyAdminRole", [pin], "verifyAdminRole", { pin: pin });
+        if (auth && (auth.status === "SUCCESS" || auth.level)) {
+          processAuthSuccess(auth, pin);
         } else {
-          // Fallback cục bộ khi test
-          authRes = { status: "SUCCESS", level: (pin === "2026" ? 2 : 1), role: (pin === "2026" ? "SUPER_ADMIN" : "MANAGER"), name: (pin === "2026" ? "Anh Hải Âu" : "Quản Lý Bếp") };
-        }
-
-        if (authRes && authRes.status === "SUCCESS") {
-          processAuthSuccess(authRes, pin);
-        } else {
-          err.innerText = (authRes && authRes.message) ? authRes.message : "Mã PIN không chính xác!";
+          err.innerText = (auth && auth.message) ? auth.message : "Mã PIN không chính xác!";
           err.style.display = "block";
         }
       } catch (ex) {
-        console.error("Lỗi xác thực:", ex);
-        // Chế độ khẩn cấp đảm bảo không chặn giao diện của chủ quán
-        processAuthSuccess({ status: "SUCCESS", level: 2, role: "SUPER_ADMIN", name: "Anh Hải Âu" }, pin);
+        console.warn("Lỗi kết nối xác thực, kích hoạt Fallback PIN:", ex);
+        var fallbackAuth = { status: "SUCCESS", level: (pin === "2026" ? 2 : 1), role: (pin === "2026" ? "SUPER_ADMIN" : "MANAGER"), name: (pin === "2026" ? "Anh Hải Âu" : "Quản Lý Bếp") };
+        if (pin === "1985" || pin === "2026") {
+          processAuthSuccess(fallbackAuth, pin);
+        } else {
+          err.innerText = "Sai mã PIN (Mặc định: 1985 / 2026)";
+          err.style.display = "block";
+        }
       }
     }
 
@@ -1153,7 +1159,7 @@
         if (btnTaxReport) btnTaxReport.style.display = "inline-flex";
       } else {
         badge.className = "role-badge lv1";
-        badge.innerText = "👤 " + (auth.name || "Quản Lý");
+        badge.innerText = "👤 " + (auth.name || "Quản Lý Bếp");
         if (navBtnSettings) navBtnSettings.style.display = "none";
         if (btnTaxReport) btnTaxReport.style.display = "none";
 
@@ -1189,6 +1195,7 @@
       }, 1000);
 
       loadDynamicConfigToInputs();
+      loadGamificationAdminData();
       loadAllAdminData(currentPeriod);
       loadAdminMenuList();
       loadStoreStatus();
@@ -1196,28 +1203,21 @@
       renderWheelSlotsBuilder();
     }
 
-    // 2. TẢI TOÀN BỘ SỐ LIỆU DOANH THU & P&L (TAB 1 & TAB 6)
+    // 2. DOANH THU & P&L
     async function loadAllAdminData(period) {
       period = period || 'all';
       setStatusLog("Đang tính toán số liệu kỳ: " + period + "...", false);
 
       try {
-        var res = null;
-        if (window.Thim5API && typeof window.Thim5API.getSummary === 'function') {
-          res = await window.Thim5API.getSummary(period);
-        } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.withSuccessHandler(renderAdminSummaryData).getAdminReports(period);
-          return;
-        }
-        if (res && res.data) {
-          renderAdminSummaryData(res.data);
-        } else if (res && res.d2cRevenue !== undefined) {
-          renderAdminSummaryData(res);
+        var res = await callBackend("getAdminReports", [period], "getSummary", { period: period });
+        var payload = (res && res.data) ? res.data : res;
+        if (payload && payload.d2cRevenue !== undefined) {
+          renderAdminSummaryData(payload);
         } else {
           setStatusLog("Chưa có số liệu phát sinh trong kỳ.", false);
         }
       } catch (err) {
-        console.error("Lỗi nạp số liệu P&L:", err);
+        console.error("Lỗi P&L:", err);
         setStatusLog("Lỗi nạp số liệu: " + err.message, true);
       }
     }
@@ -1302,7 +1302,7 @@
       });
     }
 
-    // 3. TẢI DANH SÁCH TÀI XẾ SHIPPER (TAB 7)
+    // 3. QUẢN TRỊ SHIPPER
     async function loadAdminShippersList(period) {
       period = period || 'all';
       setStatusLog("Đang tải danh sách tài xế kỳ: " + period + "...", false);
@@ -1310,17 +1310,11 @@
       if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải danh sách tài xế...</td></tr>";
 
       try {
-        var res = null;
-        if (window.Thim5API && typeof window.Thim5API.getShippers === 'function') {
-          res = await window.Thim5API.getShippers(period);
-        } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.withSuccessHandler(renderShippersTableDirect).getAdminShippersWithPerformance(period);
-          return;
-        }
+        var res = await callBackend("getAdminShippersWithPerformance", [period], "getShippers", { period: period });
         var list = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
         renderShippersTableDirect(list);
       } catch (err) {
-        console.error("Lỗi nạp Shipper:", err);
+        console.error("Lỗi Shipper:", err);
         if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--danger); padding:15px;'>Không thể kết nối máy chủ Shipper!</td></tr>";
       }
     }
@@ -1351,23 +1345,58 @@
       setStatusLog("Đã nạp danh sách tài xế thành công.", false);
     }
 
-    // 4. TẢI MINI CRM KHÁCH HÀNG (TAB 8)
+    function openAddShipperModal() {
+      document.getElementById("shipperModalTitle").innerText = "Thêm Tài Xế Mới";
+      document.getElementById("shipperEditId").value = "";
+      document.getElementById("shipperIdInput").disabled = false;
+      document.getElementById("shipperIdInput").value = "SH-0" + (document.querySelectorAll("#adminShippersTbody tr").length + 1);
+      document.getElementById("shipperNameInput").value = "";
+      document.getElementById("shipperPhoneInput").value = "";
+      document.getElementById("shipperStatusInput").value = "Rảnh";
+      document.getElementById("shipperModal").style.display = "flex";
+    }
+
+    function openEditShipperModal(id, name, phone, status) {
+      document.getElementById("shipperModalTitle").innerText = "Chỉnh Sửa Tài Xế: " + name;
+      document.getElementById("shipperEditId").value = id;
+      document.getElementById("shipperIdInput").disabled = true;
+      document.getElementById("shipperIdInput").value = id;
+      document.getElementById("shipperNameInput").value = name;
+      document.getElementById("shipperPhoneInput").value = phone;
+      document.getElementById("shipperStatusInput").value = status || "Rảnh";
+      document.getElementById("shipperModal").style.display = "flex";
+    }
+
+    async function saveShipperSubmit() {
+      var id = document.getElementById("shipperIdInput").value.trim();
+      var name = document.getElementById("shipperNameInput").value.trim();
+      var phone = document.getElementById("shipperPhoneInput").value.trim();
+      var status = document.getElementById("shipperStatusInput").value;
+
+      if (!id || !name || !phone) { alert("Vui lòng điền đủ Mã, Tên và Số điện thoại tài xế!"); return; }
+
+      var payload = { id: id, name: name, phone: phone, status: status };
+      try {
+        var res = await callBackend("saveOrUpdateShipperServer", [payload], "saveShipper", payload);
+        alert((res && res.message) ? res.message : "Đã lưu tài xế thành công!");
+        closeModal("shipperModal");
+        loadAdminShippersList(currentShipperPeriod);
+      } catch (err) {
+        alert("Lỗi lưu tài xế: " + err.message);
+      }
+    }
+
+    // 4. MINI CRM KHÁCH HÀNG
     async function loadAdminCrmData() {
       var tbody = document.getElementById("adminCrmTbody");
       if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải dữ liệu CRM...</td></tr>";
 
       try {
-        var res = null;
-        if (window.Thim5API && typeof window.Thim5API.getCRM === 'function') {
-          res = await window.Thim5API.getCRM("all");
-        } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.withSuccessHandler(renderCrmTableDirect).getAdminCrmData();
-          return;
-        }
+        var res = await callBackend("getAdminCrmData", [], "getCRM", { period: "all" });
         var list = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
         renderCrmTableDirect(list);
       } catch (err) {
-        console.error("Lỗi nạp CRM:", err);
+        console.error("Lỗi CRM:", err);
         if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--danger); padding:15px;'>Không thể nạp danh bạ khách hàng!</td></tr>";
       }
     }
@@ -1408,23 +1437,17 @@
       setStatusLog("Đã nạp danh bạ CRM thành công.", false);
     }
 
-    // 5. TẢI LỊCH SỬ NHẬP KHO COGS (TAB 5)
+    // 5. NHẬP KHO COGS
     async function loadAdminInventoryData() {
       var tbody = document.getElementById("adminInventoryTbody");
       if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải dữ liệu nhập kho...</td></tr>";
 
       try {
-        var res = null;
-        if (window.Thim5API && typeof window.Thim5API.getCOGS === 'function') {
-          res = await window.Thim5API.getCOGS(currentPeriod);
-        } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.withSuccessHandler(renderInventoryTableDirect).getAdminInventoryData();
-          return;
-        }
+        var res = await callBackend("getAdminInventoryData", [], "getCOGS", { period: currentPeriod });
         var list = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
         renderInventoryTableDirect(list);
       } catch (err) {
-        console.error("Lỗi nạp COGS:", err);
+        console.error("Lỗi COGS:", err);
         if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--danger); padding:15px;'>Không thể kết nối sổ kho COGS!</td></tr>";
       }
     }
@@ -1450,21 +1473,39 @@
       setStatusLog("Đã nạp sổ kho COGS thành công.", false);
     }
 
-    // 6. TẢI MENU MÓN CHÍNH, TOPPING & GIẢI KHÁT (TABS 2, 3, 4)
+    function openAddInventoryModal() {
+      document.getElementById("invNameInput").value = "";
+      document.getElementById("invPackInput").value = "";
+      document.getElementById("invTotalInput").value = "";
+      document.getElementById("invRatioInput").value = "30";
+      document.getElementById("inventoryModal").style.display = "flex";
+    }
+
+    async function saveInventorySubmit() {
+      var name = document.getElementById("invNameInput").value.trim();
+      var pack = document.getElementById("invPackInput").value.trim();
+      var total = Number(document.getElementById("invTotalInput").value) || 0;
+      var ratio = Number(document.getElementById("invRatioInput").value) || 1;
+      var unit = document.getElementById("invUnitInput").value.trim() || "suất";
+
+      if (!name || total <= 0) { alert("Vui lòng nhập Tên nguyên liệu và Tổng tiền!"); return; }
+
+      var payload = { name: name, pack: pack, totalCost: total, ratio: ratio, unit: unit, category: "Nguyên Liệu" };
+      try {
+        var res = await callBackend("saveInventoryItemServer", [payload], "saveInventory", payload);
+        alert((res && res.message) ? res.message : "Đã ghi nhận vào sổ kho COGS!");
+        closeModal("inventoryModal");
+        loadAdminInventoryData();
+        loadAllAdminData(currentPeriod);
+      } catch (err) {
+        alert("Lỗi lưu kho: " + err.message);
+      }
+    }
+
+    // 6. MENU MÓN CHÍNH, TOPPING & NƯỚC UỐNG
     async function loadAdminMenuList() {
       try {
-        var res = null;
-        if (window.Thim5API && typeof window.Thim5API.getMenu === 'function') {
-          res = await window.Thim5API.getMenu();
-        } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.withSuccessHandler(function(list) {
-            cachedMasterMenuList = list || [];
-            renderMasterMenuTable(cachedMasterMenuList);
-            loadAdminDrinks();
-            loadAdminToppings();
-          }).getAdminMenuList();
-          return;
-        }
+        var res = await callBackend("getAdminMenuList", [], "getMenu", {});
         cachedMasterMenuList = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
         renderMasterMenuTable(cachedMasterMenuList);
         loadAdminDrinks();
@@ -1506,53 +1547,29 @@
     }
 
     async function toggleDishAvailability(id, isChecked) {
-      if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-        await window.Thim5API.callGAS("toggleDish", { id: id, status: isChecked });
-      } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run.toggleDishAvailabilityServer(id, isChecked);
-      }
+      await callBackend("toggleDishAvailabilityServer", [id, isChecked], "toggleDish", { id: id, status: isChecked });
       loadAdminMenuList();
     }
 
     function formatCategoryTag(cat) {
-      var catMap = {
-        "mon-chinh": "🍜 Món Chính / Mồi",
-        "moi-lai-rai": "🍻 Mồi Lai Rai",
-        "dai-tiec": "👑 Mâm VIP Đại Tiệc",
-        "an-kem": "🍱 Món Ăn Kèm",
-        "giai-khat": "🧋 Nước Uống 1L",
-        "topping-extra": "🥢 Topping Ăn Kèm"
-      };
+      var catMap = { "mon-chinh": "🍜 Món Chính / Mồi", "moi-lai-rai": "🍻 Mồi Lai Rai", "dai-tiec": "👑 Mâm VIP Đại Tiệc", "an-kem": "🍱 Món Ăn Kèm", "giai-khat": "🧋 Nước Uống 1L", "topping-extra": "🥢 Topping Ăn Kèm" };
       return catMap[cat] || cat;
     }
 
     function formatDishTypeTag(type) {
-      var typeMap = {
-        "kho": "🍜 Khô / Mì Trộn",
-        "nuoc": "🍲 Món Nước Súp",
-        "an-kem": "🍱 Ăn Kèm / Vặt",
-        "giai-khat": "🧋 Nước Uống"
-      };
+      var typeMap = { "kho": "🍜 Khô / Mì Trộn", "nuoc": "🍲 Món Nước Súp", "an-kem": "🍱 Ăn Kèm / Vặt", "giai-khat": "🧋 Nước Uống" };
       return typeMap[type] || "🍜 Khô / Trộn";
     }
 
     async function loadAdminToppings() {
       var tbody = document.getElementById("adminToppingTbody");
       if (!tbody) return;
-      tbody.innerHTML = "";
-
       try {
-        var res = null;
-        if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-          res = await window.Thim5API.callGAS("getToppings");
-        } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.withSuccessHandler(renderToppingsTableDirect).getAdminToppingList();
-          return;
-        }
+        var res = await callBackend("getAdminToppingList", [], "getToppings", {});
         var list = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
         renderToppingsTableDirect(list);
       } catch (err) {
-        console.error("Lỗi nạp Topping:", err);
+        console.error("Lỗi Topping:", err);
       }
     }
 
@@ -1562,7 +1579,7 @@
       tbody.innerHTML = "";
       list.forEach(function(t) {
         var isAvail = (t.available === true || String(t.available).toUpperCase() === "TRUE");
-        var isSoup = (t.group === "soup" || t.id.indexOf("soup_") === 0);
+        var isSoup = (t.group === "soup" || (t.id && t.id.indexOf("soup_") === 0));
         var tr = document.createElement("tr");
         tr.innerHTML = `
           <td style="font-weight:700;">${t.id}</td>
@@ -1584,11 +1601,7 @@
     }
 
     async function toggleToppingAvailability(id, isChecked) {
-      if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-        await window.Thim5API.callGAS("toggleTopping", { id: id, status: isChecked });
-      } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run.toggleToppingAvailabilityServer(id, isChecked);
-      }
+      await callBackend("toggleToppingAvailabilityServer", [id, isChecked], "toggleTopping", { id: id, status: isChecked });
       loadAdminToppings();
     }
 
@@ -1629,7 +1642,122 @@
       });
     }
 
-    // 7. CẤU HÌNH DYNAMIC VÒNG QUAY (TAB 9)
+    function openAddDishModal() {
+      document.getElementById("dishModalTitle").innerText = "Thêm Món Ăn Mới";
+      document.getElementById("dishEditId").value = "";
+      document.getElementById("dishImgBase64").value = "";
+      document.getElementById("dishFileInput").value = "";
+      document.getElementById("dishImgPreview").src = "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=500";
+      document.getElementById("dishImgStatus").innerText = "Dùng ảnh mặc định";
+      document.getElementById("dishIdInput").disabled = false;
+      document.getElementById("dishIdInput").value = "m" + (document.querySelectorAll("#adminMenuTbody tr").length + 1);
+      document.getElementById("dishNameInput").value = "";
+      document.getElementById("dishCatInput").value = "mon-chinh";
+      document.getElementById("dishTypeInput").value = "kho";
+      document.getElementById("dishPriceInput").value = "";
+      document.getElementById("dishPriceAppInput").value = "";
+      document.getElementById("dishCostInput").value = "";
+      document.getElementById("dishDescInput").value = "";
+      document.getElementById("dishModal").style.display = "flex";
+    }
+
+    function openEditDishModal(id, name, cat, type, price, priceApp, cost, desc, img) {
+      document.getElementById("dishModalTitle").innerText = "Chỉnh Sửa Món: " + name;
+      document.getElementById("dishEditId").value = id;
+      document.getElementById("dishImgBase64").value = "";
+      document.getElementById("dishFileInput").value = "";
+      document.getElementById("dishImgPreview").src = img || "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=500";
+      document.getElementById("dishImgStatus").innerText = img ? "Ảnh hiện tại của món" : "Dùng ảnh mặc định";
+      document.getElementById("dishIdInput").value = id;
+      document.getElementById("dishIdInput").disabled = true;
+      document.getElementById("dishNameInput").value = name;
+      document.getElementById("dishCatInput").value = cat || "mon-chinh";
+      document.getElementById("dishTypeInput").value = type || "kho";
+      document.getElementById("dishPriceInput").value = price;
+      document.getElementById("dishPriceAppInput").value = priceApp;
+      document.getElementById("dishCostInput").value = cost;
+      document.getElementById("dishDescInput").value = desc;
+      document.getElementById("dishModal").style.display = "flex";
+    }
+
+    function handleDishImageProcess(event) {
+      var file = event.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var canvas = document.createElement("canvas");
+          var ctx = canvas.getContext("2d");
+          canvas.width = 400; canvas.height = 400;
+          var minSide = Math.min(img.width, img.height);
+          var sx = (img.width - minSide) / 2;
+          var sy = (img.height - minSide) / 2;
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, 400, 400);
+          var compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+          document.getElementById("dishImgPreview").src = compressedBase64;
+          document.getElementById("dishImgBase64").value = compressedBase64;
+          document.getElementById("dishImgStatus").innerText = "✅ Đã nén vuông 400x400px (" + Math.round(compressedBase64.length/1024) + " KB)";
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveDishSubmit() {
+      var id = document.getElementById("dishIdInput").value.trim();
+      var name = document.getElementById("dishNameInput").value.trim();
+      var cat = document.getElementById("dishCatInput").value;
+      var type = document.getElementById("dishTypeInput").value;
+      var priceApp = Number(document.getElementById("dishPriceAppInput").value) || 0;
+      var price = Number(document.getElementById("dishPriceInput").value) || 0;
+
+      if (priceApp > 0 && price <= 0) {
+        var d2cRate = (activeStoreConfigCache && activeStoreConfigCache.d2cDiscountRate) ? activeStoreConfigCache.d2cDiscountRate : 0.12;
+        price = Math.round((priceApp * (1 - d2cRate)) / 1000) * 1000;
+      } else if (price > 0 && priceApp <= 0) {
+        var d2cRate2 = (activeStoreConfigCache && activeStoreConfigCache.d2cDiscountRate) ? activeStoreConfigCache.d2cDiscountRate : 0.12;
+        priceApp = Math.round((price / (1 - d2cRate2)) / 1000) * 1000;
+      }
+
+      var cost = Number(document.getElementById("dishCostInput").value) || Math.round(price * 0.35);
+      var desc = document.getElementById("dishDescInput").value.trim();
+      var base64Img = document.getElementById("dishImgBase64").value;
+      var currentPreviewSrc = document.getElementById("dishImgPreview").src;
+
+      if (!id || !name || price <= 0) { alert("Vui lòng điền đủ Mã ID, Tên và Giá món!"); return; }
+
+      var btn = document.getElementById("btnSaveDish");
+      btn.innerText = "⏳ Đang lưu...";
+      btn.disabled = true;
+
+      var finalImgUrl = currentPreviewSrc;
+      if (base64Img && isRunningInsideGAS()) {
+        try {
+          var uploadedUrl = await callBackend("uploadImageToDrive", [base64Img, "dish_" + id + ".jpg"], "uploadImage", { base64: base64Img, filename: "dish_" + id + ".jpg" });
+          if (uploadedUrl) finalImgUrl = uploadedUrl;
+        } catch (e) {
+          console.warn("Upload ảnh Drive thất bại, dùng ảnh base64 trực tiếp:", e);
+        }
+      }
+
+      var dishRecord = { id: id, name: name, category: cat, dishType: type, price: price, priceD2C: price, priceApp: priceApp, foodCost: cost, desc: desc, available: true, img: finalImgUrl };
+
+      try {
+        var res = await callBackend("saveOrUpdateMenuItem", [dishRecord], "saveMenuItem", dishRecord);
+        alert((res && res.message) ? res.message : "Đã lưu món thành công!");
+        btn.innerText = "💾 Lưu Món Ăn";
+        btn.disabled = false;
+        closeModal("dishModal");
+        loadAdminMenuList();
+      } catch (err) {
+        alert("Lỗi lưu món: " + err.message);
+        btn.innerText = "💾 Lưu Món Ăn";
+        btn.disabled = false;
+      }
+    }
+
+    // 7. VÒNG QUAY MAY MẮN
     function renderWheelSlotsBuilder() {
       var container = document.getElementById("wheelSlotsContainer");
       if (!container) return;
@@ -1741,19 +1869,32 @@
       }
     }
 
+    async function saveWheelSetupSubmit() {
+      for (var i = 0; i < dynamicWheelSlots.length; i++) {
+        dynamicWheelSlots[i].type = document.getElementById("wheelType_" + i).value;
+        dynamicWheelSlots[i].name = document.getElementById("wheelName_" + i).value.trim();
+        dynamicWheelSlots[i].text = dynamicWheelSlots[i].name;
+        dynamicWheelSlots[i].code = document.getElementById("wheelCode_" + i).value.trim().toUpperCase();
+        dynamicWheelSlots[i].cost = parseFloat(document.getElementById("wheelCost_" + i).value) || 0;
+      }
+
+      setStatusLog("Đang lưu cấu hình Vòng Quay mới...", false);
+      try {
+        var res = await callBackend("saveWheelPrizesConfigServer", [dynamicWheelSlots], "saveWheelConfig", { slots: dynamicWheelSlots });
+        alert((res && res.message) ? res.message : "Đã lưu cấu hình Vòng Quay thành công!");
+        setStatusLog("Đã lưu cấu hình Vòng Quay thành công!", false);
+      } catch (err) {
+        alert("Lỗi lưu Vòng quay: " + err.message);
+      }
+    }
+
     async function loadAdminWheelData() {
       var tbody = document.getElementById("adminWheelTbody");
       if (!tbody) return;
       tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải lịch sử quay thưởng...</td></tr>";
 
       try {
-        var res = null;
-        if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-          res = await window.Thim5API.callGAS("getWheelReviews");
-        } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.withSuccessHandler(renderWheelReviewsTableDirect).getAdminWheelReviews();
-          return;
-        }
+        var res = await callBackend("getAdminWheelReviews", [], "getWheelReviews", {});
         var list = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
         renderWheelReviewsTableDirect(list);
       } catch (err) {
@@ -1780,65 +1921,7 @@
       });
     }
 
-    // 8. CÁC HÀM TIỆN ÍCH LỌC VÀ ĐIỀU HƯỚNG
-    function changePeriodFilter(period, btnElement) {
-      currentPeriod = period;
-      document.querySelectorAll(".period-filter-bar .filter-btn").forEach(function(b){ b.classList.remove("active"); });
-      if (btnElement) btnElement.classList.add("active");
-      loadAllAdminData(currentPeriod);
-    }
-
-    function changeShipperPeriodFilter(period, btnElement) {
-      currentShipperPeriod = period;
-      document.querySelectorAll("#tab_shippers .filter-btn").forEach(function(b){ b.classList.remove("active"); });
-      if (btnElement) btnElement.classList.add("active");
-      loadAdminShippersList(currentShipperPeriod);
-    }
-
-    function openAddShipperModal() {
-      document.getElementById("shipperModalTitle").innerText = "Thêm Tài Xế Mới";
-      document.getElementById("shipperEditId").value = "";
-      document.getElementById("shipperIdInput").disabled = false;
-      document.getElementById("shipperIdInput").value = "SH-0" + (document.querySelectorAll("#adminShippersTbody tr").length + 1);
-      document.getElementById("shipperNameInput").value = "";
-      document.getElementById("shipperPhoneInput").value = "";
-      document.getElementById("shipperStatusInput").value = "Rảnh";
-      document.getElementById("shipperModal").style.display = "flex";
-    }
-
-    function openEditShipperModal(id, name, phone, status) {
-      document.getElementById("shipperModalTitle").innerText = "Chỉnh Sửa Tài Xế: " + name;
-      document.getElementById("shipperEditId").value = id;
-      document.getElementById("shipperIdInput").disabled = true;
-      document.getElementById("shipperIdInput").value = id;
-      document.getElementById("shipperNameInput").value = name;
-      document.getElementById("shipperPhoneInput").value = phone;
-      document.getElementById("shipperStatusInput").value = status || "Rảnh";
-      document.getElementById("shipperModal").style.display = "flex";
-    }
-
-    async function saveShipperSubmit() {
-      var id = document.getElementById("shipperIdInput").value.trim();
-      var name = document.getElementById("shipperNameInput").value.trim();
-      var phone = document.getElementById("shipperPhoneInput").value.trim();
-      var status = document.getElementById("shipperStatusInput").value;
-
-      if (!id || !name || !phone) { alert("Vui lòng điền đủ Mã, Tên và Số điện thoại tài xế!"); return; }
-
-      if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-        var res = await window.Thim5API.callGAS("saveShipper", { id: id, name: name, phone: phone, status: status });
-        alert(res.message || "Đã lưu tài xế thành công!");
-        closeModal("shipperModal");
-        loadAdminShippersList(currentShipperPeriod);
-      } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run.withSuccessHandler(function(res) {
-          alert("✅ " + res.message);
-          closeModal("shipperModal");
-          loadAdminShippersList(currentShipperPeriod);
-        }).saveOrUpdateShipperServer({ id: id, name: name, phone: phone, status: status });
-      }
-    }
-
+    // 8. CẤU HÌNH HỆ THỐNG & ĐỊNH GIÁ NGƯỢC
     function autoCalculateD2CFromApp(appVal) {
       var pApp = parseFloat(appVal) || 0;
       var d2cRate = (activeStoreConfigCache && activeStoreConfigCache.d2cDiscountRate) ? activeStoreConfigCache.d2cDiscountRate : 0.12;
@@ -1871,40 +1954,114 @@
 
     async function loadDynamicConfigToInputs() {
       try {
-        var cfg = null;
-        if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-          var res = await window.Thim5API.callGAS("getConfig");
-          cfg = (res && res.data) ? res.data : res;
-        } else if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.withSuccessHandler(populateConfigInputs).getStoreConfigDynamic();
-          return;
+        var res = await callBackend("getStoreConfigDynamic", [], "getConfig", {});
+        var cfg = (res && res.data) ? res.data : res;
+        if (!cfg) return;
+        activeStoreConfigCache = cfg;
+
+        if (document.getElementById("cfgStoreName")) document.getElementById("cfgStoreName").value = cfg.storeName || "";
+        if (document.getElementById("cfgOwnerName")) document.getElementById("cfgOwnerName").value = cfg.ownerName || "";
+        if (document.getElementById("cfgStorePhone")) document.getElementById("cfgStorePhone").value = cfg.phone || "";
+        if (document.getElementById("cfgStoreAddress")) document.getElementById("cfgStoreAddress").value = cfg.address || "";
+        if (document.getElementById("cfgLat")) document.getElementById("cfgLat").value = (cfg.centerCoords && cfg.centerCoords.lat) ? cfg.centerCoords.lat : "11.285267";
+        if (document.getElementById("cfgLng")) document.getElementById("cfgLng").value = (cfg.centerCoords && cfg.centerCoords.lng) ? cfg.centerCoords.lng : "106.133347";
+        
+        if (document.getElementById("cfgBankAccount")) document.getElementById("cfgBankAccount").value = cfg.bankAccount || cfg.momoAccount || "0934220585";
+        if (document.getElementById("cfgAccountHolderName")) document.getElementById("cfgAccountHolderName").value = cfg.accountHolderName || cfg.momoName || "NGUYEN HAI AU";
+        if (document.getElementById("cfgAccountTypeLabel")) document.getElementById("cfgAccountTypeLabel").value = cfg.accountTypeLabel || "Tài khoản Hộ Kinh Doanh";
+
+        if (cfg.bankCode && cfg.bankBin && document.getElementById("cfgBankSelect")) {
+          document.getElementById("cfgBankSelect").value = cfg.bankCode + "|" + cfg.bankBin;
         }
-        if (cfg) populateConfigInputs(cfg);
+
+        var taxPercent = ((cfg.taxRateDefault !== undefined && cfg.taxRateDefault !== null) ? Number(cfg.taxRateDefault) : 0.045) * 100;
+        if (document.getElementById("cfgTaxRatePercent")) document.getElementById("cfgTaxRatePercent").value = taxPercent.toFixed(1);
+        if (document.getElementById("cfgTaxReportEmails")) document.getElementById("cfgTaxReportEmails").value = cfg.taxReportEmails || "haiau2205@gmail.com";
+
+        var d2cRatePercent = ((cfg.d2cDiscountRate !== undefined) ? Number(cfg.d2cDiscountRate) : 0.12) * 100;
+        var promoRatePercent = ((cfg.maxPromoBudgetRate !== undefined) ? Number(cfg.maxPromoBudgetRate) : 0.15) * 100;
+        if (document.getElementById("cfgD2cDiscountRate")) document.getElementById("cfgD2cDiscountRate").value = Math.round(d2cRatePercent);
+        if (document.getElementById("cfgMaxPromoBudgetRate")) document.getElementById("cfgMaxPromoBudgetRate").value = Math.round(promoRatePercent);
+
+        if (cfg.shippingRules) {
+          if (document.getElementById("cfgShipMinBill1")) document.getElementById("cfgShipMinBill1").value = cfg.shippingRules.subsidyTier1_MinBill || 100000;
+          if (document.getElementById("cfgShipSubsidy1")) document.getElementById("cfgShipSubsidy1").value = cfg.shippingRules.subsidyTier1_Amount || 15000;
+          if (document.getElementById("cfgShipMinBill2")) document.getElementById("cfgShipMinBill2").value = cfg.shippingRules.subsidyTier2_MinBill || 150000;
+          if (document.getElementById("cfgShipSubsidy2")) document.getElementById("cfgShipSubsidy2").value = cfg.shippingRules.subsidyTier2_Amount || 25000;
+        }
+        previewPricingDemo(d2cRatePercent);
+
+        var currentWebUrl = cfg.webAppUrl || window.location.href.split('?')[0];
+        if (document.getElementById("cfgStoreWebUrl")) document.getElementById("cfgStoreWebUrl").value = currentWebUrl;
+        generateStoreDynamicQr(currentWebUrl);
+
+        if (document.getElementById("dispHeaderTitle")) document.getElementById("dispHeaderTitle").innerText = "👑 QUẢN TRỊ • " + (cfg.storeName || "MÌ TRỘN THÍM 5");
       } catch (err) {
-        console.error("Lỗi nạp config:", err);
+        console.error("Lỗi cấu hình hệ thống:", err);
       }
     }
 
-    function populateConfigInputs(cfg) {
-      if (!cfg) return;
-      activeStoreConfigCache = cfg;
+    async function handleSaveDynamicFormulas() {
+      if (activeAdminSession.level !== 2) {
+        alert("⛔ TỪ CHỐI: Chỉ Super Admin mới có quyền lưu công thức định giá!");
+        return;
+      }
 
-      if (document.getElementById("cfgStoreName")) document.getElementById("cfgStoreName").value = cfg.storeName || "Mì Trộn & Cơm Trộn Thím 5";
-      if (document.getElementById("cfgOwnerName")) document.getElementById("cfgOwnerName").value = cfg.ownerName || "Nguyễn Hải Âu";
-      if (document.getElementById("cfgStorePhone")) document.getElementById("cfgStorePhone").value = cfg.phone || "0969004693";
-      if (document.getElementById("cfgStoreAddress")) document.getElementById("cfgStoreAddress").value = cfg.address || "Nguyễn Văn Linh, TX. Hòa Thành, Tây Ninh";
-      
-      var currentWebUrl = cfg.webAppUrl || window.location.origin;
-      if (document.getElementById("cfgStoreWebUrl")) document.getElementById("cfgStoreWebUrl").value = currentWebUrl;
-      generateStoreDynamicQr(currentWebUrl);
+      var d2cRateVal = parseFloat(document.getElementById("cfgD2cDiscountRate").value) || 12;
+      var promoRateVal = parseFloat(document.getElementById("cfgMaxPromoBudgetRate").value) || 15;
+
+      var payload = {
+        d2cDiscountRate: (d2cRateVal / 100),
+        maxPromoBudgetRate: (promoRateVal / 100),
+        shippingRules: {
+          subsidyTier1_MinBill: Number(document.getElementById("cfgShipMinBill1").value) || 100000,
+          subsidyTier1_Amount: Number(document.getElementById("cfgShipSubsidy1").value) || 15000,
+          subsidyTier2_MinBill: Number(document.getElementById("cfgShipMinBill2").value) || 150000,
+          subsidyTier2_Amount: Number(document.getElementById("cfgShipSubsidy2").value) || 25000
+        }
+      };
+
+      setStatusLog("Đang lưu công thức và cập nhật Menu...", false);
+      try {
+        var res = await callBackend("updateDynamicPricingSettings", [payload, activeAdminSession.pin], "updatePricingSettings", { payload: payload, pin: activeAdminSession.pin });
+        alert((res && res.message) ? res.message : "Đã đồng bộ công thức mới thành công!");
+        setStatusLog("Đã đồng bộ công thức mới thành công!", false);
+        loadDynamicConfigToInputs();
+        loadAdminMenuList();
+      } catch (err) {
+        alert("Lỗi: " + err.message);
+        setStatusLog("Lỗi: " + err.message, true);
+      }
+    }
+
+    function handleBankSelectChange() {
+      var val = document.getElementById("cfgBankSelect").value;
+      if (val.indexOf("MOMO") !== -1) {
+        document.getElementById("cfgBankAccount").placeholder = "Nhập SĐT Ví MoMo (VD: 0934220585)";
+      } else {
+        document.getElementById("cfgBankAccount").placeholder = "Nhập Số tài khoản Ngân hàng";
+      }
     }
 
     function generateStoreDynamicQr(url) {
-      var targetUrl = url || window.location.origin;
+      var targetUrl = url || window.location.href.split('?')[0];
       var qrImg = document.getElementById("dynamicStoreQrImg");
       if (qrImg && targetUrl) {
         qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(targetUrl) + "&margin=10";
       }
+    }
+
+    function downloadStoreQrImage() {
+      var qrImg = document.getElementById("dynamicStoreQrImg");
+      if (!qrImg || !qrImg.src) return;
+      var a = document.createElement("a");
+      a.href = qrImg.src;
+      a.download = "QR_Thim5_HoaThanh.png";
+      a.target = "_blank";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      alert("📥 Đã tải ảnh mã QR Quán về máy!");
     }
 
     function copyStoreWebUrl() {
@@ -1914,26 +2071,384 @@
       }
     }
 
-    function loadStoreStatus() {
-      if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-        window.Thim5API.callGAS("getStoreStatus").then(function(res){
-          if (res && res.data) {
-            document.getElementById("chkStoreClosed").checked = res.data.isClosed;
-            document.getElementById("txtClosedMsg").value = res.data.message || "";
-          }
-        });
+    async function loadGoldenHourAdmin() {
+      try {
+        var res = await callBackend("getGoldenHourStatus", [], "getGoldenHour", {});
+        var data = (res && res.data) ? res.data : res;
+        if (data) {
+          document.getElementById("chkGoldenHourActive").checked = data.isActive;
+          document.getElementById("txtGoldenHourMsg").value = data.msg || "Freeship từ 2 phần + Tặng 1 Nước Suối cho bill từ 50k!";
+        }
+      } catch (e) {}
+    }
+
+    async function toggleGoldenHourDirect(isActive) {
+      var msg = document.getElementById("txtGoldenHourMsg").value.trim();
+      setStatusLog("Đang cập nhật trạng thái Giờ Vàng...", false);
+      try {
+        var res = await callBackend("updateGoldenHourStatus", [isActive, msg], "updateGoldenHour", { isActive: isActive, msg: msg });
+        setStatusLog((res && res.message) ? res.message : "Đã cập nhật Giờ Vàng", false);
+      } catch (e) {
+        setStatusLog("Lỗi cập nhật Giờ Vàng", true);
       }
     }
 
-    function loadGoldenHourAdmin() {
-      if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-        window.Thim5API.callGAS("getGoldenHour").then(function(res){
-          if (res && res.data) {
-            document.getElementById("chkGoldenHourActive").checked = res.data.isActive;
-            document.getElementById("txtGoldenHourMsg").value = res.data.msg || "Freeship từ 2 phần + Tặng 1 Nước Suối cho bill từ 50k!";
-          }
-        });
+    async function handleManualSendTaxReport() {
+      var targetEmail = document.getElementById("cfgTaxReportEmails") ? document.getElementById("cfgTaxReportEmails").value.trim() : "haiau2205@gmail.com";
+      if (!targetEmail) { alert("Vui lòng nhập Email nhận báo cáo thuế!"); return; }
+
+      setStatusLog("Đang xuất bảng kê và gửi email báo cáo thuế...", false);
+      try {
+        var res = await callBackend("triggerManualTaxReportExport", [targetEmail], "sendTaxReport", { email: targetEmail });
+        alert((res && res.message) ? res.message : "Đã gửi báo cáo thuế thành công!");
+        setStatusLog("Đã gửi báo cáo thuế thành công.", false);
+      } catch (err) {
+        alert("Lỗi gửi báo cáo thuế: " + err.message);
+        setStatusLog("Lỗi gửi báo cáo thuế: " + err.message, true);
       }
+    }
+
+    async function handleActivateTaxAutoTrigger() {
+      setStatusLog("Đang kích hoạt lịch gửi tự động 23:59...", false);
+      try {
+        var res = await callBackend("setupDailyTaxReportTrigger", [], "setupTaxTrigger", {});
+        alert("✅ " + ((res && res.message) ? res.message : "Đã kích hoạt hẹn giờ 23:59 thành công"));
+        setStatusLog("Đã kích hoạt hẹn giờ 23:59 thành công.", false);
+      } catch (err) {
+        alert("Lỗi kích hoạt hẹn giờ: " + err.message);
+      }
+    }
+
+    async function loadGamificationAdminData() {
+      try {
+        var res = await callBackend("getLoyaltyGamificationConfig", [], "getGamificationConfig", {});
+        var cfg = (res && res.data) ? res.data : res;
+        if (!cfg) return;
+        activeGamificationCfg = cfg;
+        renderTierConfigTable(cfg.tiers);
+        
+        if (cfg.drinkUpsell && cfg.drinkUpsell.length >= 2) {
+          document.getElementById("upsellMinBill1").value = cfg.drinkUpsell[0].minBill;
+          document.getElementById("upsellGiftName1").value = cfg.drinkUpsell[0].giftName;
+          document.getElementById("upsellMinBill2").value = cfg.drinkUpsell[1].minBill;
+          document.getElementById("upsellGiftName2").value = cfg.drinkUpsell[1].giftName;
+        }
+        
+        if (cfg.referral) {
+          document.getElementById("refInviteeDisc").value = cfg.referral.inviteeDiscount;
+          document.getElementById("refMinSpend").value = cfg.referral.inviteeMinSpend;
+        }
+      } catch (e) {}
+    }
+
+    function renderTierConfigTable(tiers) {
+      var tbody = document.getElementById("tierConfigTbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      
+      (tiers || []).forEach(function(t, idx) {
+        var tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="font-weight:bold; color:var(--gold);">Lv.${t.level}</td>
+          <td><input type="number" class="form-input" style="width:60px;" id="tierOrders_${idx}" value="${t.minOrders}" /></td>
+          <td><input type="text" class="form-input" id="tierBadge_${idx}" value="${t.defaultBadge}" /></td>
+          <td><input type="text" class="form-input" id="tierPool_${idx}" value="${(t.prefixPool || []).join(' | ')}" /></td>
+          <td><input type="number" step="0.01" class="form-input" style="width:65px;" id="tierDisc_${idx}" value="${(t.discount * 100).toFixed(1)}" />%</td>
+          <td style="text-align:center;">
+            <input type="checkbox" id="tierFreeship_${idx}" ${t.freeship ? 'checked' : ''} style="width:16px; height:16px;" />
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function saveGamificationAdminData() {
+      if (!activeGamificationCfg) return;
+      
+      for (var i = 0; i < activeGamificationCfg.tiers.length; i++) {
+        activeGamificationCfg.tiers[i].minOrders = parseInt(document.getElementById("tierOrders_" + i).value, 10) || 0;
+        activeGamificationCfg.tiers[i].defaultBadge = document.getElementById("tierBadge_" + i).value.trim();
+        activeGamificationCfg.tiers[i].prefixPool = document.getElementById("tierPool_" + i).value.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
+        activeGamificationCfg.tiers[i].discount = (parseFloat(document.getElementById("tierDisc_" + i).value) || 0) / 100;
+        activeGamificationCfg.tiers[i].freeship = document.getElementById("tierFreeship_" + i).checked;
+      }
+
+      activeGamificationCfg.drinkUpsell[0].minBill = Number(document.getElementById("upsellMinBill1").value) || 50000;
+      activeGamificationCfg.drinkUpsell[0].giftName = document.getElementById("upsellGiftName1").value.trim();
+      activeGamificationCfg.drinkUpsell[1].minBill = Number(document.getElementById("upsellMinBill2").value) || 99000;
+      activeGamificationCfg.drinkUpsell[1].giftName = document.getElementById("upsellGiftName2").value.trim();
+
+      activeGamificationCfg.referral.inviteeDiscount = Number(document.getElementById("refInviteeDisc").value) || 5000;
+      activeGamificationCfg.referral.inviteeMinSpend = Number(document.getElementById("refMinSpend").value) || 40000;
+
+      setStatusLog("Đang lưu chiến dịch marketing...", false);
+      try {
+        var res = await callBackend("saveLoyaltyGamificationConfig", [activeGamificationCfg], "saveGamificationConfig", { config: activeGamificationCfg });
+        alert("🎉 " + ((res && res.message) ? res.message : "Chiến dịch marketing đã được kích hoạt!"));
+        setStatusLog("Chiến dịch marketing đã được kích hoạt!", false);
+      } catch (err) {
+        alert("Lỗi lưu chiến dịch: " + err.message);
+      }
+    }
+
+    function getCurrentLocationGps() {
+      if (!navigator.geolocation) { alert("Trình duyệt không hỗ trợ định vị GPS!"); return; }
+      setStatusLog("Đang lấy tọa độ GPS từ thiết bị...", false);
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        document.getElementById("cfgLat").value = pos.coords.latitude.toFixed(6);
+        document.getElementById("cfgLng").value = pos.coords.longitude.toFixed(6);
+        setStatusLog("Đã lấy GPS thành công!", false);
+        alert("📍 Đã lấy tọa độ quán thành công:\nLat: " + pos.coords.latitude.toFixed(6) + "\nLng: " + pos.coords.longitude.toFixed(6));
+      }, function(err) {
+        alert("Không thể lấy GPS: " + err.message);
+      });
+    }
+
+    async function handleSavePinLevel1() {
+      var newPin = document.getElementById("inputNewPinLv1").value.trim();
+      if (!newPin || newPin.length < 4) { alert("Vui lòng nhập PIN Level 1 ít nhất 4 số!"); return; }
+      try {
+        var res = await callBackend("updateManagerPinLevel1", [newPin], "updatePinLv1", { pin: newPin });
+        alert("✅ " + ((res && res.message) ? res.message : "Đã đổi PIN Level 1 thành công!"));
+        document.getElementById("inputNewPinLv1").value = "";
+      } catch (err) {
+        alert("Lỗi đổi PIN: " + err.message);
+      }
+    }
+
+    async function openSuperPinResetModal() {
+      if (activeAdminSession.level !== 2) {
+        alert("⛔ TỪ CHỐI: Chỉ Super Admin mới có quyền đổi PIN Level 2!"); return;
+      }
+      if (confirm("Gửi mã xác thực OTP 6 số về Gmail chính chủ để đổi Super PIN?")) {
+        setStatusLog("Đang gửi OTP về Gmail...", false);
+        try {
+          var res = await callBackend("sendSuperPinResetOtp", [], "sendSuperPinOtp", {});
+          alert((res && res.message) ? res.message : "Đã gửi OTP về email!");
+          document.getElementById("superPinOtpModal").style.display = "flex";
+        } catch (err) {
+          alert("Lỗi gửi OTP: " + err.message);
+        }
+      }
+    }
+
+    async function handleSubmitSuperPinReset() {
+      var otp = document.getElementById("superOtpInput").value.trim();
+      var newPin = document.getElementById("newSuperPinInput").value.trim();
+      if (!otp || !newPin) { alert("Vui lòng nhập đủ mã OTP và Super PIN mới!"); return; }
+
+      try {
+        var res = await callBackend("verifyOtpAndSaveSuperPin", [otp, newPin], "verifyOtpAndSaveSuperPin", { otp: otp, newPin: newPin });
+        if (res && res.status === "SUCCESS") {
+          alert(res.message);
+          closeModal("superPinOtpModal");
+          localStorage.setItem("thim5_admin_active_pin", newPin);
+          activeAdminSession.pin = newPin;
+        } else {
+          alert("❌ " + ((res && res.message) ? res.message : "Xác thực OTP thất bại!"));
+        }
+      } catch (err) {
+        alert("Lỗi: " + err.message);
+      }
+    }
+
+    async function saveSystemSettingsSubmit() {
+      var bankParts = (document.getElementById("cfgBankSelect").value || "MB|970422").split("|");
+      var taxPercentInput = parseFloat(document.getElementById("cfgTaxRatePercent").value) || 4.5;
+      
+      var newCfg = {
+        storeName: document.getElementById("cfgStoreName").value.trim(),
+        ownerName: document.getElementById("cfgOwnerName").value.trim(),
+        phone: document.getElementById("cfgStorePhone").value.trim(),
+        address: document.getElementById("cfgStoreAddress").value.trim(),
+        lat: document.getElementById("cfgLat").value.trim(),
+        lng: document.getElementById("cfgLng").value.trim(),
+        bankCode: bankParts[0],
+        bankBin: bankParts[1],
+        bankAccount: document.getElementById("cfgBankAccount").value.trim(),
+        momoAccount: document.getElementById("cfgBankAccount").value.trim(),
+        accountHolderName: document.getElementById("cfgAccountHolderName").value.trim().toUpperCase(),
+        momoName: document.getElementById("cfgAccountHolderName").value.trim().toUpperCase(),
+        accountTypeLabel: document.getElementById("cfgAccountTypeLabel").value,
+        webAppUrl: document.getElementById("cfgStoreWebUrl").value.trim(),
+        taxReportEmails: document.getElementById("cfgTaxReportEmails").value.trim(),
+        foodCostRateD2C: 0.35,
+        taxRateDefault: (taxPercentInput / 100)
+      };
+
+      if (!newCfg.storeName || !newCfg.phone || !newCfg.bankAccount) { 
+        alert("Vui lòng điền đủ Tên Quán, SĐT Hotline và Số Tài Khoản nhận tiền!"); return; 
+      }
+
+      var isGolden = document.getElementById("chkGoldenHourActive").checked;
+      var goldenMsg = document.getElementById("txtGoldenHourMsg").value.trim();
+
+      setStatusLog("Đang lưu và đồng bộ toàn hệ thống...", false);
+      try {
+        await callBackend("updateGoldenHourStatus", [isGolden, goldenMsg], "updateGoldenHour", { isActive: isGolden, msg: goldenMsg });
+        var res = await callBackend("saveStoreConfigDynamic", [newCfg], "saveConfig", { config: newCfg });
+        alert("✅ " + ((res && res.message) ? res.message : "Đã đồng bộ cấu hình thành công!"));
+        loadDynamicConfigToInputs();
+        setStatusLog("Đã đồng bộ toàn hệ thống thành công!", false);
+      } catch (err) {
+        alert("Lỗi lưu cấu hình: " + err.message);
+      }
+    }
+
+    // 9. NHẬP LIỆU HÀNG LOẠT & TẢI MẪU CSV
+    function openImportMediaModal() {
+      document.getElementById("currentImportType").value = "MENU";
+      document.getElementById("importModalTitle").innerText = "🍜 Nhập Liệu Menu Hàng Loạt Chuẩn Hoá";
+      document.getElementById("bulkTextInput").value = "";
+      document.getElementById("bulkFileInput").value = "";
+      document.getElementById("importMediaModal").style.display = "flex";
+    }
+
+    function openImportInvoiceModal() {
+      document.getElementById("currentImportType").value = "INVENTORY";
+      document.getElementById("importModalTitle").innerText = "📦 Quét / Nhập Hóa Đơn Kho COGS Hàng Loạt";
+      document.getElementById("bulkTextInput").value = "";
+      document.getElementById("bulkFileInput").value = "";
+      document.getElementById("importMediaModal").style.display = "flex";
+    }
+
+    async function downloadMenuCsvTemplate() {
+      setStatusLog("Đang kết xuất file mẫu CSV từ máy chủ...", false);
+      try {
+        var csvContent = await callBackend("getMenuCsvTemplateServer", [], "getMenuTemplate", {});
+        triggerBrowserDownloadCsv(csvContent, "Mau_Menu_Thim5_7Cot_ChuanHoa.csv");
+        setStatusLog("Đã tải file mẫu chuẩn thành công!", false);
+      } catch (e) {
+        var fallbackHeader = "\uFEFFTên Món Ăn,Phân Tầng Menu,Dạng Thức Món,Giá Niêm Yết Sàn App,Giá Bán Web D2C,Food Cost Khoán,Mô Tả Thành Phần\n"
+          + '"Mì Trộn Tóp Mỡ Trứng Đào","mon-chinh","kho",45000,39000,13500,"2 vắt mì dai ngon + sốt sa tế tỏi giòn cay + trứng lòng đào béo ngậy"\n'
+          + '"Mì Trộn Đùi Gà Rán Sốt Tỏi","mon-chinh","kho",55000,48000,16000,"Mì trộn nóng hổi + đùi gà tỏi chiên giòn rụm chuẩn vị Đất Thánh"\n'
+          + '"Cơm Phủ Trứng Thịt Bằm","mon-chinh","kho",33000,29000,9500,"Cơm dẻo thơm + trứng lòng đào mượt + thịt bằm sốt đậm đà"\n'
+          + '"Mì Nước Bò Mỹ Sa Tế","mon-chinh","nuoc",59000,52000,17500,"Nước súp thanh ngọt hầm xương + thịt bò Mỹ mềm ngọt"\n'
+          + '"Cơm Cuộn Kimbap Chiên Giòn","an-kem","an-kem",23000,20000,6500,"Kimbap chiên xù giòn rụm chấm mayonnaise"\n'
+          + '"Trà Đào Cam Sả Khổng Lồ (1L)","giai-khat","giai-khat",29000,25000,7500,"Bình 1000ml mát lạnh giải ngấy sốt cay"';
+        triggerBrowserDownloadCsv(fallbackHeader, "Mau_Menu_Thim5_7Cot_ChuanHoa.csv");
+        setStatusLog("Đã tải file mẫu chuẩn!", false);
+      }
+    }
+
+    function triggerBrowserDownloadCsv(content, filename) {
+      var blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function handleCsvFileSelected(event) {
+      var file = event.target.files[0];
+      if (!file) return;
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var text = e.target.result;
+        document.getElementById("bulkTextInput").value = text.trim();
+        setStatusLog("Đã nạp nội dung file: " + file.name, false);
+      };
+      reader.readAsText(file, "UTF-8");
+    }
+
+    async function handleExecuteBulkImport() {
+      var type = document.getElementById("currentImportType").value;
+      var rawText = document.getElementById("bulkTextInput").value.trim();
+      
+      if (!rawText) {
+        alert("Vui lòng tải file CSV hoặc dán nội dung văn bản!");
+        return;
+      }
+      
+      var btn = document.getElementById("btnExecuteBulkImport");
+      btn.innerText = "⏳ Đang lọc rác & nạp dữ liệu...";
+      btn.disabled = true;
+
+      try {
+        var res = await callBackend("processBulkRawDataImport", [type, rawText], "bulkImport", { type: type, text: rawText });
+        btn.innerText = "🚀 Nạp Dữ Liệu Tự Động";
+        btn.disabled = false;
+        alert((res && res.message) ? res.message : "Đã nạp dữ liệu thành công!");
+        closeModal("importMediaModal");
+        if (type === "MENU") loadAdminMenuList();
+        else { loadAdminInventoryData(); loadAllAdminData(currentPeriod); }
+      } catch (err) {
+        btn.innerText = "🚀 Nạp Dữ Liệu Tự Động";
+        btn.disabled = false;
+        alert("Lỗi nạp liệu: " + err.message);
+      }
+    }
+
+    // 10. TRẠNG THÁI QUÁN & CHỐT SỔ TÀI CHÍNH
+    function openStoreStatusModal() { 
+      loadStoreStatus();
+      document.getElementById("storeStatusModal").style.display = "flex"; 
+    }
+
+    async function loadStoreStatus() {
+      try {
+        var res = await callBackend("getStoreStatus", [], "getStoreStatus", {});
+        var data = (res && res.data) ? res.data : res;
+        if (data) {
+          document.getElementById("chkStoreClosed").checked = data.isClosed;
+          document.getElementById("txtClosedMsg").value = data.message || "";
+        }
+        var cfgRes = await callBackend("getStoreConfigDynamic", [], "getConfig", {});
+        var cfg = (cfgRes && cfgRes.data) ? cfgRes.data : cfgRes;
+        if (cfg) {
+          if (document.getElementById("cfgAutoOpenHour")) document.getElementById("cfgAutoOpenHour").value = cfg.autoOpenHour !== undefined ? cfg.autoOpenHour : 6;
+          if (document.getElementById("cfgAutoCloseHour")) document.getElementById("cfgAutoCloseHour").value = cfg.autoCloseHour !== undefined ? cfg.autoCloseHour : 22;
+        }
+      } catch (e) {}
+    }
+
+    async function saveStoreStatusSubmit() {
+      var isClosed = document.getElementById("chkStoreClosed").checked;
+      var msg = document.getElementById("txtClosedMsg").value.trim();
+      var openH = parseInt(document.getElementById("cfgAutoOpenHour").value, 10) || 6;
+      var closeH = parseInt(document.getElementById("cfgAutoCloseHour").value, 10) || 22;
+
+      setStatusLog("Đang lưu trạng thái và khung giờ bán...", false);
+      try {
+        await callBackend("updateStoreStatus", [isClosed, msg], "updateStoreStatus", { isClosed: isClosed, message: msg });
+        await callBackend("saveStoreConfigDynamic", [{ autoOpenHour: openH, autoCloseHour: closeH }], "saveConfig", { config: { autoOpenHour: openH, autoCloseHour: closeH } });
+        alert("✅ Đã cập nhật trạng thái quán và khung giờ bán (" + openH + "h - " + closeH + "h) thành công!");
+        closeModal("storeStatusModal");
+        setStatusLog("Hệ thống sẵn sàng phục vụ theo khung giờ mới.", false);
+      } catch (err) {
+        alert("Lỗi cập nhật trạng thái quán: " + err.message);
+      }
+    }
+
+    async function triggerFinancialExport(periodType) {
+      var labels = { day: "HÔM NAY", week: "TUẦN NÀY", month: "THÁNG NÀY", quarter: "QUÝ NÀY" };
+      if (!confirm("Xác nhận chốt số liệu " + labels[periodType] + " và lưu vào sổ cái 10_Lich_Su_Bao_Cao?")) return;
+
+      try {
+        var res = await callBackend("saveFinancialReportToMasterLog", [periodType], "exportFinancialReport", { period: periodType });
+        alert("✅ " + ((res && res.message) ? res.message : ("Đã ghi nhận thành công Báo Cáo " + (res.period || periodType) + " vào Sổ Cái!")));
+        loadAllAdminData(currentPeriod);
+      } catch (err) {
+        alert("Lỗi chốt sổ: " + err.message);
+      }
+    }
+
+    function changePeriodFilter(period, btnElement) {
+      currentPeriod = period;
+      document.querySelectorAll(".period-filter-bar .filter-btn").forEach(function(b){ b.classList.remove("active"); });
+      if (btnElement) btnElement.classList.add("active");
+      loadAllAdminData(currentPeriod);
+    }
+
+    function changeShipperPeriodFilter(period, btnElement) {
+      currentShipperPeriod = period;
+      document.querySelectorAll("#tab_shippers .filter-btn").forEach(function(b){ b.classList.remove("active"); });
+      if (btnElement) btnElement.classList.add("active");
+      loadAdminShippersList(currentShipperPeriod);
     }
 
     function closeModal(id) { 
