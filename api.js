@@ -1,3 +1,4 @@
+// CẤU HÌNH KẾT NỐI API THÍM 5 HÒA THÀNH
 const CONFIG = {
   API_URL: "https://script.google.com/macros/s/AKfycbwZZoE51LGSlZbe85BH_sB2bzWwB_omtZaPFI_vevIAh56bs8CrpGTPMfdg2FfzadcY/exec"
 };
@@ -9,10 +10,11 @@ const Thim5API = {
     const targetUrl = CONFIG.API_URL + "?" + queryParams;
 
     try {
-      // Yêu cầu Simple GET tuyệt đối không gán Header để tránh lỗi CORS Preflight
+      // BẮT BUỘC: Không thêm bất kỳ headers nào để tránh bị chặn CORS Preflight (OPTIONS)
       const response = await fetch(targetUrl, {
         method: "GET",
-        mode: "cors"
+        mode: "cors",
+        redirect: "follow"
       });
 
       if (!response.ok) {
