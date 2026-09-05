@@ -4,32 +4,26 @@ const CONFIG = {
 
 const Thim5API = {
   async callGAS(action, params = {}) {
-    const queryParams = new URLSearchParams({ action: action, ...params }).toString();
-    const targetUrl = `${CONFIG.API_URL}?${queryParams}`;
+    const cleanParams = Object.assign({ action: action }, params);
+    const queryParams = new URLSearchParams(cleanParams).toString();
+    const targetUrl = CONFIG.API_URL + "?" + queryParams;
 
     try {
-      // Yêu cầu Simple GET không mang Header để vượt qua chuyển hướng 302 của Google
+      // Yêu cầu Simple GET tuyệt đối không gán Header để tránh lỗi CORS Preflight
       const response = await fetch(targetUrl, {
         method: "GET",
         mode: "cors"
       });
-      
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw new Error("HTTP error " + response.status);
       }
+
       return await response.json();
     } catch (error) {
-      console.error(`[API ERROR] Action: ${action}`, error);
+      console.error("[API_ERROR] Action: " + action, error);
       throw error;
     }
-  },
-
-  async getKitchenData() {
-    return await this.callGAS("getKitchenData");
-  },
-
-  async getShipperOrders(last4 = "") {
-    return await this.callGAS("getShipperOrders", { last4: last4 });
   },
 
   async verifyAdminRole(pin) {
@@ -54,6 +48,14 @@ const Thim5API = {
 
   async getMenu() {
     return await this.callGAS("getMenu");
+  },
+
+  async getKitchenData() {
+    return await this.callGAS("getKitchenData");
+  },
+
+  async getShipperOrders(last4 = "") {
+    return await this.callGAS("getShipperOrders", { last4: last4 });
   }
 };
 
