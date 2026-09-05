@@ -16,7 +16,7 @@
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding: 12px; font-size: 13px; line-height: 1.4; }
     .container { max-width: 600px; margin: 0 auto; }
 
-    /* MÀN HÌNH ĐĂNG NHẬP 4 SỐ CUỐI */
+    /* AUTH CARD */
     .auth-card { background: var(--card); border-radius: var(--radius); border: 2px solid var(--primary); box-shadow: var(--shadow); padding: 28px 18px; text-align: center; margin-top: 50px; }
     .auth-icon { width: 58px; height: 58px; background: rgba(234, 88, 12, 0.2); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 12px; }
     .auth-title { font-size: 17px; font-weight: 900; color: #fff; margin-bottom: 4px; }
@@ -24,13 +24,13 @@
     .auth-input { width: 100%; max-width: 220px; padding: 11px; font-size: 22px; font-weight: 900; text-align: center; letter-spacing: 5px; border: 2px solid var(--border); border-radius: 10px; outline: none; margin-bottom: 14px; background: #0F172A; color: var(--gold); }
     .auth-input:focus { border-color: var(--primary); }
 
-    /* APP HEADER */
+    /* HEADER */
     .app-header { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .shipper-info h2 { font-size: 14px; font-weight: 800; color: var(--gold); }
     .shipper-info p { font-size: 11px; color: var(--muted); }
     .btn-logout { background: #0F172A; color: var(--muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
 
-    /* KPI THU NHẬP & NỢ COD */
+    /* KPI STRIP */
     .kpi-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
     .kpi-box { background: #1E293B; border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; }
     .kpi-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
@@ -38,13 +38,13 @@
     .kpi-val.green { color: #34D399; }
     .kpi-val.gold { color: var(--gold); }
 
-    /* THANH LỌC CUỐC XE NHANH */
+    /* FILTER TABS */
     .filter-tabs-bar { display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; margin-bottom: 10px; padding-bottom: 2px; scrollbar-width: none; }
     .filter-tabs-bar::-webkit-scrollbar { display: none; }
     .tab-filter-btn { padding: 6px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; font-size: 11px; font-weight: 800; color: var(--muted); cursor: pointer; transition: .2s; }
     .tab-filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    /* CARD ĐƠN HÀNG */
+    /* ORDER CARD */
     .order-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 14px; margin-bottom: 12px; position: relative; }
     .order-card.step0 { border-left: 6px solid var(--warning); background: #182234; }
     .order-card.step2 { border-left: 6px solid var(--primary); }
@@ -63,13 +63,11 @@
     .order-row strong { color: #fff; }
     .order-items-box { background: #0F172A; border-radius: 8px; padding: 8px 10px; margin: 8px 0; border: 1px solid var(--border); font-size: 11.5px; line-height: 1.5; color: #E2E8F0; }
 
-    /* HỘP TÀI CHÍNH MINH BẠCH BÙ SHIP & COD */
     .fin-box { background: #0F172A; border: 1px dashed var(--warning); border-radius: 8px; padding: 8px 10px; margin: 8px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; }
     .fin-item { display: flex; flex-direction: column; }
     .fin-item span { color: var(--muted); font-size: 10px; }
     .fin-item strong { font-size: 12px; margin-top: 1px; }
 
-    /* NÚT ĐỊNH VỊ GPS VỆ TINH 1-CHẠM */
     .gps-nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
     .btn-gps-nav { text-align: center; padding: 9px 6px; border-radius: 8px; font-weight: 800; text-decoration: none; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; transition: .2s; }
     .btn-gps-store { background: #EA580C; color: #fff; }
@@ -89,7 +87,7 @@
 <body>
 
   <div class="container">
-    <!-- MÀN HÌNH ĐĂNG NHẬP 4 SỐ CUỐI ĐIỆN THOẠI -->
+    <!-- MÀN HÌNH ĐĂNG NHẬP 4 SỐ CUỐI -->
     <div id="authScreen" class="auth-card">
       <div class="auth-icon">🛵</div>
       <h2 class="auth-title">TRẠM SHIPPER THÍM 5</h2>
@@ -101,7 +99,7 @@
       <p id="loginError" style="color:var(--danger); font-size:11px; margin-top:8px; display:none; font-weight:bold;"></p>
     </div>
 
-    <!-- MÀN HÌNH ĐIỀU PHỐI ĐƠN HÀNG CHÍNH -->
+    <!-- MÀN HÌNH ĐIỀU PHỐI CHÍNH -->
     <div id="mainScreen" style="display:none;">
       <header class="app-header">
         <div class="shipper-info">
@@ -111,7 +109,7 @@
         <button class="btn-logout" onclick="handleLogout()">Đăng Xuất</button>
       </header>
 
-      <!-- BẢNG KPI & THU NHẬP SHIPPER -->
+      <!-- KPI THU NHẬP -->
       <div class="kpi-strip">
         <div class="kpi-box">
           <div class="kpi-label">Đơn Hoàn Tất Hôm Nay</div>
@@ -123,7 +121,7 @@
         </div>
       </div>
 
-      <!-- THANH TABS LỌC NHANH CUỐC XE -->
+      <!-- THANH TABS LỌC -->
       <div class="filter-tabs-bar">
         <button class="tab-filter-btn active" data-filter="all" onclick="changeFilter('all', this)">🌐 Tất Cả</button>
         <button class="tab-filter-btn" data-filter="wait_verify" onclick="changeFilter('wait_verify', this)">⏳ Cần Gọi Xác Minh</button>
@@ -148,7 +146,6 @@
     var cachedOrdersList = [];
     var currentActiveFilter = 'all';
 
-    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG NHẬN DIỆN GAS HOẶC WEB TĨNH RENDER
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -162,14 +159,17 @@
           if (typeof runner[gasFunctionName] === 'function') {
             runner[gasFunctionName].apply(runner, gasArgsArray || []);
           } else {
-            reject(new Error("Hàm " + gasFunctionName + " không tồn tại trong GAS"));
+            reject(new Error("Hàm " + gasFunctionName + " không tồn tại"));
           }
         } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
           window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
-            .then(function(res) { resolve(res); })
+            .then(function(res) { 
+              if (res && res.data !== undefined) resolve(res.data);
+              else resolve(res);
+            })
             .catch(function(err) { reject(err); });
         } else {
-          reject(new Error("Không tìm thấy kết nối Backend (GAS / api.js)"));
+          reject(new Error("Không tìm thấy kết nối Backend"));
         }
       });
     }
@@ -207,7 +207,7 @@
       loadShipperOrders();
 
       if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-      autoRefreshTimer = setInterval(loadShipperOrders, 5000); // Tự động làm mới mỗi 5 giây
+      autoRefreshTimer = setInterval(loadShipperOrders, 4000);
     }
 
     async function loadShipperOrders() {
@@ -215,7 +215,6 @@
       try {
         var res = await callBackend("getShipperOrders", [currentLast4], "getShipperOrders", { last4: currentLast4 });
         
-        // Bóc tách dữ liệu an toàn cho cả hai cấu trúc phản hồi
         if (res && Array.isArray(res.orders)) {
           cachedOrdersList = res.orders;
         } else if (res && res.data && Array.isArray(res.data.orders)) {
@@ -262,17 +261,17 @@
       } else if (currentActiveFilter === 'completed') {
         displayList = cachedOrdersList.filter(function(o){ return Number(o.step) === 4 || o.status === "Hoàn Tất"; });
       } else {
-        // Tab Tất Cả: Hiển thị các đơn đang cần giao (chưa hoàn tất)
         displayList = cachedOrdersList.filter(function(o){ return Number(o.step) < 4 && o.status !== "Hoàn Tất"; });
       }
 
       if (displayList.length === 0) {
-        container.innerHTML = "<div class='order-card' style='text-align:center; color:var(--muted); padding:35px;'>Không có cuốc xe nào trong mục này.<br><small>Hệ thống tự động lắng nghe đơn mới mỗi 5 giây...</small></div>";
+        container.innerHTML = "<div class='order-card' style='text-align:center; color:var(--muted); padding:35px;'>Không có cuốc xe nào trong mục này.<br><small>Hệ thống tự động lắng nghe đơn mới mỗi 4 giây...</small></div>";
         return;
       }
 
       var html = "";
       displayList.forEach(function(o) {
+        var cleanCode = String(o.code || "").trim();
         var stepNum = Number(o.step);
         var isStep0 = (stepNum === 0);
         var isDelivering = (stepNum === 3);
@@ -294,7 +293,7 @@
         html += `
           <div class="order-card step${stepNum}">
             <div class="order-header">
-              <span class="order-code">${o.code} (${o.dist || 1.5} km)</span>
+              <span class="order-code">${cleanCode} (${o.dist || 1.5} km)</span>
               <span class="order-badge ${isStep0 ? 'badge-step0' : (isDelivering ? 'badge-delivering' : (isCompleted ? 'badge-done' : 'badge-wait'))}">
                 ${isStep0 ? '⏳ Chờ Xác Minh COD' : (isDelivering ? '🛵 Đang Giao' : (isCompleted ? '✅ Đã Hoàn Tất' : '🍳 Bếp Đang Nấu'))}
               </span>
@@ -309,7 +308,6 @@
               <div style="color:var(--muted); margin-top:4px;"><strong>Khẩu vị:</strong> ${o.taste || 'Chuẩn vị Thím 5'}</div>
             </div>
 
-            <!-- BẢNG TÀI CHÍNH THỰC NHẬN CỦA SHIPPER -->
             <div class="fin-box">
               <div class="fin-item">
                 <span>Thanh toán:</span>
@@ -330,7 +328,6 @@
               `}
             </div>
 
-            <!-- CỤM 2 NÚT ĐỊNH VỊ GPS VỆ TINH 1-CHẠM -->
             <div class="gps-nav-grid">
               <a href="${storeNavUrl}" target="_blank" class="btn-gps-nav btn-gps-store">
                 📍 1. Đến Bếp Lấy Món
@@ -343,18 +340,18 @@
             <a href="tel:${o.phone}" class="btn-call">📞 Bấm Gọi Cho Khách (${o.phone})</a>
 
             ${isStep0 ? `
-              <button class="btn-action btn-verify" onclick="verifyCodOrder('${o.code}')">
+              <button class="btn-action btn-verify" id="btn_verify_${cleanCode}" onclick="verifyCodOrder('${cleanCode}')">
                 📞 Đã Gọi Khách Xác Nhận ➔ Báo Bếp Nấu
               </button>
             ` : (!isDelivering && !isCompleted ? `
-              <button class="btn-action btn-take" onclick="takeOrder('${o.code}')">
+              <button class="btn-action btn-take" onclick="takeOrder('${cleanCode}')">
                 🛵 Nhận Cuốc Xe Giao Đơn Này
               </button>
             ` : (isDelivering ? `
-              <button class="btn-action btn-done" onclick="completeOrder('${o.code}')">
+              <button class="btn-action btn-done" onclick="completeOrder('${cleanCode}')">
                 ✅ Đã Giao Xong & Thu Đủ Tiền
               </button>
-              <button class="btn-action btn-cancel" onclick="cancelOrder('${o.code}')">
+              <button class="btn-action btn-cancel" onclick="cancelOrder('${cleanCode}')">
                 ⚠️ Báo Hỏng Xe / Trả Đơn Về Bếp
               </button>
             ` : ''))}
@@ -364,36 +361,45 @@
       container.innerHTML = html;
     }
 
-    /**
-     * CÁC HÀM XỬ LÝ HÀNH ĐỘNG CỦA SHIPPER (DUAL-MODE)
-     */
     async function verifyCodOrder(orderCode) {
+      var cleanCode = String(orderCode || "").trim();
       var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "");
       var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "");
       var shipperLabel = sName + " (" + sPhone + ")";
 
-      if (!confirm("Xác nhận bạn đã gọi điện cho khách và khách đồng ý nhận đơn " + orderCode + "?")) return;
+      if (!confirm("Xác nhận bạn đã gọi điện cho khách và khách đồng ý nhận đơn " + cleanCode + "?")) return;
+
+      var btn = document.getElementById("btn_verify_" + cleanCode);
+      if (btn) {
+        btn.innerText = "⏳ Đang gửi lệnh mở Bếp...";
+        btn.disabled = true;
+      }
 
       try {
-        await callBackend("shipperVerifyCodOrderSuccess", [orderCode, shipperLabel], "shipperVerifyCodOrderSuccess", {
-          orderCode: orderCode,
+        var res = await callBackend("shipperVerifyCodOrderSuccess", [cleanCode, shipperLabel], "shipperVerifyCodOrderSuccess", {
+          orderCode: cleanCode,
           shipperInfo: shipperLabel
         });
-        alert("✅ Đã xác minh COD thành công! Bếp đã nhận lệnh nấu món.");
+        alert("✅ Đã xác minh COD thành công! Bếp KDS đã được mở để nhận nấu.");
         loadShipperOrders();
       } catch (err) {
         alert("Lỗi xác minh COD: " + err.message);
+        if (btn) {
+          btn.innerText = "📞 Đã Gọi Khách Xác Nhận ➔ Báo Bếp Nấu";
+          btn.disabled = false;
+        }
       }
     }
 
     async function takeOrder(orderCode) {
+      var cleanCode = String(orderCode || "").trim();
       var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "");
       var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "");
       var shipperLabel = sName + " (" + sPhone + ")";
 
       try {
-        await callBackend("shipperUpdateStep", [orderCode, shipperLabel, 3], "shipperUpdateStep", {
-          orderCode: orderCode,
+        await callBackend("shipperUpdateStep", [cleanCode, shipperLabel, 3], "shipperUpdateStep", {
+          orderCode: cleanCode,
           shipperName: shipperLabel,
           stepNumber: 3
         });
@@ -404,15 +410,16 @@
     }
 
     async function completeOrder(orderCode) {
-      if (!confirm("Xác nhận đã giao đơn " + orderCode + " tận tay khách hàng?")) return;
+      var cleanCode = String(orderCode || "").trim();
+      if (!confirm("Xác nhận đã giao đơn " + cleanCode + " tận tay khách hàng?")) return;
 
       try {
-        await callBackend("shipperUpdateStep", [orderCode, "", 4], "shipperUpdateStep", {
-          orderCode: orderCode,
+        await callBackend("shipperUpdateStep", [cleanCode, "", 4], "shipperUpdateStep", {
+          orderCode: cleanCode,
           shipperName: "",
           stepNumber: 4
         });
-        alert("🎉 Đã hoàn tất cuốc giao đơn " + orderCode + "!");
+        alert("🎉 Đã hoàn tất cuốc giao đơn " + cleanCode + "!");
         loadShipperOrders();
       } catch (err) {
         alert("Lỗi hoàn tất đơn: " + err.message);
@@ -420,12 +427,13 @@
     }
 
     async function cancelOrder(orderCode) {
+      var cleanCode = String(orderCode || "").trim();
       var reason = prompt("Nhập lý do sự cố (VD: Hỏng xe, thủng lốp, khách không nghe máy...):", "Hỏng xe đột xuất");
       if (!reason || !reason.trim()) return;
 
       try {
-        await callBackend("shipperReleaseOrder", [orderCode, reason], "shipperReleaseOrder", {
-          orderCode: orderCode,
+        await callBackend("shipperReleaseOrder", [cleanCode, reason], "shipperReleaseOrder", {
+          orderCode: cleanCode,
           reason: reason
         });
         alert("⚠️ Đã nhả đơn về bếp để điều phối tài xế khác!");
