@@ -654,18 +654,18 @@
             </div>
           </div>
 
-          <!-- KHỐI 3: MARKETING & GAMIFICATION ĐỘNG -->
+          <!-- KHỐI 3: MARKETING & GAMIFICATION ĐỘNG (5 TIERS) -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <div>
                 <strong style="color:var(--gold); font-size:13px;">🏆 QUẢN TRỊ CHIẾN DỊCH HUY HIỆU, NICKNAME & QUÀ TẶNG ĐỘNG</strong>
-                <p style="font-size:10px; color:var(--muted); margin-top:2px;">Tùy chỉnh mốc cày đơn, từ khóa khẩu vị và ngưỡng tặng nước đóng chai</p>
+                <p style="font-size:10px; color:var(--muted); margin-top:2px;">Tùy chỉnh mốc cày đơn (2-4-7-12 đơn), giảm 1%, 2%, 3%, Freeship 2km và quà AOV</p>
               </div>
               <button class="btn btn-blue btn-sm" onclick="loadGamificationAdminData()">🔄 Tải Lại Config</button>
             </div>
 
             <div style="background:#1E293B; border-radius:10px; padding:10px; margin-bottom:10px; border:1px solid #334155;">
-              <label style="color:#38BDF8; font-weight:bold; font-size:11px; display:block; margin-bottom:6px;">1. Bảng 5 Cấp Bậc Huy Hiệu Theo Tháng (Mốc 2 - 4 - 7 - 12 đơn):</label>
+              <label style="color:#38BDF8; font-weight:bold; font-size:11px; display:block; margin-bottom:6px;">1. Bảng 5 Cấp Bậc Huy Hiệu Theo Tháng (Mốc 0 - 2 - 4 - 7 - 12 đơn):</label>
               <div class="table-responsive">
                 <table style="min-width:100%;">
                   <thead>
@@ -678,7 +678,9 @@
                       <th>Freeship 2km</th>
                     </tr>
                   </thead>
-                  <tbody id="tierConfigTbody"></tbody>
+                  <tbody id="tierConfigTbody">
+                    <tr><td colspan="6" style="text-align:center; color:var(--muted); padding:10px;">Đang tải cấu hình Tiers...</td></tr>
+                  </tbody>
                 </table>
               </div>
             </div>
@@ -744,7 +746,7 @@
 
             <div class="form-group">
               <label>Số Tài Khoản / Số Điện Thoại Nhận Tiền:</label>
-              <input type="text" class="form-input" id="cfgBankAccount" value="0934220585" placeholder="Nhập số tài khoản hoặc SĐT MoMo" />
+              <input type="text" class="form-input" id="cfgBankAccount" value="3939388888" placeholder="Nhập số tài khoản hoặc SĐT MoMo" />
             </div>
 
             <div class="form-group">
@@ -769,7 +771,7 @@
             <img src="" id="dynamicStoreQrImg" class="qr-card-img" alt="Store QR Code" />
             
             <div class="form-group" style="text-align:left; margin-top:10px;">
-              <label>Đường Dẫn Web Quán (Script URL hoặc anngonlonghoa.com.vn/thim5):</label>
+              <label>Đường Dẫn Web Quán (Script URL hoặc thim5.anngonlonghoa.com.vn):</label>
               <input type="url" class="form-input" id="cfgStoreWebUrl" placeholder="Để trống để tự động lấy URL triển khai thực tế..." oninput="generateStoreDynamicQr(this.value)" />
             </div>
 
@@ -1051,6 +1053,7 @@
       { type: "SHIP", name: "Hỗ Trợ Cước Ship 10.000đ", code: "FREESHIP10K", cost: 10000, weight: 2, color: "#C2410C", textColor: "#FFFFFF" }
     ];
 
+    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG NHẬN DIỆN GAS VÀ REST API RENDER
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -1069,11 +1072,8 @@
         } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
           window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
             .then(function(res) { 
-              if (res && res.data !== undefined) {
-                resolve(res.data);
-              } else {
-                resolve(res);
-              }
+              if (res && res.data !== undefined) resolve(res.data);
+              else resolve(res);
             })
             .catch(function(err) { reject(err); });
         } else {
@@ -1117,6 +1117,7 @@
       }
     });
 
+    // 1. XÁC THỰC MÃ PIN QUẢN TRỊ
     async function handleAdminLogin() {
       var pin = document.getElementById("adminPinAuthInput").value.trim();
       var err = document.getElementById("authErrorMsg");
@@ -1207,6 +1208,7 @@
       renderWheelSlotsBuilder();
     }
 
+    // 2. DOANH THU & P&L
     async function loadAllAdminData(period) {
       period = period || 'all';
       setStatusLog("Đang tính toán số liệu kỳ: " + period + "...", false);
@@ -1305,6 +1307,7 @@
       });
     }
 
+    // 3. QUẢN TRỊ SHIPPER
     async function loadAdminShippersList(period) {
       period = period || 'all';
       setStatusLog("Đang tải danh sách tài xế kỳ: " + period + "...", false);
@@ -1388,6 +1391,7 @@
       }
     }
 
+    // 4. MINI CRM KHÁCH HÀNG
     async function loadAdminCrmData() {
       var tbody = document.getElementById("adminCrmTbody");
       if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải dữ liệu CRM...</td></tr>";
@@ -1438,6 +1442,7 @@
       setStatusLog("Đã nạp danh bạ CRM thành công.", false);
     }
 
+    // 5. NHẬP KHO COGS
     async function loadAdminInventoryData() {
       var tbody = document.getElementById("adminInventoryTbody");
       if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải dữ liệu nhập kho...</td></tr>";
@@ -1502,6 +1507,7 @@
       }
     }
 
+    // 6. MENU MÓN CHÍNH, TOPPING & NƯỚC UỐNG
     async function loadAdminMenuList() {
       try {
         var res = await callBackend("getAdminMenuList", [], "getMenu", {});
@@ -1879,7 +1885,7 @@
 
       setStatusLog("Đang lưu cấu hình Vòng Quay mới...", false);
       try {
-        var res = await callBackend("saveWheelPrizesConfigServer", [dynamicWheelSlots], "saveWheelConfig", { slots: JSON.stringify(dynamicWheelSlots) });
+        var res = await callBackend("saveWheelPrizesConfigServer", [dynamicWheelSlots], "saveWheelConfig", { payload: JSON.stringify(dynamicWheelSlots) });
         alert((res && res.message) ? res.message : "Đã lưu cấu hình Vòng Quay thành công!");
         setStatusLog("Đã lưu cấu hình Vòng Quay thành công!", false);
       } catch (err) {
@@ -1965,7 +1971,8 @@
         if (document.getElementById("cfgLat")) document.getElementById("cfgLat").value = (cfg.centerCoords && cfg.centerCoords.lat) ? cfg.centerCoords.lat : "11.285267";
         if (document.getElementById("cfgLng")) document.getElementById("cfgLng").value = (cfg.centerCoords && cfg.centerCoords.lng) ? cfg.centerCoords.lng : "106.133347";
         
-        if (document.getElementById("cfgBankAccount")) document.getElementById("cfgBankAccount").value = cfg.bankAccount || cfg.momoAccount || "0934220585";
+        var currentBankAcc = cfg.bankAccount || cfg.momoAccount || "3939388888";
+        if (document.getElementById("cfgBankAccount")) document.getElementById("cfgBankAccount").value = currentBankAcc;
         if (document.getElementById("cfgAccountHolderName")) document.getElementById("cfgAccountHolderName").value = cfg.accountHolderName || cfg.momoName || "NGUYEN HAI AU";
         if (document.getElementById("cfgAccountTypeLabel")) document.getElementById("cfgAccountTypeLabel").value = cfg.accountTypeLabel || "Tài khoản Hộ Kinh Doanh";
 
@@ -2038,7 +2045,7 @@
       if (val.indexOf("MOMO") !== -1) {
         document.getElementById("cfgBankAccount").placeholder = "Nhập SĐT Ví MoMo (VD: 0934220585)";
       } else {
-        document.getElementById("cfgBankAccount").placeholder = "Nhập Số tài khoản Ngân hàng";
+        document.getElementById("cfgBankAccount").placeholder = "Nhập Số tài khoản Ngân hàng (VD: 3939388888)";
       }
     }
 
@@ -2118,26 +2125,47 @@
       }
     }
 
+    // TỐI ƯU HÓA: BÓC TÁCH CHÍNH XÁC CẤU HÌNH TIERS ĐỘNG TỪ SERVER
     async function loadGamificationAdminData() {
       try {
         var res = await callBackend("getLoyaltyGamificationConfig", [], "getGamificationConfig", {});
         var cfg = (res && res.tiers !== undefined) ? res : (res && res.data ? res.data : null);
-        if (!cfg) return;
+        
+        // Fallback an toàn nếu backend chưa khởi tạo thuộc tính
+        if (!cfg || !cfg.tiers) {
+          cfg = {
+            monthlyReset: true,
+            tiers: [
+              { level: 0, minOrders: 0, discount: 0.00, freeship: false, defaultBadge: "🌱 Tấm Chiếu Mới", prefixPool: ["Bạn Mới"] },
+              { level: 1, minOrders: 2, discount: 0.01, freeship: false, defaultBadge: "🥢 Khách Gu Ruột", prefixPool: ["Bạn Thân"] },
+              { level: 2, minOrders: 4, discount: 0.02, freeship: false, defaultBadge: "💖 Fen Cứng Thím 5", prefixPool: ["Fen Cứng"] },
+              { level: 3, minOrders: 7, discount: 0.03, freeship: false, defaultBadge: "👑 Chiến Thần Mì Trộn", prefixPool: ["Chiến Thần"] },
+              { level: 4, minOrders: 12, discount: 0.03, freeship: true, defaultBadge: "💎 Tri Kỷ Đất Thánh", prefixPool: ["Tri Kỷ"] }
+            ],
+            drinkUpsell: [
+              { minBill: 50000, giftName: "1 Chai Nước Suối Ướp Lạnh (0đ)", cost: 2000 },
+              { minBill: 99000, giftName: "1 Lon Pepsi/7Up Ướp Lạnh (0đ)", cost: 8200 }
+            ],
+            referral: { enabled: true, inviteeDiscount: 5000, inviteeMinSpend: 40000 }
+          };
+        }
         activeGamificationCfg = cfg;
         renderTierConfigTable(cfg.tiers);
         
         if (cfg.drinkUpsell && cfg.drinkUpsell.length >= 2) {
-          document.getElementById("upsellMinBill1").value = cfg.drinkUpsell[0].minBill;
-          document.getElementById("upsellGiftName1").value = cfg.drinkUpsell[0].giftName;
-          document.getElementById("upsellMinBill2").value = cfg.drinkUpsell[1].minBill;
-          document.getElementById("upsellGiftName2").value = cfg.drinkUpsell[1].giftName;
+          if (document.getElementById("upsellMinBill1")) document.getElementById("upsellMinBill1").value = cfg.drinkUpsell[0].minBill;
+          if (document.getElementById("upsellGiftName1")) document.getElementById("upsellGiftName1").value = cfg.drinkUpsell[0].giftName;
+          if (document.getElementById("upsellMinBill2")) document.getElementById("upsellMinBill2").value = cfg.drinkUpsell[1].minBill;
+          if (document.getElementById("upsellGiftName2")) document.getElementById("upsellGiftName2").value = cfg.drinkUpsell[1].giftName;
         }
         
         if (cfg.referral) {
-          document.getElementById("refInviteeDisc").value = cfg.referral.inviteeDiscount;
-          document.getElementById("refMinSpend").value = cfg.referral.inviteeMinSpend;
+          if (document.getElementById("refInviteeDisc")) document.getElementById("refInviteeDisc").value = cfg.referral.inviteeDiscount;
+          if (document.getElementById("refMinSpend")) document.getElementById("refMinSpend").value = cfg.referral.inviteeMinSpend;
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Lỗi nạp Gamification Config:", e);
+      }
     }
 
     function renderTierConfigTable(tiers) {
@@ -2182,7 +2210,7 @@
 
       setStatusLog("Đang lưu chiến dịch marketing...", false);
       try {
-        var res = await callBackend("saveLoyaltyGamificationConfig", [activeGamificationCfg], "saveGamificationConfig", { config: JSON.stringify(activeGamificationCfg) });
+        var res = await callBackend("saveLoyaltyGamificationConfig", [activeGamificationCfg], "saveGamificationConfig", { payload: JSON.stringify(activeGamificationCfg) });
         alert("🎉 " + ((res && res.message) ? res.message : "Chiến dịch marketing đã được kích hoạt!"));
         setStatusLog("Chiến dịch marketing đã được kích hoạt!", false);
       } catch (err) {
@@ -2251,6 +2279,7 @@
       }
     }
 
+    // TỐI ƯU HÓA: BỌC CHUẨN JSON PAYLOAD CHO CẤU HÌNH NGÂN HÀNG & HỆ THỐNG
     async function saveSystemSettingsSubmit() {
       var bankParts = (document.getElementById("cfgBankSelect").value || "MB|970422").split("|");
       var taxPercentInput = parseFloat(document.getElementById("cfgTaxRatePercent").value) || 4.5;
@@ -2287,10 +2316,7 @@
       setStatusLog("Đang lưu và đồng bộ toàn hệ thống...", false);
       try {
         await callBackend("updateGoldenHourStatus", [isGolden, goldenMsg], "updateGoldenHour", { isActive: isGolden, msg: goldenMsg });
-        
-        // CẬP NHẬT MỚI: Dùng JSON.stringify bọc payload để chống gãy dữ liệu qua GET
         var res = await callBackend("saveStoreConfigDynamic", [newCfg], "saveConfig", { payload: JSON.stringify(newCfg) });
-        
         alert("✅ " + ((res && res.message) ? res.message : "Đã đồng bộ cấu hình thành công!"));
         loadDynamicConfigToInputs();
         setStatusLog("Đã đồng bộ toàn hệ thống thành công!", false);
