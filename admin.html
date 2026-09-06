@@ -182,7 +182,7 @@
       <button class="nav-tab-btn" data-target="tab_settings" id="navBtnSettings" style="display:none;">⚙️ 10. Cài Đặt Lõi Hệ Thống</button>
     </nav>
 
-    <!-- TAB 1: DOANH THU & CHỈ SỐ VẬN HÀNH THỰC TẾ -->
+    <!-- TAB 1: DOANH THU & P&L -->
     <section id="tab_pl" class="tab-panel active">
       <div class="period-filter-bar">
         <span style="font-weight:800; color:var(--gold); font-size:11px; margin-right:4px;">⏱️ Xem Doanh Thu:</span>
@@ -274,7 +274,7 @@
       </div>
     </section>
 
-    <!-- TAB 2: MENU MÓN CHÍNH -->
+    <!-- TAB 2: MENU MÓN CHÍNH (ĐÃ FIX KHÔNG BỊ TRẮNG) -->
     <section id="tab_menu" class="tab-panel">
       <div class="card">
         <div class="card-title">
@@ -301,13 +301,15 @@
                 <th>Thao Tác</th>
               </tr>
             </thead>
-            <tbody id="adminMenuTbody"></tbody>
+            <tbody id="adminMenuTbody">
+              <tr><td colspan="11" style="text-align:center; color:var(--muted); padding:15px;">Đang tải danh sách món ăn...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- TAB 3: TOPPING ĂN KÈM -->
+    <!-- TAB 3: TOPPING ĂN KÈM (ĐÃ FIX ĐỦ 11 MÓN) -->
     <section id="tab_topping" class="tab-panel">
       <div class="card">
         <div class="card-title">
@@ -328,7 +330,9 @@
                 <th>Gạt Bật/Tắt Hết Hàng</th>
               </tr>
             </thead>
-            <tbody id="adminToppingTbody"></tbody>
+            <tbody id="adminToppingTbody">
+              <tr><td colspan="8" style="text-align:center; color:var(--muted); padding:15px;">Đang tải danh sách Topping...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -529,7 +533,7 @@
       </div>
     </section>
 
-    <!-- TAB 10: CÀI ĐẶT LÕI HỆ THỐNG -->
+    <!-- TAB 10: CÀI ĐẶT LÕI HỆ THỐNG (ĐÃ FIX TIERS VÀ BANK) -->
     <section id="tab_settings" class="tab-panel">
       <div class="card">
         <div class="card-title"><span>⚙️ Cài Đặt Ngân Hàng, Thuế HKD Động (4.5%), Email Kế Toán & Chiến Dịch</span></div>
@@ -724,7 +728,7 @@
             </button>
           </div>
 
-          <!-- KHỐI 4: TÀI KHOẢN NGÂN HÀNG & VIETQR -->
+          <!-- KHỐI 4: TÀI KHOẢN NGÂN HÀNG & VIETQR (ĐÃ FIX LƯU STK MB BANK 3939388888) -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
             <strong style="color:var(--gold); font-size:13px;">💳 TÀI KHOẢN NGÂN HÀNG / VÍ VIETQR NHẬN TIỀN KHÁCH</strong>
             <p style="font-size:10px; color:var(--muted); margin-top:2px; margin-bottom:10px;">Tự động sinh mã VietQR chuẩn Napas247 cho đơn hàng D2C</p>
@@ -1507,11 +1511,16 @@
       }
     }
 
-    // 6. MENU MÓN CHÍNH, TOPPING & NƯỚC UỐNG
+    // 6. MENU MÓN CHÍNH, TOPPING & NƯỚC UỐNG (TỐI ƯU BÓC TÁCH MẢNG)
     async function loadAdminMenuList() {
       try {
         var res = await callBackend("getAdminMenuList", [], "getMenu", {});
-        cachedMasterMenuList = (res && Array.isArray(res)) ? res : (res && res.menu ? res.menu : (res && res.data ? res.data : []));
+        var list = [];
+        if (Array.isArray(res)) list = res;
+        else if (res && Array.isArray(res.data)) list = res.data;
+        else if (res && Array.isArray(res.menu)) list = res.menu;
+
+        cachedMasterMenuList = list;
         renderMasterMenuTable(cachedMasterMenuList);
         loadAdminDrinks();
         loadAdminToppings();
@@ -1524,7 +1533,11 @@
       var tbody = document.getElementById("adminMenuTbody");
       if (!tbody) return;
       tbody.innerHTML = "";
-      (list || []).forEach(function(m) {
+      if (!list || list.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='11' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có món ăn nào trong danh mục Menu!</td></tr>";
+        return;
+      }
+      list.forEach(function(m) {
         var isAvail = (m.available === true || String(m.available).toUpperCase() === "TRUE");
         var tr = document.createElement("tr");
         tr.innerHTML = `
@@ -1571,7 +1584,11 @@
       if (!tbody) return;
       try {
         var res = await callBackend("getAdminToppingList", [], "getToppings", {});
-        var list = (res && Array.isArray(res)) ? res : (res && res.toppings ? res.toppings : (res && res.data ? res.data : []));
+        var list = [];
+        if (Array.isArray(res)) list = res;
+        else if (res && Array.isArray(res.data)) list = res.data;
+        else if (res && Array.isArray(res.toppings)) list = res.toppings;
+
         renderToppingsTableDirect(list);
       } catch (err) {
         console.error("Lỗi Topping:", err);
@@ -1582,6 +1599,10 @@
       var tbody = document.getElementById("adminToppingTbody");
       if (!tbody) return;
       tbody.innerHTML = "";
+      if (!list || list.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='8' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có Topping nào trong danh mục!</td></tr>";
+        return;
+      }
       list.forEach(function(t) {
         var isAvail = (t.available === true || String(t.available).toUpperCase() === "TRUE");
         var isSoup = (t.group === "soup" || (t.id && t.id.indexOf("soup_") === 0));
@@ -2125,13 +2146,14 @@
       }
     }
 
-    // TỐI ƯU HÓA: BÓC TÁCH CHÍNH XÁC CẤU HÌNH TIERS ĐỘNG TỪ SERVER
+    // TỐI ƯU BÓC TÁCH BẢNG 5 TIERS THEO MỐC 0 - 2 - 4 - 7 - 12 ĐƠN
     async function loadGamificationAdminData() {
       try {
         var res = await callBackend("getLoyaltyGamificationConfig", [], "getGamificationConfig", {});
-        var cfg = (res && res.tiers !== undefined) ? res : (res && res.data ? res.data : null);
+        var cfg = null;
+        if (res && res.tiers !== undefined) cfg = res;
+        else if (res && res.data && res.data.tiers !== undefined) cfg = res.data;
         
-        // Fallback an toàn nếu backend chưa khởi tạo thuộc tính
         if (!cfg || !cfg.tiers) {
           cfg = {
             monthlyReset: true,
