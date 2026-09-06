@@ -52,7 +52,11 @@
     .kds-brand h1 { font-size: 16px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 6px; }
     .kds-badge-count { background: var(--primary); color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; }
 
-    .kds-controls { display: flex; align-items: center; gap: 10px; }
+    .kds-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .sound-select-kds {
+      background: #0F172A; color: #FDE047; border: 1px solid var(--card-border);
+      padding: 6px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; outline: none; cursor: pointer;
+    }
     .btn-sound { background: var(--success); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; }
     .btn-sound.muted { background: #475569; }
     .btn-lock { background: #334155; color: var(--muted); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; }
@@ -75,7 +79,7 @@
     .orders-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
     .order-card { background: var(--card); border: 2px solid var(--card-border); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: .2s; }
     .order-card.step0 { border-color: #64748B; border-left: 6px solid #F59E0B; background: #182234; }
-    .order-card.step1 { border-color: var(--danger); border-left: 6px solid var(--danger); box-shadow: 0 0 12px rgba(239, 68, 68, 0.25); }
+    .order-card.step1 { border-color: var(--danger); border-left: 6px solid var(--danger); box-shadow: 0 0 14px rgba(239, 68, 68, 0.35); }
     .order-card.step2 { border-color: var(--warning); border-left: 6px solid var(--warning); }
     .order-card.step3 { border-color: var(--blue); border-left: 6px solid var(--blue); opacity: 0.88; }
 
@@ -100,14 +104,21 @@
     /* ACTION BUTTONS */
     .card-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
     .btn-kds { width: 100%; padding: 11px; border: none; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: .2s; }
-    .btn-accept { background: var(--danger); color: #fff; animation: pulseRed 2s infinite; }
+    .btn-accept { background: var(--danger); color: #fff; animation: pulseRed 1.8s infinite; }
     @keyframes pulseRed { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
     .btn-locked-step0 { background: #334155; color: #94A3B8; cursor: not-allowed; border: 1px dashed #64748B; }
     .btn-cancel-order { background: #334155; color: #FCA5A5; border: 1px dashed #EF4444; padding: 7px; font-size: 11px; }
     .btn-cancel-order:hover { background: #991B1B; color: #fff; }
 
-    .shipper-assign-box { display: flex; gap: 6px; }
-    .btn-assign { background: var(--blue); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; white-space: nowrap; width: 100%; }
+    /* KHUNG KHÓA TÀI XẾ STEP 2 */
+    .locked-shipper-card {
+      background: #0F172A; border: 1px solid #38BDF8; border-radius: 8px;
+      padding: 8px 10px; display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 6px;
+    }
+    .locked-shipper-name { font-size: 11.5px; font-weight: 800; color: #38BDF8; display: flex; align-items: center; gap: 5px; }
+    .btn-dispatch { background: var(--blue); color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; width: 100%; }
+    .btn-dispatch:hover { background: #1D4ED8; }
 
     .status-badge { text-align: center; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: 800; }
     .status-badge.step0 { background: rgba(245, 158, 11, 0.2); color: #FDE047; }
@@ -139,6 +150,13 @@
       <span class="kds-badge-count" id="dispOrderCount">0 ĐƠN ĐANG XỬ LÝ</span>
     </div>
     <div class="kds-controls">
+      <!-- TÙY CHỌN ÂM BÁO BẾP -->
+      <select class="sound-select-kds" id="kdsSoundChoice" onchange="changeKdsSound(this.value)">
+        <option value="tingting">🔔 Chuông Ting Ting (Thanh)</option>
+        <option value="urgent">🚨 Còi Khẩn Cấp (Nấu Gấp)</option>
+        <option value="bell">🛎️ Chuông Nhà Hàng (Trầm)</option>
+        <option value="electronic">⚡ Chuông Điện Tử</option>
+      </select>
       <button class="btn-sound" id="btnSoundToggle" onclick="toggleSound()">🔔 Âm Báo: BẬT</button>
       <div class="clock-display" id="kdsLiveClock">00:00:00</div>
       <button class="btn-lock" onclick="handleKdsLockOut()" title="Khóa màn hình Bếp">🔒 Khóa</button>
@@ -177,7 +195,10 @@
     var rawOrdersCache = [];
     var currentFilter = 'all';
     var kdsPollingTimer = null;
+    var alarmLoopTimer = null;
+    var activeSoundType = localStorage.getItem("thim5_kds_sound") || "tingting";
 
+    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS NỘI BỘ VÀ REST API RENDER
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -234,6 +255,7 @@
 
     function handleKdsLockOut() {
       if (confirm("Khóa màn hình trạm Bếp KDS?")) {
+        stopUrgentAlarmLoop();
         localStorage.removeItem("thim5_kds_auth");
         if (kdsPollingTimer) clearInterval(kdsPollingTimer);
         kdsPollingTimer = null;
@@ -243,6 +265,9 @@
     }
 
     function initKDS() {
+      var soundSelect = document.getElementById("kdsSoundChoice");
+      if (soundSelect) soundSelect.value = activeSoundType;
+
       updateLiveClock();
       setInterval(updateLiveClock, 1000);
       loadKitchenOrders();
@@ -272,50 +297,120 @@
       if (el) el.innerText = h + ":" + m + ":" + s;
     }
 
+    function changeKdsSound(type) {
+      activeSoundType = type;
+      localStorage.setItem("thim5_kds_sound", type);
+      playSynthesizedAlarm(type);
+    }
+
     function toggleSound() {
       isSoundEnabled = !isSoundEnabled;
       var btn = document.getElementById("btnSoundToggle");
       if (isSoundEnabled) {
         btn.className = "btn-sound";
         btn.innerText = "🔔 Âm Báo: BẬT";
-        playBeepSound();
+        playSynthesizedAlarm(activeSoundType);
       } else {
         btn.className = "btn-sound muted";
         btn.innerText = "🔕 Âm Báo: TẮT";
+        stopUrgentAlarmLoop();
       }
     }
 
-    function playBeepSound() {
+    // BỘ TỔNG HỢP ÂM BÁO WEB AUDIO CHỐNG TIẾNG ỒN GIAN BẾP
+    function playSynthesizedAlarm(type) {
       if (!isSoundEnabled) return;
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
 
-        var osc1 = audioCtx.createOscillator();
-        var gain1 = audioCtx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(880, audioCtx.currentTime);
-        gain1.gain.setValueAtTime(0.35, audioCtx.currentTime);
-        gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-        osc1.connect(gain1);
-        gain1.connect(audioCtx.destination);
-        osc1.start();
-        osc1.stop(audioCtx.currentTime + 0.25);
+        var now = audioCtx.currentTime;
 
-        setTimeout(function() {
-          if (!audioCtx) return;
+        if (type === "urgent") {
+          // Còi báo động giục nấu gấp
+          var osc = audioCtx.createOscillator();
+          var gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(650, now);
+          osc.frequency.linearRampToValueAtTime(980, now + 0.18);
+          osc.frequency.linearRampToValueAtTime(650, now + 0.35);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+          osc.connect(gain); gain.connect(audioCtx.destination);
+          osc.start(now); osc.stop(now + 0.35);
+        } else if (type === "bell") {
+          // Chuông nhà hàng (Trầm ấm)
+          var oscB = audioCtx.createOscillator();
+          var gainB = audioCtx.createGain();
+          oscB.type = 'triangle';
+          oscB.frequency.setValueAtTime(523.25, now); // Nốt C5
+          gainB.gain.setValueAtTime(0.5, now);
+          gainB.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+          oscB.connect(gainB); gainB.connect(audioCtx.destination);
+          oscB.start(now); oscB.stop(now + 0.9);
+        } else if (type === "electronic") {
+          // Chuông điện tử đa âm dồn dập
+          for (var i = 0; i < 3; i++) {
+            (function(idx) {
+              var oscE = audioCtx.createOscillator();
+              var gainE = audioCtx.createGain();
+              oscE.type = 'square';
+              oscE.frequency.setValueAtTime(1046.5 + (idx * 200), now + (idx * 0.1));
+              gainE.gain.setValueAtTime(0.2, now + (idx * 0.1));
+              gainE.gain.exponentialRampToValueAtTime(0.01, now + (idx * 0.1) + 0.08);
+              oscE.connect(gainE); gainE.connect(audioCtx.destination);
+              oscE.start(now + (idx * 0.1)); oscE.stop(now + (idx * 0.1) + 0.08);
+            })(i);
+          }
+        } else {
+          // Mặc định: Ting Ting ngân vang 2 nốt
+          var osc1 = audioCtx.createOscillator();
+          var gain1 = audioCtx.createGain();
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(880, now);
+          gain1.gain.setValueAtTime(0.4, now);
+          gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+          osc1.connect(gain1); gain1.connect(audioCtx.destination);
+          osc1.start(now); osc1.stop(now + 0.5);
+
           var osc2 = audioCtx.createOscillator();
           var gain2 = audioCtx.createGain();
           osc2.type = 'sine';
-          osc2.frequency.setValueAtTime(1174.66, audioCtx.currentTime);
-          gain2.gain.setValueAtTime(0.35, audioCtx.currentTime);
-          gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-          osc2.connect(gain2);
-          gain2.connect(audioCtx.destination);
-          osc2.start();
-          osc2.stop(audioCtx.currentTime + 0.35);
-        }, 200);
+          osc2.frequency.setValueAtTime(1318.51, now + 0.18); // Nốt E6
+          gain2.gain.setValueAtTime(0.4, now + 0.18);
+          gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+          osc2.connect(gain2); gain2.connect(audioCtx.destination);
+          osc2.start(now + 0.18); osc2.stop(now + 0.7);
+        }
       } catch(e) {}
+    }
+
+    // CƠ CHẾ DUY TRÌ CHUÔNG LẶP: CÒN ĐƠN STEP 1 (CẦN NẤU) LÀ CÒN REO LIÊN TỤC
+    function checkAndMaintainUrgentLoop(activeOrders) {
+      if (!isSoundEnabled) {
+        stopUrgentAlarmLoop();
+        return;
+      }
+
+      var needCookCount = activeOrders.filter(function(o){ return Number(o.step) === 1; }).length;
+
+      if (needCookCount > 0) {
+        if (!alarmLoopTimer) {
+          playSynthesizedAlarm(activeSoundType);
+          alarmLoopTimer = setInterval(function() {
+            playSynthesizedAlarm(activeSoundType);
+          }, 3500); // Tự động giục Bếp mỗi 3.5 giây cho đến khi bấm nhận
+        }
+      } else {
+        stopUrgentAlarmLoop();
+      }
+    }
+
+    function stopUrgentAlarmLoop() {
+      if (alarmLoopTimer) {
+        clearInterval(alarmLoopTimer);
+        alarmLoopTimer = null;
+      }
     }
 
     async function loadKitchenOrders() {
@@ -333,7 +428,7 @@
         updateFilterCounts(rawOrdersCache);
         renderKitchenUI();
       } catch (err) {
-        console.error("Lỗi KDS:", err);
+        console.error("Lỗi đồng bộ KDS:", err);
       }
     }
 
@@ -359,6 +454,9 @@
       if (elCook) elCook.innerText = cCooking;
       if (elWait) elWait.innerText = cWait;
       if (elDisp) elDisp.innerText = activeOrders.length + " ĐƠN ĐANG XỬ LÝ";
+
+      // Kiểm soát chuông lặp khẩn cấp
+      checkAndMaintainUrgentLoop(activeOrders);
     }
 
     function changeKdsFilter(filterKey, btnElement) {
@@ -386,7 +484,7 @@
       if (!isInitialLoad) {
         var hasNewOrder = currentCodes.some(function(code){ return knownOrderCodes.indexOf(code) === -1; });
         if (hasNewOrder) {
-          playBeepSound();
+          playSynthesizedAlarm(activeSoundType);
         }
       } else {
         isInitialLoad = false;
@@ -417,6 +515,9 @@
         var formattedItemsHtml = (o.items || '').split(" | ").map(function(itemText){
           return `<div style="margin-bottom:4px; padding-bottom:4px; border-bottom:1px dashed #1E293B;">${itemText}</div>`;
         }).join("");
+
+        // Tên Shipper đã gán từ bước xác minh
+        var assignedShipperDisplay = (o.shipper && o.shipper !== 'Chưa gán' && o.shipper !== 'Chờ Gán') ? o.shipper : 'Tài xế nhận đơn';
 
         html += `
           <div class="order-card ${stepClass}">
@@ -455,14 +556,16 @@
                 </button>
               ` : (stepNum === 2 ? `
                 <div class="status-badge step2">🔥 Bếp đang nấu trên chảo...</div>
-                <div class="shipper-assign-box">
-                  <div style="flex: 1; padding: 8px; background: #0F172A; border: 1px solid var(--card-border); color: #fff; border-radius: 6px; font-size: 11px; font-weight: 700;">
-                    🛵 ${o.shipper && o.shipper !== 'Chưa gán' && o.shipper !== 'Chờ Gán' ? o.shipper : 'Tài xế nội bộ'}
-                  </div>
-                  <button class="btn-assign" onclick="handleKitchenAssign('${cleanCode}', '${o.shipper}')">Giao Đơn</button>
+                <!-- BẾP KHÔNG CẦN CHỌN LẠI: HIỂN THỊ TRỰC TIẾP TÀI XẾ ĐÃ CHỐT ĐƠN -->
+                <div class="locked-shipper-card">
+                  <span class="locked-shipper-name">🛵 ${assignedShipperDisplay}</span>
+                  <span style="font-size:10px; color:#34D399; font-weight:bold;">Đã chốt cuốc</span>
                 </div>
+                <button class="btn-dispatch" onclick="handleKitchenDispatch('${cleanCode}', '${assignedShipperDisplay}')">
+                  🚀 Xong Món ➔ Bàn Giao Cho Shipper Giao Đi
+                </button>
               ` : `
-                <div class="status-badge step3">🛵 Đang giao bởi: <strong>${o.shipper || 'Shipper'}</strong></div>
+                <div class="status-badge step3">🛵 Đang giao bởi: <strong>${assignedShipperDisplay}</strong></div>
               `))}
 
               <button class="btn-kds btn-cancel-order" onclick="handleKitchenCancel('${cleanCode}')">
@@ -496,13 +599,13 @@
       }
     }
 
-    async function handleKitchenAssign(orderCode, currentShipper) {
+    // BÀN GIAO MÓN CHO SHIPPER (CHUYỂN SANG STEP 3: ĐANG GIAO)
+    async function handleKitchenDispatch(orderCode, currentShipper) {
       var cleanCode = String(orderCode || "").trim();
-      var shipName = "Tài xế nội bộ";
+      var shipName = "Tài xế nhận đơn";
       var shipPhone = "0969004693";
       
-      // Tách Họ tên và SĐT từ chuỗi "Nguyễn Hải Âu (0934220585)" do Shipper đã chốt
-      if (currentShipper && currentShipper !== "undefined" && currentShipper !== "Chưa gán" && currentShipper !== "Chờ Gán") {
+      if (currentShipper && currentShipper !== "undefined" && currentShipper !== "Chưa gán") {
         var parts = currentShipper.split("(");
         shipName = parts[0].trim();
         if (parts[1]) shipPhone = parts[1].replace(")", "").trim();
@@ -516,7 +619,7 @@
         });
         loadKitchenOrders();
       } catch (err) {
-        alert("Lỗi gán shipper: " + err.message);
+        alert("Lỗi bàn giao món cho Shipper: " + err.message);
       }
     }
 
