@@ -52,7 +52,7 @@
     .tab-panel.active { display: block; animation: fadeIn .2s ease-in; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* STATS GRID 6 THẺ */
+    /* STATS GRID 6 THẺ P&L */
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .stat-card { background: var(--card); padding: 14px 16px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
     .stat-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
@@ -274,7 +274,7 @@
       </div>
     </section>
 
-    <!-- TAB 2: MENU MÓN CHÍNH (ĐÃ FIX KHÔNG BỊ TRẮNG) -->
+    <!-- TAB 2: MENU MÓN CHÍNH (ĐÃ BÓC TÁCH MẢNG CHỐNG TRẮNG BẢNG) -->
     <section id="tab_menu" class="tab-panel">
       <div class="card">
         <div class="card-title">
@@ -309,7 +309,7 @@
       </div>
     </section>
 
-    <!-- TAB 3: TOPPING ĂN KÈM (ĐÃ FIX ĐỦ 11 MÓN) -->
+    <!-- TAB 3: TOPPING ĂN KÈM (ĐỦ 11 MÓN CHUẨN) -->
     <section id="tab_topping" class="tab-panel">
       <div class="card">
         <div class="card-title">
@@ -533,7 +533,7 @@
       </div>
     </section>
 
-    <!-- TAB 10: CÀI ĐẶT LÕI HỆ THỐNG (ĐÃ FIX TIERS VÀ BANK) -->
+    <!-- TAB 10: CÀI ĐẶT LÕI HỆ THỐNG (SUPER ADMIN LEVEL 2) -->
     <section id="tab_settings" class="tab-panel">
       <div class="card">
         <div class="card-title"><span>⚙️ Cài Đặt Ngân Hàng, Thuế HKD Động (4.5%), Email Kế Toán & Chiến Dịch</span></div>
@@ -658,12 +658,12 @@
             </div>
           </div>
 
-          <!-- KHỐI 3: MARKETING & GAMIFICATION ĐỘNG (5 TIERS) -->
+          <!-- KHỐI 3: MARKETING & GAMIFICATION ĐỘNG (5 TIERS) - ĐÃ FIX KHÔNG BỊ TRẮNG BẢNG -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <div>
                 <strong style="color:var(--gold); font-size:13px;">🏆 QUẢN TRỊ CHIẾN DỊCH HUY HIỆU, NICKNAME & QUÀ TẶNG ĐỘNG</strong>
-                <p style="font-size:10px; color:var(--muted); margin-top:2px;">Tùy chỉnh mốc cày đơn (2-4-7-12 đơn), giảm 1%, 2%, 3%, Freeship 2km và quà AOV</p>
+                <p style="font-size:10px; color:var(--muted); margin-top:2px;">Tùy chỉnh mốc cày đơn (0-2-4-7-12 đơn), giảm 1%, 2%, 3%, Freeship 2km và quà AOV</p>
               </div>
               <button class="btn btn-blue btn-sm" onclick="loadGamificationAdminData()">🔄 Tải Lại Config</button>
             </div>
@@ -787,7 +787,11 @@
 
           <hr style="border:0; border-top:1px dashed #334155; margin:16px 0;" />
 
-          <!-- KHỐI 6: THÔNG TIN VẬN HÀNH & ĐỔI MÃ PIN -->
+          <!-- KHỐI 6: THÔNG TIN VẬN HÀNH & ĐỔI MÃ PIN & BANNER COVER ĐỘNG -->
+          <div class="form-group">
+            <label>Ảnh Bìa / Banner Cover Quán (URL hình ảnh hiển thị trên Web):</label>
+            <input type="url" class="form-input" id="cfgStoreCoverUrl" placeholder="https://images.unsplash.com/... hoặc link ảnh Drive" />
+          </div>
           <div class="form-group">
             <label>Tên Quán Quản Trị:</label>
             <input type="text" class="form-input" id="cfgStoreName" value="Mì Trộn & Cơm Trộn Thím 5" />
@@ -1057,7 +1061,7 @@
       { type: "SHIP", name: "Hỗ Trợ Cước Ship 10.000đ", code: "FREESHIP10K", cost: 10000, weight: 2, color: "#C2410C", textColor: "#FFFFFF" }
     ];
 
-    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG NHẬN DIỆN GAS VÀ REST API RENDER
+    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS VÀ REST API RENDER
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -1511,7 +1515,7 @@
       }
     }
 
-    // 6. MENU MÓN CHÍNH, TOPPING & NƯỚC UỐNG (TỐI ƯU BÓC TÁCH MẢNG)
+    // 6. MENU MÓN CHÍNH & TOPPING (TỐI ƯU GIẢI NÉN ĐA TẦNG CHỐNG TRẮNG BẢNG)
     async function loadAdminMenuList() {
       try {
         var res = await callBackend("getAdminMenuList", [], "getMenu", {});
@@ -1985,6 +1989,7 @@
         if (!cfg) return;
         activeStoreConfigCache = cfg;
 
+        if (document.getElementById("cfgStoreCoverUrl")) document.getElementById("cfgStoreCoverUrl").value = cfg.storeCoverUrl || "";
         if (document.getElementById("cfgStoreName")) document.getElementById("cfgStoreName").value = cfg.storeName || "";
         if (document.getElementById("cfgOwnerName")) document.getElementById("cfgOwnerName").value = cfg.ownerName || "";
         if (document.getElementById("cfgStorePhone")) document.getElementById("cfgStorePhone").value = cfg.phone || "";
@@ -2146,7 +2151,7 @@
       }
     }
 
-    // TỐI ƯU BÓC TÁCH BẢNG 5 TIERS THEO MỐC 0 - 2 - 4 - 7 - 12 ĐƠN
+    // TỐI ƯU HÓA: BÓC TÁCH MẢNG TIERS 3 TẦNG & FALLBACK ĐỦ 5 CẤP ĐỘ
     async function loadGamificationAdminData() {
       try {
         var res = await callBackend("getLoyaltyGamificationConfig", [], "getGamificationConfig", {});
@@ -2154,6 +2159,7 @@
         if (res && res.tiers !== undefined) cfg = res;
         else if (res && res.data && res.data.tiers !== undefined) cfg = res.data;
         
+        // Fallback chuẩn 5 cấp bậc nếu chưa có cấu hình trên server
         if (!cfg || !cfg.tiers) {
           cfg = {
             monthlyReset: true,
@@ -2301,12 +2307,13 @@
       }
     }
 
-    // TỐI ƯU HÓA: BỌC CHUẨN JSON PAYLOAD CHO CẤU HÌNH NGÂN HÀNG & HỆ THỐNG
+    // TỐI ƯU HÓA: BỌC CHUẨN JSON CHỐNG GÃY LỆNH LƯU NGÂN HÀNG & COVER BANNER
     async function saveSystemSettingsSubmit() {
       var bankParts = (document.getElementById("cfgBankSelect").value || "MB|970422").split("|");
       var taxPercentInput = parseFloat(document.getElementById("cfgTaxRatePercent").value) || 4.5;
       
       var newCfg = {
+        storeCoverUrl: document.getElementById("cfgStoreCoverUrl") ? document.getElementById("cfgStoreCoverUrl").value.trim() : "",
         storeName: document.getElementById("cfgStoreName").value.trim(),
         ownerName: document.getElementById("cfgOwnerName").value.trim(),
         phone: document.getElementById("cfgStorePhone").value.trim(),
@@ -2338,7 +2345,10 @@
       setStatusLog("Đang lưu và đồng bộ toàn hệ thống...", false);
       try {
         await callBackend("updateGoldenHourStatus", [isGolden, goldenMsg], "updateGoldenHour", { isActive: isGolden, msg: goldenMsg });
+        
+        // CHỐT CHẶN ÉP KIỂU: Bọc payload JSON chuỗi để backend đọc chính xác 100%
         var res = await callBackend("saveStoreConfigDynamic", [newCfg], "saveConfig", { payload: JSON.stringify(newCfg) });
+        
         alert("✅ " + ((res && res.message) ? res.message : "Đã đồng bộ cấu hình thành công!"));
         loadDynamicConfigToInputs();
         setStatusLog("Đã đồng bộ toàn hệ thống thành công!", false);
