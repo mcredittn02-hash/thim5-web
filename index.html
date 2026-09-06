@@ -29,12 +29,13 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     html, body { width: 100%; max-width: 100vw; overflow-x: hidden; position: relative; background-color: var(--grab-bg); color: var(--grab-text); font-size: 13px; line-height: 1.4; padding-bottom: 100px; }
 
-    /* HEADER & BANNER */
+    /* HEADER & BANNER HERO */
     .store-hero {
       position: relative;
       width: 100%;
       height: 160px;
       background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%), url('https://images.unsplash.com/photo-1612927601601-6638404737ce?w=800') center/cover;
+      transition: background-image 0.3s ease;
     }
     .hero-nav {
       position: absolute;
@@ -205,15 +206,8 @@
     @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
     @media (max-width: 768px) {
-      .modal-overlay {
-        align-items: flex-end !important;
-        padding: 0 !important;
-      }
-      .modal-sheet-grab {
-        max-width: 100% !important;
-        border-radius: 20px 20px 0 0 !important;
-        animation: slideUp .25s ease-out;
-      }
+      .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+      .modal-sheet-grab { max-width: 100% !important; border-radius: 20px 20px 0 0 !important; animation: slideUp .25s ease-out; }
       @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
       .main-layout { grid-template-columns: 100%; padding: 0 10px; }
       .cart-box { display: none; }
@@ -240,11 +234,7 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
       transition: all 0.2s ease !important;
     }
-    .btn-close-modal:hover {
-      background: #EF4444 !important;
-      color: #FFFFFF !important;
-      border-color: #EF4444 !important;
-    }
+    .btn-close-modal:hover { background: #EF4444 !important; color: #FFFFFF !important; border-color: #EF4444 !important; }
 
     .modal-content-body { padding: 16px; }
     .dish-modal-title { font-size: 16px; font-weight: 900; color: #1C1C1C; }
@@ -288,8 +278,8 @@
 </head>
 <body>
 
-  <!-- HERO STORE BANNER -->
-  <div class="store-hero">
+  <!-- HERO STORE BANNER (HỖ TRỢ ĐỔI ẢNH BÌA DYNAMIC) -->
+  <div class="store-hero" id="storeHeroBanner">
     <div class="hero-nav">
       <button class="hero-btn" onclick="location.href='?page=index'">←</button>
       <div style="display:flex; gap:6px;">
@@ -343,7 +333,7 @@
     <span style="font-weight:900;">⚡ 15-20 PHÚT</span>
   </div>
 
-  <!-- LIVE TRACKING BANNER -->
+  <!-- LIVE TRACKING BANNER (ĐÃ TỐI ƯU CHỐNG TREO) -->
   <div class="tracking-wrapper">
     <div class="tracking-card" id="trackingCard">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -559,7 +549,7 @@
             📥 Tải Ảnh QR Về Máy (Để Quét Trong App Bank)
           </button>
           <button type="button" class="btn-copy-chip" onclick="copyDynamicBankAccount()">
-            <span>📋 STK: <strong id="dispCopyMomoAcc">Đang tải...</strong></span>
+            <span>📋 STK: <strong id="dispCopyMomoAcc">3939388888</strong></span>
             <span style="color:var(--grab-green); font-size:9px;">Sao chép</span>
           </button>
         </div>
@@ -634,7 +624,7 @@
     </div>
   </div>
 
-  <!-- MODAL GHIM APP -->
+  <!-- MODAL GHIM APP (PWA) -->
   <div class="modal-overlay" id="pwaModal" onclick="if(event.target === this) closeModal('pwaModal')">
     <div class="modal-sheet-grab" style="text-align:center; padding:20px; border-radius:20px;">
       <div style="width:48px; height:48px; background:#EFF6FF; color:#2563EB; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 8px;">📌</div>
@@ -657,13 +647,14 @@
   <script>
     var STORE_COORDS = { lat: 11.285267, lng: 106.133347 };
     var ZALO_HOTLINE = "0969004693";
-    var MOMO_PAYMENT_PHONE = "0934220585";
+    var MOMO_PAYMENT_PHONE = "3939388888";
     var activeStoreConfig = {
       storeName: "Mì Trộn & Cơm Trộn Thím 5",
       phone: "0969004693",
       address: "Nguyễn Văn Linh, TX. Hòa Thành, Tây Ninh",
-      bankAccount: "0934220585",
-      momoAccount: "0934220585",
+      storeCoverUrl: "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=800",
+      bankAccount: "3939388888",
+      momoAccount: "3939388888",
       bankBin: "970422",
       accountHolderName: "NGUYEN HAI AU",
       momoName: "NGUYEN HAI AU",
@@ -733,7 +724,7 @@
     var isSpinning = false;
     var isStoreClosed = false;
 
-    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS VÀ RENDER
+    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS NỘI BỘ VÀ REST API RENDER
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -794,19 +785,30 @@
         if (cfg) {
           activeStoreConfig = Object.assign({}, activeStoreConfig, cfg);
           ZALO_HOTLINE = cfg.phone || "0969004693";
-          MOMO_PAYMENT_PHONE = cfg.bankAccount || cfg.momoAccount || "0934220585";
+          MOMO_PAYMENT_PHONE = cfg.bankAccount || cfg.momoAccount || "3939388888";
           if (cfg.centerCoords && cfg.centerCoords.lat) STORE_COORDS = cfg.centerCoords;
           if (document.getElementById("dispStoreTitle")) document.getElementById("dispStoreTitle").innerText = cfg.storeName || "Mì Trộn & Cơm Trộn Thím 5";
           if (document.getElementById("linkHotlineHeader")) document.getElementById("linkHotlineHeader").href = "tel:" + (cfg.phone || "0969004693");
-          if (document.getElementById("dispCopyMomoAcc")) document.getElementById("dispCopyMomoAcc").innerText = MOMO_PAYMENT_PHONE;
+          
+          // CẬP NHẬT ẢNH BÌA COVER TỰ ĐỘNG
+          if (cfg.storeCoverUrl) {
+            var heroEl = document.getElementById("storeHeroBanner");
+            if (heroEl) {
+              heroEl.style.backgroundImage = "linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%), url('" + cfg.storeCoverUrl + "')";
+            }
+          }
+
+          var copySpan = document.getElementById("dispCopyMomoAcc");
+          if (copySpan) copySpan.innerText = MOMO_PAYMENT_PHONE;
+
           updateDynamicCalculations();
         }
       } catch (e) {}
     }
 
     function copyDynamicBankAccount() {
-      var acc = MOMO_PAYMENT_PHONE || (activeStoreConfig && (activeStoreConfig.bankAccount || activeStoreConfig.momoAccount)) || "0934220585";
-      copyValueText(acc, "Đã copy STK: " + acc);
+      var acc = MOMO_PAYMENT_PHONE || (activeStoreConfig && (activeStoreConfig.bankAccount || activeStoreConfig.momoAccount)) || "3939388888";
+      copyValueText(acc, "Đã sao chép STK: " + acc);
     }
 
     function playGoldenHourAlert() {
@@ -1255,7 +1257,7 @@
       if (!qrBox || !qrImg) return;
       if (payMethod === "CK_VIETQR" && grandTotal > 0) {
         qrBox.style.display = "block";
-        var momoAcc = MOMO_PAYMENT_PHONE || (activeStoreConfig && (activeStoreConfig.bankAccount || activeStoreConfig.momoAccount)) || "0934220585";
+        var momoAcc = MOMO_PAYMENT_PHONE || (activeStoreConfig && (activeStoreConfig.bankAccount || activeStoreConfig.momoAccount)) || "3939388888";
         var momoName = encodeURIComponent(activeStoreConfig.accountHolderName || activeStoreConfig.momoName || "NGUYEN HAI AU");
         var bankBinCode = activeStoreConfig.bankBin || "970422";
         qrImg.src = "https://img.vietqr.io/image/" + bankBinCode + "-" + momoAcc + "-compact2.png?amount=" + grandTotal + "&addInfo=" + currentOrderCode + "&accountName=" + momoName;
@@ -1375,7 +1377,7 @@
       localStorage.setItem("thim5_last_order", JSON.stringify({ code: currentOrderCode, phone: phone, time: new Date().getTime(), step: initialStep, isSpun: false }));
       localStorage.setItem("thim5_crm", JSON.stringify({ name: name, phone: phone, address: detailAddr }));
 
-      var momoAccFinal = MOMO_PAYMENT_PHONE || (activeStoreConfig && (activeStoreConfig.bankAccount || activeStoreConfig.momoAccount)) || "0934220585";
+      var momoAccFinal = MOMO_PAYMENT_PHONE || (activeStoreConfig && (activeStoreConfig.bankAccount || activeStoreConfig.momoAccount)) || "3939388888";
       latestBillText = "🍜 *ĐƠN HÀNG THÍM 5 • MÃ: " + currentOrderCode + "*\n"
         + "👤 Khách hàng: " + name + " (" + phone + ")\n"
         + "📍 Địa chỉ: " + (detailAddr || "Hòa Thành, Tây Ninh") + "\n"
@@ -1446,7 +1448,7 @@
       window.open(zaloUrl, "_blank");
     }
 
-    // TỐI ƯU HÓA: DÙNG CHECKORDERSTATUSLIVE QUÉT TRỰC TIẾP MÃ ĐƠN TRÁNH BỊ TREO HOÀN TẤT
+    // TỐI ƯU HÓA: DÙNG CHECKORDERSTATUSLIVE DÒ THẲNG SHEET CHỐNG TREO HOÀN TẤT
     function checkActiveTracking() {
       var last = JSON.parse(localStorage.getItem("thim5_last_order") || "null");
       var tCard = document.getElementById("trackingCard");
