@@ -56,7 +56,8 @@
     .order-code { font-size: 14px; font-weight: 900; color: var(--gold); }
     .order-badge { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 8px; }
     .badge-step0 { background: rgba(245, 158, 11, 0.2); color: #FDE047; }
-    .badge-wait { background: rgba(239, 68, 68, 0.2); color: #FCA5A5; }
+    .badge-step1 { background: rgba(239, 68, 68, 0.2); color: #FCA5A5; }
+    .badge-step2 { background: rgba(234, 88, 12, 0.2); color: #FB923C; }
     .badge-delivering { background: rgba(37, 99, 235, 0.2); color: #93C5FD; }
     .badge-done { background: rgba(16, 185, 129, 0.2); color: #34D399; }
 
@@ -107,7 +108,10 @@
           <h2 id="dispShipperName">Tài Xế: Đang nạp...</h2>
           <p id="dispShipperPhone">SĐT: ...</p>
         </div>
-        <button class="btn-logout" onclick="handleLogout()">Đăng Xuất</button>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button id="btnSoundShipper" onclick="toggleShipperSound()" style="background:#0F172A; border:1px solid var(--border); color:var(--gold); padding:6px 10px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer;">🔔 Chuông: BẬT</button>
+          <button class="btn-logout" onclick="handleLogout()">Đăng Xuất</button>
+        </div>
       </header>
 
       <!-- KPI THU NHẬP -->
@@ -126,7 +130,7 @@
       <div class="filter-tabs-bar">
         <button class="tab-filter-btn active" data-filter="all" onclick="changeFilter('all', this)">🌐 Tất Cả</button>
         <button class="tab-filter-btn" data-filter="wait_verify" onclick="changeFilter('wait_verify', this)">⏳ Cần Gọi Xác Minh</button>
-        <button class="tab-filter-btn" data-filter="delivering" onclick="changeFilter('delivering', this)">🛵 Chờ Lấy & Giao</button>
+        <button class="tab-filter-btn" data-filter="delivering" onclick="changeFilter('delivering', this)">🛵 Đang Giao / Nấu</button>
         <button class="tab-filter-btn" data-filter="completed" onclick="changeFilter('completed', this)">✅ Đã Giao Xong</button>
       </div>
 
@@ -146,8 +150,11 @@
     var autoRefreshTimer = null;
     var cachedOrdersList = [];
     var currentActiveFilter = 'all';
+    var isShipperSoundOn = true;
+    var audioCtx = null;
+    var urgentShipperTimer = null;
 
-    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG NHẬN DIỆN GAS HOẶC WEB TĨNH RENDER
+    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS VÀ REST API RENDER
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -182,6 +189,63 @@
         document.getElementById("shipperPinInput").value = savedLast4;
         handleShipperLogin();
       }
+      document.body.addEventListener('click', initAudioCtx, { once: true });
+    }
+
+    function initAudioCtx() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      } catch(e) {}
+    }
+
+    function toggleShipperSound() {
+      isShipperSoundOn = !isShipperSoundOn;
+      var btn = document.getElementById("btnSoundShipper");
+      if (btn) {
+        btn.innerText = isShipperSoundOn ? "🔔 Chuông: BẬT" : "🔕 Chuông: TẮT";
+        btn.style.color = isShipperSoundOn ? "var(--gold)" : "var(--muted)";
+      }
+      if (!isShipperSoundOn && urgentShipperTimer) {
+        clearInterval(urgentShipperTimer);
+        urgentShipperTimer = null;
+      }
+    }
+
+    function playShipperAlertSound() {
+      if (!isShipperSoundOn) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        var now = audioCtx.currentTime;
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(784, now); // Nốt G5
+        osc.frequency.setValueAtTime(1046.5, now + 0.15); // Nốt C6
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.45);
+      } catch(e) {}
+    }
+
+    function checkAndMaintainShipperUrgentLoop(orders) {
+      if (!isShipperSoundOn) return;
+      var waitVerifyCount = orders.filter(function(o){ return Number(o.step) === 0; }).length;
+
+      if (waitVerifyCount > 0) {
+        if (!urgentShipperTimer) {
+          playShipperAlertSound();
+          urgentShipperTimer = setInterval(playShipperAlertSound, 4000);
+        }
+      } else {
+        if (urgentShipperTimer) {
+          clearInterval(urgentShipperTimer);
+          urgentShipperTimer = null;
+        }
+      }
     }
 
     function handleShipperLogin() {
@@ -206,6 +270,7 @@
       document.getElementById("dispShipperName").innerText = "Tài Xế: " + sName;
       document.getElementById("dispShipperPhone").innerText = "SĐT: " + sPhone;
 
+      initAudioCtx();
       loadShipperOrders();
 
       if (autoRefreshTimer) clearInterval(autoRefreshTimer);
@@ -233,6 +298,7 @@
         }
 
         renderOrders();
+        checkAndMaintainShipperUrgentLoop(cachedOrdersList);
       } catch (err) {
         console.error("Lỗi nạp cuốc xe Shipper:", err);
       }
@@ -259,12 +325,12 @@
       if (currentActiveFilter === 'wait_verify') {
         displayList = cachedOrdersList.filter(function(o){ return Number(o.step) === 0; });
       } else if (currentActiveFilter === 'delivering') {
-        // Gom cả Step 1 (Bếp đang nhận) và Step 2 (Bếp đang nấu) và Step 3 (Đang giao) vào để Shipper theo dõi
+        // Gom cả Step 1 (Bếp đang nhận), Step 2 (Bếp đang nấu) và Step 3 (Đang đi giao) để Shipper không bị mất đơn
         displayList = cachedOrdersList.filter(function(o){ return Number(o.step) >= 1 && Number(o.step) <= 3; });
       } else if (currentActiveFilter === 'completed') {
         displayList = cachedOrdersList.filter(function(o){ return Number(o.step) === 4 || o.status === "Hoàn Tất"; });
       } else {
-        // Tab Tất Cả: Hiển thị các đơn đang cần giao (chưa hoàn tất)
+        // Tab Tất Cả: Hiển thị các đơn đang vận hành (chưa hoàn tất)
         displayList = cachedOrdersList.filter(function(o){ return Number(o.step) < 4 && o.status !== "Hoàn Tất"; });
       }
 
@@ -296,8 +362,8 @@
           ? `<span style="color:#34D399; font-weight:800;">${shipFeeEarn.toLocaleString('vi-VN')}đ (Quán Trợ Giá 100%)</span>`
           : `<span style="color:var(--gold); font-weight:800;">${shipFeeEarn.toLocaleString('vi-VN')}đ</span>`;
 
-        var badgeClass = isStep0 ? 'badge-step0' : (isStep1 ? 'badge-wait' : (isStep2 ? 'badge-wait' : (isDelivering ? 'badge-delivering' : 'badge-done')));
-        var badgeText = isStep0 ? '⏳ Chờ Xác Minh COD' : (isStep1 ? '🔔 Bếp Đang Tiếp Nhận' : (isStep2 ? '🍳 Bếp Đang Nấu' : (isDelivering ? '🛵 Đang Giao' : '✅ Đã Hoàn Tất')));
+        var badgeClass = isStep0 ? 'badge-step0' : (isStep1 ? 'badge-step1' : (isStep2 ? 'badge-step2' : (isDelivering ? 'badge-delivering' : 'badge-done')));
+        var badgeText = isStep0 ? '⏳ Chờ Xác Minh COD' : (isStep1 ? '🔔 Bếp Đang Tiếp Nhận' : (isStep2 ? '🍳 Bếp Đang Nấu Chảo' : (isDelivering ? '🛵 Đang Giao Cho Khách' : '✅ Đã Hoàn Tất')));
 
         html += `
           <div class="order-card step${stepNum}">
@@ -368,17 +434,18 @@
       container.innerHTML = html;
     }
 
+    // XÁC MINH ĐƠN COD (STEP 0 ➔ STEP 1): TỰ ĐỘNG GÁN TÊN SHIPPER ĐỂ KHÓA CHẾT VÀO ĐƠN
     async function verifyCodOrder(orderCode) {
       var cleanCode = String(orderCode || "").trim();
-      var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "");
-      var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "");
+      var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "").trim();
+      var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "").trim();
       var shipperLabel = sName + " (" + sPhone + ")";
 
-      if (!confirm("Xác nhận bạn đã gọi điện cho khách và khách đồng ý nhận đơn " + cleanCode + "?")) return;
+      if (!confirm("Xác nhận bạn đã gọi điện và khách đồng ý nhận đơn " + cleanCode + "?")) return;
 
       var btn = document.getElementById("btn_verify_" + cleanCode);
       if (btn) {
-        btn.innerText = "⏳ Đang gửi lệnh mở Bếp...";
+        btn.innerText = "⏳ Đang truyền lệnh mở Bếp...";
         btn.disabled = true;
       }
 
@@ -398,10 +465,11 @@
       }
     }
 
+    // SHIPPER NHẬN MÓN VÀ BẮT ĐẦU ĐI GIAO (STEP 1/2 ➔ STEP 3)
     async function takeOrder(orderCode) {
       var cleanCode = String(orderCode || "").trim();
-      var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "");
-      var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "");
+      var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "").trim();
+      var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "").trim();
       var shipperLabel = sName + " (" + sPhone + ")";
 
       try {
@@ -416,9 +484,10 @@
       }
     }
 
+    // HOÀN TẤT CUỐC XE (STEP 3 ➔ STEP 4): GIAO XONG, TỰ ĐỘNG KÍCH HOẠT TÍCH LŨY CRM VÀ MỞ VÒNG QUAY
     async function completeOrder(orderCode) {
       var cleanCode = String(orderCode || "").trim();
-      if (!confirm("Xác nhận đã giao đơn " + cleanCode + " tận tay khách hàng?")) return;
+      if (!confirm("Xác nhận đã giao đơn " + cleanCode + " tận tay khách và thu đủ tiền?")) return;
 
       try {
         await callBackend("shipperUpdateStep", [cleanCode, "", 4], "shipperUpdateStep", {
@@ -433,6 +502,7 @@
       }
     }
 
+    // SỰ CỐ TRẢ ĐƠN VỀ BẾP (STEP 3 ➔ STEP 2)
     async function cancelOrder(orderCode) {
       var cleanCode = String(orderCode || "").trim();
       var reason = prompt("Nhập lý do sự cố (VD: Hỏng xe, thủng lốp, khách không nghe máy...):", "Hỏng xe đột xuất");
@@ -453,6 +523,8 @@
     function handleLogout() {
       if (autoRefreshTimer) clearInterval(autoRefreshTimer);
       autoRefreshTimer = null;
+      if (urgentShipperTimer) clearInterval(urgentShipperTimer);
+      urgentShipperTimer = null;
       localStorage.removeItem("thim5_shipper_last4");
       currentLast4 = "";
       document.getElementById("mainScreen").style.display = "none";
