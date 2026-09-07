@@ -52,11 +52,11 @@
     .tab-panel.active { display: block; animation: fadeIn .2s ease-in; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* STATS GRID 6 THẺ P&L */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    /* STATS GRID 7 THẺ P&L (BỔ SUNG QUỸ MARKETING ADS 1%) */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .stat-card { background: var(--card); padding: 14px 16px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
     .stat-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
-    .stat-val { font-size: 20px; font-weight: 900; color: #fff; }
+    .stat-val { font-size: 19px; font-weight: 900; color: #fff; }
     .stat-val.primary { color: var(--gold); }
     .stat-val.success { color: #34D399; }
     .stat-val.blue { color: #60A5FA; }
@@ -106,7 +106,7 @@
     .form-input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; outline: none; background: #0F172A; color: #fff; font-weight: bold; }
     .form-input:focus { border-color: var(--primary); }
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 12px; backdrop-filter: blur(4px); }
-    .modal-sheet { background: var(--card); width: 100%; max-width: 480px; border-radius: var(--radius); border: 2px solid var(--border); padding: 18px; max-height: 90vh; overflow-y: auto; color: #fff; }
+    .modal-sheet { background: var(--card); width: 100%; max-width: 500px; border-radius: var(--radius); border: 2px solid var(--border); padding: 18px; max-height: 90vh; overflow-y: auto; color: #fff; }
     
     .dish-img-preview { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); margin-top: 4px; }
     #systemStatusBar { background: #0F172A; color: var(--muted); padding: 6px 12px; border-radius: 8px; font-size: 11px; margin-bottom: 12px; display: flex; justify-content: space-between; border: 1px solid var(--border); }
@@ -114,6 +114,8 @@
     /* KHUNG QR DYNAMIC */
     .qr-card-box { background: #0F172A; border: 1px dashed var(--gold); border-radius: 12px; padding: 14px; text-align: center; margin-top: 14px; }
     .qr-card-img { width: 180px; height: 180px; border-radius: 10px; margin: 10px auto; display: block; border: 3px solid var(--gold); background: #fff; padding: 6px; }
+
+    .soft-warning-msg { color: #EF4444; font-size: 10.5px; font-weight: 800; margin-top: 4px; display: none; }
 
     @media (max-width: 768px) {
       body { padding: 10px; }
@@ -203,7 +205,7 @@
         <div class="stat-card" style="border-color:#10B981; background:rgba(16, 185, 129, 0.08);">
           <div class="stat-label" style="color:#34D399;">Lợi Nhuận Ròng (LNR Bỏ Túi)</div>
           <div class="stat-val success" id="stD2CLNR">0đ</div>
-          <div class="stat-sub" id="stD2CMargin" style="color:#34D399; font-weight:700;">Biên LNR: 0.0% (Trừ Cost 35% + Thuế HKD 4.5%)</div>
+          <div class="stat-sub" id="stD2CMargin" style="color:#34D399; font-weight:700;">Biên LNR: 0.0% (Trừ Cost + Thuế HKD)</div>
         </div>
 
         <div class="stat-card">
@@ -215,13 +217,19 @@
         <div class="stat-card">
           <div class="stat-label">Giá Trị Trung Bình Đơn (AOV)</div>
           <div class="stat-val primary" id="stAovVal">0đ</div>
-          <div class="stat-sub">Mục tiêu: Kéo &ge; 45.000đ/đơn</div>
+          <div class="stat-sub" id="stAovTargetSub">Mục tiêu AOV: 50.000đ</div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-label">Ngân Sách Đi Chợ (Cost 35%)</div>
+          <div class="stat-label">Ngân Sách Đi Chợ (Food Cost)</div>
           <div class="stat-val danger" id="stFoodCostBudget">0đ</div>
-          <div class="stat-sub">Định mức chi phí nguyên liệu tối đa</div>
+          <div class="stat-sub" id="stFoodCostRateSub">Định mức khoán trần: 35%</div>
+        </div>
+
+        <div class="stat-card" style="border-color:#38BDF8; background:rgba(56,189,248,0.06);">
+          <div class="stat-label" style="color:#38BDF8;">Quỹ Marketing Ads (1%)</div>
+          <div class="stat-val blue" id="stMarketingBudgetVal">0đ</div>
+          <div class="stat-sub">Tài trợ Ads Meta/TikTok cho quán</div>
         </div>
 
         <div class="stat-card">
@@ -247,20 +255,20 @@
               <tr>
                 <td><strong>1. Tỷ Lệ Biên LNR Kênh D2C</strong></td>
                 <td id="rowD2CMarginVal" style="font-weight:800; color:#34D399;">0.0%</td>
-                <td><span class="status-pill on">&ge; 30%</span></td>
+                <td><span class="status-pill on">&ge; 25%</span></td>
                 <td id="rowD2CMarginEval">Đang kiểm tra...</td>
               </tr>
               <tr>
                 <td><strong>2. Chênh Lệch Đối Soát Kho (COGS Gap)</strong></td>
                 <td id="rowCogsGap" style="font-weight:800;">0đ</td>
                 <td><span class="status-pill on">&le; 0đ</span></td>
-                <td id="rowCogsGapEval">Hóa đơn mua sỉ vs Định mức khoán 35%</td>
+                <td id="rowCogsGapEval">Hóa đơn mua sỉ vs Định mức khoán</td>
               </tr>
               <tr>
                 <td><strong>3. Giá Trị Trung Bình Đơn (AOV)</strong></td>
                 <td id="rowAOV" style="font-weight:800; color:var(--gold);">0đ</td>
-                <td><span class="status-pill on">&ge; 45.000đ</span></td>
-                <td>Mời thêm Nước 1L (25k) hoặc Topping để tối ưu doanh thu</td>
+                <td id="rowAovThreshold"><span class="status-pill on">&ge; 45.000đ</span></td>
+                <td>Mời thêm Nước 1L hoặc Topping giòn béo để kéo Ticket size</td>
               </tr>
               <tr>
                 <td><strong>4. Tỷ Lệ Đơn Giao Thành Công</strong></td>
@@ -309,7 +317,7 @@
       </div>
     </section>
 
-    <!-- TAB 3: TOPPING ĂN KÈM (ĐỦ 11 MÓN CHUẨN) -->
+    <!-- TAB 3: TOPPING ĂN KÈM -->
     <section id="tab_topping" class="tab-panel">
       <div class="card">
         <div class="card-title">
@@ -402,7 +410,7 @@
       <div class="card">
         <div class="card-title">
           <span>🛵 Danh Sách Đơn Hàng D2C & Chi Tiết Từng Phần Đặt</span>
-          <span style="font-size:11px; background:rgba(16, 185, 129, 0.2); color:#34D399; padding:3px 8px; border-radius:8px; font-weight:bold;">Food Cost Khoán 35% + Thuế HKD 4.5%</span>
+          <span style="font-size:11px; background:rgba(16, 185, 129, 0.2); color:#34D399; padding:3px 8px; border-radius:8px; font-weight:bold;">Food Cost Khoán & Thuế HKD Tự Động</span>
         </div>
         <div class="table-responsive">
           <table>
@@ -418,7 +426,7 @@
                 <th>LNR Thực Nhận</th>
                 <th>Biên LNR</th>
                 <th>Shipper Giao</th>
-                <th>Trạng Thái</th>
+                <th>Nguồn UTM / Trạng Thái</th>
               </tr>
             </thead>
             <tbody id="adminOrdersTbody"></tbody>
@@ -536,23 +544,88 @@
     <!-- TAB 10: CÀI ĐẶT LÕI HỆ THỐNG (SUPER ADMIN LEVEL 2) -->
     <section id="tab_settings" class="tab-panel">
       <div class="card">
-        <div class="card-title"><span>⚙️ Cài Đặt Ngân Hàng, Thuế HKD Động (4.5%), Email Kế Toán & Chiến Dịch</span></div>
+        <div class="card-title"><span>⚙️ Cài Đặt Lõi, Đa Ngành, Thù Lao Master, Ngân Hàng & Thuế HKD</span></div>
         <div style="max-width:850px;">
           
-          <!-- KHỐI 0: BẢNG ĐIỀU HÀNH THAM SỐ TÀI CHÍNH -->
+          <!-- KHỐI 0: CẤU HÌNH ĐA NGÀNH F&B & THÙ LAO SẾP ÂU + QUỸ ADS 1% -->
           <div style="background:#0F172A; border:2px solid var(--gold); border-radius:14px; padding:16px; margin-bottom:16px; box-shadow: 0 4px 20px rgba(253, 224, 71, 0.15);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px dashed #334155; padding-bottom:8px;">
               <div>
-                <strong style="color:var(--gold); font-size:14px;">🎛️ BẢNG ĐIỀU HÀNH CÔNG THỨC ĐỊNH GIÁ & KHUYẾN MÃI ĐỘNG</strong>
-                <p style="font-size:11px; color:var(--muted); margin-top:2px;">Tùy chỉnh tham số thời kỳ - Tự động tính toán Menu, Giỏ hàng và Doanh thu sạch</p>
+                <strong style="color:var(--gold); font-size:14px;">🌐 CẤU HÌNH ĐA NGÀNH, THÙ LAO MASTER (SẾP ÂU) & QUỸ ADS 1%</strong>
+                <p style="font-size:11px; color:var(--muted); margin-top:2px;">Điều chỉnh linh hoạt từng Child Node kết nối Master Root Portal</p>
               </div>
               <span class="role-badge lv2">Super Admin Only</span>
             </div>
 
+            <div style="display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:10px; margin-bottom:10px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Lĩnh Vực Hoạt Động (Category):</label>
+                <select class="form-input" id="cfgIndustryType" onchange="handleIndustryChange(this.value)">
+                  <option value="FAST_FOOD" selected>🍜 Thức Ăn Nhanh / Mì Trộn / Cơm</option>
+                  <option value="DRINKS">🧋 Trà Sữa / Cà Phê / Giải Khát</option>
+                  <option value="PUBS">🍻 Quán Nhậu / Mồi Bén / Lẩu Nướng</option>
+                  <option value="RESTAURANT">🍱 Cơm Trưa / Bếp Gia Đình</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Tỷ Lệ Thù Lao Sếp Âu (% D2C):</label>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <input type="number" step="0.1" min="0" max="10" class="form-input" id="cfgHubRoyaltyRate" value="2.0" style="color:var(--gold); font-size:14px;" />
+                  <span style="color:var(--gold); font-weight:bold;">%</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Quỹ Marketing Ads Chuỗi (%):</label>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <input type="number" step="0.1" class="form-input" id="cfgMarketingBudgetRate" value="1.0" style="color:#38BDF8; font-size:14px;" />
+                  <span style="color:#38BDF8; font-weight:bold;">%</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Ngưỡng Food Cost Trần An Toàn (%):</label>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <input type="number" step="1" min="10" max="50" class="form-input" id="cfgTargetMaxFoodCostRate" value="35" style="color:#F87171; font-size:14px;" />
+                  <span style="color:#F87171; font-weight:bold;">%</span>
+                  <span style="font-size:10px; color:var(--muted);">(Nước: ~25%, Mì: ~35%)</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Giá Trị Trung Bình Đơn Kỳ Vọng (AOV):</label>
+                <input type="number" class="form-input" id="cfgTargetAOV" value="50000" placeholder="50000" />
+              </div>
+            </div>
+          </div>
+
+          <!-- KHỐI TRACKING PIXEL TỰ ĐỘNG (ZERO-TOUCH CODE) -->
+          <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
+            <strong style="color:var(--gold); font-size:13px;">🎯 KHAI BÁO MÃ THEO DÕI QUẢNG CÁO (PIXEL ĐỘNG)</strong>
+            <p style="font-size:10px; color:var(--muted); margin-top:2px; margin-bottom:10px;">
+              Tự động kích hoạt phễu đo lường Ads Meta & TikTok khi khách đặt món D2C. Để trống nếu quán không chạy quảng cáo.
+            </p>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="color:#38BDF8;">Meta Pixel ID (Facebook Ads):</label>
+                <input type="text" class="form-input" id="cfgMetaPixelId" placeholder="VD: 123456789012345" />
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label style="color:#F472B6;">TikTok Pixel ID (TikTok Ads):</label>
+                <input type="text" class="form-input" id="cfgTiktokPixelId" placeholder="VD: C123456789ABCDEF" />
+              </div>
+            </div>
+          </div>
+
+          <!-- KHỐI 1: BẢNG ĐIỀU HÀNH CÔNG THỨC ĐỊNH GIÁ & KHUYẾN MÃI ĐỘNG -->
+          <div style="background:#0F172A; border:1px solid #334155; border-radius:14px; padding:16px; margin-bottom:16px;">
+            <strong style="color:var(--gold); font-size:13px; display:block; margin-bottom:8px;">🎛️ CÔNG THỨC ĐỊNH GIÁ NGƯỢC & BẬC THANG PHÍ SHIP</strong>
+
             <!-- 1. CÔNG THỨC ĐỊNH GIÁ NGƯỢC -->
             <div style="background:#1E293B; border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid #334155;">
               <label style="color:#38BDF8; font-weight:800; font-size:12px; display:block; margin-bottom:6px;">
-                1. Công thức định giá D2C từ giá sàn: D2C = Giá Sàn × (1 - Tỷ Lệ Lệch)
+                1. Định giá D2C từ giá sàn: D2C = Giá Sàn × (1 - Tỷ Lệ Lệch)
               </label>
               <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:10px; align-items:center;">
                 <div>
@@ -573,7 +646,7 @@
             <!-- 2. KHÓA TRẦN TỔNG KHUYẾN MÃI -->
             <div style="background:#1E293B; border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid #334155;">
               <label style="color:#F472B6; font-weight:800; font-size:12px; display:block; margin-bottom:6px;">
-                2. Khóa trần tổng ngân sách khuyến mãi toàn đơn (Voucher + Ship + Wheel + TV):
+                2. Khóa trần tổng ngân sách khuyến mãi toàn đơn (Voucher + Ship + Wheel):
               </label>
               <div style="display:flex; gap:8px; align-items:center;">
                 <label style="font-size:10.5px; color:var(--muted);">Tỷ lệ ngân sách tối đa trên tổng tiền món:</label>
@@ -615,7 +688,7 @@
             </button>
           </div>
 
-          <!-- KHỐI 1: CẤU HÌNH THUẾ HKD & EMAIL BÁO CÁO THUẾ -->
+          <!-- KHỐI 2: CẤU HÌNH THUẾ HKD & EMAIL BÁO CÁO THUẾ -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
             <strong style="color:var(--gold); font-size:13px;">📋 CẤU HÌNH THUẾ HỘ KINH DOANH & BÁO CÁO KÊ KHAI (23H59)</strong>
             <p style="font-size:10px; color:var(--muted); margin-top:2px; margin-bottom:10px;">Chỉ Super Admin mới có quyền điều chỉnh thuế suất và danh sách email nhận báo cáo thuế hàng ngày</p>
@@ -640,7 +713,7 @@
             </div>
           </div>
 
-          <!-- KHỐI 2: KHUNG GIỜ VÀNG -->
+          <!-- KHỐI 3: KHUNG GIỜ VÀNG -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <div>
@@ -658,7 +731,7 @@
             </div>
           </div>
 
-          <!-- KHỐI 3: MARKETING & GAMIFICATION ĐỘNG (5 TIERS) - ĐÃ FIX KHÔNG BỊ TRẮNG BẢNG -->
+          <!-- KHỐI 4: MARKETING & GAMIFICATION ĐỘNG (5 TIERS) -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <div>
@@ -728,7 +801,7 @@
             </button>
           </div>
 
-          <!-- KHỐI 4: TÀI KHOẢN NGÂN HÀNG & VIETQR (ĐÃ FIX LƯU STK MB BANK 3939388888) -->
+          <!-- KHỐI 5: TÀI KHOẢN NGÂN HÀNG & VIETQR -->
           <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
             <strong style="color:var(--gold); font-size:13px;">💳 TÀI KHOẢN NGÂN HÀNG / VÍ VIETQR NHẬN TIỀN KHÁCH</strong>
             <p style="font-size:10px; color:var(--muted); margin-top:2px; margin-bottom:10px;">Tự động sinh mã VietQR chuẩn Napas247 cho đơn hàng D2C</p>
@@ -767,7 +840,7 @@
             </div>
           </div>
 
-          <!-- KHỐI 5: MÃ QR ĐỘNG -->
+          <!-- KHỐI 6: MÃ QR ĐỘNG -->
           <div class="qr-card-box">
             <strong style="color:var(--gold); font-size:13px;">📱 MÃ QR ĐẶT MÓN ĐỘNG CỦA QUÁN (IN ẤN / STANDEE)</strong>
             <p style="font-size:10px; color:var(--muted); margin-top:2px;">Tự động cập nhật lại mã QR mỗi khi thay đổi địa chỉ Web quán</p>
@@ -787,7 +860,7 @@
 
           <hr style="border:0; border-top:1px dashed #334155; margin:16px 0;" />
 
-          <!-- KHỐI 6: THÔNG TIN VẬN HÀNH & ĐỔI MÃ PIN & BANNER COVER ĐỘNG -->
+          <!-- KHỐI 7: THÔNG TIN VẬN HÀNH & ĐỔI MÃ PIN & BANNER COVER ĐỘNG -->
           <div class="form-group">
             <label>Ảnh Bìa / Banner Cover Quán (URL hình ảnh hiển thị trên Web):</label>
             <input type="url" class="form-input" id="cfgStoreCoverUrl" placeholder="https://images.unsplash.com/... hoặc link ảnh Drive" />
@@ -886,7 +959,7 @@
     </div>
   </div>
 
-  <!-- MODAL THÊM/SỬA MÓN -->
+  <!-- MODAL THÊM/SỬA MÓN (CÓ CẢNH BÁO MỀM SOFT WARNING) -->
   <div class="modal" id="dishModal">
     <div class="modal-sheet">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -910,10 +983,10 @@
 
       <div class="form-group">
         <label>Phân Loại Ma Trận Menu (Định vị kéo AOV):</label>
-        <select class="form-input" id="dishCatInput">
-          <option value="mon-chinh">🍜 Món Mồi / Món Chính (25k – 45k) [Traffic Maker]</option>
-          <option value="moi-lai-rai">🍻 Mồi Lai Rai Bắt Vị (45k – 79k) [Kéo Ticket Nhậu]</option>
-          <option value="dai-tiec">👑 Mâm VIP / Đại Tiệc (119k – 199k) [Kéo AOV Nhóm]</option>
+        <select class="form-input" id="dishCatInput" onchange="validateSoftWarningPricing()">
+          <option value="mon-chinh">🍜 Món Mồi / Món Chính (25k – 29k) [Traffic Maker]</option>
+          <option value="moi-lai-rai">🍻 Mồi Lai Rai Bắt Vị (39k – 49k) [Core Profit]</option>
+          <option value="dai-tiec">👑 Mâm VIP / Đại Tiệc (59k – 199k) [Kéo AOV Nhóm]</option>
           <option value="an-kem">🍱 Món Ăn Kèm (Kimbap, Gà Viên...)</option>
           <option value="giai-khat">🧋 Nước Uống Bất Tử (Size 1 Lít & Đóng Lon)</option>
           <option value="topping-extra">🥢 Topping Ăn Kèm (Trứng đào, Tóp mỡ...)</option>
@@ -935,12 +1008,13 @@
         <input type="number" class="form-input" id="dishPriceAppInput" placeholder="VD: 45000" oninput="autoCalculateD2CFromApp(this.value)" />
       </div>
       <div class="form-group">
-        <label style="color:var(--gold);">Giá Bán Web D2C (Tự động rẻ hơn 12%):</label>
+        <label style="color:var(--gold);">Giá Bán Web D2C (Rẻ hơn ~12%):</label>
         <input type="number" class="form-input" id="dishPriceInput" placeholder="Tự nhảy: 39000" oninput="autoCalculateAppFromD2C(this.value)" />
+        <p id="softWarningPriceText" class="soft-warning-msg"></p>
       </div>
       <div class="form-group">
-        <label>Food Cost Định Lượng (Max 35%):</label>
-        <input type="number" class="form-input" id="dishCostInput" placeholder="Tự tính trần 35%" />
+        <label>Food Cost Định Lượng (Khuyến nghị &le; <span id="dispCostRateLimitLabel">35%</span>):</label>
+        <input type="number" class="form-input" id="dishCostInput" placeholder="Tự tính theo trần Food Cost" />
       </div>
       <div class="form-group"><label>Mô Tả Thành Phần / Khẩu Vị:</label><input type="text" class="form-input" id="dishDescInput" /></div>
       <button class="btn" style="width:100%; padding:10px;" id="btnSaveDish" onclick="saveDishSubmit()">💾 Lưu Món Ăn</button>
@@ -967,7 +1041,7 @@
   <div class="modal" id="importMediaModal">
     <div class="modal-sheet" style="max-width: 620px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 id="importModalTitle" style="font-size:15px; font-weight:800; color:var(--gold);">📷 Nhập Liệu Menu Hàng Loạt Tự Động</h3>
+        <h3 id="importModalTitle" style="font-size:15px; font-weight:800; color:var(--gold);">📷 Nhập Liệu Menu Hàng Loạt Chuẩn Hoá</h3>
         <button onclick="closeModal('importMediaModal')" style="background:none; border:none; font-size:16px; cursor:pointer; color:#fff;">✕</button>
       </div>
 
@@ -1239,6 +1313,7 @@
       var d2c = Number(res.d2cRevenue) || 0;
       var d2cLnr = Number(res.d2cNetProfit) || 0;
       var cogsGap = Number(res.cogsGap) || 0;
+      var marketingAds = Number(res.marketingAdsBudget) || Math.round(d2c * 0.01);
       var orders = res.recentOrders || [];
 
       var completedCount = 0;
@@ -1251,23 +1326,29 @@
       var totalOrders = completedCount > 0 ? completedCount : orders.length;
       var cancelRate = (orders.length > 0) ? ((cancelCount / orders.length) * 100).toFixed(1) : "0.0";
       var aov = totalOrders > 0 ? Math.round(d2c / totalOrders) : 0;
-      var foodCostBudget = Math.round(d2c * 0.35);
+      var targetFoodCostRate = (activeStoreConfigCache && activeStoreConfigCache.targetMaxFoodCostRate) ? activeStoreConfigCache.targetMaxFoodCostRate : 0.35;
+      var foodCostBudget = Math.round(d2c * targetFoodCostRate);
       var totalShipSubsidy = Number(res.d2cPromoTotal) || 0;
 
       document.getElementById("stD2CRev").innerText = d2c.toLocaleString('vi-VN') + "đ";
       document.getElementById("stD2CLNR").innerText = d2cLnr.toLocaleString('vi-VN') + "đ";
-      document.getElementById("stD2CMargin").innerText = "Biên LNR: " + (res.d2cMargin || "0.0%") + " (Trừ Cost 35% + Thuế HKD 4.5%)";
+      document.getElementById("stD2CMargin").innerText = "Biên LNR: " + (res.d2cMargin || "0.0%") + " (Trừ Cost + Thuế HKD)";
       document.getElementById("stTotalOrdersCount").innerText = totalOrders + " đơn";
       document.getElementById("stCancelRateSub").innerText = "Tỷ lệ hủy đơn: " + cancelRate + "%";
       document.getElementById("stAovVal").innerText = aov.toLocaleString('vi-VN') + "đ";
       document.getElementById("stFoodCostBudget").innerText = foodCostBudget.toLocaleString('vi-VN') + "đ";
+      document.getElementById("stMarketingBudgetVal").innerText = marketingAds.toLocaleString('vi-VN') + "đ";
       document.getElementById("stTotalShipSubsidy").innerText = totalShipSubsidy.toLocaleString('vi-VN') + "đ";
+
+      var targetAovVal = (activeStoreConfigCache && activeStoreConfigCache.targetAOV) ? activeStoreConfigCache.targetAOV : 50000;
+      document.getElementById("stAovTargetSub").innerText = "Mục tiêu AOV: " + targetAovVal.toLocaleString('vi-VN') + "đ";
+      document.getElementById("stFoodCostRateSub").innerText = "Định mức khoán trần: " + Math.round(targetFoodCostRate * 100) + "%";
 
       document.getElementById("rowD2CMarginVal").innerText = res.d2cMargin || "0.0%";
       var marginNum = parseFloat(res.d2cMargin) || 0;
       var marginEval = document.getElementById("rowD2CMarginEval");
-      if (marginNum >= 30.0) {
-        marginEval.innerHTML = "<span style='color:#34D399; font-weight:800;'>✅ Lợi Nhuận Khỏe (&ge; 30%)</span>";
+      if (marginNum >= 25.0) {
+        marginEval.innerHTML = "<span style='color:#34D399; font-weight:800;'>✅ Lợi Nhuận Khỏe (&ge; 25%)</span>";
       } else {
         marginEval.innerHTML = "<span style='color:var(--danger); font-weight:800;'>⚠️ Cảnh Báo: Rà lại Voucher/Ship</span>";
       }
@@ -1275,12 +1356,13 @@
       document.getElementById("rowCogsGap").innerText = (cogsGap > 0 ? "+" : "") + cogsGap.toLocaleString('vi-VN') + "đ";
       var cogsEval = document.getElementById("rowCogsGapEval");
       if (cogsGap <= 0) {
-        cogsEval.innerHTML = "<span style='color:#34D399; font-weight:800;'>✅ Kho Chuẩn (Tiền chợ &le; Khoán 35%)</span>";
+        cogsEval.innerHTML = "<span style='color:#34D399; font-weight:800;'>✅ Kho Chuẩn (Tiền chợ &le; Khoán)</span>";
       } else {
         cogsEval.innerHTML = "<span style='color:var(--danger); font-weight:800;'>⚠️ Hao Hụt: Tiền chợ vượt định mức</span>";
       }
 
       document.getElementById("rowAOV").innerText = aov.toLocaleString('vi-VN') + "đ";
+      document.getElementById("rowAovThreshold").innerHTML = "<span class='status-pill on'>&ge; " + targetAovVal.toLocaleString('vi-VN') + "đ</span>";
       var successRate = orders.length > 0 ? (((orders.length - cancelCount) / orders.length) * 100).toFixed(1) : "100.0";
       document.getElementById("rowDeliverySuccessRate").innerText = successRate + "%";
 
@@ -1298,6 +1380,7 @@
       }
       orders.forEach(function(o) {
         var tr = document.createElement("tr");
+        var utmBadge = o.utmSource ? `<br><small style="color:#38BDF8; font-weight:800;">[Nguồn: ${o.utmSource}]</small>` : "";
         tr.innerHTML = `
           <td style="font-weight:800; color:var(--gold);">${o.code}</td>
           <td style="color:var(--muted); font-size:11px;">${o.time}</td>
@@ -1309,7 +1392,7 @@
           <td style="font-weight:800; color:#34D399;">+${Number(o.netProfit||0).toLocaleString('vi-VN')}đ</td>
           <td style="font-weight:800; font-size:11px; text-align:center; color:#34D399;">${o.margin || '0.0%'}</td>
           <td><span style="background:var(--card-inner); padding:2px 6px; border-radius:6px; font-size:10px;">${o.shipper || 'Chưa gán'}</span></td>
-          <td><span class="status-pill on">${o.status}</span></td>
+          <td><span class="status-pill on">${o.status}</span>${utmBadge}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -1515,7 +1598,7 @@
       }
     }
 
-    // 6. MENU MÓN CHÍNH & TOPPING (TỐI ƯU GIẢI NÉN ĐA TẦNG CHỐNG TRẮNG BẢNG)
+    // 6. MENU MÓN CHÍNH & TOPPING
     async function loadAdminMenuList() {
       try {
         var res = await callBackend("getAdminMenuList", [], "getMenu", {});
@@ -1688,6 +1771,7 @@
       document.getElementById("dishPriceAppInput").value = "";
       document.getElementById("dishCostInput").value = "";
       document.getElementById("dishDescInput").value = "";
+      validateSoftWarningPricing();
       document.getElementById("dishModal").style.display = "flex";
     }
 
@@ -1707,7 +1791,49 @@
       document.getElementById("dishPriceAppInput").value = priceApp;
       document.getElementById("dishCostInput").value = cost;
       document.getElementById("dishDescInput").value = desc;
+      validateSoftWarningPricing();
       document.getElementById("dishModal").style.display = "flex";
+    }
+
+    // CƠ CHẾ CẢNH BÁO MỀM (SOFT WARNING) KHI NHẬP GIÁ NGOÀI MA TRẬN 3 TẦNG
+    function validateSoftWarningPricing() {
+      var cat = document.getElementById("dishCatInput").value;
+      var priceD2C = parseFloat(document.getElementById("dishPriceInput").value) || 0;
+      var warnEl = document.getElementById("softWarningPriceText");
+      if (!warnEl) return;
+
+      if (priceD2C <= 0) {
+        warnEl.style.display = "none";
+        return;
+      }
+
+      var rules = (activeStoreConfigCache && activeStoreConfigCache.softWarningRules) ? activeStoreConfigCache.softWarningRules : {
+        tier1_Traffic_Min: 22000, tier1_Traffic_Max: 33000,
+        tier2_Core_Min: 35000, tier2_Core_Max: 55000,
+        tier3_Ticket_Min: 50000
+      };
+
+      var msg = "";
+      if (cat === "mon-chinh") {
+        if (priceD2C < rules.tier1_Traffic_Min || priceD2C > rules.tier1_Traffic_Max) {
+          msg = "⚠️ Cảnh Báo Định Vị: Món mồi khuyến nghị từ 25k - 29k (Mức an toàn: " + (rules.tier1_Traffic_Min/1000) + "k - " + (rules.tier1_Traffic_Max/1000) + "k) để kéo khách mới.";
+        }
+      } else if (cat === "moi-lai-rai") {
+        if (priceD2C < rules.tier2_Core_Min || priceD2C > rules.tier2_Core_Max) {
+          msg = "⚠️ Cảnh Báo Biên Lợi Nhuận: Món chủ lực khuyến nghị từ 39k - 49k (Mức an toàn: " + (rules.tier2_Core_Min/1000) + "k - " + (rules.tier2_Core_Max/1000) + "k).";
+        }
+      } else if (cat === "dai-tiec") {
+        if (priceD2C < rules.tier3_Ticket_Min) {
+          msg = "⚠️ Cảnh Báo Kéo Ticket: Mâm VIP / Đại tiệc nên đặt từ 59k trở lên để kéo AOV đơn hàng.";
+        }
+      }
+
+      if (msg) {
+        warnEl.innerText = msg;
+        warnEl.style.display = "block";
+      } else {
+        warnEl.style.display = "none";
+      }
     }
 
     function handleDishImageProcess(event) {
@@ -1750,7 +1876,8 @@
         priceApp = Math.round((price / (1 - d2cRate2)) / 1000) * 1000;
       }
 
-      var cost = Number(document.getElementById("dishCostInput").value) || Math.round(price * 0.35);
+      var targetRate = (activeStoreConfigCache && activeStoreConfigCache.targetMaxFoodCostRate) ? activeStoreConfigCache.targetMaxFoodCostRate : 0.35;
+      var cost = Number(document.getElementById("dishCostInput").value) || Math.round(price * targetRate);
       var desc = document.getElementById("dishDescInput").value.trim();
       var base64Img = document.getElementById("dishImgBase64").value;
       var currentPreviewSrc = document.getElementById("dishImgPreview").src;
@@ -1955,23 +2082,27 @@
     function autoCalculateD2CFromApp(appVal) {
       var pApp = parseFloat(appVal) || 0;
       var d2cRate = (activeStoreConfigCache && activeStoreConfigCache.d2cDiscountRate) ? activeStoreConfigCache.d2cDiscountRate : 0.12;
+      var targetRate = (activeStoreConfigCache && activeStoreConfigCache.targetMaxFoodCostRate) ? activeStoreConfigCache.targetMaxFoodCostRate : 0.35;
       if (pApp > 0) {
         var pD2C = Math.round((pApp * (1 - d2cRate)) / 1000) * 1000;
         document.getElementById("dishPriceInput").value = pD2C;
-        var safeCost = Math.round(pD2C * 0.35);
+        var safeCost = Math.round(pD2C * targetRate);
         document.getElementById("dishCostInput").value = safeCost;
       }
+      validateSoftWarningPricing();
     }
 
     function autoCalculateAppFromD2C(d2cVal) {
       var pD2C = parseFloat(d2cVal) || 0;
       var d2cRate = (activeStoreConfigCache && activeStoreConfigCache.d2cDiscountRate) ? activeStoreConfigCache.d2cDiscountRate : 0.12;
+      var targetRate = (activeStoreConfigCache && activeStoreConfigCache.targetMaxFoodCostRate) ? activeStoreConfigCache.targetMaxFoodCostRate : 0.35;
       if (pD2C > 0) {
         var pApp = Math.round((pD2C / (1 - d2cRate)) / 1000) * 1000;
         document.getElementById("dishPriceAppInput").value = pApp;
-        var safeCost = Math.round(pD2C * 0.35);
+        var safeCost = Math.round(pD2C * targetRate);
         document.getElementById("dishCostInput").value = safeCost;
       }
+      validateSoftWarningPricing();
     }
 
     function previewPricingDemo(rateVal) {
@@ -1982,12 +2113,37 @@
       if (el) el.innerText = "Sàn: " + demoApp.toLocaleString('vi-VN') + "đ ➔ D2C: " + demoD2C.toLocaleString('vi-VN') + "đ (Lệch " + Math.round(r * 100) + "%)";
     }
 
+    function handleIndustryChange(val) {
+      if (val === "DRINKS") {
+        document.getElementById("cfgTargetMaxFoodCostRate").value = 25;
+        document.getElementById("cfgTargetAOV").value = 35000;
+      } else if (val === "PUBS") {
+        document.getElementById("cfgTargetMaxFoodCostRate").value = 42;
+        document.getElementById("cfgTargetAOV").value = 200000;
+      } else {
+        document.getElementById("cfgTargetMaxFoodCostRate").value = 35;
+        document.getElementById("cfgTargetAOV").value = 50000;
+      }
+    }
+
     async function loadDynamicConfigToInputs() {
       try {
         var res = await callBackend("getStoreConfigDynamic", [], "getConfig", {});
         var cfg = (res && res.storeName !== undefined) ? res : (res && res.data ? res.data : null);
         if (!cfg) return;
         activeStoreConfigCache = cfg;
+
+        if (document.getElementById("cfgIndustryType")) document.getElementById("cfgIndustryType").value = cfg.industryType || "FAST_FOOD";
+        if (document.getElementById("cfgHubRoyaltyRate")) document.getElementById("cfgHubRoyaltyRate").value = ((cfg.hubRoyaltyRate !== undefined) ? Number(cfg.hubRoyaltyRate) : 0.02) * 100;
+        if (document.getElementById("cfgMarketingBudgetRate")) document.getElementById("cfgMarketingBudgetRate").value = ((cfg.marketingBudgetRate !== undefined) ? Number(cfg.marketingBudgetRate) : 0.01) * 100;
+        
+        var targetCostVal = ((cfg.targetMaxFoodCostRate !== undefined) ? Number(cfg.targetMaxFoodCostRate) : 0.35) * 100;
+        if (document.getElementById("cfgTargetMaxFoodCostRate")) document.getElementById("cfgTargetMaxFoodCostRate").value = Math.round(targetCostVal);
+        if (document.getElementById("dispCostRateLimitLabel")) document.getElementById("dispCostRateLimitLabel").innerText = Math.round(targetCostVal) + "%";
+        if (document.getElementById("cfgTargetAOV")) document.getElementById("cfgTargetAOV").value = cfg.targetAOV || 50000;
+
+        if (document.getElementById("cfgMetaPixelId")) document.getElementById("cfgMetaPixelId").value = cfg.metaPixelId || "";
+        if (document.getElementById("cfgTiktokPixelId")) document.getElementById("cfgTiktokPixelId").value = cfg.tiktokPixelId || "";
 
         if (document.getElementById("cfgStoreCoverUrl")) document.getElementById("cfgStoreCoverUrl").value = cfg.storeCoverUrl || "";
         if (document.getElementById("cfgStoreName")) document.getElementById("cfgStoreName").value = cfg.storeName || "";
@@ -2151,7 +2307,6 @@
       }
     }
 
-    // TỐI ƯU HÓA: BÓC TÁCH MẢNG TIERS 3 TẦNG & FALLBACK ĐỦ 5 CẤP ĐỘ
     async function loadGamificationAdminData() {
       try {
         var res = await callBackend("getLoyaltyGamificationConfig", [], "getGamificationConfig", {});
@@ -2159,7 +2314,6 @@
         if (res && res.tiers !== undefined) cfg = res;
         else if (res && res.data && res.data.tiers !== undefined) cfg = res.data;
         
-        // Fallback chuẩn 5 cấp bậc nếu chưa có cấu hình trên server
         if (!cfg || !cfg.tiers) {
           cfg = {
             monthlyReset: true,
@@ -2307,10 +2461,13 @@
       }
     }
 
-    // TỐI ƯU HÓA: BỌC CHUẨN JSON CHỐNG GÃY LỆNH LƯU NGÂN HÀNG & COVER BANNER
+    // TỐI ƯU HÓA: BỌC CHUẨN JSON ĐA NGÀNH, TRACKING PIXEL & STK MB BANK
     async function saveSystemSettingsSubmit() {
       var bankParts = (document.getElementById("cfgBankSelect").value || "MB|970422").split("|");
       var taxPercentInput = parseFloat(document.getElementById("cfgTaxRatePercent").value) || 4.5;
+      var royaltyInput = parseFloat(document.getElementById("cfgHubRoyaltyRate").value) || 2.0;
+      var marketingInput = parseFloat(document.getElementById("cfgMarketingBudgetRate").value) || 1.0;
+      var targetCostInput = parseFloat(document.getElementById("cfgTargetMaxFoodCostRate").value) || 35;
       
       var newCfg = {
         storeCoverUrl: document.getElementById("cfgStoreCoverUrl") ? document.getElementById("cfgStoreCoverUrl").value.trim() : "",
@@ -2329,8 +2486,18 @@
         accountTypeLabel: document.getElementById("cfgAccountTypeLabel").value,
         webAppUrl: document.getElementById("cfgStoreWebUrl").value.trim(),
         taxReportEmails: document.getElementById("cfgTaxReportEmails").value.trim(),
-        foodCostRateD2C: 0.35,
+        
+        industryType: document.getElementById("cfgIndustryType").value,
+        hubRoyaltyRate: (royaltyInput / 100),
+        marketingBudgetRate: (marketingInput / 100),
+        targetMaxFoodCostRate: (targetCostInput / 100),
+        targetAOV: parseInt(document.getElementById("cfgTargetAOV").value, 10) || 50000,
+        foodCostRateD2C: (targetCostInput / 100),
         taxRateDefault: (taxPercentInput / 100),
+
+        metaPixelId: document.getElementById("cfgMetaPixelId") ? document.getElementById("cfgMetaPixelId").value.trim() : "",
+        tiktokPixelId: document.getElementById("cfgTiktokPixelId") ? document.getElementById("cfgTiktokPixelId").value.trim() : "",
+
         autoOpenHour: parseInt(document.getElementById("cfgAutoOpenHour") ? document.getElementById("cfgAutoOpenHour").value : 6, 10),
         autoCloseHour: parseInt(document.getElementById("cfgAutoCloseHour") ? document.getElementById("cfgAutoCloseHour").value : 22, 10)
       };
@@ -2345,8 +2512,6 @@
       setStatusLog("Đang lưu và đồng bộ toàn hệ thống...", false);
       try {
         await callBackend("updateGoldenHourStatus", [isGolden, goldenMsg], "updateGoldenHour", { isActive: isGolden, msg: goldenMsg });
-        
-        // CHỐT CHẶN ÉP KIỂU: Bọc payload JSON chuỗi để backend đọc chính xác 100%
         var res = await callBackend("saveStoreConfigDynamic", [newCfg], "saveConfig", { payload: JSON.stringify(newCfg) });
         
         alert("✅ " + ((res && res.message) ? res.message : "Đã đồng bộ cấu hình thành công!"));
