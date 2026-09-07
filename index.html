@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Mì Trộn & Cơm Trộn Thím 5 • Hòa Thành, Tây Ninh</title>
+  
+  <!-- FIX TRIỆT ĐỂ LỖI 404 FAVICON.ICO BẰNG SVG ICON CHUẨN F&B -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍜</text></svg>">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   
@@ -99,7 +103,7 @@
     /* ACTION PILLS */
     .action-pills-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 8px;
       margin-top: 12px;
     }
@@ -113,7 +117,9 @@
       gap: 8px;
       font-size: 11px;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
+    .pill-card:hover { border-color: var(--grab-green); }
     .pill-card strong { color: #1C1C1C; display: block; font-size: 11px; }
     .pill-card span { color: var(--grab-muted); font-size: 10px; }
 
@@ -304,6 +310,13 @@
       </div>
 
       <div class="action-pills-grid">
+        <div class="pill-card" id="btnEnableNotification" onclick="requestPushNotificationPermission()" style="border-color:#F59E0B; background:#FFFBEB;">
+          <span style="font-size:16px;">🔔</span>
+          <div>
+            <strong style="color:#B45309;" id="notifBtnTitle">Bật Chuông Giờ Vàng</strong>
+            <span style="color:#D97706;" id="notifBtnSub">Nhận Freeship & Quà Tặng</span>
+          </div>
+        </div>
         <div class="pill-card" onclick="openPwaModal()">
           <span style="font-size:16px;">📌</span>
           <div>
@@ -538,18 +551,18 @@
           <label>Hình thức thanh toán:</label>
           <select class="form-input" id="payMethod" onchange="renderQRMoMo()">
             <option value="COD">💵 Tiền mặt khi nhận hàng (COD)</option>
-            <option value="CK_VIETQR">💳 Quét MoMo / VietQR (Tự Động)</option>
+            <option value="CK_VIETQR">💳 Quét MoMo / VietQR MB Bank (Tự Động)</option>
           </select>
         </div>
 
         <div class="qr-container" id="qrContainer">
           <p style="font-size:10px; font-weight:800; color:#92400E;">MÃ VIETQR / MOMO TỰ ĐỘNG THÍM 5</p>
-          <img src="" id="dynamicQrImg" class="qr-img" alt="MoMo VietQR" />
+          <img src="" id="dynamicQrImg" class="qr-img" alt="MB Bank VietQR" />
           <button type="button" class="btn-grab-submit" style="background:#0F172A; padding:7px; font-size:10px; margin:4px 0;" onclick="downloadQrCodeImage()">
             📥 Tải Ảnh QR Về Máy (Để Quét Trong App Bank)
           </button>
           <button type="button" class="btn-copy-chip" onclick="copyDynamicBankAccount()">
-            <span>📋 STK MB: <strong id="dispCopyMomoAcc">3939388888</strong></span>
+            <span>📋 STK MB Bank: <strong id="dispCopyMomoAcc">3939388888</strong></span>
             <span style="color:var(--grab-green); font-size:9px;">Sao chép</span>
           </button>
         </div>
@@ -726,14 +739,14 @@
     var isSpinning = false;
     var isStoreClosed = false;
 
-    // QUẢN LÝ TRACKING PIXEL & UTM
+    // QUẢN LÝ TRACKING PIXEL & UTM NGUỒN CHUYỂN ĐỔI
     var activeTrackingPixels = { meta: "", tiktok: "" };
     var currentUtmSource = "";
 
     function captureUtmTracking() {
       try {
         var params = new URLSearchParams(window.location.search);
-        var src = params.get("src") || params.get("utm_source") || params.get("ref");
+        var src = params.get("src") || params.get("utm_source") || params.get("ref") || params.get("zarsrc");
         if (src) {
           currentUtmSource = src;
           sessionStorage.setItem("thim5_utm_source", src);
@@ -1448,7 +1461,7 @@
         + "-----------------------------\n"
         + "🍲 *CHI TIẾT MÓN ĐẶT:*\n" + billZaloItemsText + "\n"
         + "-----------------------------\n"
-        + "💳 Thanh toán: " + (payMethod === 'COD' ? "Tiền mặt khi nhận hàng (COD)" : "Đã chuyển khoản VietQR (" + momoAccFinal + ")") + "\n"
+        + "💳 Thanh toán: " + (payMethod === 'COD' ? "Tiền mặt khi nhận hàng (COD)" : "Đã chuyển khoản VietQR MB Bank (" + momoAccFinal + ")") + "\n"
         + "💰 *TỔNG THANH TOÁN: " + grandTotalNum.toLocaleString('vi-VN') + "đ*\n"
         + "👉 Bếp xác nhận đơn và làm nóng giòn giúp mình nhé!";
 
@@ -1712,6 +1725,140 @@
 
     function closeModal(id) {
       document.getElementById(id).style.display = "none";
+    }
+
+    // =========================================================================
+    // SERVICE WORKER & LOCAL PUSH NOTIFICATION (REMARKETING 0 ĐỒNG)
+    // =========================================================================
+    var swRegistration = null;
+
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js').then(function(reg) {
+          swRegistration = reg;
+          console.log('✅ Service Worker Thím 5 sẵn sàng:', reg.scope);
+          checkExistingNotificationPermission();
+          setupAutomatedFoodAlarmSchedule();
+        }).catch(function(err) {
+          console.warn('⚠️ Service Worker chưa thể đăng ký:', err);
+        });
+      });
+    }
+
+    function requestPushNotificationPermission() {
+      if (!('Notification' in window)) {
+        alert("Trình duyệt điện thoại của bạn chưa hỗ trợ tính năng thông báo này!");
+        return;
+      }
+
+      Notification.requestPermission().then(function(permission) {
+        if (permission === 'granted') {
+          updateNotifButtonState(true);
+          playGoldenHourAlert();
+          sendDirectPushAlert(
+            "🎉 Đã Bật Chuông Ưu Đãi Thím 5!",
+            "Bạn sẽ nhận ngay thông báo Freeship 2km và Quà tặng Giờ Vàng 14h mỗi ngày!",
+            "/?src=notif_welcome"
+          );
+          localStorage.setItem("thim5_push_enabled", "true");
+        } else {
+          alert("Bạn đã từ chối nhận thông báo. Hãy bấm vào biểu tượng ổ khóa 🔒 cạnh thanh địa chỉ để bật lại nhé!");
+        }
+      });
+    }
+
+    function checkExistingNotificationPermission() {
+      if (Notification.permission === 'granted') {
+        updateNotifButtonState(true);
+      }
+    }
+
+    function updateNotifButtonState(isGranted) {
+      var titleEl = document.getElementById("notifBtnTitle");
+      var subEl = document.getElementById("notifBtnSub");
+      var cardEl = document.getElementById("btnEnableNotification");
+      if (titleEl && isGranted) {
+        titleEl.innerText = "Chuông Đang Bật 🟢";
+        titleEl.style.color = "var(--grab-green)";
+        subEl.innerText = "Sẵn sàng nhận Freeship";
+        subEl.style.color = "var(--grab-muted)";
+        cardEl.style.background = "#ECFDF5";
+        cardEl.style.borderColor = "var(--grab-green)";
+      }
+    }
+
+    function sendDirectPushAlert(title, body, targetUrl) {
+      if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          action: 'SHOW_FOOD_ALERT',
+          title: title,
+          body: body,
+          url: targetUrl || '/',
+          icon: activeStoreConfig.storeCoverUrl || 'https://images.unsplash.com/photo-1612927601601-6638404737ce?w=192'
+        });
+      } else if (Notification.permission === 'granted') {
+        new Notification(title, {
+          body: body,
+          icon: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?w=192'
+        });
+      }
+    }
+
+    function setupAutomatedFoodAlarmSchedule() {
+      setInterval(function() {
+        if (Notification.permission !== 'granted') return;
+
+        var now = new Date();
+        var currentHour = now.getHours();
+        var currentMinute = now.getMinutes();
+        var todayKey = now.toDateString();
+
+        // 11h15 TRƯA (CỨU ĐÓI DÂN VĂN PHÒNG & HỌC SINH)
+        if (currentHour === 11 && currentMinute === 15 && localStorage.getItem("alert_lunch_" + todayKey) !== "sent") {
+          sendDirectPushAlert(
+            "🍱 Trưa Nay Ăn Gì? Mì Trộn Thím 5 Đang Đỏ Lửa!",
+            "Mì Trộn Tóp Mỡ Trứng Đào nóng giòn giao tận nơi trong 15-20 phút.",
+            "/?src=push_lunch"
+          );
+          localStorage.setItem("alert_lunch_" + todayKey, "sent");
+        }
+
+        // 14h00 CHIỀU (BẬT GIỜ VÀNG FLASH SALE FREESHIP)
+        if (currentHour === 14 && currentMinute === 0 && localStorage.getItem("alert_golden_" + todayKey) !== "sent") {
+          playGoldenHourAlert();
+          sendDirectPushAlert(
+            "🔥 GIỜ VÀNG ĐÃ MỞ (14h - 16h): FREESHIP 2KM!",
+            "Đặt từ 2 phần nhận ngay FREESHIP 0đ + Tặng 1 Nước Suối cho bill từ 50k!",
+            "/?src=push_golden"
+          );
+          localStorage.setItem("alert_golden_" + todayKey, "sent");
+        }
+
+        // 18h00 TỐI (KÉO BILL MÂM ĐẠI TIỆC GIA ĐÌNH)
+        if (currentHour === 18 && currentMinute === 0 && localStorage.getItem("alert_dinner_" + todayKey) !== "sent") {
+          sendDirectPushAlert(
+            "👑 Tối Nay Nghỉ Nấu Cơm: Gọi Mâm Đại Tiệc Thím 5!",
+            "Mâm Gà Rán 4 vắt mì + Đùi gà sốt tỏi + Pepsi đủ cho 2-3 người ăn no nê.",
+            "/?src=push_dinner"
+          );
+          localStorage.setItem("alert_dinner_" + todayKey, "sent");
+        }
+
+        // NHẮC ĐÁNH GIÁ & VÒNG QUAY SAU ĂN 2 TIẾNG
+        var lastOrder = JSON.parse(localStorage.getItem("thim5_last_order") || "null");
+        if (lastOrder && !lastOrder.isSpun && !lastOrder.notifSent) {
+          var timeDiffHours = (now.getTime() - lastOrder.time) / (1000 * 60 * 60);
+          if (timeDiffHours >= 1.5 && timeDiffHours <= 3.0) {
+            sendDirectPushAlert(
+              "🎁 Bạn Vừa Dùng Bữa Xong? Vào Vòng Quay Nhận Quà!",
+              "Mã đơn " + lastOrder.code + " có 1 lượt quay trúng Voucher 20k hoặc Trứng Lòng Đào!",
+              "/?src=push_review"
+            );
+            lastOrder.notifSent = true;
+            localStorage.setItem("thim5_last_order", JSON.stringify(lastOrder));
+          }
+        }
+      }, 60000);
     }
 
     if (document.readyState === "loading") {
