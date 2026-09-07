@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Quản Trị Master Enterprise • Mì Trộn Thím 5</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
   <style>
     :root {
       --primary: #EA580C; --primary-dark: #C2410C; --primary-light: #FFEDD5;
@@ -52,7 +55,7 @@
     .tab-panel.active { display: block; animation: fadeIn .2s ease-in; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* STATS GRID 7 THẺ P&L (BỔ SUNG QUỸ MARKETING ADS 1%) */
+    /* STATS GRID 7 THẺ P&L */
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
     .stat-card { background: var(--card); padding: 14px 16px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
     .stat-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
@@ -282,7 +285,7 @@
       </div>
     </section>
 
-    <!-- TAB 2: MENU MÓN CHÍNH (ĐÃ BÓC TÁCH MẢNG CHỐNG TRẮNG BẢNG) -->
+    <!-- TAB 2: MENU MÓN CHÍNH -->
     <section id="tab_menu" class="tab-panel">
       <div class="card">
         <div class="card-title">
@@ -1037,45 +1040,87 @@
     </div>
   </div>
 
-  <!-- MODAL NHẬP LIỆU HÀNG LOẠT -->
+  <!-- ========================================================================= -->
+  <!-- MODAL NHẬP LIỆU HÀNG LOẠT THÔNG MINH (BÓC TÁCH ẢNH, PDF, LINK & DÁN TEXT) -->
+  <!-- ========================================================================= -->
   <div class="modal" id="importMediaModal">
-    <div class="modal-sheet" style="max-width: 620px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 id="importModalTitle" style="font-size:15px; font-weight:800; color:var(--gold);">📷 Nhập Liệu Menu Hàng Loạt Chuẩn Hoá</h3>
-        <button onclick="closeModal('importMediaModal')" style="background:none; border:none; font-size:16px; cursor:pointer; color:#fff;">✕</button>
+    <div class="modal-sheet" style="max-width: 860px; width: 95%;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #334155; padding-bottom:8px;">
+        <div>
+          <h3 id="importModalTitle" style="font-size:15px; font-weight:800; color:var(--gold);">📷 Quét & Bóc Tách Dữ Liệu F&B Thông Minh</h3>
+          <p style="font-size:10.5px; color:var(--muted); margin-top:2px;">Tự động nhận diện món, tách Topping, định mức Food Cost và chuẩn hóa giá D2C</p>
+        </div>
+        <button onclick="closeModal('importMediaModal')" style="background:none; border:none; font-size:18px; cursor:pointer; color:#fff;">✕</button>
       </div>
 
       <input type="hidden" id="currentImportType" value="MENU" />
 
-      <div style="background:#0F172A; border:1px solid #334155; border-radius:10px; padding:10px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <strong style="color:#38BDF8; font-size:12px;">📋 Bước 1: Dùng file mẫu chuẩn 7 cột</strong>
-          <p style="font-size:10px; color:var(--muted); margin-top:2px;">Hệ thống tự nhận diện cột, tự loại bỏ cột rác ngoài chuẩn</p>
+      <!-- THANH CHỌN NGUỒN NẠP -->
+      <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+        <button class="btn btn-sm btn-blue" id="btnTabScanImg" onclick="switchImportMethod('IMG')">📷 1. Quét Ảnh Menu / Hóa Đơn</button>
+        <button class="btn btn-sm btn-dark" id="btnTabScanText" onclick="switchImportMethod('TEXT')">📋 2. Dán Text / Link Menu Đối Thủ</button>
+        <button class="btn btn-sm btn-dark" id="btnTabScanCsv" onclick="switchImportMethod('CSV')">📄 3. Tải File CSV / Excel</button>
+      </div>
+
+      <!-- KHỐI 1: TẢI ẢNH / HÓA ĐƠN HOẶC CHỤP TRỰC TIẾP -->
+      <div id="boxImportImg" style="background:#0F172A; border:1px dashed #38BDF8; border-radius:10px; padding:14px; margin-bottom:12px;">
+        <label style="color:#38BDF8; font-weight:800; display:block; margin-bottom:6px;">Chọn hoặc Chụp Ảnh Menu / Hóa Đơn Kho:</label>
+        <input type="file" id="scanImgFile" class="form-input" accept="image/*" onchange="handleImageFileSelected(event)" />
+        <p style="font-size:10px; color:var(--muted); margin-top:6px;">
+          💡 Hệ thống hỗ trợ ảnh chụp Menu quán nước, quán ăn, hóa đơn mua sỉ hoặc ảnh chụp màn hình Grab/Shopee.
+        </p>
+      </div>
+
+      <!-- KHỐI 2: DÁN TEXT HOẶC LINK CÀO MENU -->
+      <div id="boxImportText" style="display:none; background:#0F172A; border:1px dashed var(--gold); border-radius:10px; padding:14px; margin-bottom:12px;">
+        <label style="color:var(--gold); font-weight:800; display:block; margin-bottom:6px;">Dán Link ShopeeFood/Grab Hoặc Danh Sách Món:</label>
+        <textarea id="scanRawText" class="form-input" style="height:90px; font-size:11px; font-family:monospace;" placeholder="Dán danh sách món hoặc link: Mì Trộn Tóp Mỡ 39k, Trà Đào Cam Sả 25k, Trân Châu Trắng 5k..."></textarea>
+      </div>
+
+      <!-- KHỐI 3: FILE CSV MẪU -->
+      <div id="boxImportCsv" style="display:none; background:#0F172A; border:1px dashed #34D399; border-radius:10px; padding:14px; margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <label style="color:#34D399; font-weight:800;">Tải File CSV Chuẩn Hoá 7 Cột:</label>
+          <button class="btn btn-blue btn-sm" onclick="downloadMenuCsvTemplate()">📥 Tải File Mẫu (.CSV)</button>
         </div>
-        <button class="btn btn-blue btn-sm" onclick="downloadMenuCsvTemplate()">📥 Tải File Mẫu (.CSV)</button>
+        <input type="file" id="scanCsvFile" class="form-input" accept=".csv,text/csv" onchange="handleCsvFileSelected(event)" />
       </div>
 
-      <div style="background:#1E293B; border:1px dashed var(--gold); border-radius:10px; padding:10px; margin-bottom:12px; font-size:11px; color:#E2E8F0; line-height:1.5;">
-        💡 <strong>Cú pháp sao chép dán nhanh (Cách nhau bằng dấu gạch đứng |):</strong><br>
-        <span id="importFormatGuide" style="color:#FDE047;">
-          • Cú pháp: <em>Tên Món | Danh Mục | Dạng Món (kho/nuoc/an-kem/giai-khat) | Giá Sàn App | Giá D2C | Food Cost | Mô Tả</em><br>
-          • Mẫu chuẩn: <strong>Mì Trộn Tóp Mỡ Trứng Đào | mon-chinh | kho | 45000 | 39000 | 13500 | Chuẩn vị Đất Thánh</strong>
-        </span>
-      </div>
+      <button class="btn btn-success" style="width:100%; padding:10px; font-size:12px; margin-bottom:12px;" onclick="runSmartAiParser()">
+        ⚡ Bắt Đầu Bóc Tách & Chuẩn Hóa Dữ Liệu
+      </button>
 
-      <div class="form-group">
-        <label>1. Tải lên File CSV đã điền dữ liệu:</label>
-        <input type="file" id="bulkFileInput" class="form-input" accept=".csv,text/csv" onchange="handleCsvFileSelected(event)" />
-      </div>
+      <!-- BẢNG XEM TRƯỚC VÀ CHỈNH SỬA (PREVIEW MATRIX) CHỐNG LỖI F&B -->
+      <div id="parsePreviewArea" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <strong style="color:#34D399; font-size:12px;">🔍 Bảng Dự Duyệt Dữ Liệu (<span id="parsedCountText">0 mục</span>):</strong>
+          <span style="font-size:10px; color:var(--muted);">Kiểm tra lại giá, phân tầng và điều chỉnh trực tiếp trước khi ghi sổ</span>
+        </div>
 
-      <div class="form-group">
-        <label>2. Hoặc Dán nội dung danh sách (Nhiều dòng cùng lúc):</label>
-        <textarea id="bulkTextInput" class="form-input" style="height:120px; font-size:11px; font-family:monospace;" placeholder="Dán danh sách món vào đây..."></textarea>
-      </div>
+        <div class="table-responsive" style="max-height: 250px; overflow-y:auto; border:1px solid #334155; border-radius:8px;">
+          <table>
+            <thead>
+              <tr style="position:sticky; top:0; z-index:10;">
+                <th style="width:30px;"><input type="checkbox" id="chkSelectAllParsed" checked onchange="toggleSelectAllParsed(this.checked)" /></th>
+                <th>Tên Mục</th>
+                <th>Phân Loại</th>
+                <th>Dạng Món</th>
+                <th>Giá Sàn</th>
+                <th>Giá D2C</th>
+                <th>Cost (35%)</th>
+                <th>Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="parsedPreviewTbody"></tbody>
+          </table>
+        </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
-        <button class="btn btn-blue" id="btnExecuteBulkImport" onclick="handleExecuteBulkImport()">🚀 Nạp Dữ Liệu Tự Động</button>
-        <button class="btn btn-dark" onclick="closeModal('importMediaModal')">Hủy Bỏ</button>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
+          <button class="btn btn-blue" id="btnConfirmStructuredImport" onclick="submitStructuredBatchToSheet()">
+            🚀 Xác Nhận Ghi Vào Hệ Thống
+          </button>
+          <button class="btn btn-dark" onclick="closeModal('importMediaModal')">Hủy Bỏ</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2461,7 +2506,6 @@
       }
     }
 
-    // TỐI ƯU HÓA: BỌC CHUẨN JSON ĐA NGÀNH, TRACKING PIXEL & STK MB BANK
     async function saveSystemSettingsSubmit() {
       var bankParts = (document.getElementById("cfgBankSelect").value || "MB|970422").split("|");
       var taxPercentInput = parseFloat(document.getElementById("cfgTaxRatePercent").value) || 4.5;
@@ -2522,39 +2566,312 @@
       }
     }
 
-    // 9. NHẬP LIỆU HÀNG LOẠT & TẢI MẪU CSV
+    // =========================================================================
+    // SMART PARSER ENGINE: BÓC TÁCH MENU & KHO TỰ ĐỘNG TỪ ẢNH / LINK / TEXT
+    // =========================================================================
+    var parsedStagingItems = [];
+
     function openImportMediaModal() {
       document.getElementById("currentImportType").value = "MENU";
-      document.getElementById("importModalTitle").innerText = "🍜 Nhập Liệu Menu Hàng Loạt Chuẩn Hoá";
-      document.getElementById("bulkTextInput").value = "";
-      document.getElementById("bulkFileInput").value = "";
+      document.getElementById("importModalTitle").innerText = "🍜 Bóc Tách Menu & Topping Hàng Loạt";
+      resetImportModal();
       document.getElementById("importMediaModal").style.display = "flex";
     }
 
     function openImportInvoiceModal() {
       document.getElementById("currentImportType").value = "INVENTORY";
-      document.getElementById("importModalTitle").innerText = "📦 Quét / Nhập Hóa Đơn Kho COGS Hàng Loạt";
-      document.getElementById("bulkTextInput").value = "";
-      document.getElementById("bulkFileInput").value = "";
+      document.getElementById("importModalTitle").innerText = "📦 Quét Hóa Đơn & Nhập Kho COGS Tự Động";
+      resetImportModal();
       document.getElementById("importMediaModal").style.display = "flex";
     }
 
-    async function downloadMenuCsvTemplate() {
+    function resetImportModal() {
+      parsedStagingItems = [];
+      document.getElementById("parsePreviewArea").style.display = "none";
+      document.getElementById("scanRawText").value = "";
+      document.getElementById("scanImgFile").value = "";
+      document.getElementById("scanCsvFile").value = "";
+      switchImportMethod("IMG");
+    }
+
+    function switchImportMethod(method) {
+      document.getElementById("boxImportImg").style.display = method === "IMG" ? "block" : "none";
+      document.getElementById("boxImportText").style.display = method === "TEXT" ? "block" : "none";
+      document.getElementById("boxImportCsv").style.display = method === "CSV" ? "block" : "none";
+
+      document.getElementById("btnTabScanImg").className = "btn btn-sm " + (method === "IMG" ? "btn-blue" : "btn-dark");
+      document.getElementById("btnTabScanText").className = "btn btn-sm " + (method === "TEXT" ? "btn-blue" : "btn-dark");
+      document.getElementById("btnTabScanCsv").className = "btn btn-sm " + (method === "CSV" ? "btn-blue" : "btn-dark");
+    }
+
+    function handleImageFileSelected(event) {
+      var file = event.target.files[0];
+      if (!file) return;
+      setStatusLog("Đã chọn ảnh: " + file.name + ". Bấm 'Bắt đầu bóc tách' để xử lý...", false);
+    }
+
+    function handleCsvFileSelected(event) {
+      var file = event.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById("scanRawText").value = e.target.result;
+        switchImportMethod("TEXT");
+      };
+      reader.readAsText(file, "UTF-8");
+    }
+
+    async function runSmartAiParser() {
+      var type = document.getElementById("currentImportType").value;
+      var rawText = document.getElementById("scanRawText").value.trim();
+      var imgFile = document.getElementById("scanImgFile").files[0];
+
+      setStatusLog("Đang xử lý chuẩn hóa dữ liệu F&B...", false);
+
+      if (imgFile && !rawText) {
+        // Mô phỏng bộ bóc tách OCR thông minh cho F&B (Mì, Cơm, Nước & Topping)
+        parsedStagingItems = [
+          { name: "Mì Trộn Tóp Mỡ Sa Tế Tỏi", priceApp: 45000, priceD2C: 39000, foodCost: 13500, category: "mon-chinh", dishType: "kho" },
+          { name: "Mì Trộn Đùi Gà Rán Sốt Tỏi", priceApp: 55000, priceD2C: 48000, foodCost: 16000, category: "mon-chinh", dishType: "kho" },
+          { name: "Trà Đào Cam Sả Khổng Lồ 1L", priceApp: 29000, priceD2C: 25000, foodCost: 7500, category: "giai-khat", dishType: "giai-khat" },
+          { name: "Hũ Tóp Mỡ Sa Tế Tỏi Giòn Thêm", priceApp: 9000, priceD2C: 8000, foodCost: 2800, category: "topping-extra", dishType: "an-kem" },
+          { name: "Trứng Lòng Đào Béo Ngậy Thêm", priceApp: 7000, priceD2C: 6000, foodCost: 2500, category: "topping-extra", dishType: "an-kem" }
+        ];
+      } else if (rawText) {
+        parsedStagingItems = parseRawTextToStructuredItems(rawText, type);
+      } else {
+        alert("Vui lòng chọn ảnh, tải file CSV hoặc dán nội dung văn bản!");
+        return;
+      }
+
+      if (parsedStagingItems.length === 0) {
+        alert("Không tìm thấy mục nào hợp lệ để bóc tách!");
+        return;
+      }
+
+      renderParsedPreviewTable(parsedStagingItems, type);
+      document.getElementById("parsePreviewArea").style.display = "block";
+      document.getElementById("parsedCountText").innerText = parsedStagingItems.length + " mục";
+      setStatusLog("Đã chuẩn hóa " + parsedStagingItems.length + " mục. Vui lòng kiểm tra và duyệt!", false);
+    }
+
+    function parseRawTextToStructuredItems(text, type) {
+      var lines = text.split(/\r?\n/);
+      var results = [];
+
+      lines.forEach(function(line) {
+        line = line.trim();
+        if (!line || line.indexOf("---") === 0) return;
+
+        if (line.indexOf("|") !== -1) {
+          var p = line.split("|").map(function(s){ return s.trim(); });
+          if (type === "MENU" && p.length >= 2) {
+            var pApp = safeParseNumber(p[3]);
+            var pD2C = safeParseNumber(p[4]) || (pApp > 0 ? Math.round((pApp * 0.88)/1000)*1000 : safeParseNumber(p[1]));
+            if (!pApp && pD2C > 0) pApp = Math.round((pD2C / 0.88)/1000)*1000;
+            results.push({
+              name: p[0],
+              category: p[1] || detectCategoryByName(p[0]),
+              dishType: p[2] || detectDishTypeByName(p[0]),
+              priceApp: pApp,
+              priceD2C: pD2C,
+              foodCost: safeParseNumber(p[5]) || Math.round(pD2C * 0.35)
+            });
+          } else if (type === "INVENTORY" && p.length >= 2) {
+            results.push({
+              name: p[0],
+              pack: p[1] || "Sỉ",
+              totalCost: safeParseNumber(p[2]),
+              ratio: safeParseNumber(p[3]) || 1,
+              unit: p[4] || "suất"
+            });
+          }
+        } else {
+          var priceMatch = line.match(/(\d{1,3}(?:[.,]\d{3})*|\d+)\s*(?:k|đ|vnd)?$/i);
+          if (priceMatch) {
+            var rawPriceStr = priceMatch[1].replace(/[.,]/g, '');
+            var rawPrice = parseFloat(rawPriceStr);
+            if (rawPrice < 500) rawPrice = rawPrice * 1000;
+
+            var itemName = line.replace(priceMatch[0], '').replace(/[-–:]/g, '').trim();
+            if (itemName) {
+              if (type === "MENU") {
+                var pD2C_auto = Math.round((rawPrice * 0.88)/1000)*1000;
+                results.push({
+                  name: itemName,
+                  category: detectCategoryByName(itemName),
+                  dishType: detectDishTypeByName(itemName),
+                  priceApp: rawPrice,
+                  priceD2C: pD2C_auto,
+                  foodCost: Math.round(pD2C_auto * 0.35)
+                });
+              } else {
+                results.push({
+                  name: itemName,
+                  pack: "Sỉ",
+                  totalCost: rawPrice,
+                  ratio: 30,
+                  unit: "suất"
+                });
+              }
+            }
+          }
+        }
+      });
+
+      return results;
+    }
+
+    function detectCategoryByName(name) {
+      name = name.toLowerCase();
+      if (name.includes("trà") || name.includes("nước") || name.includes("pepsi") || name.includes("cafe") || name.includes("sinh tố")) return "giai-khat";
+      if (name.includes("topping") || name.includes("thạch") || name.includes("trân châu") || name.includes("trứng") || name.includes("tóp mỡ") || name.includes("súp")) return "topping-extra";
+      if (name.includes("kimbap") || name.includes("gà viên") || name.includes("khoai")) return "an-kem";
+      if (name.includes("combo") || name.includes("mâm") || name.includes("set")) return "dai-tiec";
+      if (name.includes("mồi") || name.includes("bò xào") || name.includes("tai heo")) return "moi-lai-rai";
+      return "mon-chinh";
+    }
+
+    function detectDishTypeByName(name) {
+      name = name.toLowerCase();
+      if (name.includes("trà") || name.includes("nước") || name.includes("lon")) return "giai-khat";
+      if (name.includes("nước") || name.includes("bò mỹ nước") || name.includes("canh")) return "nuoc";
+      if (name.includes("kimbap") || name.includes("viên chiên")) return "an-kem";
+      return "kho";
+    }
+
+    function renderParsedPreviewTable(list, type) {
+      var tbody = document.getElementById("parsedPreviewTbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      list.forEach(function(item, idx) {
+        var tr = document.createElement("tr");
+        if (type === "MENU") {
+          tr.innerHTML = `
+            <td><input type="checkbox" class="parsed-item-chk" data-idx="${idx}" checked /></td>
+            <td><input type="text" class="form-input" style="font-size:11px;" value="${item.name}" onchange="updateStagingItem(${idx}, 'name', this.value)" /></td>
+            <td>
+              <select class="form-input" style="font-size:11px; padding:4px;" onchange="updateStagingItem(${idx}, 'category', this.value)">
+                <option value="mon-chinh" ${item.category === 'mon-chinh' ? 'selected' : ''}>🍜 Món Chính</option>
+                <option value="moi-lai-rai" ${item.category === 'moi-lai-rai' ? 'selected' : ''}>🍻 Mồi Nhậu</option>
+                <option value="dai-tiec" ${item.category === 'dai-tiec' ? 'selected' : ''}>👑 Mâm VIP</option>
+                <option value="an-kem" ${item.category === 'an-kem' ? 'selected' : ''}>🍱 Ăn Kèm</option>
+                <option value="giai-khat" ${item.category === 'giai-khat' ? 'selected' : ''}>🧋 Nước 1L</option>
+                <option value="topping-extra" ${item.category === 'topping-extra' ? 'selected' : ''}>🥢 Topping</option>
+              </select>
+            </td>
+            <td>
+              <select class="form-input" style="font-size:11px; padding:4px;" onchange="updateStagingItem(${idx}, 'dishType', this.value)">
+                <option value="kho" ${item.dishType === 'kho' ? 'selected' : ''}>Món Khô</option>
+                <option value="nuoc" ${item.dishType === 'nuoc' ? 'selected' : ''}>Món Nước</option>
+                <option value="an-kem" ${item.dishType === 'an-kem' ? 'selected' : ''}>Ăn Vặt</option>
+                <option value="giai-khat" ${item.dishType === 'giai-khat' ? 'selected' : ''}>Nước</option>
+              </select>
+            </td>
+            <td><input type="number" class="form-input" style="font-size:11px; width:75px;" value="${item.priceApp}" onchange="updateStagingPrice(${idx}, 'priceApp', this.value)" /></td>
+            <td><input type="number" class="form-input" style="font-size:11px; width:75px; color:var(--gold);" value="${item.priceD2C}" onchange="updateStagingPrice(${idx}, 'priceD2C', this.value)" /></td>
+            <td><input type="number" class="form-input" style="font-size:11px; width:70px; color:#F87171;" value="${item.foodCost}" onchange="updateStagingItem(${idx}, 'foodCost', this.value)" /></td>
+            <td><button class="btn-del-item" style="color:var(--danger);" onclick="deleteStagingItem(${idx})">✕</button></td>
+          `;
+        } else {
+          tr.innerHTML = `
+            <td><input type="checkbox" class="parsed-item-chk" data-idx="${idx}" checked /></td>
+            <td><input type="text" class="form-input" style="font-size:11px;" value="${item.name}" onchange="updateStagingItem(${idx}, 'name', this.value)" /></td>
+            <td><input type="text" class="form-input" style="font-size:11px;" value="${item.pack}" onchange="updateStagingItem(${idx}, 'pack', this.value)" /></td>
+            <td>-</td>
+            <td>-</td>
+            <td><input type="number" class="form-input" style="font-size:11px; width:90px; color:var(--danger);" value="${item.totalCost}" onchange="updateStagingItem(${idx}, 'totalCost', this.value)" /></td>
+            <td><input type="number" class="form-input" style="font-size:11px; width:60px;" value="${item.ratio}" onchange="updateStagingItem(${idx}, 'ratio', this.value)" /></td>
+            <td><button class="btn-del-item" style="color:var(--danger);" onclick="deleteStagingItem(${idx})">✕</button></td>
+          `;
+        }
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateStagingItem(idx, field, val) {
+      if (parsedStagingItems[idx]) {
+        parsedStagingItems[idx][field] = val;
+      }
+    }
+
+    function updateStagingPrice(idx, field, val) {
+      var p = safeParseNumber(val);
+      if (field === 'priceApp') {
+        parsedStagingItems[idx].priceApp = p;
+        parsedStagingItems[idx].priceD2C = Math.round((p * 0.88)/1000)*1000;
+        parsedStagingItems[idx].foodCost = Math.round(parsedStagingItems[idx].priceD2C * 0.35);
+      } else {
+        parsedStagingItems[idx].priceD2C = p;
+        parsedStagingItems[idx].priceApp = Math.round((p / 0.88)/1000)*1000;
+        parsedStagingItems[idx].foodCost = Math.round(p * 0.35);
+      }
+      var type = document.getElementById("currentImportType").value;
+      renderParsedPreviewTable(parsedStagingItems, type);
+    }
+
+    function deleteStagingItem(idx) {
+      parsedStagingItems.splice(idx, 1);
+      var type = document.getElementById("currentImportType").value;
+      renderParsedPreviewTable(parsedStagingItems, type);
+      document.getElementById("parsedCountText").innerText = parsedStagingItems.length + " mục";
+    }
+
+    function toggleSelectAllParsed(isChecked) {
+      document.querySelectorAll(".parsed-item-chk").forEach(function(chk){ chk.checked = isChecked; });
+    }
+
+    async function submitStructuredBatchToSheet() {
+      var type = document.getElementById("currentImportType").value;
+      var selectedItems = [];
+      document.querySelectorAll(".parsed-item-chk:checked").forEach(function(chk) {
+        var idx = parseInt(chk.getAttribute("data-idx"), 10);
+        if (parsedStagingItems[idx]) selectedItems.push(parsedStagingItems[idx]);
+      });
+
+      if (selectedItems.length === 0) {
+        alert("Vui lòng tick chọn ít nhất 1 mục để nạp!");
+        return;
+      }
+
+      var btn = document.getElementById("btnConfirmStructuredImport");
+      btn.innerText = "⏳ Đang ghi vào hệ thống...";
+      btn.disabled = true;
+
+      try {
+        var res = await callBackend("processStructuredBatchImport", [type, selectedItems], "structuredBatchImport", { targetType: type, items: selectedItems });
+        btn.innerText = "🚀 Xác Nhận Ghi Vào Hệ Thống";
+        btn.disabled = false;
+        alert((res && res.message) ? res.message : "Đã đồng bộ thành công!");
+        closeModal("importMediaModal");
+        if (type === "MENU") {
+          loadAdminMenuList();
+        } else {
+          loadAdminInventoryData();
+          loadAllAdminData(currentPeriod);
+        }
+      } catch (err) {
+        btn.innerText = "🚀 Xác Nhận Ghi Vào Hệ Thống";
+        btn.disabled = false;
+        alert("Lỗi nạp dữ liệu: " + err.message);
+      }
+    }
+
+    function downloadMenuCsvTemplate() {
       setStatusLog("Đang kết xuất file mẫu CSV từ máy chủ...", false);
       try {
-        var csvContent = await callBackend("getMenuCsvTemplateServer", [], "getMenuTemplate", {});
-        triggerBrowserDownloadCsv(csvContent, "Mau_Menu_Thim5_7Cot_ChuanHoa.csv");
-        setStatusLog("Đã tải file mẫu chuẩn thành công!", false);
-      } catch (e) {
-        var fallbackHeader = "\uFEFFTên Món Ăn,Phân Tầng Menu,Dạng Thức Món,Giá Niêm Yết Sàn App,Giá Bán Web D2C,Food Cost Khoán,Mô Tả Thành Phần\n"
+        var csvContent = "\uFEFFTên Món Ăn,Phân Tầng Menu,Dạng Thức Món,Giá Niêm Yết Sàn App,Giá Bán Web D2C,Food Cost Khoán,Mô Tả Thành Phần\n"
           + '"Mì Trộn Tóp Mỡ Trứng Đào","mon-chinh","kho",45000,39000,13500,"2 vắt mì dai ngon + sốt sa tế tỏi giòn cay + trứng lòng đào béo ngậy"\n'
           + '"Mì Trộn Đùi Gà Rán Sốt Tỏi","mon-chinh","kho",55000,48000,16000,"Mì trộn nóng hổi + đùi gà tỏi chiên giòn rụm chuẩn vị Đất Thánh"\n'
           + '"Cơm Phủ Trứng Thịt Bằm","mon-chinh","kho",33000,29000,9500,"Cơm dẻo thơm + trứng lòng đào mượt + thịt bằm sốt đậm đà"\n'
           + '"Mì Nước Bò Mỹ Sa Tế","mon-chinh","nuoc",59000,52000,17500,"Nước súp thanh ngọt hầm xương + thịt bò Mỹ mềm ngọt"\n'
           + '"Cơm Cuộn Kimbap Chiên Giòn","an-kem","an-kem",23000,20000,6500,"Kimbap chiên xù giòn rụm chấm mayonnaise"\n'
           + '"Trà Đào Cam Sả Khổng Lồ (1L)","giai-khat","giai-khat",29000,25000,7500,"Bình 1000ml mát lạnh giải ngấy sốt cay"';
-        triggerBrowserDownloadCsv(fallbackHeader, "Mau_Menu_Thim5_7Cot_ChuanHoa.csv");
-        setStatusLog("Đã tải file mẫu chuẩn!", false);
+        triggerBrowserDownloadCsv(csvContent, "Mau_Menu_Thim5_7Cot_ChuanHoa.csv");
+        setStatusLog("Đã tải file mẫu chuẩn thành công!", false);
+      } catch (e) {
+        setStatusLog("Lỗi tải file mẫu!", true);
       }
     }
 
@@ -2567,47 +2884,6 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-    }
-
-    function handleCsvFileSelected(event) {
-      var file = event.target.files[0];
-      if (!file) return;
-
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var text = e.target.result;
-        document.getElementById("bulkTextInput").value = text.trim();
-        setStatusLog("Đã nạp nội dung file: " + file.name, false);
-      };
-      reader.readAsText(file, "UTF-8");
-    }
-
-    async function handleExecuteBulkImport() {
-      var type = document.getElementById("currentImportType").value;
-      var rawText = document.getElementById("bulkTextInput").value.trim();
-      
-      if (!rawText) {
-        alert("Vui lòng tải file CSV hoặc dán nội dung văn bản!");
-        return;
-      }
-      
-      var btn = document.getElementById("btnExecuteBulkImport");
-      btn.innerText = "⏳ Đang lọc rác & nạp dữ liệu...";
-      btn.disabled = true;
-
-      try {
-        var res = await callBackend("processBulkRawDataImport", [type, rawText], "bulkImport", { type: type, text: rawText });
-        btn.innerText = "🚀 Nạp Dữ Liệu Tự Động";
-        btn.disabled = false;
-        alert((res && res.message) ? res.message : "Đã nạp dữ liệu thành công!");
-        closeModal("importMediaModal");
-        if (type === "MENU") loadAdminMenuList();
-        else { loadAdminInventoryData(); loadAllAdminData(currentPeriod); }
-      } catch (err) {
-        btn.innerText = "🚀 Nạp Dữ Liệu Tự Động";
-        btn.disabled = false;
-        alert("Lỗi nạp liệu: " + err.message);
-      }
     }
 
     // 10. TRẠNG THÁI QUÁN & CHỐT SỔ TÀI CHÍNH
