@@ -278,7 +278,7 @@
 </head>
 <body>
 
-  <!-- HERO STORE BANNER (HỖ TRỢ ĐỔI ẢNH BÌA DYNAMIC) -->
+  <!-- HERO STORE BANNER -->
   <div class="store-hero" id="storeHeroBanner">
     <div class="hero-nav">
       <button class="hero-btn" onclick="location.href='?page=index'">←</button>
@@ -333,7 +333,7 @@
     <span style="font-weight:900;">⚡ 15-20 PHÚT</span>
   </div>
 
-  <!-- LIVE TRACKING BANNER (ĐÃ TỐI ƯU CHỐNG TREO) -->
+  <!-- LIVE TRACKING BANNER -->
   <div class="tracking-wrapper">
     <div class="tracking-card" id="trackingCard">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -549,7 +549,7 @@
             📥 Tải Ảnh QR Về Máy (Để Quét Trong App Bank)
           </button>
           <button type="button" class="btn-copy-chip" onclick="copyDynamicBankAccount()">
-            <span>📋 STK: <strong id="dispCopyMomoAcc">3939388888</strong></span>
+            <span>📋 STK MB: <strong id="dispCopyMomoAcc">3939388888</strong></span>
             <span style="color:var(--grab-green); font-size:9px;">Sao chép</span>
           </button>
         </div>
@@ -660,6 +660,8 @@
       momoName: "NGUYEN HAI AU",
       d2cDiscountRate: 0.12,
       maxPromoBudgetRate: 0.15,
+      metaPixelId: "",
+      tiktokPixelId: "",
       shippingRules: {
         baseDistKm: 2.0,
         baseFee: 12000,
@@ -724,7 +726,58 @@
     var isSpinning = false;
     var isStoreClosed = false;
 
-    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS NỘI BỘ VÀ REST API RENDER
+    // QUẢN LÝ TRACKING PIXEL & UTM
+    var activeTrackingPixels = { meta: "", tiktok: "" };
+    var currentUtmSource = "";
+
+    function captureUtmTracking() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var src = params.get("src") || params.get("utm_source") || params.get("ref");
+        if (src) {
+          currentUtmSource = src;
+          sessionStorage.setItem("thim5_utm_source", src);
+        } else {
+          currentUtmSource = sessionStorage.getItem("thim5_utm_source") || "";
+        }
+      } catch(e) {}
+    }
+
+    function initDynamicTrackingPixels(metaId, tiktokId) {
+      if (metaId && metaId !== "" && activeTrackingPixels.meta !== metaId) {
+        activeTrackingPixels.meta = metaId;
+        (function(f,b,e,v,n,t,s) {
+          if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)
+        })(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', metaId);
+        fbq('track', 'PageView');
+      }
+
+      if (tiktokId && tiktokId !== "" && activeTrackingPixels.tiktok !== tiktokId) {
+        activeTrackingPixels.tiktok = tiktokId;
+        (function (w, d, t) {
+          w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/sdk.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var a=document.createElement("script");a.type="text/javascript",a.async=!0,a.src=i+"?type=module&pkg=@tiktok/pixel";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(a,s)};
+          ttq.load(tiktokId);
+          ttq.page();
+        })(window, document, 'ttq');
+      }
+    }
+
+    function fireFandBEvent(eventName, payload) {
+      if (window.fbq && activeTrackingPixels.meta) {
+        try { fbq('track', eventName, payload); } catch(e) {}
+      }
+      if (window.ttq && activeTrackingPixels.tiktok) {
+        try { ttq.track(eventName, payload); } catch(e) {}
+      }
+    }
+
+    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS VÀ RENDER
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -754,6 +807,7 @@
     }
 
     function initClient() {
+      captureUtmTracking();
       renderCatNav();
       renderMenuItems();
       updateDynamicCalculations();
@@ -790,7 +844,6 @@
           if (document.getElementById("dispStoreTitle")) document.getElementById("dispStoreTitle").innerText = cfg.storeName || "Mì Trộn & Cơm Trộn Thím 5";
           if (document.getElementById("linkHotlineHeader")) document.getElementById("linkHotlineHeader").href = "tel:" + (cfg.phone || "0969004693");
           
-          // CẬP NHẬT ẢNH BÌA COVER TỰ ĐỘNG
           if (cfg.storeCoverUrl) {
             var heroEl = document.getElementById("storeHeroBanner");
             if (heroEl) {
@@ -801,6 +854,10 @@
           var copySpan = document.getElementById("dispCopyMomoAcc");
           if (copySpan) copySpan.innerText = MOMO_PAYMENT_PHONE;
 
+          if (cfg.metaPixelId || cfg.tiktokPixelId) {
+            initDynamicTrackingPixels(cfg.metaPixelId, cfg.tiktokPixelId);
+          }
+
           updateDynamicCalculations();
         }
       } catch (e) {}
@@ -808,7 +865,7 @@
 
     function copyDynamicBankAccount() {
       var acc = MOMO_PAYMENT_PHONE || (activeStoreConfig && (activeStoreConfig.bankAccount || activeStoreConfig.momoAccount)) || "3939388888";
-      copyValueText(acc, "Đã sao chép STK: " + acc);
+      copyValueText(acc, "Đã sao chép STK MB Bank: " + acc);
     }
 
     function playGoldenHourAlert() {
@@ -1060,6 +1117,13 @@
         toppingTotal: (soupCost + topsCost),
         total: itemTotal,
         qty: 1
+      });
+
+      fireFandBEvent('AddToCart', {
+        content_name: selectedDish.name,
+        content_category: selectedDish.category,
+        value: itemTotal,
+        currency: 'VND'
       });
 
       closeModal("customModal");
@@ -1341,7 +1405,7 @@
       document.getElementById("checkoutModal").style.display = "flex";
     }
 
-    // HÀM GỬI ĐƠN HÀNG CHUẨN DUAL-MODE (ĐẨY THẲNG BẾP & SHIPPER)
+    // HÀM GỬI ĐƠN HÀNG CHUẨN DUAL-MODE (ĐẨY BẾP, SHIP VÀ GẮN UTM SOURCE)
     async function submitOrder() {
       if (isStoreClosed) { alert("🏖️ Quán đang tạm nghỉ!"); return; }
       var name = document.getElementById("custName").value.trim();
@@ -1400,18 +1464,34 @@
       btn.disabled = true;
 
       var orderPayload = {
-        orderCode: currentOrderCode, name: name, phone: phone,
-        address: finalAddressText, distance: customerDist,
-        itemsSummary: itemsSummary, tasteNotes: tasteNotes,
+        orderCode: currentOrderCode,
+        name: name,
+        phone: phone,
+        address: finalAddressText,
+        distance: customerDist,
+        itemsSummary: itemsSummary,
+        tasteNotes: tasteNotes,
         paymentMethod: payMethod,
-        foodVal: foodVal, toppingVal: toppingVal,
+        foodVal: foodVal,
+        toppingVal: toppingVal,
         voucherVal: appliedVoucherDiscount || 0,
         mainDishesCount: mainDishesCount,
-        grandTotal: grandTotalNum, itemsCount: cart.length
+        grandTotal: grandTotalNum,
+        itemsCount: cart.length,
+        utmSource: currentUtmSource || ""
       };
 
       try {
         var res = await callBackend("executeOrderCreation", [orderPayload], "doPostOrder", orderPayload);
+        
+        fireFandBEvent('InitiateCheckout', {
+          num_items: cart.length,
+          value: grandTotalNum,
+          currency: 'VND',
+          order_id: currentOrderCode,
+          utm_source: currentUtmSource || "direct"
+        });
+
         btn.innerText = "🚀 2. GỬI BẾP NẤU NGAY";
         btn.disabled = false;
         closeModal("checkoutModal");
@@ -1448,7 +1528,6 @@
       window.open(zaloUrl, "_blank");
     }
 
-    // TỐI ƯU HÓA: DÙNG CHECKORDERSTATUSLIVE DÒ THẲNG SHEET CHỐNG TREO HOÀN TẤT
     function checkActiveTracking() {
       var last = JSON.parse(localStorage.getItem("thim5_last_order") || "null");
       var tCard = document.getElementById("trackingCard");
