@@ -1,65 +1,73 @@
-// CẤU HÌNH KẾT NỐI API THÍM 5 HÒA THÀNH
+/**
+ * CẤU HÌNH KẾT NỐI API THÍM 5 HÒA THÀNH - DUAL ENGINE 2026
+ * Hỗ trợ chuyển mạch GET/POST tự động chống lỗi URL Length và CORS Preflight
+ */
 const CONFIG = {
   API_URL: "https://script.google.com/macros/s/AKfycbwZZoE51LGSlZbE85BH_sB2bzWwB_omtZaPFI_vevlAh56bs8CrpGTPMfdg2FfzadcY/exec"
 };
 
 const Thim5API = {
   async callGAS(action, params = {}) {
-    const cleanParams = Object.assign({ action: action }, params);
-    const queryParams = new URLSearchParams(cleanParams).toString();
-    const targetUrl = CONFIG.API_URL + "?" + queryParams;
+    // Tự động phân loại: Nếu dữ liệu lớn (ảnh Base64, mảng Batch) -> Bắt buộc dùng POST
+    const isPayloadHeavy = (
+      action === "saveMenuItem" || 
+      action === "saveOrUpdateMenuItem" || 
+      action === "structuredBatchImport" || 
+      action === "processStructuredBatchImport" ||
+      action === "doPostOrder" || 
+      action === "submitOrder" ||
+      JSON.stringify(params).length > 1500
+    );
 
-    try {
-      // BẮT BUỘC: Không thêm bất kỳ headers nào để tránh bị chặn CORS Preflight (OPTIONS)
-      const response = await fetch(targetUrl, {
-        method: "GET",
-        mode: "cors",
-        redirect: "follow"
+    if (isPayloadHeavy) {
+      // GỬI BẰNG POST (DẠNG TEXT/PLAIN ĐỂ TRÁNH CORS PREFLIGHT CHẶN)
+      const postBody = JSON.stringify({
+        action: action,
+        payload: params,
+        ...params
       });
 
-      if (!response.ok) {
-        throw new Error("HTTP error " + response.status);
+      try {
+        const response = await fetch(CONFIG.API_URL, {
+          method: "POST",
+          mode: "cors",
+          redirect: "follow",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: postBody
+        });
+        return await response.json();
+      } catch (err) {
+        console.error("Lỗi Fetch POST API:", err);
+        throw err;
+      }
+    } else {
+      // GỬI BẰNG GET CHO CÁC TRUY VẤN NHẸ (MENU, CONFIG, BÁO CÁO)
+      const cleanParams = Object.assign({ action: action }, params);
+      const queryParams = new URLSearchParams();
+      
+      for (const key in cleanParams) {
+        if (cleanParams[key] !== undefined && cleanParams[key] !== null) {
+          queryParams.append(key, (typeof cleanParams[key] === 'object') ? JSON.stringify(cleanParams[key]) : cleanParams[key]);
+        }
       }
 
-      return await response.json();
-    } catch (error) {
-      console.error("[API_ERROR] Action: " + action, error);
-      throw error;
+      const targetUrl = CONFIG.API_URL + "?" + queryParams.toString();
+
+      try {
+        const response = await fetch(targetUrl, {
+          method: "GET",
+          mode: "cors",
+          redirect: "follow"
+        });
+        return await response.json();
+      } catch (err) {
+        console.error("Lỗi Fetch GET API:", err);
+        throw err;
+      }
     }
-  },
-
-  async verifyAdminRole(pin) {
-    return await this.callGAS("verifyAdminRole", { pin: pin });
-  },
-
-  async getSummary(period = "all") {
-    return await this.callGAS("getSummary", { period: period });
-  },
-
-  async getCOGS(period = "all") {
-    return await this.callGAS("getCOGS", { period: period });
-  },
-
-  async getShippers(period = "all") {
-    return await this.callGAS("getShippers", { period: period });
-  },
-
-  async getCRM(period = "all") {
-    return await this.callGAS("getCRM", { period: period });
-  },
-
-  async getMenu() {
-    return await this.callGAS("getMenu");
-  },
-
-  async getKitchenData() {
-    return await this.callGAS("getKitchenData");
-  },
-
-  async getShipperOrders(last4 = "") {
-    return await this.callGAS("getShipperOrders", { last4: last4 });
   }
 };
 
 window.Thim5API = Thim5API;
-window.API_URL = CONFIG.API_URL;
