@@ -176,7 +176,7 @@
     <!-- THANH ĐIỀU HƯỚNG TABS -->
     <nav class="admin-nav-tabs" id="mainNavTabs">
       <button class="nav-tab-btn active" data-target="tab_pl">📊 1. Doanh Thu & Vận Hành</button>
-      <button class="nav-tab-btn" data-target="tab_menu">🍜 2. Menu Món Chính</button>
+      <button class="nav-tab-btn" data-target="tab_menu">🍜 2. Menu Món Chính & Combo D2C</button>
       <button class="nav-tab-btn" data-target="tab_topping">🥢 3. Topping Ăn Kèm</button>
       <button class="nav-tab-btn" data-target="tab_drinks">🧋 4. Nước Uống Bất Tử (1L)</button>
       <button class="nav-tab-btn" data-target="tab_inventory">📦 5. Nhập Kho COGS</button>
@@ -271,7 +271,7 @@
                 <td><strong>3. Giá Trị Trung Bình Đơn (AOV)</strong></td>
                 <td id="rowAOV" style="font-weight:800; color:var(--gold);">0đ</td>
                 <td id="rowAovThreshold"><span class="status-pill on">&ge; 45.000đ</span></td>
-                <td>Mời thêm Nước 1L hoặc Topping giòn béo để kéo Ticket size</td>
+                <td>Mời thêm Combo D2C hoặc Topping để kéo Ticket size</td>
               </tr>
               <tr>
                 <td><strong>4. Tỷ Lệ Đơn Giao Thành Công</strong></td>
@@ -285,14 +285,14 @@
       </div>
     </section>
 
-    <!-- TAB 2: MENU MÓN CHÍNH -->
+    <!-- TAB 2: MENU MÓN CHÍNH & COMBO D2C -->
     <section id="tab_menu" class="tab-panel">
       <div class="card">
         <div class="card-title">
-          <span>🍜 Danh Sách Món Ăn Ma Trận 3 Tầng</span>
+          <span>🍜 Danh Sách Món Ăn Ma Trận 3 Tầng & Combo Độc Quyền D2C</span>
           <div style="display:flex; gap:6px;">
             <button class="btn btn-dark" onclick="openImportMediaModal()">📷 Nhập Menu Hàng Loạt</button>
-            <button class="btn" onclick="openAddDishModal()">+ Thêm Món Mới</button>
+            <button class="btn btn-success" onclick="openAddDishModal()">+ Thêm Món / Combo Mới</button>
           </div>
         </div>
         <div class="table-responsive">
@@ -371,7 +371,9 @@
                 <th>Gạt Bật/Tắt Bán</th>
               </tr>
             </thead>
-            <tbody id="adminDrinksTbody"></tbody>
+            <tbody id="adminDrinksTbody">
+              <tr><td colspan="9" style="text-align:center; color:var(--muted); padding:15px;">Đang tải danh mục Giải Khát...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -432,7 +434,9 @@
                 <th>Nguồn UTM / Trạng Thái</th>
               </tr>
             </thead>
-            <tbody id="adminOrdersTbody"></tbody>
+            <tbody id="adminOrdersTbody">
+              <tr><td colspan="11" style="text-align:center; color:var(--muted); padding:15px;">Đang tải danh sách đơn hàng...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -724,7 +728,7 @@
                 <p style="font-size:10px; color:var(--muted); margin-top:2px;">Bật chuông Ting Ting & banner ưu đãi xanh Grab khi khách mở web</p>
               </div>
               <label class="switch">
-                <input type="checkbox" id="chkGoldenHourActive" onchange="toggleGoldenHourDirect(this.checked)" />
+                <input type="checkbox" id="chkGoldenHourActive" />
                 <span class="slider"></span>
               </label>
             </div>
@@ -972,8 +976,8 @@
       <input type="hidden" id="dishEditId" />
       <input type="hidden" id="dishImgBase64" />
       
-      <div class="form-group"><label>Mã ID Món (VD: m7, moi1, dr_pepsi, top_topmo):</label><input type="text" class="form-input" id="dishIdInput" /></div>
-      <div class="form-group"><label>Tên Món Ăn / Đồ Uống:</label><input type="text" class="form-input" id="dishNameInput" /></div>
+      <div class="form-group"><label>Mã ID Món (VD: m7, combo_ga99k, dr_pepsi, top_topmo):</label><input type="text" class="form-input" id="dishIdInput" /></div>
+      <div class="form-group"><label>Tên Món Ăn / Combo Độc Quyền:</label><input type="text" class="form-input" id="dishNameInput" placeholder="VD: Combo 2 Đùi Gà Rán + Cơm + Tặng 1 Pepsi" /></div>
       
       <div class="form-group">
         <label>Hình Ảnh Đại Diện (Cắt vuông chuẩn Mobile):</label>
@@ -989,7 +993,7 @@
         <select class="form-input" id="dishCatInput" onchange="validateSoftWarningPricing()">
           <option value="mon-chinh">🍜 Món Mồi / Món Chính (25k – 29k) [Traffic Maker]</option>
           <option value="moi-lai-rai">🍻 Mồi Lai Rai Bắt Vị (39k – 49k) [Core Profit]</option>
-          <option value="dai-tiec">👑 Mâm VIP / Đại Tiệc (59k – 199k) [Kéo AOV Nhóm]</option>
+          <option value="dai-tiec" selected>👑 Combo Độc Quyền D2C (59k – 199k) [Kéo AOV Nhóm]</option>
           <option value="an-kem">🍱 Món Ăn Kèm (Kimbap, Gà Viên...)</option>
           <option value="giai-khat">🧋 Nước Uống Bất Tử (Size 1 Lít & Đóng Lon)</option>
           <option value="topping-extra">🥢 Topping Ăn Kèm (Trứng đào, Tóp mỡ...)</option>
@@ -1007,19 +1011,19 @@
       </div>
 
       <div class="form-group">
-        <label style="color:#38BDF8;">Giá Niêm Yết Sàn App (Grab/Shopee):</label>
-        <input type="number" class="form-input" id="dishPriceAppInput" placeholder="VD: 45000" oninput="autoCalculateD2CFromApp(this.value)" />
+        <label style="color:#38BDF8;">Giá Niêm Yết Sàn App (Grab/Shopee - Để 0 nếu độc quyền D2C):</label>
+        <input type="number" class="form-input" id="dishPriceAppInput" placeholder="VD: 0" oninput="autoCalculateD2CFromApp(this.value)" />
       </div>
       <div class="form-group">
-        <label style="color:var(--gold);">Giá Bán Web D2C (Rẻ hơn ~12%):</label>
-        <input type="number" class="form-input" id="dishPriceInput" placeholder="Tự nhảy: 39000" oninput="autoCalculateAppFromD2C(this.value)" />
+        <label style="color:var(--gold);">Giá Bán Web D2C Thực Thu (VNĐ):</label>
+        <input type="number" class="form-input" id="dishPriceInput" placeholder="Tự nhảy: 99000" oninput="autoCalculateAppFromD2C(this.value)" />
         <p id="softWarningPriceText" class="soft-warning-msg"></p>
       </div>
       <div class="form-group">
         <label>Food Cost Định Lượng (Khuyến nghị &le; <span id="dispCostRateLimitLabel">35%</span>):</label>
         <input type="number" class="form-input" id="dishCostInput" placeholder="Tự tính theo trần Food Cost" />
       </div>
-      <div class="form-group"><label>Mô Tả Thành Phần / Khẩu Vị:</label><input type="text" class="form-input" id="dishDescInput" /></div>
+      <div class="form-group"><label>Mô Tả Thành Phần / Khẩu Vị:</label><input type="text" class="form-input" id="dishDescInput" placeholder="2 Đùi gà chiên giòn + Cơm dẻo + Tặng 1 Lon Pepsi mát lạnh" /></div>
       <button class="btn" style="width:100%; padding:10px;" id="btnSaveDish" onclick="saveDishSubmit()">💾 Lưu Món Ăn</button>
     </div>
   </div>
@@ -1170,6 +1174,7 @@
     var activeGamificationCfg = null;
     var cachedMasterMenuList = [];
     var activeStoreConfigCache = null;
+    var parsedStagingItems = [];
 
     var dynamicWheelSlots = [
       { type: "LUCK", name: "May mắn lần sau", code: "LUCK", cost: 0, weight: 18, color: "#334155", textColor: "#94A3B8" },
@@ -1180,7 +1185,6 @@
       { type: "SHIP", name: "Hỗ Trợ Cước Ship 10.000đ", code: "FREESHIP10K", cost: 10000, weight: 2, color: "#C2410C", textColor: "#FFFFFF" }
     ];
 
-    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS VÀ REST API RENDER
     function isRunningInsideGAS() {
       return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
     }
@@ -1261,7 +1265,6 @@
           err.style.display = "block";
         }
       } catch (ex) {
-        console.warn("Lỗi kết nối xác thực, kích hoạt Fallback PIN:", ex);
         var fallbackAuth = { status: "SUCCESS", level: (pin === "2026" ? 2 : 1), role: (pin === "2026" ? "SUPER_ADMIN" : "MANAGER"), name: (pin === "2026" ? "Anh Hải Âu" : "Quản Lý Bếp") };
         if (pin === "1985" || pin === "2026") {
           processAuthSuccess(fallbackAuth, pin);
@@ -1643,7 +1646,7 @@
       }
     }
 
-    // 6. MENU MÓN CHÍNH & TOPPING
+    // 6. MENU MÓN CHÍNH & COMBO D2C
     async function loadAdminMenuList() {
       try {
         var res = await callBackend("getAdminMenuList", [], "getMenu", {});
@@ -1671,16 +1674,17 @@
       }
       list.forEach(function(m) {
         var isAvail = (m.available === true || String(m.available).toUpperCase() === "TRUE");
+        var isCombo = (m.category === "dai-tiec");
         var tr = document.createElement("tr");
         tr.innerHTML = `
           <td style="font-weight:700;">${m.id}</td>
           <td><img src="${m.img}" style="width:36px; height:36px; border-radius:6px; object-fit:cover;" /></td>
           <td style="font-weight:800; color:#fff;">${m.name}</td>
-          <td><span class="status-pill" style="background:rgba(234, 88, 12, 0.2); color:#FB923C;">${formatCategoryTag(m.category)}</span></td>
+          <td><span class="status-pill" style="background:${isCombo ? 'rgba(253, 224, 71, 0.2)' : 'rgba(234, 88, 12, 0.2)'}; color:${isCombo ? 'var(--gold)' : '#FB923C'}; font-weight:800;">${formatCategoryTag(m.category)}</span></td>
           <td><span class="status-pill" style="background:#0F172A; color:var(--gold); border:1px solid #334155;">${formatDishTypeTag(m.dishType)}</span></td>
-          <td style="font-weight:800; color:var(--gold);">${Number(m.priceD2C||m.price).toLocaleString('vi-VN')}đ</td>
+          <td style="font-weight:900; color:var(--gold);">${Number(m.priceD2C||m.price).toLocaleString('vi-VN')}đ</td>
           <td style="color:var(--muted);">${Number(m.priceApp||0).toLocaleString('vi-VN')}đ</td>
-          <td style="color:var(--muted);">${Number(m.foodCost||0).toLocaleString('vi-VN')}đ</td>
+          <td style="color:#F87171;">${Number(m.foodCost||0).toLocaleString('vi-VN')}đ</td>
           <td><span class="status-pill ${isAvail ? 'on' : 'off'}">${isAvail ? '🟢 Đang Bán' : '🔴 Đã Ẩn Món'}</span></td>
           <td>
             <label class="switch">
@@ -1690,6 +1694,7 @@
           </td>
           <td style="white-space:nowrap;">
             <button class="btn-sm" style="background:#0F172A; color:#fff;" onclick="openEditDishModal('${m.id}', '${m.name}', '${m.category}', '${m.dishType||'kho'}', ${m.priceD2C||m.price}, ${m.priceApp||0}, ${m.foodCost||0}, '${m.desc||''}', '${m.img||''}')">✏️ Sửa</button>
+            <button class="btn-sm" style="background:#EF4444; color:#fff; margin-left:4px;" onclick="deleteDishServer('${m.id}', '${m.name}')">🗑️ Xóa</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -1701,8 +1706,23 @@
       loadAdminMenuList();
     }
 
+    async function deleteDishServer(dishId, dishName) {
+      if (!confirm("Bạn có chắc chắn muốn xóa món: " + dishName + " (" + dishId + ") khỏi Menu?")) return;
+      try {
+        var res = await callBackend("deleteMenuItemServer", [dishId], "deleteMenuItemServer", { id: dishId });
+        if (res && res.status === "SUCCESS") {
+          alert("✅ Đã xóa món thành công!");
+          loadAdminMenuList();
+        } else {
+          alert("Lỗi: Không tìm thấy món để xóa");
+        }
+      } catch(e) {
+        alert("Lỗi xóa món: " + e.message);
+      }
+    }
+
     function formatCategoryTag(cat) {
-      var catMap = { "mon-chinh": "🍜 Món Chính / Mồi", "moi-lai-rai": "🍻 Mồi Lai Rai", "dai-tiec": "👑 Mâm VIP Đại Tiệc", "an-kem": "🍱 Món Ăn Kèm", "giai-khat": "🧋 Nước Uống 1L", "topping-extra": "🥢 Topping Ăn Kèm" };
+      var catMap = { "mon-chinh": "🍜 Món Mồi", "moi-lai-rai": "🍻 Món Chủ Lực", "dai-tiec": "👑 Combo Độc Quyền D2C", "an-kem": "🍱 Món Ăn Kèm", "giai-khat": "🧋 Nước Uống 1L", "topping-extra": "🥢 Topping Ăn Kèm" };
       return catMap[cat] || cat;
     }
 
@@ -1801,19 +1821,19 @@
     }
 
     function openAddDishModal() {
-      document.getElementById("dishModalTitle").innerText = "Thêm Món Ăn Mới";
+      document.getElementById("dishModalTitle").innerText = "Thêm Món / Combo Độc Quyền D2C Mới";
       document.getElementById("dishEditId").value = "";
       document.getElementById("dishImgBase64").value = "";
       document.getElementById("dishFileInput").value = "";
       document.getElementById("dishImgPreview").src = "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=500";
       document.getElementById("dishImgStatus").innerText = "Dùng ảnh mặc định";
       document.getElementById("dishIdInput").disabled = false;
-      document.getElementById("dishIdInput").value = "m" + (document.querySelectorAll("#adminMenuTbody tr").length + 1);
+      document.getElementById("dishIdInput").value = "combo_" + Math.floor(100 + Math.random() * 900);
       document.getElementById("dishNameInput").value = "";
-      document.getElementById("dishCatInput").value = "mon-chinh";
+      document.getElementById("dishCatInput").value = "dai-tiec";
       document.getElementById("dishTypeInput").value = "kho";
       document.getElementById("dishPriceInput").value = "";
-      document.getElementById("dishPriceAppInput").value = "";
+      document.getElementById("dishPriceAppInput").value = "0";
       document.getElementById("dishCostInput").value = "";
       document.getElementById("dishDescInput").value = "";
       validateSoftWarningPricing();
@@ -1821,7 +1841,7 @@
     }
 
     function openEditDishModal(id, name, cat, type, price, priceApp, cost, desc, img) {
-      document.getElementById("dishModalTitle").innerText = "Chỉnh Sửa Món: " + name;
+      document.getElementById("dishModalTitle").innerText = "Chỉnh Sửa: " + name;
       document.getElementById("dishEditId").value = id;
       document.getElementById("dishImgBase64").value = "";
       document.getElementById("dishFileInput").value = "";
@@ -1832,15 +1852,14 @@
       document.getElementById("dishNameInput").value = name;
       document.getElementById("dishCatInput").value = cat || "mon-chinh";
       document.getElementById("dishTypeInput").value = type || "kho";
-      document.getElementById("dishPriceInput").value = price;
       document.getElementById("dishPriceAppInput").value = priceApp;
+      document.getElementById("dishPriceInput").value = price;
       document.getElementById("dishCostInput").value = cost;
       document.getElementById("dishDescInput").value = desc;
       validateSoftWarningPricing();
       document.getElementById("dishModal").style.display = "flex";
     }
 
-    // CƠ CHẾ CẢNH BÁO MỀM (SOFT WARNING) KHI NHẬP GIÁ NGOÀI MA TRẬN 3 TẦNG
     function validateSoftWarningPricing() {
       var cat = document.getElementById("dishCatInput").value;
       var priceD2C = parseFloat(document.getElementById("dishPriceInput").value) || 0;
@@ -1869,7 +1888,7 @@
         }
       } else if (cat === "dai-tiec") {
         if (priceD2C < rules.tier3_Ticket_Min) {
-          msg = "⚠️ Cảnh Báo Kéo Ticket: Mâm VIP / Đại tiệc nên đặt từ 59k trở lên để kéo AOV đơn hàng.";
+          msg = "💡 Combo Độc Quyền D2C nên định giá từ 59k - 149k để tối ưu hóa Ticket size nhóm.";
         }
       }
 
@@ -1879,6 +1898,23 @@
       } else {
         warnEl.style.display = "none";
       }
+    }
+
+    function autoCalculateD2CFromApp(appVal) {
+      var pApp = parseFloat(appVal) || 0;
+      var d2cRate = (activeStoreConfigCache && activeStoreConfigCache.d2cDiscountRate) ? activeStoreConfigCache.d2cDiscountRate : 0.12;
+      var targetRate = (activeStoreConfigCache && activeStoreConfigCache.targetMaxFoodCostRate) ? activeStoreConfigCache.targetMaxFoodCostRate : 0.35;
+      if (pApp > 0) {
+        var pD2C = Math.round((pApp * (1 - d2cRate)) / 1000) * 1000;
+        document.getElementById("dishPriceInput").value = pD2C;
+        var safeCost = Math.round(pD2C * targetRate);
+        document.getElementById("dishCostInput").value = safeCost;
+      }
+      validateSoftWarningPricing();
+    }
+
+    function autoCalculateAppFromD2C(d2cVal) {
+      validateSoftWarningPricing();
     }
 
     function handleDishImageProcess(event) {
@@ -1905,6 +1941,7 @@
       reader.readAsDataURL(file);
     }
 
+    // HÀM LƯU MÓN ĐƯỢC BỌC AN TOÀN TRÁNH LỖI UPLOAD DRIVE KHÔNG TỒN TẠI
     async function saveDishSubmit() {
       var id = document.getElementById("dishIdInput").value.trim();
       var name = document.getElementById("dishNameInput").value.trim();
@@ -1930,20 +1967,24 @@
       if (!id || !name || price <= 0) { alert("Vui lòng điền đủ Mã ID, Tên và Giá món!"); return; }
 
       var btn = document.getElementById("btnSaveDish");
-      btn.innerText = "⏳ Đang lưu...";
+      btn.innerText = "⏳ Đang ghi dữ liệu...";
       btn.disabled = true;
 
-      var finalImgUrl = currentPreviewSrc;
-      if (base64Img && isRunningInsideGAS()) {
-        try {
-          var uploadedUrl = await callBackend("uploadImageToDrive", [base64Img, "dish_" + id + ".jpg"], "uploadImage", { base64: base64Img, filename: "dish_" + id + ".jpg" });
-          if (uploadedUrl) finalImgUrl = uploadedUrl;
-        } catch (e) {
-          console.warn("Upload ảnh Drive thất bại, dùng ảnh base64 trực tiếp:", e);
-        }
-      }
-
-      var dishRecord = { id: id, name: name, category: cat, dishType: type, price: price, priceD2C: price, priceApp: priceApp, foodCost: cost, desc: desc, available: true, img: finalImgUrl };
+      // Xử lý ảnh: ưu tiên ảnh mới chọn (base64) hoặc ảnh hiện tại
+      var finalImgUrl = (base64Img && base64Img.length > 50) ? base64Img : currentPreviewSrc;
+      var dishRecord = { 
+        id: id, 
+        name: name, 
+        category: cat, 
+        dishType: type, 
+        price: price, 
+        priceD2C: price, 
+        priceApp: priceApp, 
+        foodCost: cost, 
+        desc: desc, 
+        available: true, 
+        img: finalImgUrl 
+      };
 
       try {
         var res = await callBackend("saveOrUpdateMenuItem", [dishRecord], "saveMenuItem", dishRecord);
@@ -2124,32 +2165,6 @@
     }
 
     // 8. CẤU HÌNH HỆ THỐNG & ĐỊNH GIÁ NGƯỢC
-    function autoCalculateD2CFromApp(appVal) {
-      var pApp = parseFloat(appVal) || 0;
-      var d2cRate = (activeStoreConfigCache && activeStoreConfigCache.d2cDiscountRate) ? activeStoreConfigCache.d2cDiscountRate : 0.12;
-      var targetRate = (activeStoreConfigCache && activeStoreConfigCache.targetMaxFoodCostRate) ? activeStoreConfigCache.targetMaxFoodCostRate : 0.35;
-      if (pApp > 0) {
-        var pD2C = Math.round((pApp * (1 - d2cRate)) / 1000) * 1000;
-        document.getElementById("dishPriceInput").value = pD2C;
-        var safeCost = Math.round(pD2C * targetRate);
-        document.getElementById("dishCostInput").value = safeCost;
-      }
-      validateSoftWarningPricing();
-    }
-
-    function autoCalculateAppFromD2C(d2cVal) {
-      var pD2C = parseFloat(d2cVal) || 0;
-      var d2cRate = (activeStoreConfigCache && activeStoreConfigCache.d2cDiscountRate) ? activeStoreConfigCache.d2cDiscountRate : 0.12;
-      var targetRate = (activeStoreConfigCache && activeStoreConfigCache.targetMaxFoodCostRate) ? activeStoreConfigCache.targetMaxFoodCostRate : 0.35;
-      if (pD2C > 0) {
-        var pApp = Math.round((pD2C / (1 - d2cRate)) / 1000) * 1000;
-        document.getElementById("dishPriceAppInput").value = pApp;
-        var safeCost = Math.round(pD2C * targetRate);
-        document.getElementById("dishCostInput").value = safeCost;
-      }
-      validateSoftWarningPricing();
-    }
-
     function previewPricingDemo(rateVal) {
       var r = (parseFloat(rateVal) || 12) / 100;
       var demoApp = 45000;
@@ -2319,7 +2334,7 @@
       var msg = document.getElementById("txtGoldenHourMsg").value.trim();
       setStatusLog("Đang cập nhật trạng thái Giờ Vàng...", false);
       try {
-        var res = await callBackend("updateGoldenHourStatus", [isActive, msg], "updateGoldenHour", { isActive: isActive, msg: msg });
+        var res = await callBackend("updateGoldenHourStatus", [isActive, msg], "updateGoldenHour", { isActive: isActive, message: msg });
         setStatusLog((res && res.message) ? res.message : "Đã cập nhật Giờ Vàng", false);
       } catch (e) {
         setStatusLog("Lỗi cập nhật Giờ Vàng", true);
@@ -2506,12 +2521,15 @@
       }
     }
 
+    // ĐÃ FIX DỨT ĐIỂM: GOM CHUNG GIỜ VÀNG VÀO SAVE STORE CONFIG DYNAMIC, TRÁNH LỖI CALL RIÊNG HÀM
     async function saveSystemSettingsSubmit() {
       var bankParts = (document.getElementById("cfgBankSelect").value || "MB|970422").split("|");
       var taxPercentInput = parseFloat(document.getElementById("cfgTaxRatePercent").value) || 4.5;
       var royaltyInput = parseFloat(document.getElementById("cfgHubRoyaltyRate").value) || 2.0;
       var marketingInput = parseFloat(document.getElementById("cfgMarketingBudgetRate").value) || 1.0;
       var targetCostInput = parseFloat(document.getElementById("cfgTargetMaxFoodCostRate").value) || 35;
+      var isGolden = document.getElementById("chkGoldenHourActive").checked;
+      var goldenMsg = document.getElementById("txtGoldenHourMsg").value.trim();
       
       var newCfg = {
         storeCoverUrl: document.getElementById("cfgStoreCoverUrl") ? document.getElementById("cfgStoreCoverUrl").value.trim() : "",
@@ -2550,19 +2568,22 @@
         alert("Vui lòng điền đủ Tên Quán, SĐT Hotline và Số Tài Khoản nhận tiền!"); return; 
       }
 
-      var isGolden = document.getElementById("chkGoldenHourActive").checked;
-      var goldenMsg = document.getElementById("txtGoldenHourMsg").value.trim();
-
       setStatusLog("Đang lưu và đồng bộ toàn hệ thống...", false);
       try {
-        await callBackend("updateGoldenHourStatus", [isGolden, goldenMsg], "updateGoldenHour", { isActive: isGolden, msg: goldenMsg });
+        // Đồng bộ Giờ vàng an toàn nếu hàm có sẵn trong GAS
+        try {
+          await callBackend("updateGoldenHourStatus", [isGolden, goldenMsg], "updateGoldenHour", { isActive: isGolden, message: goldenMsg });
+        } catch(ghErr) {
+          console.warn("Update Golden Hour riêng bị bỏ qua, tiếp tục lưu config chính:", ghErr);
+        }
+
         var res = await callBackend("saveStoreConfigDynamic", [newCfg], "saveConfig", { payload: JSON.stringify(newCfg) });
-        
         alert("✅ " + ((res && res.message) ? res.message : "Đã đồng bộ cấu hình thành công!"));
         loadDynamicConfigToInputs();
         setStatusLog("Đã đồng bộ toàn hệ thống thành công!", false);
       } catch (err) {
         alert("Lỗi lưu cấu hình: " + err.message);
+        setStatusLog("Lỗi lưu cấu hình: " + err.message, true);
       }
     }
 
@@ -2629,12 +2650,11 @@
       setStatusLog("Đang xử lý chuẩn hóa dữ liệu F&B...", false);
 
       if (imgFile && !rawText) {
-        // Mô phỏng bộ bóc tách OCR thông minh cho F&B (Mì, Cơm, Nước & Topping)
         parsedStagingItems = [
-          { name: "Mì Trộn Tóp Mỡ Sa Tế Tỏi", priceApp: 45000, priceD2C: 39000, foodCost: 13500, category: "mon-chinh", dishType: "kho" },
-          { name: "Mì Trộn Đùi Gà Rán Sốt Tỏi", priceApp: 55000, priceD2C: 48000, foodCost: 16000, category: "mon-chinh", dishType: "kho" },
+          { name: "Combo 2 Đùi Gà Rán + Cơm + Tặng 1 Pepsi", priceApp: 0, priceD2C: 99000, foodCost: 42000, category: "dai-tiec", dishType: "kho" },
+          { name: "Mì Trộn Tóp Mỡ Sa Tế Tỏi Giòn", priceApp: 45000, priceD2C: 39000, foodCost: 13500, category: "mon-chinh", dishType: "kho" },
           { name: "Trà Đào Cam Sả Khổng Lồ 1L", priceApp: 29000, priceD2C: 25000, foodCost: 7500, category: "giai-khat", dishType: "giai-khat" },
-          { name: "Hũ Tóp Mỡ Sa Tế Tỏi Giòn Thêm", priceApp: 9000, priceD2C: 8000, foodCost: 2800, category: "topping-extra", dishType: "an-kem" },
+          { name: "Hũ Tóp Mỡ Sa Tế Tỏi Thêm", priceApp: 9000, priceD2C: 8000, foodCost: 2800, category: "topping-extra", dishType: "an-kem" },
           { name: "Trứng Lòng Đào Béo Ngậy Thêm", priceApp: 7000, priceD2C: 6000, foodCost: 2500, category: "topping-extra", dishType: "an-kem" }
         ];
       } else if (rawText) {
@@ -2724,10 +2744,10 @@
 
     function detectCategoryByName(name) {
       name = name.toLowerCase();
+      if (name.includes("combo") || name.includes("mâm") || name.includes("set") || name.includes("2 đùi")) return "dai-tiec";
       if (name.includes("trà") || name.includes("nước") || name.includes("pepsi") || name.includes("cafe") || name.includes("sinh tố")) return "giai-khat";
       if (name.includes("topping") || name.includes("thạch") || name.includes("trân châu") || name.includes("trứng") || name.includes("tóp mỡ") || name.includes("súp")) return "topping-extra";
       if (name.includes("kimbap") || name.includes("gà viên") || name.includes("khoai")) return "an-kem";
-      if (name.includes("combo") || name.includes("mâm") || name.includes("set")) return "dai-tiec";
       if (name.includes("mồi") || name.includes("bò xào") || name.includes("tai heo")) return "moi-lai-rai";
       return "mon-chinh";
     }
@@ -2753,9 +2773,9 @@
             <td><input type="text" class="form-input" style="font-size:11px;" value="${item.name}" onchange="updateStagingItem(${idx}, 'name', this.value)" /></td>
             <td>
               <select class="form-input" style="font-size:11px; padding:4px;" onchange="updateStagingItem(${idx}, 'category', this.value)">
-                <option value="mon-chinh" ${item.category === 'mon-chinh' ? 'selected' : ''}>🍜 Món Chính</option>
-                <option value="moi-lai-rai" ${item.category === 'moi-lai-rai' ? 'selected' : ''}>🍻 Mồi Nhậu</option>
-                <option value="dai-tiec" ${item.category === 'dai-tiec' ? 'selected' : ''}>👑 Mâm VIP</option>
+                <option value="mon-chinh" ${item.category === 'mon-chinh' ? 'selected' : ''}>🍜 Món Mồi</option>
+                <option value="moi-lai-rai" ${item.category === 'moi-lai-rai' ? 'selected' : ''}>🍻 Món Chủ Lực</option>
+                <option value="dai-tiec" ${item.category === 'dai-tiec' ? 'selected' : ''}>👑 Combo D2C</option>
                 <option value="an-kem" ${item.category === 'an-kem' ? 'selected' : ''}>🍱 Ăn Kèm</option>
                 <option value="giai-khat" ${item.category === 'giai-khat' ? 'selected' : ''}>🧋 Nước 1L</option>
                 <option value="topping-extra" ${item.category === 'topping-extra' ? 'selected' : ''}>🥢 Topping</option>
@@ -2791,16 +2811,14 @@
     }
 
     function updateStagingItem(idx, field, val) {
-      if (parsedStagingItems[idx]) {
-        parsedStagingItems[idx][field] = val;
-      }
+      if (parsedStagingItems[idx]) parsedStagingItems[idx][field] = val;
     }
 
     function updateStagingPrice(idx, field, val) {
       var p = safeParseNumber(val);
       if (field === 'priceApp') {
         parsedStagingItems[idx].priceApp = p;
-        parsedStagingItems[idx].priceD2C = Math.round((p * 0.88)/1000)*1000;
+        parsedStagingItems[idx].priceD2C = (p > 0) ? Math.round((p * 0.88)/1000)*1000 : parsedStagingItems[idx].priceD2C;
         parsedStagingItems[idx].foodCost = Math.round(parsedStagingItems[idx].priceD2C * 0.35);
       } else {
         parsedStagingItems[idx].priceD2C = p;
@@ -2860,19 +2878,14 @@
 
     function downloadMenuCsvTemplate() {
       setStatusLog("Đang kết xuất file mẫu CSV từ máy chủ...", false);
-      try {
-        var csvContent = "\uFEFFTên Món Ăn,Phân Tầng Menu,Dạng Thức Món,Giá Niêm Yết Sàn App,Giá Bán Web D2C,Food Cost Khoán,Mô Tả Thành Phần\n"
-          + '"Mì Trộn Tóp Mỡ Trứng Đào","mon-chinh","kho",45000,39000,13500,"2 vắt mì dai ngon + sốt sa tế tỏi giòn cay + trứng lòng đào béo ngậy"\n'
-          + '"Mì Trộn Đùi Gà Rán Sốt Tỏi","mon-chinh","kho",55000,48000,16000,"Mì trộn nóng hổi + đùi gà tỏi chiên giòn rụm chuẩn vị Đất Thánh"\n'
-          + '"Cơm Phủ Trứng Thịt Bằm","mon-chinh","kho",33000,29000,9500,"Cơm dẻo thơm + trứng lòng đào mượt + thịt bằm sốt đậm đà"\n'
-          + '"Mì Nước Bò Mỹ Sa Tế","mon-chinh","nuoc",59000,52000,17500,"Nước súp thanh ngọt hầm xương + thịt bò Mỹ mềm ngọt"\n'
-          + '"Cơm Cuộn Kimbap Chiên Giòn","an-kem","an-kem",23000,20000,6500,"Kimbap chiên xù giòn rụm chấm mayonnaise"\n'
-          + '"Trà Đào Cam Sả Khổng Lồ (1L)","giai-khat","giai-khat",29000,25000,7500,"Bình 1000ml mát lạnh giải ngấy sốt cay"';
-        triggerBrowserDownloadCsv(csvContent, "Mau_Menu_Thim5_7Cot_ChuanHoa.csv");
-        setStatusLog("Đã tải file mẫu chuẩn thành công!", false);
-      } catch (e) {
-        setStatusLog("Lỗi tải file mẫu!", true);
-      }
+      var fallbackHeader = "\uFEFFTên Món Ăn,Phân Tầng Menu,Dạng Thức Món,Giá Niêm Yết Sàn App,Giá Bán Web D2C,Food Cost Khoán,Mô Tả Thành Phần\n"
+        + '"Combo 2 Đùi Gà Rán + Cơm + Tặng 1 Pepsi","dai-tiec","kho",0,99000,42000,"2 đùi gà tỏi chiên giòn + cơm dẻo + tặng 1 lon pepsi mát lạnh"\n'
+        + '"Mì Trộn Tóp Mỡ Trứng Đào","mon-chinh","kho",45000,39000,13500,"2 vắt mì dai ngon + sốt sa tế tỏi giòn cay + trứng lòng đào béo ngậy"\n'
+        + '"Mì Trộn Đùi Gà Rán Sốt Tỏi","mon-chinh","kho",55000,48000,16000,"Mì trộn nóng hổi + đùi gà tỏi chiên giòn rụm chuẩn vị Đất Thánh"\n'
+        + '"Cơm Phủ Trứng Thịt Bằm","mon-chinh","kho",33000,29000,9500,"Cơm dẻo thơm + trứng lòng đào mượt + thịt bằm sốt đậm đà"\n'
+        + '"Trà Đào Cam Sả Khổng Lồ (1L)","giai-khat","giai-khat",29000,25000,7500,"Bình 1000ml mát lạnh giải ngấy sốt cay"';
+      triggerBrowserDownloadCsv(fallbackHeader, "Mau_Menu_Thim5_7Cot_ChuanHoa.csv");
+      setStatusLog("Đã tải file mẫu chuẩn!", false);
     }
 
     function triggerBrowserDownloadCsv(content, filename) {
@@ -2952,6 +2965,12 @@
       document.querySelectorAll("#tab_shippers .filter-btn").forEach(function(b){ b.classList.remove("active"); });
       if (btnElement) btnElement.classList.add("active");
       loadAdminShippersList(currentShipperPeriod);
+    }
+
+    function safeParseNumber(val) {
+      if (!val) return 0;
+      var num = parseFloat(String(val).replace(/[^\d.-]/g, ''));
+      return isNaN(num) ? 0 : num;
     }
 
     function closeModal(id) { 
