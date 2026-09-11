@@ -2,7 +2,7 @@
  * CẤU HÌNH KẾT NỐI API THÍM 5 HÒA THÀNH - VƯỢT RÀO CẢN CORS VÀ HTTP 302 REDIRECT
  */
 const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbwZZoE51LGSlZbE85BH_sB2bZwWB_omtZaPFI_vevlAh56bs8CrpGTPmfdg2FfzadcY/exec"
+  API_URL: "https://script.google.com/macros/s/AKfycbwZZoE51LGSlZbE85BH_sB2bzWwB_omtZaPFI_vevlAh56bs8CrpGTPMfdg2FfzadcY/exec"
 };
 
 const Thim5API = {
