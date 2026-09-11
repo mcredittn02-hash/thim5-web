@@ -1,73 +1,86 @@
 /**
- * CẤU HÌNH KẾT NỐI API THÍM 5 HÒA THÀNH - VƯỢT RÀO CẢN CORS VÀ HTTP 302 REDIRECT
+ * =========================================================================
+ * FILE: api.js - BẢN BỌC THÉP CHỐNG LỖI 302 REDIRECT & HTML UNEXPECTED TOKEN
+ * HỆ THỐNG: Mì Trộn & Cơm Trộn Thím 5 Master
+ * =========================================================================
  */
 const CONFIG = {
   API_URL: "https://script.google.com/macros/s/AKfycbwZZoE51LGSlZbE85BH_sB2bzWwB_omtZaPFI_vevlAh56bs8CrpGTPMfdg2FfzadcY/exec"
 };
 
+let requestQueue = Promise.resolve();
+
 const Thim5API = {
   async callGAS(action, params = {}) {
-    const isWriteAction = (
-      action === "saveStoreConfigDynamic" ||
-      action === "saveConfig" ||
-      action === "updateDynamicPricingSettings" ||
-      action === "updatePricingSettings" ||
-      action === "saveOrUpdateMenuItem" ||
-      action === "saveMenuItem" ||
-      action === "processStructuredBatchImport" ||
-      action === "structuredBatchImport" ||
-      action === "saveInventoryItemServer" ||
-      action === "saveInventory" ||
-      action === "saveWheelPrizesConfigServer" ||
-      action === "saveWheelConfig" ||
-      action === "saveLoyaltyGamificationConfig" ||
-      action === "saveGamificationConfig" ||
-      action === "doPostOrder" ||
-      action === "submitOrder"
-    );
-
-    if (isWriteAction) {
-      const postUrl = CONFIG.API_URL + "?action=" + encodeURIComponent(action);
-      const formData = new URLSearchParams();
-      formData.append("action", action);
-      formData.append("payload", JSON.stringify(params || {}));
-
-      try {
-        const response = await fetch(postUrl, {
-          method: "POST",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-          },
-          body: formData.toString()
-        });
-
-        const textRes = await response.text();
+    return new Promise((resolve, reject) => {
+      requestQueue = requestQueue.then(async () => {
         try {
-          return JSON.parse(textRes);
-        } catch (e) {
-          return { status: "SUCCESS", message: "Đã đồng bộ thành công!" };
+          const res = await Thim5API.executeWithRetry(action, params, 2);
+          resolve(res);
+        } catch (err) {
+          reject(err);
         }
-      } catch (err) {
-        console.warn("Lỗi fetch POST, fallback sang GET params:", err);
-        const fallbackUrl = CONFIG.API_URL + "?action=" + encodeURIComponent(action) + "&payload=" + encodeURIComponent(JSON.stringify(params || {}));
-        const resFb = await fetch(fallbackUrl);
-        return await resFb.json();
-      }
-    } else {
-      const cleanParams = Object.assign({ action: action }, params);
-      const queryParams = new URLSearchParams();
-      
-      for (const key in cleanParams) {
-        if (cleanParams[key] !== undefined && cleanParams[key] !== null) {
-          queryParams.append(key, (typeof cleanParams[key] === 'object') ? JSON.stringify(cleanParams[key]) : cleanParams[key]);
-        }
-      }
+        await new Promise(r => setTimeout(r, 100));
+      });
+    });
+  },
 
-      const targetUrl = CONFIG.API_URL + "?" + queryParams.toString();
-      const response = await fetch(targetUrl, { method: "GET", mode: "cors" });
-      const textRes = await response.text();
+  async executeWithRetry(action, params, maxRetries = 2) {
+    let lastError = null;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await Thim5API.sendRequest(action, params);
+      } catch (err) {
+        lastError = err;
+        console.warn(`[Thim5API] Lỗi gọi '${action}' (Lần ${attempt + 1}):`, err.message);
+        if (attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
+        }
+      }
+    }
+    throw lastError;
+  },
+
+  async sendRequest(action, params = {}) {
+    // Ép mọi hành động cập nhật trạng thái, đơn hàng, cấu hình đều đi qua POST có đính kèm action rõ ràng trên URL
+    const isWriteAction = true; // Luôn dùng POST cho mọi thao tác gọi từ trang quản trị để tránh cache và lỗi 302
+
+    const postUrl = CONFIG.API_URL + "?action=" + encodeURIComponent(action) + "&method=api&_t=" + Date.now();
+    const formData = new URLSearchParams();
+    formData.append("action", action);
+    formData.append("method", "api");
+    formData.append("payload", typeof params === "string" ? params : JSON.stringify(params || {}));
+
+    // Phẳng hóa toàn bộ tham số để doPost(e) bắt được cả qua e.parameter lẫn postData
+    if (params && typeof params === "object") {
+      for (const k in params) {
+        if (params[k] !== undefined && params[k] !== null && typeof params[k] !== "object") {
+          formData.append(k, params[k]);
+        }
+      }
+    }
+
+    const response = await fetch(postUrl, {
+      method: "POST",
+      mode: "cors",
+      redirect: "follow",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+      },
+      body: formData.toString()
+    });
+
+    const textRes = await response.text();
+    
+    // Kiểm tra gắt gao: Nếu Google Apps Script trả về HTML (bắt đầu bằng < hoặc <!DOCTYPE) -> Báo lỗi ngay lập tức
+    if (!textRes || textRes.trim().startsWith("<") || textRes.includes("<!DOCTYPE")) {
+      throw new Error("GAS trả về HTML thay vì JSON. Kiểm tra lại quyền Deploy 'Anyone' hoặc tên Action: " + action);
+    }
+
+    try {
       return JSON.parse(textRes);
+    } catch (e) {
+      throw new Error("Phản hồi không phải JSON hợp lệ: " + textRes.substring(0, 100));
     }
   }
 };
