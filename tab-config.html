@@ -1,0 +1,358 @@
+<!-- BẢNG ĐIỀU KHIỂN CẤU HÌNH HỆ THỐNG DỘNG [SYS_CONFIG] -->
+<div class="max-w-6xl mx-auto space-y-6 pb-12">
+    <!-- Top Action Bar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-lg">
+        <div>
+            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-red-500"></i> Bảng Điều Khiển Cấu Hình Trung Tâm
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Các tham số dưới đây điều khiển trực tiếp logic giá, thuế và dòng tiền toàn hệ thống.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="initTabConfig()" id="btn-reload-config" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition flex items-center gap-2">
+                <i class="fa-solid fa-arrows-rotate"></i> Tải lại
+            </button>
+            <button onclick="ConfigController.openConfirmModal()" id="btn-save-config" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/30 transition flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i> Lưu Cấu Hình
+            </button>
+        </div>
+    </div>
+
+    <!-- Form Container (5 Nhóm Thông Số) -->
+    <form id="config-form" onsubmit="event.preventDefault()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- CARD 1: THÔNG TIN ĐIỂM BÁN & CSKH -->
+        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4">
+            <div class="flex items-center gap-2 pb-3 border-b border-slate-800 text-sm font-bold text-blue-400">
+                <i class="fa-solid fa-store"></i> 1. THÔNG TIN THƯƠNG HIỆU & VẬN HÀNH
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Tên Thương Hiệu / Chi Nhánh</label>
+                <input type="text" id="cfg-STORE_NAME" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Mì Trộn Thím 5">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Hotline CSKH / Zalo Chủ Quán</label>
+                <input type="text" id="cfg-STORE_PHONE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="0979531213">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Địa Chỉ Bếp / Chi Nhánh</label>
+                <textarea id="cfg-STORE_ADDRESS" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="TX. Hòa Thành, Tây Ninh"></textarea>
+            </div>
+        </div>
+
+        <!-- CARD 2: RÀO CHẮN TÀI CHÍNH & KHẤU TRỪ SÀN -->
+        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4">
+            <div class="flex items-center gap-2 pb-3 border-b border-slate-800 text-sm font-bold text-emerald-400">
+                <i class="fa-solid fa-shield-halved"></i> 2. RÀO CHẮN TÀI CHÍNH & DÒNG TIỀN
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Khóa Trần Khuyến Mãi (<= 15%)</label>
+                    <input type="number" step="0.01" id="cfg-PROMO_CAP_RATE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-emerald-400 font-bold focus:outline-none focus:border-emerald-500" placeholder="0.15">
+                    <span class="text-[10px] text-slate-500">Ví dụ: 0.15 = 15%</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Tổng Khấu Trừ Nền Tảng</label>
+                    <input type="number" step="0.01" id="cfg-PLATFORM_FEE_RATE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-amber-400 font-bold focus:outline-none focus:border-amber-500" placeholder="0.40">
+                    <span class="text-[10px] text-slate-500">Phí sàn + chiết khấu (0.40 = 40%)</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Trích Lập Thuế HKD</label>
+                    <input type="number" step="0.001" id="cfg-TAX_RATE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="0.045">
+                    <span class="text-[10px] text-slate-500">Mặc định: 0.045 = 4.5%</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Phí Quản Trị Master</label>
+                    <input type="number" step="0.001" id="cfg-MASTER_ROYALTY" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="0.02">
+                    <span class="text-[10px] text-slate-500">Thù lao SaaS (0.02 = 2%)</span>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Hạn Mức Giữ Tiền COD Của Shipper (VNĐ)</label>
+                <input type="number" id="cfg-COD_HOLDING_LIMIT" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-yellow-400 font-mono focus:outline-none focus:border-yellow-500" placeholder="1000000">
+            </div>
+        </div>
+
+        <!-- CARD 3: CỔNG THANH TOÁN VIETQR ĐỘNG -->
+        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4">
+            <div class="flex items-center gap-2 pb-3 border-b border-slate-800 text-sm font-bold text-amber-400">
+                <i class="fa-solid fa-qrcode"></i> 3. CỔNG THANH TOÁN VIETQR TỰ ĐỘNG
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Mã Ngân Hàng (Bank Code)</label>
+                    <input type="text" id="cfg-BANK_CODE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-amber-500" placeholder="MB, VCB, TCB...">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Số Tài Khoản</label>
+                    <input type="text" id="cfg-BANK_ACCOUNT" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-amber-400 font-mono font-bold focus:outline-none focus:border-amber-500" placeholder="3939388888">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Tên Chủ Tài Khoản (Viết hoa không dấu)</label>
+                <input type="text" id="cfg-BANK_OWNER" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-semibold uppercase focus:outline-none focus:border-amber-500" placeholder="NGUYEN HAI AU">
+            </div>
+        </div>
+
+        <!-- CARD 4: TIẾP THỊ & TRACKING PIXELS -->
+        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4">
+            <div class="flex items-center gap-2 pb-3 border-b border-slate-800 text-sm font-bold text-purple-400">
+                <i class="fa-solid fa-bullseye"></i> 4. TIẾP THỊ & TRACKING PIXELS
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Meta (Facebook) Pixel ID</label>
+                <input type="text" id="cfg-META_PIXEL_ID" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-purple-300 font-mono focus:outline-none focus:border-purple-500" placeholder="123456789012345">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">TikTok Pixel ID</label>
+                <input type="text" id="cfg-TIKTOK_PIXEL_ID" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-purple-300 font-mono focus:outline-none focus:border-purple-500" placeholder="C123456789ABCDEF">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Google Tag Manager (GTM) ID</label>
+                <input type="text" id="cfg-GTM_ID" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-purple-300 font-mono focus:outline-none focus:border-purple-500" placeholder="GTM-XXXXXXX">
+            </div>
+        </div>
+
+        <!-- CARD 5: BẢO MẬT & BÁO CÁO HỆ THỐNG -->
+        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4 md:col-span-2">
+            <div class="flex items-center gap-2 pb-3 border-b border-slate-800 text-sm font-bold text-red-400">
+                <i class="fa-solid fa-lock"></i> 5. BẢO MẬT PHÂN QUYỀN & BÁO CÁO TỰ ĐỘNG
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">PIN Quản Lý Ca (Level 1)</label>
+                    <input type="password" maxlength="6" id="cfg-ADMIN_PIN_LV1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono text-center tracking-widest focus:outline-none focus:border-red-500" placeholder="••••">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">PIN Super Admin (Level 2)</label>
+                    <input type="password" maxlength="6" id="cfg-ADMIN_PIN_LV2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono text-center tracking-widest focus:outline-none focus:border-red-500" placeholder="••••">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Email Nhận Báo Cáo Thuế 23:59</label>
+                    <input type="email" id="cfg-TAX_REPORT_EMAIL" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-red-500" placeholder="haiau2205@gmail.com">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- MODAL XÁC NHẬN BẢO MẬT & NHẬP PIN LEVEL 2 -->
+<div id="modal-confirm-config" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4">
+        <div class="flex items-center gap-3 text-amber-400">
+            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            <h4 class="font-bold text-base text-white">Xác Nhận Thay Đổi Cấu Hình</h4>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Các thay đổi này sẽ ảnh hưởng ngay lập tức đến công thức định giá, chiết khấu và báo cáo thuế của hệ thống.
+        </p>
+        <div id="config-diff-list" class="max-h-36 overflow-y-auto p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 space-y-1 font-mono">
+            <!-- Tự động nạp danh sách tham số thay đổi -->
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-red-400 mb-1">Nhập PIN Super Admin (Level 2) để duyệt:</label>
+            <input type="password" id="input-confirm-pin" maxlength="6" class="w-full bg-slate-950 border border-red-500/50 rounded-xl px-4 py-2.5 text-center text-lg font-mono tracking-widest text-white focus:outline-none focus:border-red-500" placeholder="••••">
+            <span id="pin-error-msg" class="hidden text-[11px] text-red-400 mt-1">Mã PIN không chính xác. Vui lòng kiểm tra lại.</span>
+        </div>
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <button onclick="ConfigController.closeConfirmModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">Hủy bỏ</button>
+            <button onclick="ConfigController.executeSave()" id="btn-execute-save" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/30 transition flex items-center gap-2">
+                <i class="fa-solid fa-check"></i> Xác Nhận Lưu
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * =========================================================================
+ * CONTROLLER: CONFIG CONTROLLER (ĐIỀU PHỐI CẤU HÌNH HỆ THỐNG)
+ * Vai trò: Đồng bộ dữ liệu hai chiều giữa Form UI và Google Sheets [SYS_CONFIG].
+ * Bọc thép: Diffing state, Input Sanitization, PIN Level 2 Authorization.
+ * =========================================================================
+ */
+const ConfigController = (function() {
+    // Danh sách toàn bộ Key cấu hình chuẩn hóa theo [SYS_CONFIG]
+    const CONFIG_KEYS = [
+        "STORE_NAME", "STORE_PHONE", "STORE_ADDRESS",
+        "PLATFORM_FEE_RATE", "PROMO_CAP_RATE", "TAX_RATE", "MASTER_ROYALTY", "COD_HOLDING_LIMIT",
+        "BANK_CODE", "BANK_ACCOUNT", "BANK_OWNER",
+        "META_PIXEL_ID", "TIKTOK_PIXEL_ID", "GTM_ID",
+        "ADMIN_PIN_LV1", "ADMIN_PIN_LV2", "TAX_REPORT_EMAIL"
+    ];
+
+    let originalSnapshot = {};
+    let pendingChanges = {};
+
+    /**
+     * Nạp dữ liệu cấu hình từ Backend Google Apps Script
+     */
+    async function loadConfig() {
+        const btnReload = document.getElementById("btn-reload-config");
+        const btnSave = document.getElementById("btn-save-config");
+        
+        try {
+            if (btnReload) btnReload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải...';
+            if (btnSave) btnSave.disabled = true;
+
+            const configData = await Thim5API.callGAS("getSysConfig");
+            if (!configData || typeof configData !== "object") {
+                throw new Error("Dữ liệu cấu hình trả về không hợp lệ.");
+            }
+
+            // Lưu trữ snapshot nguyên bản để đối soát thay đổi
+            originalSnapshot = Object.assign({}, configData);
+
+            // Bơm dữ liệu vào từng ô input trên form
+            CONFIG_KEYS.forEach(key => {
+                const inputElem = document.getElementById("cfg-" + key);
+                if (inputElem) {
+                    inputElem.value = (configData[key] !== undefined && configData[key] !== null) ? configData[key] : "";
+                }
+            });
+
+            console.log("✅ [ConfigController] Đã nạp thành công cấu hình hệ thống.");
+        } catch (error) {
+            alert("❌ Không thể tải cấu hình hệ thống: " + error.message);
+            console.error("[ConfigController] Lỗi loadConfig:", error);
+        } finally {
+            if (btnReload) btnReload.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Tải lại';
+            if (btnSave) btnSave.disabled = false;
+        }
+    }
+
+    /**
+     * Thu thập các giá trị đang hiển thị trên form
+     */
+    function getFormData() {
+        const currentData = {};
+        CONFIG_KEYS.forEach(key => {
+            const inputElem = document.getElementById("cfg-" + key);
+            if (inputElem) {
+                currentData[key] = inputElem.value.trim();
+            }
+        });
+        return currentData;
+    }
+
+    /**
+     * Mở hộp thoại xác nhận thay đổi và kiểm duyệt diff
+     */
+    function openConfirmModal() {
+        const currentData = getFormData();
+        pendingChanges = {};
+
+        // Kiểm tra logic tài chính cơ bản trước khi mở modal
+        const promoCap = parseFloat(currentData["PROMO_CAP_RATE"]);
+        if (promoCap > 0.15) {
+            const confirmRisk = confirm("⚠️ CẢNH BÁO TÀI CHÍNH: Trần khuyến mãi đang vượt mức 15% (" + (promoCap * 100) + "%). Việc này có thể làm âm dòng tiền thực thu của quán. Anh Hải Âu có chắc chắn muốn thiết lập mức này?");
+            if (!confirmRisk) return;
+        }
+
+        // Quét các trường dữ liệu có sự thay đổi thực tế
+        CONFIG_KEYS.forEach(key => {
+            const oldVal = String(originalSnapshot[key] !== undefined ? originalSnapshot[key] : "").trim();
+            const newVal = String(currentData[key] !== undefined ? currentData[key] : "").trim();
+            
+            if (oldVal !== newVal) {
+                pendingChanges[key] = currentData[key];
+            }
+        });
+
+        const changedKeys = Object.keys(pendingChanges);
+        if (changedKeys.length === 0) {
+            alert("ℹ️ Không có thông số nào thay đổi so với cấu hình hiện tại.");
+            return;
+        }
+
+        // Render danh sách thay đổi vào Modal để quản trị viên đối soát trực quan
+        const diffListElem = document.getElementById("config-diff-list");
+        diffListElem.innerHTML = "";
+        changedKeys.forEach(key => {
+            const oldVal = originalSnapshot[key] || "(trống)";
+            const newVal = pendingChanges[key] || "(trống)";
+            const row = document.createElement("div");
+            row.className = "flex justify-between border-b border-slate-900 pb-1";
+            row.innerHTML = `<span class="text-slate-300 font-semibold">${key}:</span> <span class="text-red-400 line-through">${oldVal}</span> ➔ <span class="text-emerald-400 font-bold">${newVal}</span>`;
+            diffListElem.appendChild(row);
+        });
+
+        // Reset trạng thái ô nhập PIN và mở modal
+        const pinInput = document.getElementById("input-confirm-pin");
+        const pinError = document.getElementById("pin-error-msg");
+        if (pinInput) pinInput.value = "";
+        if (pinError) pinError.classList.add("hidden");
+
+        const modal = document.getElementById("modal-confirm-config");
+        if (modal) modal.classList.remove("hidden");
+        if (pinInput) pinInput.focus();
+    }
+
+    /**
+     * Đóng hộp thoại xác nhận
+     */
+    function closeConfirmModal() {
+        const modal = document.getElementById("modal-confirm-config");
+        if (modal) modal.classList.add("hidden");
+        pendingChanges = {};
+    }
+
+    /**
+     * Thực thi lưu cấu hình mới lên Backend Google Apps Script
+     */
+    async function executeSave() {
+        const pinInput = document.getElementById("input-confirm-pin");
+        const pinError = document.getElementById("pin-error-msg");
+        const btnExecute = document.getElementById("btn-execute-save");
+
+        const enteredPin = pinInput ? pinInput.value.trim() : "";
+        const expectedPin = String(originalSnapshot["ADMIN_PIN_LV2"] || "2026").trim();
+
+        // Kiểm duyệt mã PIN Super Admin (Level 2)
+        if (enteredPin !== expectedPin) {
+            if (pinError) pinError.classList.remove("hidden");
+            if (pinInput) pinInput.focus();
+            return;
+        }
+
+        try {
+            if (btnExecute) {
+                btnExecute.disabled = true;
+                btnExecute.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lưu...';
+            }
+
+            // Gọi API cập nhật cấu hình động
+            const response = await Thim5API.callGAS("updateSysConfig", pendingChanges);
+
+            // Cập nhật lại snapshot dữ liệu với các giá trị vừa lưu
+            Object.assign(originalSnapshot, pendingChanges);
+
+            alert("✅ " + (response.message || "Đã cập nhật cấu hình hệ thống thành công!"));
+            closeConfirmModal();
+        } catch (error) {
+            alert("❌ Lỗi khi cập nhật cấu hình: " + error.message);
+            console.error("[ConfigController] Lỗi executeSave:", error);
+        } finally {
+            if (btnExecute) {
+                btnExecute.disabled = false;
+                btnExecute.innerHTML = '<i class="fa-solid fa-check"></i> Xác Nhận Lưu';
+            }
+        }
+    }
+
+    return {
+        loadConfig: loadConfig,
+        openConfirmModal: openConfirmModal,
+        closeConfirmModal: closeConfirmModal,
+        executeSave: executeSave
+    };
+})();
+
+/**
+ * Hàm khởi tạo tiêu chuẩn được kích hoạt tự động bởi Router trong admin-shell.html
+ */
+function initTabConfig() {
+    ConfigController.loadConfig();
+}
+</script>
