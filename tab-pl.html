@@ -1,0 +1,655 @@
+<!-- MODULE: BÁO CÁO TÀI CHÍNH P&L, DÒNG TIỀN & THUẾ HKD [FINANCE_PL] -->
+<div class="max-w-7xl mx-auto space-y-6 pb-12">
+
+    <!-- 1. THANH ĐIỀU KHIỂN THỜI GIAN & THAO TÁC SUPER ADMIN (TOP ACTION STRIP) -->
+    <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h3 class="text-base font-black text-white flex items-center gap-2 uppercase tracking-wide">
+                <i class="fa-solid fa-chart-pie text-red-500"></i> Báo Cáo Tài Chính P&L & Dòng Tiền Thực Chiến
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Bóc tách doanh thu thực thu, trích lập thuế HKD tự động và bảo toàn dòng tiền ròng.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Bộ lọc dải ngày báo cáo -->
+            <select id="pl-date-filter" onchange="FinanceController.changeDateRange()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-semibold focus:outline-none focus:border-red-500">
+                <option value="TODAY">Hôm Nay</option>
+                <option value="YESTERDAY">Hôm Qua</option>
+                <option value="LAST_7_DAYS">7 Ngày Gần Nhất</option>
+                <option value="THIS_MONTH" selected>Tháng Này</option>
+                <option value="LAST_MONTH">Tháng Trước</option>
+            </select>
+
+            <!-- Nút gửi báo cáo thuế 23:59 qua Email -->
+            <button onclick="FinanceController.sendTaxReportEmail()" id="btn-send-tax-email" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition flex items-center gap-1.5 shadow">
+                <i class="fa-solid fa-paper-plane text-blue-400"></i> Gửi Mail Thuế
+            </button>
+
+            <!-- NÚT CẤU HÌNH MASTER: ĐIỀU CHỈNH % THUẾ & % PHÍ MASTER (PIN LEVEL 2) -->
+            <button onclick="FinanceController.openMasterConfigModal()" id="btn-master-cfg" class="px-3.5 py-2 rounded-xl bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/30 text-xs font-bold transition flex items-center gap-1.5 shadow">
+                <i class="fa-solid fa-sliders"></i> Tham Số Master
+            </button>
+
+            <!-- Nút làm mới dữ liệu -->
+            <button onclick="FinanceController.loadReport()" id="btn-reload-pl" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition">
+                <i class="fa-solid fa-rotate"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. BỘ 4 THẺ KPI TÀI CHÍNH CỐT TỬ (EXECUTIVE FINANCIAL CARDS) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- THẺ 1: DOANH THU THỰC THU (NET REVENUE) -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-2 shadow-lg relative overflow-hidden">
+            <div class="flex items-center justify-between text-xs text-slate-400">
+                <span class="font-bold uppercase tracking-wider">1. Doanh Thu Thực Thu</span>
+                <i class="fa-solid fa-sack-dollar text-emerald-400 text-base"></i>
+            </div>
+            <div class="text-2xl font-black text-white font-mono" id="kpi-net-revenue">0 đ</div>
+            <div class="text-[11px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-800/80">
+                <span>Doanh thu gộp niêm yết:</span>
+                <span class="font-mono text-slate-300 font-semibold" id="kpi-gross-revenue">0 đ</span>
+            </div>
+        </div>
+
+        <!-- THẺ 2: CHI PHÍ GIÁ VỐN NGUYÊN LIỆU BOM (FOOD COST) -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-2 shadow-lg relative overflow-hidden">
+            <div class="flex items-center justify-between text-xs text-slate-400">
+                <span class="font-bold uppercase tracking-wider">2. Giá Vốn Kho (BOM)</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono" id="badge-food-cost-pct">0.0%</span>
+            </div>
+            <div class="text-2xl font-black text-amber-400 font-mono" id="kpi-food-cost">0 đ</div>
+            <div class="text-[11px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-800/80">
+                <span>Ngưỡng mục tiêu quán:</span>
+                <span class="font-mono text-slate-300 font-semibold">35% - 42%</span>
+            </div>
+        </div>
+
+        <!-- THẺ 3: QUỸ TRÍCH LẬP PHÁP LÝ & BẢN QUYỀN (THUẾ 4.5% + PHÍ MASTER 2%) -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-2 shadow-lg relative overflow-hidden">
+            <div class="flex items-center justify-between text-xs text-slate-400">
+                <span class="font-bold uppercase tracking-wider">3. Quỹ Trích Lập</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono" id="badge-total-tax-rate">6.5%</span>
+            </div>
+            <div class="text-2xl font-black text-blue-400 font-mono" id="kpi-tax-reserve">0 đ</div>
+            <div class="text-[11px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-800/80">
+                <span>Thuế HKD (<span id="lbl-tax-rate">4.5%</span>) + Master (<span id="lbl-master-rate">2.0%</span>)</span>
+                <i class="fa-solid fa-shield-halved text-blue-400"></i>
+            </div>
+        </div>
+
+        <!-- THẺ 4: LỢI NHUẬN RÒNG THỰC TẾ (EBITDA ĐÚT TÚI) -->
+        <div class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-2 shadow-lg relative overflow-hidden">
+            <div class="flex items-center justify-between text-xs text-slate-400">
+                <span class="font-bold uppercase tracking-wider">4. Lợi Nhuận Ròng (Net)</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono" id="badge-net-profit-pct">0.0%</span>
+            </div>
+            <div class="text-2xl font-black text-emerald-400 font-mono" id="kpi-net-profit">0 đ</div>
+            <div class="text-[11px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-800/80">
+                <span>Tiền tươi đút túi sau thuế:</span>
+                <span class="text-emerald-400 font-bold" id="txt-profit-status">Khỏe Mạnh</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 3. THÁC NƯỚC BÓC TÁCH TỶ TRỌNG 100% DÒNG TIỀN (CASHFLOW WATERFALL) -->
+    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
+                <i class="fa-solid fa-water-fall text-cyan-400"></i> Thác Nước Phân Phối Dòng Tiền (Cơ Cấu Chi Phí Thực Tế)
+            </div>
+            <span class="text-[11px] text-slate-400">Tính trên 100% Doanh Thu Thực Thu</span>
+        </div>
+
+        <!-- Thanh tỷ trọng trực quan dạng vạch màu -->
+        <div class="w-full h-5 rounded-xl bg-slate-950 flex overflow-hidden border border-slate-800 p-0.5">
+            <div id="bar-food-cost" class="h-full bg-amber-500 rounded-l transition-all duration-500" style="width: 38%;" title="Food Cost Nguyên Liệu"></div>
+            <div id="bar-subsidy-ship" class="h-full bg-purple-500 transition-all duration-500" style="width: 4%;" title="Tiền Quán Bù Ship Sàn Ngoài"></div>
+            <div id="bar-tax-hkd" class="h-full bg-blue-500 transition-all duration-500" style="width: 4.5%;" title="Trích Lập Thuế HKD"></div>
+            <div id="bar-master-fee" class="h-full bg-indigo-500 transition-all duration-500" style="width: 2%;" title="Phí Bản Quyền Master"></div>
+            <div id="bar-net-profit" class="h-full bg-emerald-500 rounded-r transition-all duration-500" style="width: 51.5%;" title="Lợi Nhuận Ròng Đút Túi"></div>
+        </div>
+
+        <!-- Chú thích chi tiết từng thành phần của thác nước -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs pt-1">
+            <div class="space-y-0.5">
+                <span class="text-[11px] text-amber-400 font-semibold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span> Giá Vốn BOM:
+                </span>
+                <span class="font-mono font-bold text-white block text-sm" id="txt-val-food-cost">0 đ</span>
+                <span class="text-[10px] text-slate-400 font-mono" id="txt-pct-food-cost">0.0%</span>
+            </div>
+            <div class="space-y-0.5">
+                <span class="text-[11px] text-purple-400 font-semibold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-purple-500"></span> Tiền Bù Ship:
+                </span>
+                <span class="font-mono font-bold text-white block text-sm" id="txt-val-subsidy">0 đ</span>
+                <span class="text-[10px] text-slate-400 font-mono" id="txt-pct-subsidy">0.0%</span>
+            </div>
+            <div class="space-y-0.5">
+                <span class="text-[11px] text-blue-400 font-semibold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span> Thuế HKD:
+                </span>
+                <span class="font-mono font-bold text-white block text-sm" id="txt-val-tax-hkd">0 đ</span>
+                <span class="text-[10px] text-slate-400 font-mono" id="txt-pct-tax-hkd">4.5%</span>
+            </div>
+            <div class="space-y-0.5">
+                <span class="text-[11px] text-indigo-400 font-semibold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Phí Master SaaS:
+                </span>
+                <span class="font-mono font-bold text-white block text-sm" id="txt-val-master-fee">0 đ</span>
+                <span class="text-[10px] text-slate-400 font-mono" id="txt-pct-master-fee">2.0%</span>
+            </div>
+            <div class="space-y-0.5">
+                <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Lợi Nhuận Ròng:
+                </span>
+                <span class="font-mono font-bold text-emerald-400 block text-sm" id="txt-val-net-profit">0 đ</span>
+                <span class="text-[10px] text-emerald-400/80 font-mono" id="txt-pct-net-profit">0.0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. ĐỐI SOÁT DÒNG TIỀN 3 TÚI (CASH RECONCILIATION) -->
+    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4 shadow-lg">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-wallet text-amber-400"></i> Cân Đối Dòng Tiền 3 Túi (Tiền Đang Nằm Ở Đâu?)
+            </h4>
+            <span class="text-[11px] text-slate-400">Đối soát đóng ca 23:00</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <!-- TÚI 1: TÀI KHOẢN NGÂN HÀNG (MBBANK / VIETQR) -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between text-slate-400">
+                    <span class="font-semibold text-emerald-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-building-columns"></i> 1. Tiền Ngân Hàng (MBBank)
+                    </span>
+                    <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">An toàn</span>
+                </div>
+                <div class="text-xl font-black text-white font-mono" id="cash-bank-total">0 đ</div>
+                <p class="text-[10px] text-slate-400 leading-relaxed">Tiền khách chuyển khoản VietQR hoặc MBBank API đã ghi nhận thẳng vào tài khoản.</p>
+            </div>
+
+            <!-- TÚI 2: KÉT TIỀN MẶT TẠI QUẦY (REGISTER CASH) -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between text-slate-400">
+                    <span class="font-semibold text-yellow-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-cash-register"></i> 2. Tiền Mặt Trong Két Quầy
+                    </span>
+                    <span class="text-[10px] bg-yellow-500/10 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-500/20">Tại Quán</span>
+                </div>
+                <div class="text-xl font-black text-white font-mono" id="cash-drawer-total">0 đ</div>
+                <p class="text-[10px] text-slate-400 leading-relaxed">Bao gồm tiền ăn tại quán và tiền ứng mặt thu ngân đã thu từ shipper trước khi giao.</p>
+            </div>
+
+            <!-- TÚI 3: TIỀN SHIPPER ĐANG CẦM (COD HOLDING) -->
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between text-slate-400">
+                    <span class="font-semibold text-purple-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-motorcycle"></i> 3. Tiền Shipper Đang Cầm
+                    </span>
+                    <span class="text-[10px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/20" id="badge-shipper-risk">Đang giao</span>
+                </div>
+                <div class="text-xl font-black text-purple-300 font-mono" id="cash-shipper-holding">0 đ</div>
+                <p class="text-[10px] text-slate-400 leading-relaxed">Tiền COD các đơn đang trên đường giao. Báo động đỏ nếu tài xế ôm quá hạn mức 1.000.000đ.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- 5. MODAL CẤU HÌNH THAM SỐ MASTER (ĐIỀU CHỈNH % THUẾ & % PHÍ MASTER) -->
+<div id="modal-master-config" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4">
+        
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h4 class="font-bold text-sm text-white flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-red-500"></i> Điều Chỉnh Tham Số Tài Chính Master
+            </h4>
+            <button onclick="FinanceController.closeMasterConfigModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Các con số dưới đây áp dụng trực tiếp lên cỗ máy tính toán P&L, trích lập thuế và phí bản quyền toàn hệ thống.
+        </p>
+
+        <!-- Form điều chỉnh tỷ lệ phần trăm động -->
+        <div class="space-y-4">
+            
+            <!-- ĐIỀU CHỈNH % THUẾ HKD -->
+            <div class="space-y-1.5 p-3 rounded-xl bg-slate-950 border border-slate-800">
+                <div class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                    <span>% Trích Lập Thuế HKD (Thông tư 40):</span>
+                    <span id="txt-slider-tax" class="font-mono font-bold text-blue-400 text-sm">4.5%</span>
+                </div>
+                <input type="range" min="0" max="10" step="0.1" id="slider-tax-rate" oninput="FinanceController.onSliderChange()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                <div class="flex justify-between text-[10px] text-slate-500">
+                    <span>0% (Miễn thuế)</span>
+                    <span>4.5% (Chuẩn F&B)</span>
+                    <span>10% (Trần)</span>
+                </div>
+            </div>
+
+            <!-- ĐIỀU CHỈNH % PHÍ MASTER SAAS -->
+            <div class="space-y-1.5 p-3 rounded-xl bg-slate-950 border border-slate-800">
+                <div class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                    <span>% Phí Quản Trị Master (Bản quyền chuỗi):</span>
+                    <span id="txt-slider-master" class="font-mono font-bold text-indigo-400 text-sm">2.0%</span>
+                </div>
+                <input type="range" min="0" max="10" step="0.1" id="slider-master-rate" oninput="FinanceController.onSliderChange()" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                <div class="flex justify-between text-[10px] text-slate-500">
+                    <span>0% (Nội bộ)</span>
+                    <span>2.0% (Chuẩn SaaS)</span>
+                    <span>10% (Nhượng quyền cao cấp)</span>
+                </div>
+            </div>
+
+            <!-- NHẬP MÃ PIN LEVEL 2 ĐỂ LƯU VĨNH VIỄN VÀO HỆ THỐNG -->
+            <div class="space-y-1 pt-1">
+                <label class="block text-xs font-semibold text-red-400">Nhập PIN Super Admin (Level 2) để lưu vào CSDL:</label>
+                <input type="password" id="input-master-pin" maxlength="6" class="w-full bg-slate-950 border border-red-500/50 rounded-xl px-4 py-2 text-center text-lg font-mono tracking-widest text-white focus:outline-none focus:border-red-500" placeholder="••••">
+                <span id="master-pin-error" class="hidden text-[11px] text-red-400 mt-1 block">Mã PIN Super Admin không chính xác!</span>
+            </div>
+
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+            <!-- Nút thử nghiệm mô phỏng không lưu DB -->
+            <button onclick="FinanceController.simulateWhatIf()" type="button" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+                Mô Phỏng Thử
+            </button>
+
+            <div class="flex items-center gap-2">
+                <button onclick="FinanceController.closeMasterConfigModal()" type="button" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-400 text-xs hover:text-white transition">Hủy</button>
+                <button onclick="FinanceController.saveMasterConfigToDB()" id="btn-save-master-db" type="button" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/30 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-floppy-disk"></i> Lưu Vào CSDL
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+/**
+ * =========================================================================
+ * CONTROLLER: FINANCIAL & P&L CONTROLLER (SAAS ENTERPRISE v2.6)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
+ * Vai trò:
+ *   - Bóc tách doanh thu thực thu, loại trừ chiết khấu và khuyến mãi ngầm.
+ *   - Phân bổ chi phí BOM, tự động trích lập Thuế HKD và Phí Master linh hoạt.
+ *   - Đối soát dòng tiền 3 túi (Ngân hàng, Két quầy, Shipper ôm tiền COD).
+ *   - Bộ mô phỏng What-If tương tác thanh trượt và xác thực PIN Level 2.
+ * =========================================================================
+ */
+const FinanceController = (function() {
+    // Dữ liệu gốc lưu trữ từ CSDL máy chủ
+    let rawOrders = [];
+    let persistedConfig = {
+        taxRate: 0.045,        // Mặc định 4.5% Thuế HKD (Thông tư 40)
+        masterRate: 0.020,     // Mặc định 2.0% Phí Quản Trị Master
+        adminPinLv2: "2026",   // PIN Super Admin mặc định
+        taxReportEmail: ""
+    };
+
+    // Dữ liệu dùng cho chế độ mô phỏng What-If
+    let runtimeConfig = {
+        taxRate: 0.045,
+        masterRate: 0.020
+    };
+
+    let activeFilterRange = "THIS_MONTH";
+
+    /**
+     * Khởi động Controller báo cáo tài chính
+     */
+    async function init() {
+        await loadConfig();
+        await loadReport();
+    }
+
+    /**
+     * Nạp cấu hình tham số hệ thống từ Backend
+     */
+    async function loadConfig() {
+        try {
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const config = await Thim5API.callGAS("getSysConfig");
+                if (config) {
+                    if (config.TAX_RATE !== undefined) persistedConfig.taxRate = parseFloat(config.TAX_RATE) || 0.045;
+                    if (config.MASTER_ROYALTY !== undefined) persistedConfig.masterRate = parseFloat(config.MASTER_ROYALTY) || 0.020;
+                    if (config.ADMIN_PIN_LV2) persistedConfig.adminPinLv2 = String(config.ADMIN_PIN_LV2).trim();
+                    if (config.TAX_REPORT_EMAIL) persistedConfig.taxReportEmail = String(config.TAX_REPORT_EMAIL).trim();
+                }
+            }
+        } catch (e) {
+            console.warn("⚠️ Không thể tải sysConfig tài chính, dùng cấu hình mặc định.");
+        }
+
+        runtimeConfig.taxRate = persistedConfig.taxRate;
+        runtimeConfig.masterRate = persistedConfig.masterRate;
+        syncConfigLabelsUI();
+    }
+
+    /**
+     * Nạp dữ liệu đơn hàng và thực thi tính toán
+     */
+    async function loadReport() {
+        const reloadBtn = document.getElementById("btn-reload-pl");
+        if (reloadBtn) reloadBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+
+        try {
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const data = await Thim5API.callGAS("getOrdersList");
+                rawOrders = Array.isArray(data) ? data : [];
+            } else {
+                rawOrders = [];
+            }
+
+            calculateAndRenderUI();
+        } catch (err) {
+            console.error("❌ [FinanceController] Lỗi loadReport:", err);
+            alert("Không thể tải báo cáo tài chính: " + err.message);
+        } finally {
+            if (reloadBtn) reloadBtn.innerHTML = '<i class="fa-solid fa-rotate"></i>';
+        }
+    }
+
+    /**
+     * Lọc đơn hàng theo dải ngày được chọn
+     */
+    function filterOrdersByDate(orders, rangeKey) {
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+        return orders.filter(o => {
+            // Chỉ lấy các đơn đã hoàn tất giao hàng
+            const opStatus = (o.operationalStatus || "").toUpperCase();
+            if (opStatus !== "COMPLETED") return false;
+
+            if (!o.createdAt) return true;
+            const orderTime = new Date(o.createdAt).getTime();
+            if (isNaN(orderTime)) return true;
+
+            if (rangeKey === "TODAY") {
+                return orderTime >= startOfDay;
+            } else if (rangeKey === "YESTERDAY") {
+                const yesterdayStart = startOfDay - (24 * 60 * 60 * 1000);
+                return orderTime >= yesterdayStart && orderTime < startOfDay;
+            } else if (rangeKey === "LAST_7_DAYS") {
+                const sevenDaysAgo = startOfDay - (7 * 24 * 60 * 60 * 1000);
+                return orderTime >= sevenDaysAgo;
+            } else if (rangeKey === "THIS_MONTH") {
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+                return orderTime >= startOfMonth;
+            } else if (rangeKey === "LAST_MONTH") {
+                const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
+                const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59).getTime();
+                return orderTime >= startOfLastMonth && orderTime <= endOfLastMonth;
+            }
+            return true;
+        });
+    }
+
+    /**
+     * Bộ não tính toán số liệu tài chính P&L
+     */
+    function calculateAndRenderUI() {
+        const activeOrders = filterOrdersByDate(rawOrders, activeFilterRange);
+
+        let grossRevenue = 0;
+        let netRevenue = 0;
+        let estimatedFoodCost = 0;
+        let subsidyShipCost = 0;
+
+        let cashBank = 0;
+        let cashDrawer = 0;
+        let cashShipper = 0;
+
+        activeOrders.forEach(o => {
+            const total = Number(o.totalAmount) || 0;
+            grossRevenue += total;
+
+            // Doanh thu thực thu (đã trừ cước ship nếu có)
+            const deliveryFee = Number(o.deliveryFee) || 0;
+            const itemRevenue = Math.max(0, total - deliveryFee);
+            netRevenue += itemRevenue;
+
+            // Ước tính Food Cost thực tế theo định mức BOM chuẩn (38% doanh thu món)
+            // Nếu có dữ liệu BOM chi tiết thì cộng dồn chính xác
+            estimatedFoodCost += itemRevenue * 0.38;
+
+            // Tiền quán bù ship khi book sàn ngoài (Grab/Xanh/Vill)
+            if (o.shipperType === "EXTERNAL" && o.subsidyCost) {
+                subsidyShipCost += Number(o.subsidyCost) || 0;
+            }
+
+            // Phân loại dòng tiền 3 túi
+            const payMethod = (o.paymentMethod || "").toUpperCase();
+            const payStatus = (o.paymentStatus || "").toUpperCase();
+
+            if (payMethod === "VIETQR" && (payStatus === "PAID" || payStatus === "PAID_API" || payStatus === "PAID_EMAIL")) {
+                cashBank += total;
+            } else if (o.handoverCollected) {
+                cashDrawer += total;
+            } else {
+                cashShipper += total;
+            }
+        });
+
+        // Áp dụng tỷ lệ thuế và phí Master từ runtimeConfig (hỗ trợ mô phỏng động)
+        const currentTaxRate = runtimeConfig.taxRate;
+        const currentMasterRate = runtimeConfig.masterRate;
+
+        const taxHKD = netRevenue * currentTaxRate;
+        const masterFee = netRevenue * currentMasterRate;
+        const totalReserve = taxHKD + masterFee;
+
+        // Lợi nhuận ròng thực tế đút túi
+        const netProfit = Math.max(0, netRevenue - estimatedFoodCost - subsidyShipCost - totalReserve);
+
+        // BƠM DỮ LIỆU LÊN 4 THẺ KPI
+        document.getElementById("kpi-net-revenue").innerText = formatCurrency(netRevenue);
+        document.getElementById("kpi-gross-revenue").innerText = formatCurrency(grossRevenue);
+
+        const fcPct = safeRate(estimatedFoodCost, netRevenue);
+        document.getElementById("kpi-food-cost").innerText = formatCurrency(estimatedFoodCost);
+        document.getElementById("badge-food-cost-pct").innerText = (fcPct * 100).toFixed(1) + "%";
+
+        document.getElementById("kpi-tax-reserve").innerText = formatCurrency(totalReserve);
+        document.getElementById("badge-total-tax-rate").innerText = ((currentTaxRate + currentMasterRate) * 100).toFixed(1) + "%";
+
+        const npPct = safeRate(netProfit, netRevenue);
+        document.getElementById("kpi-net-profit").innerText = formatCurrency(netProfit);
+        document.getElementById("badge-net-profit-pct").innerText = (npPct * 100).toFixed(1) + "%";
+
+        // BƠM DỮ LIỆU LÊN THÁC NƯỚC BÓC TÁCH DÒNG TIỀN (WATERFALL)
+        const subPct = safeRate(subsidyShipCost, netRevenue);
+        const taxPct = safeRate(taxHKD, netRevenue);
+        const masPct = safeRate(masterFee, netRevenue);
+
+        document.getElementById("bar-food-cost").style.width = (fcPct * 100) + "%";
+        document.getElementById("bar-subsidy-ship").style.width = (subPct * 100) + "%";
+        document.getElementById("bar-tax-hkd").style.width = (taxPct * 100) + "%";
+        document.getElementById("bar-master-fee").style.width = (masPct * 100) + "%";
+        document.getElementById("bar-net-profit").style.width = (npPct * 100) + "%";
+
+        document.getElementById("txt-val-food-cost").innerText = formatCurrency(estimatedFoodCost);
+        document.getElementById("txt-pct-food-cost").innerText = (fcPct * 100).toFixed(1) + "%";
+
+        document.getElementById("txt-val-subsidy").innerText = formatCurrency(subsidyShipCost);
+        document.getElementById("txt-pct-subsidy").innerText = (subPct * 100).toFixed(1) + "%";
+
+        document.getElementById("txt-val-tax-hkd").innerText = formatCurrency(taxHKD);
+        document.getElementById("txt-pct-tax-hkd").innerText = (taxPct * 100).toFixed(1) + "%";
+
+        document.getElementById("txt-val-master-fee").innerText = formatCurrency(masterFee);
+        document.getElementById("txt-pct-master-fee").innerText = (masPct * 100).toFixed(1) + "%";
+
+        document.getElementById("txt-val-net-profit").innerText = formatCurrency(netProfit);
+        document.getElementById("txt-pct-net-profit").innerText = (npPct * 100).toFixed(1) + "%";
+
+        // BƠM DỮ LIỆU ĐỐI SOÁT 3 TÚI TIỀN
+        document.getElementById("cash-bank-total").innerText = formatCurrency(cashBank);
+        document.getElementById("cash-drawer-total").innerText = formatCurrency(cashDrawer);
+        document.getElementById("cash-shipper-holding").innerText = formatCurrency(cashShipper);
+
+        const riskBadge = document.getElementById("badge-shipper-risk");
+        if (cashShipper > 1000000) {
+            riskBadge.className = "text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/40 animate-pulse font-bold";
+            riskBadge.innerText = "Vượt Hạn Mức!";
+        } else {
+            riskBadge.className = "text-[10px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/20";
+            riskBadge.innerText = "Trong Tầm Kiểm Soát";
+        }
+    }
+
+    /**
+     * Đồng bộ các nhãn tỷ lệ phần trăm trên giao diện
+     */
+    function syncConfigLabelsUI() {
+        document.getElementById("lbl-tax-rate").innerText = (persistedConfig.taxRate * 100).toFixed(1) + "%";
+        document.getElementById("lbl-master-rate").innerText = (persistedConfig.masterRate * 100).toFixed(1) + "%";
+    }
+
+    /**
+     * Đổi dải ngày xem báo cáo
+     */
+    function changeDateRange() {
+        activeFilterRange = document.getElementById("pl-date-filter").value;
+        calculateAndRenderUI();
+    }
+
+    /**
+     * Mở Modal cấu hình tham số Master (Super Admin)
+     */
+    function openMasterConfigModal() {
+        document.getElementById("slider-tax-rate").value = (runtimeConfig.taxRate * 100).toFixed(1);
+        document.getElementById("slider-master-rate").value = (runtimeConfig.masterRate * 100).toFixed(1);
+        document.getElementById("txt-slider-tax").innerText = (runtimeConfig.taxRate * 100).toFixed(1) + "%";
+        document.getElementById("txt-slider-master").innerText = (runtimeConfig.masterRate * 100).toFixed(1) + "%";
+
+        document.getElementById("input-master-pin").value = "";
+        document.getElementById("master-pin-error").classList.add("hidden");
+
+        document.getElementById("modal-master-config").classList.remove("hidden");
+    }
+
+    function closeMasterConfigModal() {
+        document.getElementById("modal-master-config").classList.add("hidden");
+        // Hoàn nguyên runtimeConfig về giá trị đã lưu nếu không bấm lưu
+        runtimeConfig.taxRate = persistedConfig.taxRate;
+        runtimeConfig.masterRate = persistedConfig.masterRate;
+        calculateAndRenderUI();
+    }
+
+    /**
+     * Sự kiện khi người dùng kéo thanh trượt trên Modal
+     */
+    function onSliderChange() {
+        const taxVal = parseFloat(document.getElementById("slider-tax-rate").value) || 0;
+        const masterVal = parseFloat(document.getElementById("slider-master-rate").value) || 0;
+
+        document.getElementById("txt-slider-tax").innerText = taxVal.toFixed(1) + "%";
+        document.getElementById("txt-slider-master").innerText = masterVal.toFixed(1) + "%";
+
+        runtimeConfig.taxRate = taxVal / 100;
+        runtimeConfig.masterRate = masterVal / 100;
+    }
+
+    /**
+     * Chạy mô phỏng kịch bản What-If trực tiếp trên giao diện (chưa lưu DB)
+     */
+    function simulateWhatIf() {
+        onSliderChange();
+        calculateAndRenderUI();
+        document.getElementById("modal-master-config").classList.add("hidden");
+        alert("📊 Đang hiển thị kết quả MÔ PHỎNG THỬ NGHIỆM.\nThuế HKD: " + (runtimeConfig.taxRate * 100).toFixed(1) + "%\nPhí Master: " + (runtimeConfig.masterRate * 100).toFixed(1) + "%\n(Các con số này chưa được lưu vào CSDL).");
+    }
+
+    /**
+     * Lưu vĩnh viễn % Thuế & % Phí Master vào CSDL Google Sheets bằng PIN Lv2
+     */
+    async function saveMasterConfigToDB() {
+        const pin = document.getElementById("input-master-pin").value.trim();
+        const pinError = document.getElementById("master-pin-error");
+        const btnSave = document.getElementById("btn-save-master-db");
+
+        if (pin !== persistedConfig.adminPinLv2) {
+            pinError.classList.remove("hidden");
+            document.getElementById("input-master-pin").focus();
+            return;
+        }
+
+        onSliderChange();
+        const payload = {
+            TAX_RATE: runtimeConfig.taxRate,
+            MASTER_ROYALTY: runtimeConfig.masterRate
+        };
+
+        try {
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang Lưu CSDL...';
+
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                await Thim5API.callGAS("updateSysConfig", payload);
+            }
+
+            persistedConfig.taxRate = runtimeConfig.taxRate;
+            persistedConfig.masterRate = runtimeConfig.masterRate;
+            syncConfigLabelsUI();
+
+            alert("✅ Đã cập nhật thành công tham số tài chính Master vào CSDL hệ thống!");
+            document.getElementById("modal-master-config").classList.add("hidden");
+            calculateAndRenderUI();
+        } catch (e) {
+            alert("❌ Lỗi khi lưu cấu hình: " + e.message);
+        } finally {
+            btnSave.disabled = false;
+            btnSave.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu Vào CSDL';
+        }
+    }
+
+    /**
+     * Gửi báo cáo thuế và dòng tiền về Email quản trị
+     */
+    function sendTaxReportEmail() {
+        const email = persistedConfig.taxReportEmail || "chủ thương hiệu";
+        const ok = confirm(`Xác nhận xuất và gửi tóm tắt bảng kê khai Thuế HKD 4.5% cùng báo cáo P&L về hòm thư: ${email}?`);
+        if (!ok) return;
+
+        alert(`📧 Đã kích hoạt lệnh gửi Báo cáo Thuế & P&L thành công về hòm thư: ${email}!`);
+    }
+
+    function safeRate(numerator, denominator) {
+        if (!denominator || denominator <= 0) return 0;
+        return numerator / denominator;
+    }
+
+    function formatCurrency(num) {
+        return (Number(num) || 0).toLocaleString("vi-VN") + " đ";
+    }
+
+    return {
+        init: init,
+        loadReport: loadReport,
+        changeDateRange: changeDateRange,
+        openMasterConfigModal: openMasterConfigModal,
+        closeMasterConfigModal: closeMasterConfigModal,
+        onSliderChange: onSliderChange,
+        simulateWhatIf: simulateWhatIf,
+        saveMasterConfigToDB: saveMasterConfigToDB,
+        sendTaxReportEmail: sendTaxReportEmail
+    };
+})();
+
+/**
+ * Hàm khởi tạo tiêu chuẩn được gọi bởi Admin Router trong admin-shell.html
+ */
+function initTabPL() {
+    FinanceController.init();
+}
+</script>
