@@ -1,0 +1,848 @@
+<!-- MODULE: TRUNG TÂM ĐIỀU PHỐI ĐƠN HÀNG, BẾP & SHIPPING [ORDERS_D2C] -->
+<div class="max-w-7xl mx-auto space-y-6 pb-12">
+
+    <!-- 1. THANH CHỈ SỐ VẬN HÀNH & CÔNG TẮC CHẾ ĐỘ MƯA (TOP OPS STRIP) -->
+    <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <!-- Nhóm KPIs Vận Hành Nhanh -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                <span class="text-[11px] text-slate-400 font-medium block">Tổng Đơn Hôm Nay</span>
+                <span class="text-xl font-bold text-white mt-0.5 block" id="metric-total-orders">0</span>
+                <span class="text-[10px] text-emerald-400" id="metric-completed-count">0 đơn giao thành công</span>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                <span class="text-[11px] text-slate-400 font-medium block">Đang Chờ Xử Lý</span>
+                <span class="text-xl font-bold text-amber-400 mt-0.5 block" id="metric-pending-orders">0</span>
+                <span class="text-[10px] text-slate-400">Cần gán ship / duyệt tiền</span>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                <span class="text-[11px] text-slate-400 font-medium block">Đang Giao Trên Đường</span>
+                <span class="text-xl font-bold text-purple-400 mt-0.5 block" id="metric-shipping-orders">0</span>
+                <span class="text-[10px] text-purple-300">Đã thu tiền ứng tại quán</span>
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                <span class="text-[11px] text-slate-400 font-medium block">Doanh Thu Thực Thu</span>
+                <span class="text-xl font-bold text-emerald-400 mt-0.5 block font-mono" id="metric-revenue-today">0 đ</span>
+                <span class="text-[10px] text-slate-400">Không tính cước ship</span>
+            </div>
+        </div>
+
+        <!-- Công Tắc Chế Độ Mưa & Nút Làm Mới -->
+        <div class="flex items-center gap-3 shrink-0 self-end lg:self-center">
+            <!-- Nút Gạt Chế Độ Mưa (Rain Surcharge) -->
+            <button onclick="OrdersController.toggleRainMode()" id="btn-rain-mode" class="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-xs font-bold transition-all flex items-center gap-2 shadow-lg">
+                <i class="fa-solid fa-cloud-showers-heavy text-slate-500 text-sm" id="icon-rain"></i>
+                <span id="txt-rain-status">Chế Độ Mưa: TẮT</span>
+            </button>
+
+            <!-- Tải Lại Dữ Liệu -->
+            <button onclick="OrdersController.loadOrders()" id="btn-reload-orders" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition flex items-center gap-1">
+                <i class="fa-solid fa-rotate"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. THANH CÔNG CỤ TÌM KIẾM & LỌC ĐA CHIỀU (SEARCH & FILTERS) -->
+    <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 p-3.5 rounded-2xl border border-slate-800">
+        <div class="flex items-center gap-2 flex-1 min-w-[280px]">
+            <div class="relative w-full max-w-xs">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+                <input type="text" id="order-search-input" onkeyup="OrdersController.applyFilters()" placeholder="Tìm theo Mã đơn, SĐT hoặc Tên khách..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500">
+            </div>
+            <select id="filter-payment-method" onchange="OrdersController.applyFilters()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-red-500">
+                <option value="ALL">Tất cả Thanh Toán</option>
+                <option value="VIETQR">Chuyển Khoản VietQR</option>
+                <option value="COD">Tiền Mặt (COD)</option>
+            </select>
+            <select id="filter-shipper-type" onchange="OrdersController.applyFilters()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-red-500">
+                <option value="ALL">Tất cả Shipper</option>
+                <option value="INTERNAL">Shipper Nội Bộ</option>
+                <option value="EXTERNAL">Ship Ngoài (Grab/Xanh/Vill)</option>
+            </select>
+        </div>
+        <div class="text-xs text-slate-400 flex items-center gap-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Tự động cập nhật mỗi 10 giây</span>
+        </div>
+    </div>
+
+    <!-- 3. BẢNG KANBAN 4 LÀN ĐIỀU PHỐI (4-LANE KANBAN BOARD) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
+        
+        <!-- LÀN 1: ĐƠN MỚI & CHỜ DUYỆT TIỀN (NEW / PENDING) -->
+        <div class="bg-slate-900/70 rounded-2xl border border-slate-800 flex flex-col max-h-[calc(100vh-280px)] shadow-xl">
+            <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/40 rounded-t-2xl">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+                    <h4 class="font-bold text-xs text-amber-400 uppercase tracking-wider">1. Chờ Xử Lý / Tiền</h4>
+                </div>
+                <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold" id="badge-count-lane1">0</span>
+            </div>
+            <div class="p-3 space-y-3 overflow-y-auto flex-1 custom-scroll" id="lane-pending">
+                <!-- Smart Order Cards sẽ được render tại đây -->
+            </div>
+        </div>
+
+        <!-- LÀN 2: BẾP ĐANG NẤU & CHỜ GIAO (COOKING / READY) -->
+        <div class="bg-slate-900/70 rounded-2xl border border-slate-800 flex flex-col max-h-[calc(100vh-280px)] shadow-xl">
+            <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/40 rounded-t-2xl">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                    <h4 class="font-bold text-xs text-blue-400 uppercase tracking-wider">2. Bếp Đang Nấu</h4>
+                </div>
+                <span class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold" id="badge-count-lane2">0</span>
+            </div>
+            <div class="p-3 space-y-3 overflow-y-auto flex-1 custom-scroll" id="lane-cooking">
+                <!-- Smart Order Cards sẽ được render tại đây -->
+            </div>
+        </div>
+
+        <!-- LÀN 3: ĐANG GIAO TRÊN ĐƯỜNG (SHIPPING) -->
+        <div class="bg-slate-900/70 rounded-2xl border border-slate-800 flex flex-col max-h-[calc(100vh-280px)] shadow-xl">
+            <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/40 rounded-t-2xl">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                    <h4 class="font-bold text-xs text-purple-400 uppercase tracking-wider">3. Đang Giao Hàng</h4>
+                </div>
+                <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold" id="badge-count-lane3">0</span>
+            </div>
+            <div class="p-3 space-y-3 overflow-y-auto flex-1 custom-scroll" id="lane-shipping">
+                <!-- Smart Order Cards sẽ được render tại đây -->
+            </div>
+        </div>
+
+        <!-- LÀN 4: HOÀN TẤT TRONG NGÀY (COMPLETED) -->
+        <div class="bg-slate-900/70 rounded-2xl border border-slate-800 flex flex-col max-h-[calc(100vh-280px)] shadow-xl">
+            <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/40 rounded-t-2xl">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    <h4 class="font-bold text-xs text-emerald-400 uppercase tracking-wider">4. Đã Hoàn Tất</h4>
+                </div>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold" id="badge-count-lane4">0</span>
+            </div>
+            <div class="p-3 space-y-3 overflow-y-auto flex-1 custom-scroll" id="lane-completed">
+                <!-- Smart Order Cards sẽ được render tại đây -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- 4. MODAL GÁN SHIPPER & TÍNH CƯỚC TỰ ĐỘNG CHỐNG BÙ SHIP -->
+<div id="modal-assign-shipper" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 my-8">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h4 class="font-bold text-sm text-white flex items-center gap-2">
+                <i class="fa-solid fa-motorcycle text-red-500"></i> Điều Phối Vận Chuyển: <span id="modal-ship-order-id" class="text-red-400 font-mono">T5-XXXX</span>
+            </h4>
+            <button onclick="OrdersController.closeAssignModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <!-- Khối Thông Tin Cự Ly & Cước Thu Khách -->
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
+            <div class="flex justify-between text-slate-300">
+                <span>Cự ly giao hàng (GPS):</span>
+                <span id="modal-ship-distance" class="font-mono font-bold text-blue-400">0.0 km</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+                <span>Cước quán thu của khách:</span>
+                <span id="modal-ship-customer-fee" class="font-mono font-bold text-emerald-400">12,000 đ</span>
+            </div>
+            <div class="text-[11px] text-slate-400 italic" id="modal-ship-fee-note">Đã bao gồm phụ phí mưa (nếu bật)</div>
+        </div>
+
+        <!-- Form Chọn Kênh Shipper -->
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Phương thức Giao Hàng:</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" onclick="OrdersController.selectShipperChannel('INTERNAL')" id="btn-chan-internal" class="p-2.5 rounded-xl border border-red-500/50 bg-red-600/10 text-red-300 text-xs font-bold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-id-badge"></i> Shipper Nội Bộ
+                    </button>
+                    <button type="button" onclick="OrdersController.selectShipperChannel('EXTERNAL')" id="btn-chan-external" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold hover:text-white transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cube"></i> Gọi Sàn Ngoài
+                    </button>
+                </div>
+            </div>
+
+            <!-- Khu Vực Shipper Nội Bộ -->
+            <div id="section-internal-shipper" class="space-y-2">
+                <label class="block text-xs font-medium text-slate-300">Chọn Tài Xế Nội Bộ (Khóa cứng ID):</label>
+                <select id="select-internal-driver" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500">
+                    <option value="SHIP_01 - Tuấn Tài Xế (Đang cầm: 1 đơn)">Tuấn Tài Xế (0912.345.678) - Đang cầm: 1 đơn</option>
+                    <option value="SHIP_02 - Hoàng Shipper (Đang cầm: 0 đơn)">Hoàng Shipper (0988.765.432) - Đang rảnh</option>
+                    <option value="SHIP_03 - Minh Minh (Đang cầm: 2 đơn)">Minh Minh (0933.111.222) - Đang cầm: 2 đơn</option>
+                </select>
+                <span class="text-[10px] text-slate-500 block">Tự động cộng dồn mốc chạy trong ngày để tính thưởng tích lũy.</span>
+            </div>
+
+            <!-- Khu Vực Gọi Sàn Ngoài (Grab, Xanh, Vill) -->
+            <div id="section-external-shipper" class="hidden space-y-2.5">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Hãng Ship Ngoài</label>
+                        <select id="select-external-provider" onchange="OrdersController.calculateSubsidyPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500">
+                            <option value="GRAB">GrabExpress</option>
+                            <option value="XANH_SM">Xanh SM Bike</option>
+                            <option value="VILL">Vill Ship</option>
+                            <option value="BE">Be Delivery</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] text-slate-400 mb-1">Mã Chuyến / SĐT Tài Xế</label>
+                        <input type="text" id="input-external-tracking" placeholder="VD: GRAB-8823" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-red-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">Cước Sàn Báo Thực Tế (VNĐ)</label>
+                    <input type="number" id="input-external-cost" oninput="OrdersController.calculateSubsidyPreview()" placeholder="VD: 18000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-amber-400 font-mono font-bold focus:outline-none focus:border-amber-500">
+                </div>
+                <div class="p-2.5 rounded-lg bg-red-950/20 border border-red-900/40 text-[11px] text-slate-300 flex justify-between">
+                    <span>Quán phải bù tiền ship:</span>
+                    <span id="preview-subsidy-cost" class="font-mono font-bold text-red-400">0 đ</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+            <button onclick="OrdersController.closeAssignModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700 transition">Hủy</button>
+            <button onclick="OrdersController.executeAssignShipper()" id="btn-confirm-assign" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/30 transition flex items-center gap-2">
+                <i class="fa-solid fa-lock"></i> Khóa Đơn & Đẩy Bếp
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 5. MODAL DUYỆT THANH TOÁN KHẨN CẤP (PIN LEVEL 1) -->
+<div id="modal-approve-payment" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl shadow-2xl p-6 space-y-4">
+        <div class="flex items-center gap-3 text-amber-400">
+            <i class="fa-solid fa-shield-halved text-xl"></i>
+            <h4 class="font-bold text-sm text-white">Duyệt Thanh Toán Khẩn Cấp</h4>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+            Dành cho khách chuyển khoản tại quầy hoặc mạng ngân hàng bị trễ email. Hành động này sẽ được ghi vết kiểm toán.
+        </p>
+        <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Lý do duyệt tay:</label>
+            <input type="text" id="input-payment-override-note" placeholder="Khách quét mã tại quầy..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500">
+        </div>
+        <div>
+            <label class="block text-xs font-semibold text-red-400 mb-1">Mã PIN Quản Lý Ca (Level 1):</label>
+            <input type="password" id="input-manager-pin" maxlength="6" class="w-full bg-slate-950 border border-red-500/50 rounded-xl px-4 py-2 text-center text-lg font-mono tracking-widest text-white focus:outline-none focus:border-red-500" placeholder="••••">
+            <span id="pin-error-orders" class="hidden text-[11px] text-red-400 mt-1 block">Mã PIN không đúng!</span>
+        </div>
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <button onclick="OrdersController.closeApproveModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700 transition">Hủy</button>
+            <button onclick="OrdersController.executeApprovePayment()" id="btn-execute-approve" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center gap-2">
+                <i class="fa-solid fa-check"></i> Xác Nhận Duyệt
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+/**
+ * =========================================================================
+ * CONTROLLER: ORDERS & LOGISTICS CONTROLLER (SAAS ENTERPRISE v2.6)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
+ * Vai trò:
+ *   - Quản trị Bảng Kanban 4 làn điều phối thời gian thực.
+ *   - Thuật toán Haversine tính cự ly GPS & cước ship đa tầng chống bù lỗ.
+ *   - Quản lý công tắc Chế Độ Mưa & phụ thu thời tiết tự động.
+ *   - Cổng thu tiền ứng Bếp (Cash Handover Gate) cho đơn COD.
+ *   - Đồng hồ giám sát SLA cảnh báo đỏ khi đơn ngâm quá 15 phút.
+ * =========================================================================
+ */
+const OrdersController = (function() {
+    // Tọa độ Bếp Trung Tâm Thím 5 (Hòa Thành, Tây Ninh)
+    const STORE_COORDS = { lat: 10.9825, lng: 106.1265 };
+
+    let rawOrders = [];
+    let isRainMode = false;
+    let pollingTimer = null;
+    let slaTimer = null;
+    let selectedOrderId = null;
+    let selectedShipperChannel = "INTERNAL";
+    let activeCustomerFee = 12000;
+
+    /**
+     * Khởi động Controller & Thiết lập Vòng lặp giám sát
+     */
+    async function init() {
+        // Khôi phục trạng thái Chế độ Mưa từ LocalStorage
+        isRainMode = localStorage.getItem("T5_RAIN_MODE") === "TRUE";
+        updateRainModeUI();
+
+        // Tải danh sách đơn hàng ban đầu
+        await loadOrders();
+
+        // Kích hoạt nhịp chạy đồng hồ SLA mỗi giây
+        if (slaTimer) clearInterval(slaTimer);
+        slaTimer = setInterval(updateAllSLATimers, 1000);
+
+        // Kích hoạt Polling chu kỳ 10 giây (Tự động tạm dừng khi ẩn tab)
+        if (pollingTimer) clearInterval(pollingTimer);
+        pollingTimer = setInterval(() => {
+            if (!document.hidden) {
+                loadOrders(true);
+            }
+        }, 10000);
+    }
+
+    /**
+     * Tải dữ liệu đơn hàng từ Backend qua Middleware api.js
+     */
+    async function loadOrders(isSilent = false) {
+        const reloadBtn = document.getElementById("btn-reload-orders");
+        if (!isSilent && reloadBtn) {
+            reloadBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+        }
+
+        try {
+            const data = await Thim5API.callGAS("getOrdersList");
+            rawOrders = Array.isArray(data) ? data : [];
+            updateTopMetrics();
+            applyFilters();
+        } catch (error) {
+            console.error("❌ [OrdersController] Lỗi loadOrders:", error);
+            if (!isSilent) {
+                alert("Không thể tải danh sách đơn hàng: " + error.message);
+            }
+        } finally {
+            if (!isSilent && reloadBtn) {
+                reloadBtn.innerHTML = '<i class="fa-solid fa-rotate"></i>';
+            }
+        }
+    }
+
+    /**
+     * Cập nhật số liệu tổng quan trên thanh Header Strip
+     */
+    function updateTopMetrics() {
+        const total = rawOrders.length;
+        const completedOrders = rawOrders.filter(o => o.operationalStatus === "COMPLETED");
+        const pendingOrders = rawOrders.filter(o => o.operationalStatus === "NEW" || o.operationalStatus === "PENDING");
+        const shippingOrders = rawOrders.filter(o => o.operationalStatus === "SHIPPING");
+
+        let totalRevenue = 0;
+        completedOrders.forEach(o => {
+            totalRevenue += (Number(o.totalAmount) || 0);
+        });
+
+        document.getElementById("metric-total-orders").innerText = total;
+        document.getElementById("metric-completed-count").innerText = `${completedOrders.length} đơn giao thành công`;
+        document.getElementById("metric-pending-orders").innerText = pendingOrders.length;
+        document.getElementById("metric-shipping-orders").innerText = shippingOrders.length;
+        document.getElementById("metric-revenue-today").innerText = formatCurrency(totalRevenue);
+    }
+
+    /**
+     * Phân loại và kết xuất dữ liệu vào 4 làn Kanban
+     */
+    function applyFilters() {
+        const searchTxt = (document.getElementById("order-search-input").value || "").toLowerCase().trim();
+        const payFilter = document.getElementById("filter-payment-method").value;
+        const shipFilter = document.getElementById("filter-shipper-type").value;
+
+        const filtered = rawOrders.filter(order => {
+            const matchSearch = order.orderId.toLowerCase().includes(searchTxt) ||
+                                (order.customerInfo || "").toLowerCase().includes(searchTxt);
+            const matchPay = (payFilter === "ALL") || (order.paymentMethod === payFilter);
+            const matchShip = (shipFilter === "ALL") || (order.shipperType === shipFilter);
+            return matchSearch && matchPay && matchShip;
+        });
+
+        const lanes = {
+            lane1: [], // NEW / PENDING
+            lane2: [], // COOKING / READY
+            lane3: [], // SHIPPING
+            lane4: []  // COMPLETED
+        };
+
+        filtered.forEach(order => {
+            const status = (order.operationalStatus || "NEW").toUpperCase();
+            if (status === "NEW" || status === "PENDING") {
+                lanes.lane1.push(order);
+            } else if (status === "COOKING" || status === "READY") {
+                lanes.lane2.push(order);
+            } else if (status === "SHIPPING") {
+                lanes.lane3.push(order);
+            } else if (status === "COMPLETED") {
+                lanes.lane4.push(order);
+            }
+        });
+
+        document.getElementById("badge-count-lane1").innerText = lanes.lane1.length;
+        document.getElementById("badge-count-lane2").innerText = lanes.lane2.length;
+        document.getElementById("badge-count-lane3").innerText = lanes.lane3.length;
+        document.getElementById("badge-count-lane4").innerText = lanes.lane4.length;
+
+        renderLane("lane-pending", lanes.lane1);
+        renderLane("lane-cooking", lanes.lane2);
+        renderLane("lane-shipping", lanes.lane3);
+        renderLane("lane-completed", lanes.lane4);
+
+        updateAllSLATimers();
+    }
+
+    /**
+     * Kết xuất thẻ đơn hàng (Smart Order Card) cho từng làn
+     */
+    function renderLane(laneElemId, orders) {
+        const container = document.getElementById(laneElemId);
+        if (!orders || orders.length === 0) {
+            container.innerHTML = `
+                <div class="h-32 flex flex-col items-center justify-center text-slate-500 text-xs">
+                    <i class="fa-regular fa-folder-open text-base mb-1 text-slate-600"></i>
+                    <span>Không có đơn hàng</span>
+                </div>
+            `;
+            return;
+        }
+
+        let html = "";
+        orders.forEach(order => {
+            const isVietQR = order.paymentMethod === "VIETQR";
+            const isPaid = (order.paymentStatus === "PAID" || order.paymentStatus === "PAID_MANUAL");
+            const customerParts = (order.customerInfo || "").split("|").map(s => s.trim());
+            const custName = customerParts[0] || "Khách Vãng Lai";
+            const custPhone = customerParts[1] || "";
+            const custAddr = customerParts[2] || "Tại quán";
+
+            // Danh sách món ăn
+            let itemsSummary = "";
+            if (Array.isArray(order.items)) {
+                order.items.forEach(it => {
+                    itemsSummary += `<div class="text-[11px] text-slate-300"><span class="font-bold text-red-400 font-mono">${it.qty || 1}x</span> ${it.name}</div>`;
+                });
+            }
+
+            // Huy hiệu thanh toán
+            let paymentBadge = "";
+            if (isVietQR) {
+                paymentBadge = isPaid 
+                    ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"><i class="fa-solid fa-check mr-1"></i>VIETQR ĐÃ TT</span>'
+                    : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40"><i class="fa-solid fa-clock mr-1"></i>VIETQR CHỜ TIỀN</span>';
+            } else {
+                paymentBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/40"><i class="fa-solid fa-money-bill mr-1"></i>COD TIỀN MẶT</span>';
+            }
+
+            // Các nút thao tác nghiệp vụ theo từng trạng thái
+            let actionButtons = "";
+            const opStatus = (order.operationalStatus || "NEW").toUpperCase();
+
+            if (opStatus === "NEW" || opStatus === "PENDING") {
+                if (isVietQR && !isPaid) {
+                    actionButtons += `
+                        <button onclick="OrdersController.openApproveModal('${order.orderId}')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-bold border border-amber-500/40 transition">
+                            <i class="fa-solid fa-shield-halved mr-1"></i>Duyệt Tiền Lv1
+                        </button>
+                    `;
+                }
+                actionButtons += `
+                    <button onclick="OrdersController.openAssignModal('${order.orderId}')" class="flex-1 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold shadow transition flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-motorcycle"></i>Gán Shipper & Đẩy Bếp
+                    </button>
+                `;
+            } else if (opStatus === "COOKING" || opStatus === "READY") {
+                // Rào chắn Bếp bàn giao & Thu tiền ứng
+                const needCollectCash = (!isVietQR && !order.handoverCollected);
+                if (needCollectCash) {
+                    actionButtons += `
+                        <button onclick="OrdersController.confirmHandover('${order.orderId}')" class="w-full px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-bold shadow-lg shadow-amber-600/30 transition flex items-center justify-center gap-1.5 animate-pulse">
+                            <i class="fa-solid fa-hand-holding-dollar"></i>XÁC NHẬN THU TIỀN ỨNG BẾP (${formatCurrency(order.totalAmount)})
+                        </button>
+                    `;
+                } else {
+                    actionButtons += `
+                        <button onclick="OrdersController.confirmHandover('${order.orderId}')" class="w-full px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold shadow transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-box-check"></i>Bàn Giao Món Cho Shipper
+                        </button>
+                    `;
+                }
+            } else if (opStatus === "SHIPPING") {
+                actionButtons += `
+                    <button onclick="OrdersController.completeOrder('${order.orderId}')" class="w-full px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i>Xác Nhận Giao Thành Công
+                    </button>
+                `;
+            }
+
+            html += `
+                <div class="bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl p-3.5 space-y-2.5 shadow transition">
+                    <!-- Thẻ Header: Mã đơn + Bộ đếm SLA -->
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
+                        <span class="font-mono font-bold text-red-400 text-xs">${order.orderId}</span>
+                        <div class="flex items-center gap-2">
+                            ${paymentBadge}
+                            <span class="sla-timer font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 font-bold" data-time="${order.createdAt}">00:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin khách hàng & Hotline -->
+                    <div class="space-y-0.5">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-slate-200 text-xs">${custName}</span>
+                            <div class="flex items-center gap-2">
+                                <a href="tel:${custPhone}" class="text-blue-400 hover:text-blue-300 p-1" title="Gọi điện cho khách">
+                                    <i class="fa-solid fa-phone text-xs"></i>
+                                </a>
+                                <button onclick="OrdersController.copyLiveTracking('${order.orderId}')" class="text-purple-400 hover:text-purple-300 p-1" title="Copy Link Live Tracking D2C">
+                                    <i class="fa-solid fa-location-arrow text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-[11px] text-slate-400 truncate"><i class="fa-solid fa-location-dot mr-1 text-slate-500"></i>${custAddr}</div>
+                    </div>
+
+                    <!-- Danh sách món đặt -->
+                    <div class="p-2 rounded-lg bg-slate-900/60 border border-slate-800/50 space-y-1">
+                        ${itemsSummary}
+                    </div>
+
+                    <!-- Shipper phụ trách & Tổng tiền -->
+                    <div class="flex items-center justify-between pt-1 text-xs">
+                        <div class="text-[10px] text-slate-400">
+                            ${order.shipperInfo ? `<i class="fa-solid fa-motorcycle text-slate-400 mr-1"></i><span class="text-slate-300 font-medium">${order.shipperInfo}</span>` : '<span class="text-amber-500 font-medium italic">Chưa gán ship</span>'}
+                        </div>
+                        <div class="font-mono font-bold text-sm text-white">${formatCurrency(order.totalAmount)}</div>
+                    </div>
+
+                    <!-- Khối nút thao tác -->
+                    <div class="pt-1 flex items-center gap-2">
+                        ${actionButtons}
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    /**
+     * Cập nhật thời gian SLA cho toàn bộ thẻ đơn hàng
+     */
+    function updateAllSLATimers() {
+        const timerBadges = document.querySelectorAll(".sla-timer");
+        const now = Date.now();
+
+        timerBadges.forEach(badge => {
+            const createdStr = badge.getAttribute("data-time");
+            if (!createdStr) return;
+
+            const createdMs = new Date(createdStr).getTime();
+            if (isNaN(createdMs)) return;
+
+            const elapsedSec = Math.floor((now - createdMs) / 1000);
+            const mins = Math.floor(elapsedSec / 60);
+            const secs = elapsedSec % 60;
+            const displayTxt = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            badge.innerText = displayTxt;
+
+            // Cảnh báo đỏ nếu ngâm đơn quá 15 phút
+            if (mins >= 15) {
+                badge.className = "sla-timer font-mono text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 border border-red-500/40 text-red-400 font-bold animate-pulse";
+            } else {
+                badge.className = "sla-timer font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 font-bold";
+            }
+        });
+    }
+
+    /**
+     * Bật / Tắt Chế Độ Mưa (Rain Surcharge)
+     */
+    function toggleRainMode() {
+        isRainMode = !isRainMode;
+        localStorage.setItem("T5_RAIN_MODE", isRainMode ? "TRUE" : "FALSE");
+        updateRainModeUI();
+        if (selectedOrderId) calculateShippingFees();
+    }
+
+    function updateRainModeUI() {
+        const btn = document.getElementById("btn-rain-mode");
+        const icon = document.getElementById("icon-rain");
+        const txt = document.getElementById("txt-rain-status");
+
+        if (isRainMode) {
+            btn.className = "px-4 py-2.5 rounded-xl border border-blue-500/40 bg-blue-600/20 text-blue-300 text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/10";
+            icon.className = "fa-solid fa-cloud-showers-heavy text-blue-400 text-sm animate-bounce";
+            txt.innerText = "Chế Độ Mưa: BẬT (+1k/km)";
+        } else {
+            btn.className = "px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-xs font-bold transition-all flex items-center gap-2 shadow-lg";
+            icon.className = "fa-solid fa-cloud-showers-heavy text-slate-500 text-sm";
+            txt.innerText = "Chế Độ Mưa: TẮT";
+        }
+    }
+
+    /**
+     * Thuật toán Haversine tính cự ly giữa 2 tọa độ GPS (Đơn vị: km)
+     */
+    function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Bán kính Trái Đất (km)
+        const dLat = (lat2 - lat1) * (Math.PI / 180);
+        const dLon = (lon2 - lon1) * (Math.PI / 180);
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return Math.round((R * c) * 10) / 10;
+    }
+
+    /**
+     * Mở Modal điều phối Shipper & Tính cước tự động
+     */
+    function openAssignModal(orderId) {
+        selectedOrderId = orderId;
+        const order = rawOrders.find(o => o.orderId === orderId);
+        if (!order) return;
+
+        document.getElementById("modal-ship-order-id").innerText = order.orderId;
+        selectShipperChannel("INTERNAL");
+        calculateShippingFees(order);
+
+        document.getElementById("modal-assign-shipper").classList.remove("hidden");
+    }
+
+    function closeAssignModal() {
+        document.getElementById("modal-assign-shipper").classList.add("hidden");
+        selectedOrderId = null;
+    }
+
+    /**
+     * Tính toán cước thu khách và xem trước số tiền bù ship
+     */
+    function calculateShippingFees(orderObj) {
+        const order = orderObj || rawOrders.find(o => o.orderId === selectedOrderId);
+        let distanceKm = 1.5; // Cự ly mặc định nếu không có GPS
+
+        if (order && order.gps && order.gps.includes(",")) {
+            const parts = order.gps.split(",");
+            const custLat = parseFloat(parts[0]);
+            const custLng = parseFloat(parts[1]);
+            if (!isNaN(custLat) && !isNaN(custLng)) {
+                distanceKm = calculateHaversineDistance(STORE_COORDS.lat, STORE_COORDS.lng, custLat, custLng);
+            }
+        }
+
+        // Áp dụng công thức cước đa tầng của chuỗi
+        let fee = 12000;
+        if (distanceKm > 2) {
+            fee += Math.ceil(distanceKm - 2) * 4500;
+        }
+
+        // Phụ thu thời tiết nếu bật Mưa (+1k/km)
+        let rainSurcharge = 0;
+        if (isRainMode) {
+            rainSurcharge = Math.ceil(distanceKm) * 1000;
+            fee += rainSurcharge;
+        }
+
+        activeCustomerFee = fee;
+        document.getElementById("modal-ship-distance").innerText = `${distanceKm} km`;
+        document.getElementById("modal-ship-customer-fee").innerText = formatCurrency(fee);
+        document.getElementById("modal-ship-fee-note").innerText = isRainMode 
+            ? `Cơ bản + Phụ phí mưa: +${formatCurrency(rainSurcharge)}`
+            : "Chính sách chuẩn: <2km 12k, mỗi km sau +4.5k";
+
+        calculateSubsidyPreview();
+    }
+
+    function selectShipperChannel(channel) {
+        selectedShipperChannel = channel;
+        const btnInternal = document.getElementById("btn-chan-internal");
+        const btnExternal = document.getElementById("btn-chan-external");
+        const secInternal = document.getElementById("section-internal-shipper");
+        const secExternal = document.getElementById("section-external-shipper");
+
+        if (channel === "INTERNAL") {
+            btnInternal.className = "p-2.5 rounded-xl border border-red-500/50 bg-red-600/10 text-red-300 text-xs font-bold transition flex items-center justify-center gap-2";
+            btnExternal.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold hover:text-white transition flex items-center justify-center gap-2";
+            secInternal.classList.remove("hidden");
+            secExternal.classList.add("hidden");
+        } else {
+            btnInternal.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold hover:text-white transition flex items-center justify-center gap-2";
+            btnExternal.className = "p-2.5 rounded-xl border border-red-500/50 bg-red-600/10 text-red-300 text-xs font-bold transition flex items-center justify-center gap-2";
+            secInternal.classList.add("hidden");
+            secExternal.classList.remove("hidden");
+        }
+        calculateSubsidyPreview();
+    }
+
+    function calculateSubsidyPreview() {
+        if (selectedShipperChannel === "INTERNAL") {
+            document.getElementById("preview-subsidy-cost").innerText = "0 đ (Shipper nội bộ)";
+            return;
+        }
+
+        const externalCost = parseFloat(document.getElementById("input-external-cost").value) || 0;
+        const subsidy = Math.max(0, externalCost - activeCustomerFee);
+        document.getElementById("preview-subsidy-cost").innerText = formatCurrency(subsidy);
+    }
+
+    /**
+     * Thực thi gán Shipper & Khóa đơn (Atomic Lock)
+     */
+    async function executeAssignShipper() {
+        if (!selectedOrderId) return;
+        const btn = document.getElementById("btn-confirm-assign");
+
+        let shipperInfo = "";
+        let trackingCode = "";
+
+        if (selectedShipperChannel === "INTERNAL") {
+            shipperInfo = document.getElementById("select-internal-driver").value;
+        } else {
+            const provider = document.getElementById("select-external-provider").value;
+            trackingCode = document.getElementById("input-external-tracking").value.trim();
+            shipperInfo = `${provider} (${trackingCode || "Chưa có mã"})`;
+        }
+
+        const payload = {
+            orderId: selectedOrderId,
+            shipperType: selectedShipperChannel,
+            shipperInfo: shipperInfo,
+            trackingCode: trackingCode
+        };
+
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang khóa đơn...';
+
+            await Thim5API.callGAS("assignShipper", payload);
+            closeAssignModal();
+            loadOrders();
+        } catch (error) {
+            alert("❌ Lỗi gán Shipper: " + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-lock"></i> Khóa Đơn & Đẩy Bếp';
+        }
+    }
+
+    /**
+     * Cổng Bàn Giao & Thu Tiền Ứng Tại Bếp (Handover Gate)
+     */
+    async function confirmHandover(orderId) {
+        const order = rawOrders.find(o => o.orderId === orderId);
+        if (!order) return;
+
+        const isVietQR = order.paymentMethod === "VIETQR";
+        if (!isVietQR) {
+            const ok = confirm(`⚠️ XÁC NHẬN DÒNG TIỀN:\nBếp/Thu ngân đã thu đủ số tiền ứng ${formatCurrency(order.totalAmount)} từ Shipper chưa?`);
+            if (!ok) return;
+        }
+
+        try {
+            await Thim5API.callGAS("confirmKitchenHandover", { orderId: orderId, staffName: "Bếp Trưởng Thím 5" });
+            loadOrders();
+        } catch (error) {
+            alert("❌ Lỗi bàn giao món: " + error.message);
+        }
+    }
+
+    /**
+     * Hoàn tất đơn hàng (Kích hoạt trừ kho BOM & CRM)
+     */
+    async function completeOrder(orderId) {
+        const ok = confirm(`Xác nhận đơn hàng ${orderId} đã được giao thành công cho khách?`);
+        if (!ok) return;
+
+        try {
+            await Thim5API.callGAS("completeOrder", { orderId: orderId });
+            loadOrders();
+        } catch (error) {
+            alert("❌ Lỗi hoàn tất đơn: " + error.message);
+        }
+    }
+
+    /**
+     * Mở Modal Duyệt Thanh Toán Khẩn Cấp (PIN Lv1)
+     */
+    function openApproveModal(orderId) {
+        selectedOrderId = orderId;
+        document.getElementById("input-payment-override-note").value = "";
+        document.getElementById("input-manager-pin").value = "";
+        document.getElementById("pin-error-orders").classList.add("hidden");
+        document.getElementById("modal-approve-payment").classList.remove("hidden");
+    }
+
+    function closeApproveModal() {
+        document.getElementById("modal-approve-payment").classList.add("hidden");
+        selectedOrderId = null;
+    }
+
+    async function executeApprovePayment() {
+        const pin = document.getElementById("input-manager-pin").value.trim();
+        const note = document.getElementById("input-payment-override-note").value.trim();
+        const btn = document.getElementById("btn-execute-approve");
+
+        if (!pin) {
+            document.getElementById("pin-error-orders").classList.remove("hidden");
+            return;
+        }
+
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang duyệt...';
+
+            await Thim5API.callGAS("manualApprovePayment", {
+                orderId: selectedOrderId,
+                pin: pin,
+                managerName: "Quản Lý Ca",
+                note: note || "Duyệt tiền mặt tại quầy"
+            });
+
+            alert("✅ Đã duyệt thanh toán thành công!");
+            closeApproveModal();
+            loadOrders();
+        } catch (error) {
+            alert("❌ " + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Xác Nhận Duyệt';
+        }
+    }
+
+    /**
+     * Sao chép đường link Live Tracking 5 bước gửi cho khách
+     */
+    function copyLiveTracking(orderId) {
+        const host = window.location.origin;
+        const trackingUrl = `${host}/tracking.html?order=${orderId}`;
+        navigator.clipboard.writeText(trackingUrl).then(() => {
+            alert(`🔗 Đã copy Link Live Tracking cho đơn ${orderId}:\n${trackingUrl}`);
+        }).catch(() => {
+            prompt("Copy link gửi khách:", trackingUrl);
+        });
+    }
+
+    function formatCurrency(num) {
+        return (Number(num) || 0).toLocaleString("vi-VN") + " đ";
+    }
+
+    return {
+        init: init,
+        loadOrders: loadOrders,
+        applyFilters: applyFilters,
+        toggleRainMode: toggleRainMode,
+        openAssignModal: openAssignModal,
+        closeAssignModal: closeAssignModal,
+        selectShipperChannel: selectShipperChannel,
+        calculateSubsidyPreview: calculateSubsidyPreview,
+        executeAssignShipper: executeAssignShipper,
+        confirmHandover: confirmHandover,
+        completeOrder: completeOrder,
+        openApproveModal: openApproveModal,
+        closeApproveModal: closeApproveModal,
+        executeApprovePayment: executeApprovePayment,
+        copyLiveTracking: copyLiveTracking
+    };
+})();
+
+/**
+ * Hàm khởi tạo tiêu chuẩn được kích hoạt bởi Router trong admin-shell.html
+ */
+function initTabOrders() {
+    OrdersController.init();
+}
+</script>
