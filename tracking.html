@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Theo Dõi Đơn Hàng | Mì Trộn Thím 5</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            500: '#EF4444',
+                            600: '#DC2626',
+                            700: '#B91C1C'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome 6 Pro -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .step-active-pulse { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col justify-between">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center font-black text-white text-sm shadow-lg shadow-red-600/30">
+                    T5
+                </div>
+                <div>
+                    <h1 class="text-xs font-bold text-white uppercase tracking-wider">Mì Trộn Thím 5</h1>
+                    <span class="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Live Tracking
+                    </span>
+                </div>
+            </div>
+            <a id="btn-header-hotline" href="tel:0979531213" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-phone text-red-500 text-[11px]"></i>
+                <span>Hotline</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- MAIN TRACKING VIEWPORT (MOBILE-FIRST MAX-W-MD) -->
+    <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
+
+        <!-- THẺ TRẠNG THÁI CHỦ ĐẠO (HERO STATUS CARD) -->
+        <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-5 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-red-600/10 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
+                <span class="text-xs text-slate-400 font-medium">Mã đơn hàng:</span>
+                <span id="txt-order-id" class="font-mono font-bold text-red-400 text-sm tracking-wide">T5-XXXXX</span>
+            </div>
+
+            <div class="pt-4 pb-2 text-center space-y-1">
+                <div id="hero-icon-container" class="w-14 h-14 mx-auto rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-2xl mb-3">
+                    <i class="fa-solid fa-utensils animate-pulse" id="hero-icon"></i>
+                </div>
+                <h2 id="hero-status-title" class="text-lg font-extrabold text-white">Đang Kết Nối Đơn Hàng...</h2>
+                <p id="hero-status-desc" class="text-xs text-slate-400 leading-relaxed px-4">Hệ thống đang đồng bộ dữ liệu thời gian thực từ bếp trung tâm.</p>
+            </div>
+
+            <!-- ƯỚC TÍNH THỜI GIAN GIAO (ETA BADGE) -->
+            <div id="eta-container" class="hidden mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                <span class="text-slate-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-clock text-amber-400"></i> Thời gian dự kiến:
+                </span>
+                <span id="txt-eta-time" class="font-bold text-white font-mono">15 - 25 Phút</span>
+            </div>
+        </div>
+
+        <!-- BỘ ĐIỀU HƯỚNG 5 BƯỚC THỜI GIAN THỰC (5-STEP STEPPER) -->
+        <div class="bg-slate-900/60 border border-slate-800/80 p-4 rounded-3xl space-y-3">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-route text-red-500"></i> Lộ Trình Đơn Hàng
+            </h3>
+
+            <div class="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800" id="stepper-line-container">
+                
+                <!-- BƯỚC 1: TIẾP NHẬN ĐƠN -->
+                <div class="relative flex items-start gap-3" id="step-node-1">
+                    <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-bold transition-all" id="step-dot-1">
+                        1
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 transition-all" id="step-title-1">Tiếp Nhận Đơn Hàng</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5" id="step-desc-1">Đơn đã ghi nhận vào hệ thống.</p>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 2: XÁC THỰC THANH TOÁN -->
+                <div class="relative flex items-start gap-3" id="step-node-2">
+                    <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-bold transition-all" id="step-dot-2">
+                        2
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 transition-all" id="step-title-2">Xác Thực Dòng Tiền</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5" id="step-desc-2">Kiểm tra VietQR hoặc xác nhận COD.</p>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 3: BẾP CHUẨN BỊ MÓN -->
+                <div class="relative flex items-start gap-3" id="step-node-3">
+                    <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-bold transition-all" id="step-dot-3">
+                        3
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 transition-all" id="step-title-3">Bếp Chuẩn Bị Món</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5" id="step-desc-3">Món đang được chế biến nóng hổi.</p>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 4: SHIPPER ĐANG GIAO HÀNG -->
+                <div class="relative flex items-start gap-3" id="step-node-4">
+                    <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-bold transition-all" id="step-dot-4">
+                        4
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 transition-all" id="step-title-4">Shipper Đang Giao Hàng</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5" id="step-desc-4">Tài xế đang di chuyển đến bạn.</p>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 5: GIAO THÀNH CÔNG -->
+                <div class="relative flex items-start gap-3" id="step-node-5">
+                    <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-bold transition-all" id="step-dot-5">
+                        5
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-400 transition-all" id="step-title-5">Giao Hàng Thành Công</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5" id="step-desc-5">Chúc bạn ngon miệng với Thím 5!</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- KHUNG THANH TOÁN VIETQR ĐỘNG (CHỈ HIỆN KHI CHỌN VIETQR MÀ CHƯA TRẢ TIỀN) -->
+        <div id="box-vietqr-payment" class="hidden bg-slate-900 border border-amber-500/40 p-4 rounded-3xl space-y-3 shadow-xl">
+            <div class="flex items-center justify-between text-amber-400 text-xs font-bold pb-2 border-b border-slate-800">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-qrcode"></i> Quét Mã Thanh Toán VietQR</span>
+                <span class="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30">Chờ Tiền Vào</span>
+            </div>
+            <div class="text-center space-y-2">
+                <p class="text-[11px] text-slate-300">Vui lòng quét mã QR dưới đây. Hệ thống tự động xác nhận sau 5-10 giây:</p>
+                <div class="inline-block p-2.5 bg-white rounded-2xl shadow-lg border border-slate-200">
+                    <img id="img-dynamic-vietqr" src="" alt="VietQR Thanh Toán" class="w-44 h-44 object-contain mx-auto">
+                </div>
+                <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-left text-xs font-mono">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Số tiền:</span>
+                        <span id="txt-qr-amount" class="text-emerald-400 font-bold">0 đ</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Nội dung CK:</span>
+                        <span id="txt-qr-memo" class="text-amber-300 font-bold">T5 XXXXX</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- THẺ TÀI XẾ GIAO HÀNG LIVE (SMART DRIVER CARD - HIỆN KHI ĐANG GIAO HOẶC HOÀN TẤT) -->
+        <div id="card-driver-info" class="hidden bg-slate-900/80 border border-purple-500/30 p-4 rounded-3xl space-y-3 shadow-xl">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                    <i class="fa-solid fa-motorcycle text-purple-400"></i> Tài Xế Đang Phụ Trách
+                </span>
+                <span id="badge-driver-type" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">Nội Bộ</span>
+            </div>
+            
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-purple-300 text-xl font-bold">
+                        <i class="fa-solid fa-helmet-safety"></i>
+                    </div>
+                    <div>
+                        <h4 id="txt-driver-name" class="text-sm font-bold text-white">Tài xế Thím 5</h4>
+                        <div class="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5" id="box-live-distance">
+                            <i class="fa-solid fa-location-arrow text-emerald-400 text-[10px]"></i>
+                            <span>Cách bạn: <strong id="txt-driver-distance" class="text-emerald-400 font-mono">0.0 km</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút Gọi Trực Tiếp Cho Tài Xế -->
+                <a id="btn-call-driver" href="tel:" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-lg shadow-purple-600/30 flex items-center gap-1.5 transition shrink-0">
+                    <i class="fa-solid fa-phone"></i> Gọi Tài Xế
+                </a>
+            </div>
+        </div>
+
+        <!-- CHI TIẾT ĐƠN HÀNG & MÓN ĐÃ ĐẶT (ORDER DETAILS ACCORDION) -->
+        <div class="bg-slate-900/60 border border-slate-800/80 p-4 rounded-3xl space-y-3">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-receipt text-red-500"></i> Chi Tiết Món Ăn</span>
+                <span id="txt-order-total" class="font-mono text-white text-sm font-extrabold">0 đ</span>
+            </h3>
+
+            <!-- Danh sách món đặt -->
+            <div id="list-order-items" class="divide-y divide-slate-800/60 text-xs">
+                <!-- Sẽ render động tại Client -->
+            </div>
+
+            <!-- Địa chỉ nhận hàng & Ghi chú -->
+            <div class="pt-2 border-t border-slate-800 text-[11px] space-y-1 text-slate-400">
+                <div><strong class="text-slate-300">Giao đến:</strong> <span id="txt-customer-address">Đang tải địa chỉ...</span></div>
+                <div id="box-delivery-note" class="hidden"><strong class="text-amber-400">Ghi chú cho ship:</strong> <span id="txt-delivery-note" class="text-slate-300 italic">...</span></div>
+                <div><strong class="text-slate-300">Thanh toán:</strong> <span id="txt-payment-mode" class="font-semibold text-slate-200">COD Tiền Mặt</span></div>
+            </div>
+        </div>
+
+    </main>
+    <script>
+/**
+ * =========================================================================
+ * CONTROLLER: D2C LIVE TRACKING CONTROLLER (SAAS ENTERPRISE v2.6)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
+ * Tính năng:
+ *   - Bóc tách mã đơn an toàn từ URL Query Parameter (?order=T5-XXXXX).
+ *   - Polling chu kỳ 4 giây tự động đồng bộ FSM State từ Google Apps Script.
+ *   - Sinh mã VietQR động khóa cứng đúng số tiền và nội dung chuyển khoản.
+ *   - Tự động ẩn mã VietQR và chúc mừng ngay khi phát hiện trạng thái PAID.
+ *   - Thuật toán Haversine tính toán cự ly thực tế giữa Tài xế và Thực khách.
+ * =========================================================================
+ */
+const TrackingController = (function() {
+    let orderId = null;
+    let pollingInterval = null;
+    let currentOrderData = null;
+    let storeCoords = { lat: 10.9825, lng: 106.1265 }; // Tọa độ Bếp mặc định
+
+    /**
+     * Khởi động trang Tracking
+     */
+    function init() {
+        // Trích xuất mã đơn hàng từ URL (?order=T5-XXXXX)
+        const urlParams = new URLSearchParams(window.location.search);
+        orderId = urlParams.get("order");
+
+        if (!orderId) {
+            showErrorState("Không tìm thấy mã đơn hàng hợp lệ trên đường dẫn liên kết.");
+            return;
+        }
+
+        orderId = orderId.trim().toUpperCase();
+        document.getElementById("txt-order-id").innerText = orderId;
+
+        // Tải dữ liệu đơn hàng ngay lập tức
+        fetchOrderStatus();
+
+        // Thiết lập vòng lặp Polling 4 giây/lần (Tự dừng khi rời tab để tiết kiệm dữ liệu)
+        if (pollingInterval) clearInterval(pollingInterval);
+        pollingInterval = setInterval(() => {
+            if (!document.hidden) {
+                fetchOrderStatus();
+            }
+        }, 4000);
+    }
+
+    /**
+     * Gửi request lấy trạng thái đơn hàng từ Backend API
+     */
+    async function fetchOrderStatus() {
+        try {
+            // Gọi qua Middleware api.js nếu có, hoặc gửi fetch trực tiếp an toàn
+            let responseData = null;
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                responseData = await Thim5API.callGAS("getOrdersList");
+            } else {
+                // Endpoint dự phòng kết nối qua Web App URL
+                const apiUrl = "https://script.google.com/macros/s/AKfycbz_YOUR_DEPLOYMENT_ID/exec";
+                const res = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: "getOrdersList", params: {} })
+                });
+                const json = await res.json();
+                responseData = json.data || [];
+            }
+
+            if (!Array.isArray(responseData)) return;
+
+            // Tìm chính xác bản ghi đơn hàng của khách
+            const matchedOrder = responseData.find(o => String(o.orderId || "").toUpperCase() === orderId);
+
+            if (!matchedOrder) {
+                showErrorState(`Đơn hàng ${orderId} không tồn tại hoặc đã được lưu trữ.`);
+                return;
+            }
+
+            currentOrderData = matchedOrder;
+            renderOrderState(matchedOrder);
+
+        } catch (err) {
+            console.warn("⚠️ [TrackingController] Đang thử kết nối lại:", err.message);
+        }
+    }
+
+    /**
+     * Cập nhật toàn bộ giao diện theo trạng thái FSM thời gian thực
+     */
+    function renderOrderState(order) {
+        const opStatus = (order.operationalStatus || "NEW").toUpperCase();
+        const payMethod = (order.paymentMethod || "VIETQR").toUpperCase();
+        const payStatus = (order.paymentStatus || "PENDING").toUpperCase();
+        const isPaid = (payStatus === "PAID" || payStatus === "PAID_MANUAL");
+
+        // 1. CẬP NHẬT HERO STATUS CARD
+        updateHeroCard(opStatus, isPaid, payMethod);
+
+        // 2. CẬP NHẬT BỘ ĐIỀU HƯỚNG 5 BƯỚC (STEPPER)
+        updateStepper(opStatus, isPaid, payMethod);
+
+        // 3. XỬ LÝ KHUNG THANH TOÁN VIETQR ĐỘNG
+        handleVietQRDisplay(order, isPaid, payMethod);
+
+        // 4. HIỂN THỊ THẺ TÀI XẾ & TÍNH KHOẢNG CÁCH LIVE
+        handleDriverCard(order, opStatus);
+
+        // 5. RENDER CHI TIẾT MÓN ĂN & ĐỊA CHỈ
+        renderOrderDetails(order);
+    }
+
+    /**
+     * Cập nhật khối trạng thái trung tâm
+     */
+    function updateHeroCard(opStatus, isPaid, payMethod) {
+        const titleElem = document.getElementById("hero-status-title");
+        const descElem = document.getElementById("hero-status-desc");
+        const iconElem = document.getElementById("hero-icon");
+        const iconBox = document.getElementById("hero-icon-container");
+        const etaContainer = document.getElementById("eta-container");
+        const etaText = document.getElementById("txt-eta-time");
+
+        etaContainer.classList.remove("hidden");
+
+        if (opStatus === "NEW" || opStatus === "PENDING") {
+            if (payMethod === "VIETQR" && !isPaid) {
+                titleElem.innerText = "Chờ Bạn Chuyển Khoản";
+                descElem.innerText = "Vui lòng quét mã QR bên dưới để bếp bắt đầu thực hiện món.";
+                iconElem.className = "fa-solid fa-qrcode text-amber-400 text-2xl animate-pulse";
+                iconBox.className = "w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-3";
+                etaText.innerText = "Đang chờ thanh toán";
+            } else {
+                titleElem.innerText = "Đã Nhận Đơn Hàng";
+                descElem.innerText = "Quán đã tiếp nhận đơn và đang chuẩn bị đưa vào bếp.";
+                iconElem.className = "fa-solid fa-bell-concierge text-blue-400 text-2xl animate-bounce";
+                iconBox.className = "w-14 h-14 mx-auto rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mb-3";
+                etaText.innerText = "20 - 30 Phút";
+            }
+        } else if (opStatus === "COOKING" || opStatus === "READY") {
+            titleElem.innerText = "Bếp Đang Nấu Nóng Hổi";
+            descElem.innerText = "Đầu bếp Thím 5 đang trộn mì và chuẩn bị sốt theo yêu cầu của bạn.";
+            iconElem.className = "fa-solid fa-fire-burner text-amber-500 text-2xl animate-pulse";
+            iconBox.className = "w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-3";
+            etaText.innerText = "15 - 20 Phút";
+        } else if (opStatus === "SHIPPING") {
+            titleElem.innerText = "Shipper Đang Giao Tới Bạn";
+            descElem.innerText = "Món ăn đã đóng gói kỹ càng và đang được tài xế giao đến tận tay bạn.";
+            iconElem.className = "fa-solid fa-motorcycle text-purple-400 text-2xl animate-bounce";
+            iconBox.className = "w-14 h-14 mx-auto rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mb-3";
+            etaText.innerText = "5 - 10 Phút";
+        } else if (opStatus === "COMPLETED") {
+            titleElem.innerText = "Giao Hàng Thành Công!";
+            descElem.innerText = "Cảm ơn bạn đã lựa chọn Mì Trộn Thím 5. Chúc bạn có một bữa ăn ngon miệng!";
+            iconElem.className = "fa-solid fa-circle-check text-emerald-400 text-2xl";
+            iconBox.className = "w-14 h-14 mx-auto rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-3";
+            etaContainer.classList.add("hidden");
+        }
+    }
+
+    /**
+     * Cập nhật Stepper 5 bước
+     */
+    function updateStepper(opStatus, isPaid, payMethod) {
+        let activeStep = 1;
+
+        if (opStatus === "NEW" || opStatus === "PENDING") {
+            activeStep = (payMethod === "VIETQR" && !isPaid) ? 1 : 2;
+        } else if (opStatus === "COOKING" || opStatus === "READY") {
+            activeStep = 3;
+        } else if (opStatus === "SHIPPING") {
+            activeStep = 4;
+        } else if (opStatus === "COMPLETED") {
+            activeStep = 5;
+        }
+
+        for (let i = 1; i <= 5; i++) {
+            const dot = document.getElementById(`step-dot-${i}`);
+            const title = document.getElementById(`step-title-${i}`);
+            const desc = document.getElementById(`step-desc-${i}`);
+
+            if (i < activeStep) {
+                // Đã hoàn thành bước này
+                dot.className = "absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-emerald-500 border-2 border-emerald-400 flex items-center justify-center text-[10px] text-white font-bold";
+                dot.innerHTML = '<i class="fa-solid fa-check"></i>';
+                title.className = "text-xs font-bold text-slate-200";
+            } else if (i === activeStep) {
+                // Đang ở bước hiện tại
+                dot.className = "absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-red-600 border-2 border-red-400 flex items-center justify-center text-[10px] text-white font-bold step-active-pulse animate-pulse";
+                dot.innerHTML = i;
+                title.className = "text-xs font-bold text-red-400";
+            } else {
+                // Chưa tới bước này
+                dot.className = "absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-500 font-bold";
+                dot.innerHTML = i;
+                title.className = "text-xs font-bold text-slate-500";
+            }
+        }
+    }
+
+    /**
+     * Hiển thị hoặc ẩn khung thanh toán VietQR động
+     */
+    function handleVietQRDisplay(order, isPaid, payMethod) {
+        const qrBox = document.getElementById("box-vietqr-payment");
+        if (payMethod === "VIETQR" && !isPaid) {
+            const amount = Number(order.totalAmount) || 0;
+            const memo = "T5 " + order.orderId.replace("T5-", "");
+            
+            // Cấu hình ngân hàng MBBank mặc định của quán
+            const bankCode = "MB";
+            const accountNo = "3939388888";
+            const accountName = "NGUYEN HAI AU";
+
+            // Sinh URL VietQR chuẩn quốc gia khóa cứng số tiền & nội dung
+            const qrApiUrl = `https://img.vietqr.io/image/${bankCode}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(accountName)}`;
+
+            document.getElementById("img-dynamic-vietqr").src = qrApiUrl;
+            document.getElementById("txt-qr-amount").innerText = formatCurrency(amount);
+            document.getElementById("txt-qr-memo").innerText = memo;
+
+            qrBox.classList.remove("hidden");
+        } else {
+            qrBox.classList.add("hidden");
+        }
+    }
+
+    /**
+     * Hiển thị Thẻ Shipper & Tính khoảng cách Live
+     */
+    function handleDriverCard(order, opStatus) {
+        const driverCard = document.getElementById("card-driver-info");
+
+        if (opStatus === "SHIPPING" || opStatus === "COMPLETED") {
+            const rawShipperInfo = order.shipperInfo || "Tài Xế Thím 5";
+            const shipperType = order.shipperType || "INTERNAL";
+
+            // Bóc tách Số điện thoại tài xế nếu có trong chuỗi thông tin
+            const phoneMatch = rawShipperInfo.match(/\b(0\d{9,10})\b/);
+            const driverPhone = phoneMatch ? phoneMatch[0] : "0979531213";
+            const driverName = rawShipperInfo.split("(")[0].replace(/^SHIP_\d+\s*-\s*/i, "").trim();
+
+            document.getElementById("txt-driver-name").innerText = driverName || "Tài xế giao hàng";
+            document.getElementById("badge-driver-type").innerText = (shipperType === "INTERNAL") ? "Shipper Nội Bộ" : "Đối Tác Sàn";
+            document.getElementById("btn-call-driver").href = `tel:${driverPhone}`;
+
+            // Tính toán khoảng cách cự ly nếu có tọa độ GPS của khách
+            if (order.gps && order.gps.includes(",")) {
+                const parts = order.gps.split(",");
+                const custLat = parseFloat(parts[0]);
+                const custLng = parseFloat(parts[1]);
+                if (!isNaN(custLat) && !isNaN(custLng)) {
+                    const distance = calculateHaversineDistance(storeCoords.lat, storeCoords.lng, custLat, custLng);
+                    document.getElementById("txt-driver-distance").innerText = `${distance} km`;
+                    document.getElementById("box-live-distance").classList.remove("hidden");
+                }
+            } else {
+                document.getElementById("box-live-distance").classList.add("hidden");
+            }
+
+            driverCard.classList.remove("hidden");
+        } else {
+            driverCard.classList.add("hidden");
+        }
+    }
+
+    /**
+     * Kết xuất danh sách món và địa chỉ giao
+     */
+    function renderOrderDetails(order) {
+        const itemsListElem = document.getElementById("list-order-items");
+        document.getElementById("txt-order-total").innerText = formatCurrency(order.totalAmount);
+
+        let itemsHtml = "";
+        if (Array.isArray(order.items) && order.items.length > 0) {
+            order.items.forEach(it => {
+                const price = Number(it.price || it.priceD2C || 0);
+                const qty = Number(it.qty || it.quantity || 1);
+                itemsHtml += `
+                    <div class="py-2 flex items-center justify-between">
+                        <div>
+                            <span class="font-bold text-slate-200"><strong class="text-red-400 font-mono">${qty}x</strong> ${it.name}</span>
+                            ${it.note ? `<div class="text-[10px] text-amber-400 italic">Ghi chú: ${it.note}</div>` : ""}
+                        </div>
+                        <span class="font-mono text-slate-300 font-semibold">${formatCurrency(price * qty)}</span>
+                    </div>
+                `;
+            });
+        }
+        itemsListElem.innerHTML = itemsHtml;
+
+        // Bóc tách thông tin khách và địa chỉ
+        const custParts = (order.customerInfo || "").split("|").map(s => s.trim());
+        const custAddr = custParts[2] || "Nhận tại quán";
+        document.getElementById("txt-customer-address").innerText = custAddr;
+
+        const isVietQR = (order.paymentMethod || "").toUpperCase() === "VIETQR";
+        document.getElementById("txt-payment-mode").innerText = isVietQR ? "Chuyển Khoản VietQR" : "Thanh Toán Tiền Mặt (COD)";
+    }
+
+    /**
+     * Thuật toán Haversine tính cự ly giữa 2 điểm GPS (Đơn vị: km)
+     */
+    function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Bán kính Trái Đất (km)
+        const dLat = (lat2 - lat1) * (Math.PI / 180);
+        const dLon = (lon2 - lon1) * (Math.PI / 180);
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return Math.round((R * c) * 10) / 10;
+    }
+
+    function showErrorState(message) {
+        document.getElementById("hero-status-title").innerText = "Không Thể Tải Đơn";
+        document.getElementById("hero-status-desc").innerText = message;
+        document.getElementById("hero-icon").className = "fa-solid fa-triangle-exclamation text-red-500 text-2xl";
+    }
+
+    function formatCurrency(num) {
+        return (Number(num) || 0).toLocaleString("vi-VN") + " đ";
+    }
+
+    return {
+        init: init
+    };
+})();
+
+// Khởi chạy khi tài liệu tải xong
+document.addEventListener("DOMContentLoaded", () => {
+    TrackingController.init();
+});
+</script>
+</body>
+</html>
