@@ -1,0 +1,637 @@
+<!-- MODAL: NẠP LIỆU THỰC ĐƠN & XỬ LÝ HÌNH ẢNH CLIENT-SIDE CANVAS [INGESTION_MODAL] -->
+<div id="modal-dish-ingestion" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-3 sm:p-5 overflow-y-auto">
+    
+    <!-- Modal Container (Max-w-4xl, Dark Mode sang trọng chuẩn Enterprise) -->
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
+        
+        <!-- 1. MODAL TOP HEADER -->
+        <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-red-600/20 border border-red-500/30 flex items-center justify-center text-red-500 text-lg font-bold">
+                    <i class="fa-solid fa-utensils" id="modal-header-icon"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm sm:text-base font-black text-white uppercase tracking-wider flex items-center gap-2" id="modal-dish-title">
+                        Thêm Món Ăn Mới Vào Thực Đơn
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Tự động nén ảnh 800x800 qua Canvas và bảo chứng biên lợi nhuận ròng.</p>
+                </div>
+            </div>
+            <button type="button" onclick="DishIngestionController.closeModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- 2. MODAL BODY (CHIA 2 CỘT: TRÁI XỬ LÝ ẢNH - PHẢI THÔNG SỐ TÀI CHÍNH) -->
+        <div class="p-5 sm:p-6 overflow-y-auto custom-scroll grid grid-cols-1 md:grid-cols-12 gap-6">
+            
+            <!-- CỘT TRÁI: XỬ LÝ HÌNH ẢNH CANVAS CROP 1:1 (MD:COL-SPAN-5) -->
+            <div class="md:col-span-5 space-y-4">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-camera text-red-500"></i> Ảnh Món Chuẩn 1:1
+                    </label>
+                    <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-mono" id="lbl-img-size">800x800 px</span>
+                </div>
+
+                <!-- KHUNG XEM TRƯỚC VÀ DROPZONE -->
+                <div id="dish-dropzone" class="relative group w-full aspect-square rounded-2xl border-2 border-dashed border-slate-700 hover:border-red-500/60 bg-slate-950 flex flex-col items-center justify-center overflow-hidden transition cursor-pointer">
+                    
+                    <!-- Hình ảnh xem trước sau khi nén -->
+                    <img id="preview-dish-img" src="" alt="Xem trước món ăn" class="hidden w-full h-full object-cover">
+                    
+                    <!-- Trạng thái trống khi chưa có ảnh -->
+                    <div id="placeholder-upload" class="text-center p-4 space-y-2">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 text-2xl mx-auto group-hover:text-red-400 group-hover:border-red-500/40 transition">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <div class="space-y-0.5">
+                            <p class="text-xs font-semibold text-slate-300">Bấm để chụp hoặc tải ảnh</p>
+                            <p class="text-[10px] text-slate-500">Hỗ trợ JPG, PNG, WebP (Tự nén dưới 100KB)</p>
+                        </div>
+                    </div>
+
+                    <!-- Overlay công cụ khi đã có ảnh -->
+                    <div id="overlay-img-actions" class="hidden absolute inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition duration-200">
+                        <button type="button" onclick="document.getElementById('file-dish-input').click()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold shadow flex items-center gap-1.5 border border-slate-700">
+                            <i class="fa-solid fa-camera-rotate text-xs text-amber-400"></i> Đổi Ảnh
+                        </button>
+                        <button type="button" onclick="DishIngestionController.removeImage()" class="px-3 py-1.5 rounded-xl bg-red-600/80 hover:bg-red-600 text-white text-xs font-semibold shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-trash-can text-xs"></i> Xóa
+                        </button>
+                    </div>
+
+                    <!-- Input ẩn tiếp nhận file ảnh từ thiết bị -->
+                    <input type="file" id="file-dish-input" accept="image/*" class="hidden" onchange="DishIngestionController.handleImageSelect(event)">
+                </div>
+
+                <!-- CẢNH BÁO TỐI ƯU DUNG LƯỢNG CANVAS -->
+                <div class="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-1 text-[11px] text-slate-400">
+                    <div class="flex items-center justify-between font-mono">
+                        <span>Dung lượng ảnh nén:</span>
+                        <strong class="text-slate-200" id="txt-compressed-kb">0 KB</strong>
+                    </div>
+                    <p class="text-[10px] text-slate-500 leading-relaxed">
+                        Thuật toán Canvas tự động cắt tâm 1:1 và nén chuẩn WebP/JPEG, triệt tiêu 98% dung lượng rác và chống tràn ô tính Google Sheets.
+                    </p>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: THÔNG SỐ NGHIỆP VỤ & ĐỊNH GIÁ TÀI CHÍNH (MD:COL-SPAN-7) -->
+            <div class="md:col-span-7 space-y-4">
+                
+                <!-- MÃ MÓN & TÊN MÓN -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-1">
+                        <label class="block text-[11px] font-semibold text-slate-400 mb-1">Mã Món</label>
+                        <input type="text" id="inp-dish-id" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-red-400 focus:outline-none cursor-not-allowed" placeholder="DISH_XX">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1">Tên Món Ăn *</label>
+                        <input type="text" id="inp-dish-name" placeholder="VD: Mì Trộn Bò Viên Gân Giòn" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-red-500 transition">
+                    </div>
+                </div>
+
+                <!-- PHÂN LOẠI DANH MỤC & HỆ MÓN (DRY / SOUP) -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1">Danh Mục Bán Hàng</label>
+                        <select id="sel-dish-category" onchange="DishIngestionController.onCategoryOrCostChange()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-medium text-white focus:outline-none focus:border-red-500">
+                            <option value="MÌ TRỘN">🍜 Mì Trộn Đặc Sản</option>
+                            <option value="CƠM">🍚 Cơm Đậm Vị</option>
+                            <option value="MÓN NƯỚC">🥢 Món Nước / Hủ Tiếu</option>
+                            <option value="SÚP">🍲 Súp Thượng Hạng</option>
+                            <option value="NƯỚC">🥤 Đồ Uống / Topping</option>
+                            <option value="COMBO">🔥 Combo Đại Tiệc</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-300 mb-1">Hệ Món (Kích Hoạt Gợi Ý Súp)</label>
+                        <select id="sel-dish-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-medium text-white focus:outline-none focus:border-red-500">
+                            <option value="DRY">Món Khô (Tự Gợi Ý Súp Bò Viên)</option>
+                            <option value="SOUP">Món Nước (Không Kèm Súp)</option>
+                            <option value="SOUP_EXTRA">Súp Ăn Kèm (Booster Ticket)</option>
+                            <option value="DRINK">Đồ Uống / Tráng Miệng</option>
+                            <option value="NORMAL">Món Phụ Tiêu Chuẩn</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- BỘ NÃO ĐỊNH GIÁ & ĐỒNG HỒ CẢNH BÁO FOOD COST -->
+                <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-calculator"></i> Ma Trận Định Giá Đa Kênh Tự Động
+                        </span>
+                        <button type="button" onclick="DishIngestionController.applyRecommendedPricing()" class="px-2 py-0.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-bold transition flex items-center gap-1 shadow">
+                            <i class="fa-solid fa-bolt"></i> Áp Dụng Đề Xuất
+                        </button>
+                    </div>
+
+                    <!-- Hàng Nhập Tiền Vốn Nguyên Liệu BOM -->
+                    <div class="grid grid-cols-3 gap-3 items-center">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-400 mb-0.5">Giá Vốn BOM (VNĐ) *</label>
+                            <input type="number" id="inp-dish-cost" oninput="DishIngestionController.onCategoryOrCostChange()" placeholder="15000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-amber-300 focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div class="col-span-2 flex items-center justify-between p-2 rounded-xl bg-slate-900/80 border border-slate-800">
+                            <div>
+                                <span class="text-[10px] text-slate-400 block">Biên Food Cost Thực Tế:</span>
+                                <span class="text-xs font-mono font-black" id="txt-live-fc-pct">0.0%</span>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold" id="badge-fc-status">Chờ Nhập Vốn</span>
+                        </div>
+                    </div>
+
+                    <!-- Hàng Nhập Giá Bán D2C vs Giá Sàn App -->
+                    <div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-800/80">
+                        <div>
+                            <div class="flex items-center justify-between mb-0.5">
+                                <label class="text-[10px] font-semibold text-slate-300">Giá Bán Web D2C (VNĐ) *</label>
+                                <span class="text-[9px] text-emerald-400 font-mono" id="txt-rec-d2c">Gợi ý: 0 đ</span>
+                            </div>
+                            <input type="number" id="inp-dish-price-d2c" oninput="DishIngestionController.recalculateMarginOnPriceChange()" placeholder="39000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-white focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between mb-0.5">
+                                <label class="text-[10px] font-semibold text-slate-300">Giá Niêm Yết Sàn (VNĐ)</label>
+                                <span class="text-[9px] text-amber-400 font-mono" id="txt-rec-app">Gợi ý: 0 đ</span>
+                            </div>
+                            <input type="number" id="inp-dish-price-app" placeholder="49000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-amber-300 focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CÔNG TẮC BÁN CHẠY & TRẠNG THÁI -->
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer hover:border-slate-700 transition">
+                        <span class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-fire text-amber-500 text-xs"></i> Đánh Dấu Bán Chạy
+                        </span>
+                        <input type="checkbox" id="chk-is-bestseller" class="rounded border-slate-700 text-red-600 focus:ring-0">
+                    </label>
+
+                    <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-800 bg-slate-950 cursor-pointer hover:border-slate-700 transition">
+                        <span class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-power-off text-emerald-400 text-xs"></i> Trạng Thái Mở Bán
+                        </span>
+                        <input type="checkbox" id="chk-is-active" checked class="rounded border-slate-700 text-emerald-500 focus:ring-0">
+                    </label>
+                </div>
+
+                <!-- MÔ TẢ HƯƠNG VỊ MÓN ĂN -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-400 mb-1">Mô Tả Hương Vị Kích Thích Vị Giác</label>
+                    <textarea id="inp-dish-desc" rows="2" placeholder="VD: Mì dai trứng giòn trộn sốt sa tế tỏi ớt thơm lừng, thịt mềm ngọt ngào..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500"></textarea>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 3. MODAL BOTTOM FOOTER -->
+        <div class="px-6 py-4 border-t border-slate-800 bg-slate-950/80 flex items-center justify-between shrink-0">
+            <button type="button" onclick="DishIngestionController.resetForm()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-rotate-left text-slate-400"></i> Nhập Lại
+            </button>
+
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="DishIngestionController.closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white text-xs font-semibold transition">
+                    Hủy Bỏ
+                </button>
+                <button type="button" onclick="DishIngestionController.submitDishForm()" id="btn-submit-ingestion" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/30 transition flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>Lưu Món Ăn & Tải Ảnh</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+/**
+ * =========================================================================
+ * CONTROLLER: DISH INGESTION & CANVAS COMPRESSION CONTROLLER (v2.6)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
+ * Vai trò:
+ *   - Quản lý vòng đời mở/đóng Modal thêm mới và chỉnh sửa món ăn.
+ *   - Thuật toán Canvas Auto Center-Crop 1:1, nén WebP/JPEG 800x800 px.
+ *   - Bộ não tính toán định giá đa kênh tự động và cảnh báo biên Food Cost.
+ *   - Đẩy payload an toàn lên Backend CoreRouter tuyến ingestMenuItem.
+ * =========================================================================
+ */
+const DishIngestionController = (function() {
+    // Trạng thái lưu trữ dữ liệu nạp liệu
+    let currentDishId = "";
+    let compressedBase64 = "";
+    let existingImageUrl = "";
+    let isEditingMode = false;
+
+    // Ngưỡng mục tiêu tài chính theo từng danh mục
+    const CATEGORY_RULES = {
+        "MÌ TRỘN": { targetMargin: 0.30, maxFoodCostPct: 0.45, defaultType: "DRY" },
+        "CƠM": { targetMargin: 0.30, maxFoodCostPct: 0.45, defaultType: "DRY" },
+        "MÓN NƯỚC": { targetMargin: 0.35, maxFoodCostPct: 0.40, defaultType: "SOUP" },
+        "SÚP": { targetMargin: 0.45, maxFoodCostPct: 0.30, defaultType: "SOUP_EXTRA" },
+        "NƯỚC": { targetMargin: 0.55, maxFoodCostPct: 0.25, defaultType: "DRINK" },
+        "COMBO": { targetMargin: 0.20, maxFoodCostPct: 0.55, defaultType: "DRY" }
+    };
+
+    /**
+     * Khởi tạo và lắng nghe sự kiện kéo thả Dropzone
+     */
+    function init() {
+        const dropzone = document.getElementById("dish-dropzone");
+        if (!dropzone) return;
+
+        dropzone.addEventListener("click", (e) => {
+            if (e.target.closest("#overlay-img-actions")) return;
+            document.getElementById("file-dish-input").click();
+        });
+
+        dropzone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropzone.classList.add("border-red-500");
+        });
+
+        dropzone.addEventListener("dragleave", () => {
+            dropzone.classList.remove("border-red-500");
+        });
+
+        dropzone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropzone.classList.remove("border-red-500");
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                processImageFile(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    /**
+     * MỞ MODAL NẠP LIỆU: HỖ TRỢ CẢ THÊM MỚI VÀ CHỈNH SỬA
+     * @param {Object} [dishData] - Dữ liệu món ăn nếu là chế độ chỉnh sửa
+     */
+    function openModal(dishData) {
+        resetForm();
+
+        if (dishData && typeof dishData === "object" && (dishData.id || dishData.dishId)) {
+            // Chế độ chỉnh sửa món có sẵn
+            isEditingMode = true;
+            currentDishId = dishData.id || dishData.dishId;
+            existingImageUrl = dishData.img || dishData.imageUrl || "";
+
+            document.getElementById("modal-dish-title").innerText = "Chỉnh Sửa Món: " + (dishData.name || currentDishId);
+            document.getElementById("modal-header-icon").className = "fa-solid fa-pen-to-square text-amber-500";
+            document.getElementById("inp-dish-id").value = currentDishId;
+            document.getElementById("inp-dish-name").value = dishData.name || "";
+            document.getElementById("sel-dish-category").value = dishData.category || "MÌ TRỘN";
+            document.getElementById("sel-dish-type").value = dishData.dishType || "DRY";
+            document.getElementById("inp-dish-cost").value = dishData.costPrice || dishData.cogs || "";
+            document.getElementById("inp-dish-price-d2c").value = dishData.priceD2C || dishData.price || "";
+            document.getElementById("inp-dish-price-app").value = dishData.priceApp || "";
+            document.getElementById("chk-is-bestseller").checked = (dishData.isBestSeller === true || String(dishData.isBestSeller).toUpperCase() === "TRUE");
+            document.getElementById("chk-is-active").checked = (dishData.status !== "INACTIVE");
+            document.getElementById("inp-dish-desc").value = dishData.desc || dishData.description || "";
+
+            if (existingImageUrl) {
+                showImagePreview(existingImageUrl, "Ảnh hiện tại trên Drive");
+            }
+        } else {
+            // Chế độ thêm món mới hoàn toàn
+            isEditingMode = false;
+            currentDishId = "";
+            existingImageUrl = "";
+            document.getElementById("modal-dish-title").innerText = "Thêm Món Ăn Mới Vào Thực Đơn";
+            document.getElementById("modal-header-icon").className = "fa-solid fa-utensils text-red-500";
+            document.getElementById("inp-dish-id").value = "TỰ ĐỘNG CẤP";
+            document.getElementById("chk-is-active").checked = true;
+        }
+
+        onCategoryOrCostChange();
+        document.getElementById("modal-dish-ingestion").classList.remove("hidden");
+    }
+
+    /**
+     * Đóng Modal nạp liệu
+     */
+    function closeModal() {
+        document.getElementById("modal-dish-ingestion").classList.add("hidden");
+        resetForm();
+    }
+
+    /**
+     * Reset toàn bộ dữ liệu trên form nạp liệu
+     */
+    function resetForm() {
+        compressedBase64 = "";
+        existingImageUrl = "";
+        currentDishId = "";
+        isEditingMode = false;
+
+        document.getElementById("file-dish-input").value = "";
+        document.getElementById("inp-dish-id").value = "TỰ ĐỘNG CẤP";
+        document.getElementById("inp-dish-name").value = "";
+        document.getElementById("sel-dish-category").value = "MÌ TRỘN";
+        document.getElementById("sel-dish-type").value = "DRY";
+        document.getElementById("inp-dish-cost").value = "";
+        document.getElementById("inp-dish-price-d2c").value = "";
+        document.getElementById("inp-dish-price-app").value = "";
+        document.getElementById("chk-is-bestseller").checked = false;
+        document.getElementById("chk-is-active").checked = true;
+        document.getElementById("inp-dish-desc").value = "";
+
+        removeImage();
+        onCategoryOrCostChange();
+    }
+
+    /**
+     * Xử lý file ảnh khi người dùng chọn từ input
+     */
+    function handleImageSelect(event) {
+        const files = event.target.files;
+        if (files && files.length > 0) {
+            processImageFile(files[0]);
+        }
+    }
+
+    /**
+     * THUẬT TOÁN CLIENT-SIDE CANVAS: AUTO CENTER-CROP 1:1 VÀ NÉN 800x800
+     * @param {File} file - Đối tượng file ảnh từ điện thoại/máy tính
+     */
+    function processImageFile(file) {
+        if (!file || !file.type.match(/^image\//i)) {
+            alert("⚠️ Vui lòng chỉ chọn tệp định dạng hình ảnh (JPG, PNG, WebP).");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const tempImg = new Image();
+            tempImg.onload = function() {
+                // 1. Khởi tạo Canvas ảo 800 x 800 pixel chuẩn GrabFood
+                const TARGET_SIZE = 800;
+                const canvas = document.createElement("canvas");
+                canvas.width = TARGET_SIZE;
+                canvas.height = TARGET_SIZE;
+                const ctx = canvas.getContext("2d");
+
+                // 2. Thuật toán Center-Crop 1:1 lấy trung tâm tô mì
+                const origW = tempImg.naturalWidth || tempImg.width;
+                const origH = tempImg.naturalHeight || tempImg.height;
+                const minEdge = Math.min(origW, origH);
+
+                const srcX = (origW - minEdge) / 2;
+                const srcY = (origH - minEdge) / 2;
+
+                // 3. Khử răng cưa và vẽ vùng cắt tâm lên Canvas
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = "high";
+                ctx.drawImage(tempImg, srcX, srcY, minEdge, minEdge, 0, 0, TARGET_SIZE, TARGET_SIZE);
+
+                // 4. Nén sang WebP (fallback JPEG) chất lượng 0.82
+                let dataUrl = canvas.toDataURL("image/webp", 0.82);
+                if (!dataUrl || dataUrl.indexOf("data:image/webp") !== 0) {
+                    dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+                }
+
+                compressedBase64 = dataUrl;
+
+                // 5. Tính dung lượng nén thực tế
+                const head = dataUrl.indexOf(",") + 1;
+                const byteLength = Math.round((dataUrl.length - head) * 3 / 4);
+                const kbSize = Math.round(byteLength / 1024);
+
+                showImagePreview(dataUrl, `${kbSize} KB`);
+            };
+            tempImg.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /**
+     * Hiển thị khung xem trước hình ảnh
+     */
+    function showImagePreview(srcUrl, sizeLabel) {
+        const previewImg = document.getElementById("preview-dish-img");
+        const placeholder = document.getElementById("placeholder-upload");
+        const overlay = document.getElementById("overlay-img-actions");
+        const lblSize = document.getElementById("txt-compressed-kb");
+
+        previewImg.src = srcUrl;
+        previewImg.classList.remove("hidden");
+        placeholder.classList.add("hidden");
+        overlay.classList.remove("hidden");
+        lblSize.innerText = sizeLabel || "Chuẩn CDN";
+    }
+
+    /**
+     * Xóa ảnh xem trước hiện tại
+     */
+    function removeImage() {
+        compressedBase64 = "";
+        existingImageUrl = "";
+        document.getElementById("file-dish-input").value = "";
+
+        const previewImg = document.getElementById("preview-dish-img");
+        const placeholder = document.getElementById("placeholder-upload");
+        const overlay = document.getElementById("overlay-img-actions");
+        const lblSize = document.getElementById("txt-compressed-kb");
+
+        previewImg.src = "";
+        previewImg.classList.add("hidden");
+        placeholder.classList.remove("hidden");
+        overlay.classList.add("hidden");
+        lblSize.innerText = "0 KB";
+    }
+
+    /**
+     * BỘ NÃO TÍNH TOÁN ĐỊNH GIÁ ĐA KÊNH & THEO DÕI BIÊN FOOD COST THỜI GIAN THỰC
+     */
+    function onCategoryOrCostChange() {
+        const category = document.getElementById("sel-dish-category").value;
+        const selDishType = document.getElementById("sel-dish-type");
+        const costInput = document.getElementById("inp-dish-cost");
+        const costPrice = Number(costInput.value) || 0;
+
+        // Tự động gán Hệ Món mặc định theo tính chất danh mục nếu thêm mới
+        if (!isEditingMode && CATEGORY_RULES[category]) {
+            selDishType.value = CATEGORY_RULES[category].defaultType;
+        }
+
+        const rules = CATEGORY_RULES[category] || { targetMargin: 0.30, maxFoodCostPct: 0.45 };
+
+        if (costPrice > 0) {
+            // Tính Giá D2C đề xuất bảo toàn biên lãi ròng mục tiêu
+            const recD2C = Math.ceil((costPrice / Math.max(0.1, 1 - rules.targetMargin)) / 1000) * 1000;
+            // Tính Giá Sàn đề xuất sau khi khấu trừ 40% chiết khấu sàn
+            const recApp = Math.ceil((recD2C / 0.60) / 1000) * 1000;
+
+            document.getElementById("txt-rec-d2c").innerText = "Gợi ý: " + formatCurrency(recD2C);
+            document.getElementById("txt-rec-app").innerText = "Gợi ý: " + formatCurrency(recApp);
+
+            // Lưu dữ liệu đề xuất vào dataset để nút "Áp dụng" sử dụng
+            costInput.dataset.recD2c = recD2C;
+            costInput.dataset.recApp = recApp;
+        } else {
+            document.getElementById("txt-rec-d2c").innerText = "Gợi ý: 0 đ";
+            document.getElementById("txt-rec-app").innerText = "Gợi ý: 0 đ";
+            delete costInput.dataset.recD2c;
+            delete costInput.dataset.recApp;
+        }
+
+        recalculateMarginOnPriceChange();
+    }
+
+    /**
+     * Áp dụng ngay mức giá đề xuất từ hệ thống vào form
+     */
+    function applyRecommendedPricing() {
+        const costInput = document.getElementById("inp-dish-cost");
+        const recD2C = costInput.dataset.recD2c;
+        const recApp = costInput.dataset.recApp;
+
+        if (recD2C && recApp) {
+            document.getElementById("inp-dish-price-d2c").value = recD2C;
+            document.getElementById("inp-dish-price-app").value = recApp;
+            recalculateMarginOnPriceChange();
+        } else {
+            alert("ℹ️ Vui lòng nhập giá vốn BOM để hệ thống đề xuất ma trận giá tối ưu.");
+            document.getElementById("inp-dish-cost").focus();
+        }
+    }
+
+    /**
+     * Tính toán và hiển thị màu cảnh báo Food Cost thời gian thực
+     */
+    function recalculateMarginOnPriceChange() {
+        const costPrice = Number(document.getElementById("inp-dish-cost").value) || 0;
+        const priceD2C = Number(document.getElementById("inp-dish-price-d2c").value) || 0;
+        const category = document.getElementById("sel-dish-category").value;
+        const rules = CATEGORY_RULES[category] || { maxFoodCostPct: 0.45 };
+
+        const txtFCPct = document.getElementById("txt-live-fc-pct");
+        const badgeStatus = document.getElementById("badge-fc-status");
+
+        if (costPrice <= 0 || priceD2C <= 0) {
+            txtFCPct.innerText = "0.0%";
+            txtFCPct.className = "text-xs font-mono font-black text-slate-400";
+            badgeStatus.innerText = "Chờ Nhập Vốn";
+            badgeStatus.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400";
+            return;
+        }
+
+        const fcPct = costPrice / priceD2C;
+        txtFCPct.innerText = (fcPct * 100).toFixed(1) + "%";
+
+        if (fcPct <= rules.maxFoodCostPct) {
+            txtFCPct.className = "text-xs font-mono font-black text-emerald-400";
+            badgeStatus.innerText = "Biên Lãi Chuẩn";
+            badgeStatus.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+        } else {
+            txtFCPct.className = "text-xs font-mono font-black text-red-400 animate-pulse";
+            badgeStatus.innerText = "Vượt Trần Rủi Ro!";
+            badgeStatus.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/30";
+        }
+    }
+
+    /**
+     * GỬI PAYLOAD NẠP LIỆU LÊN BACKEND GOOGLE APPS SCRIPT
+     */
+    async function submitDishForm() {
+        const name = document.getElementById("inp-dish-name").value.trim();
+        const category = document.getElementById("sel-dish-category").value;
+        const dishType = document.getElementById("sel-dish-type").value;
+        const costPrice = Number(document.getElementById("inp-dish-cost").value) || 0;
+        const priceD2C = Number(document.getElementById("inp-dish-price-d2c").value) || 0;
+        const priceApp = Number(document.getElementById("inp-dish-price-app").value) || 0;
+        const isBestSeller = document.getElementById("chk-is-bestseller").checked;
+        const isActive = document.getElementById("chk-is-active").checked;
+        const description = document.getElementById("inp-dish-desc").value.trim();
+
+        // RÀO CHẮN KIỂM DUYỆT DỮ LIỆU
+        if (!name) {
+            alert("⚠️ Vui lòng nhập tên món ăn.");
+            document.getElementById("inp-dish-name").focus();
+            return;
+        }
+
+        if (priceD2C <= 0) {
+            alert("⚠️ Giá bán Web D2C phải lớn hơn 0 VNĐ.");
+            document.getElementById("inp-dish-price-d2c").focus();
+            return;
+        }
+
+        // Cảnh báo nếu giá bán D2C đang thấp hơn giá vốn
+        if (costPrice > 0 && priceD2C < costPrice) {
+            const confirmLoss = confirm("🚨 CẢNH BÁO: Giá bán D2C (" + formatCurrency(priceD2C) + ") đang THẤP HƠN giá vốn BOM (" + formatCurrency(costPrice) + "). Món này sẽ bị lỗ trực tiếp trên mỗi đơn hàng. Anh có chắc chắn muốn lưu?");
+            if (!confirmLoss) return;
+        }
+
+        const btnSubmit = document.getElementById("btn-submit-ingestion");
+        const origBtnHtml = btnSubmit.innerHTML;
+
+        try {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang Nén & Tải Lên CDN...';
+
+            const payload = {
+                id: currentDishId,
+                name: name,
+                category: category,
+                dishType: dishType,
+                costPrice: costPrice,
+                priceD2C: priceD2C,
+                priceApp: priceApp,
+                imageBase64: compressedBase64,
+                imgUrl: existingImageUrl,
+                isBestSeller: isBestSeller,
+                status: isActive ? "ACTIVE" : "INACTIVE",
+                desc: description
+            };
+
+            let response = null;
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                response = await Thim5API.callGAS("ingestMenuItem", payload);
+            } else {
+                throw new Error("Không tìm thấy cổng kết nối Thim5API để nạp dữ liệu.");
+            }
+
+            alert("✅ " + (response.message || "Đã lưu trữ món ăn và đồng bộ hình ảnh CDN thành công!"));
+            closeModal();
+
+            // Tự động làm mới bảng thực đơn trên tab-menu.html nếu đang mở
+            if (typeof MenuController !== "undefined" && typeof MenuController.loadMenu === "function") {
+                MenuController.loadMenu();
+            }
+
+        } catch (err) {
+            console.error("❌ [DishIngestionController] Lỗi nạp món:", err);
+            alert("❌ Không thể lưu món ăn: " + err.message);
+        } finally {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = origBtnHtml;
+        }
+    }
+
+    function formatCurrency(num) {
+        return (Number(num) || 0).toLocaleString("vi-VN") + " đ";
+    }
+
+    return {
+        init: init,
+        openModal: openModal,
+        closeModal: closeModal,
+        resetForm: resetForm,
+        handleImageSelect: handleImageSelect,
+        removeImage: removeImage,
+        onCategoryOrCostChange: onCategoryOrCostChange,
+        applyRecommendedPricing: applyRecommendedPricing,
+        recalculateMarginOnPriceChange: recalculateMarginOnPriceChange,
+        submitDishForm: submitDishForm
+    };
+})();
+
+// Khởi chạy khi tài liệu hoàn tất
+document.addEventListener("DOMContentLoaded", () => {
+    DishIngestionController.init();
+});
+</script>
