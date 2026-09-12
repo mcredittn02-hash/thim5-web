@@ -1,4 +1,4 @@
-<!-- BẢNG ĐIỀU KHIỂN CẤU HÌNH HỆ THỐNG DỘNG [SYS_CONFIG] -->
+<!-- BẢNG ĐIỀU KHIỂN CẤU HÌNH HỆ THỐNG DỘNG [SYS_CONFIG] - V2.1 ENTERPRISE -->
 <div class="max-w-6xl mx-auto space-y-6 pb-12">
     <!-- Top Action Bar -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-lg">
@@ -6,7 +6,7 @@
             <h3 class="text-lg font-bold text-white flex items-center gap-2">
                 <i class="fa-solid fa-sliders text-red-500"></i> Bảng Điều Khiển Cấu Hình Trung Tâm
             </h3>
-            <p class="text-xs text-slate-400 mt-1">Các tham số dưới đây điều khiển trực tiếp logic giá, thuế và dòng tiền toàn hệ thống.</p>
+            <p class="text-xs text-slate-400 mt-1">Các tham số dưới đây điều khiển trực tiếp logic giá, tọa độ GPS, cước vận chuyển và dòng tiền.</p>
         </div>
         <div class="flex items-center gap-3">
             <button onclick="initTabConfig()" id="btn-reload-config" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition flex items-center gap-2">
@@ -18,25 +18,50 @@
         </div>
     </div>
 
-    <!-- Form Container (5 Nhóm Thông Số) -->
+    <!-- Form Container (5 Nhóm Thông Số Động) -->
     <form id="config-form" onsubmit="event.preventDefault()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        <!-- CARD 1: THÔNG TIN ĐIỂM BÁN & CSKH -->
+        <!-- CARD 1: THÔNG TIN ĐIỂM BÁN & ĐỊNH VỊ GPS BẾP TRUNG TÂM -->
         <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4">
-            <div class="flex items-center gap-2 pb-3 border-b border-slate-800 text-sm font-bold text-blue-400">
-                <i class="fa-solid fa-store"></i> 1. THÔNG TIN THƯƠNG HIỆU & VẬN HÀNH
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2 text-sm font-bold text-blue-400">
+                    <i class="fa-solid fa-store"></i> 1. ĐIỂM BÁN & TỌA ĐỘ GPS BẾP
+                </div>
+                <button type="button" onclick="ConfigController.detectCurrentGPS()" id="btn-auto-gps" class="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[11px] font-bold transition flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-location-crosshairs"></i> Lấy GPS Hiện Tại
+                </button>
             </div>
             <div>
                 <label class="block text-xs font-medium text-slate-300 mb-1">Tên Thương Hiệu / Chi Nhánh</label>
                 <input type="text" id="cfg-STORE_NAME" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Mì Trộn Thím 5">
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Hotline CSKH / Zalo Chủ Quán</label>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Hotline CSKH / Hotline Đặt Món</label>
                 <input type="text" id="cfg-STORE_PHONE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="0979531213">
             </div>
             <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Địa Chỉ Bếp / Chi Nhánh</label>
+                <label class="block text-xs font-medium text-slate-300 mb-1">Địa Chỉ Bếp Hiển Thị Cho Khách</label>
                 <textarea id="cfg-STORE_ADDRESS" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="TX. Hòa Thành, Tây Ninh"></textarea>
+            </div>
+            <!-- TỌA ĐỘ GPS BẾP (DÙNG ĐỂ TÍNH CỰ LY SHIPPER TỰ ĐỘNG) -->
+            <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-2">
+                <div class="flex items-center justify-between text-[11px] font-semibold text-slate-400">
+                    <span>Tọa Độ Gốc Tính Cước Ship (Haversine):</span>
+                    <a id="link-preview-maps" href="#" target="_blank" class="hidden text-blue-400 hover:underline flex items-center gap-1 text-[10px]">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Xem Trên Maps
+                    </a>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-0.5">Vĩ độ (Latitude)</label>
+                        <input type="text" id="cfg-STORE_LAT" onchange="ConfigController.updateMapsPreviewLink()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-blue-300 font-mono font-bold focus:outline-none focus:border-blue-500" placeholder="10.9825">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-0.5">Kinh độ (Longitude)</label>
+                        <input type="text" id="cfg-STORE_LNG" onchange="ConfigController.updateMapsPreviewLink()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-blue-300 font-mono font-bold focus:outline-none focus:border-blue-500" placeholder="106.1265">
+                    </div>
+                </div>
+                <span class="text-[10px] text-slate-400 block italic">Hệ thống sẽ lấy điểm ghim này làm mốc 0km để tính cước phí giao hàng.</span>
             </div>
         </div>
 
@@ -49,29 +74,30 @@
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">Khóa Trần Khuyến Mãi (<= 15%)</label>
                     <input type="number" step="0.01" id="cfg-PROMO_CAP_RATE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-emerald-400 font-bold focus:outline-none focus:border-emerald-500" placeholder="0.15">
-                    <span class="text-[10px] text-slate-500">Ví dụ: 0.15 = 15%</span>
+                    <span class="text-[10px] text-slate-400">0.15 = 15% (Chặn âm dòng tiền)</span>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">Tổng Khấu Trừ Nền Tảng</label>
                     <input type="number" step="0.01" id="cfg-PLATFORM_FEE_RATE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-amber-400 font-bold focus:outline-none focus:border-amber-500" placeholder="0.40">
-                    <span class="text-[10px] text-slate-500">Phí sàn + chiết khấu (0.40 = 40%)</span>
+                    <span class="text-[10px] text-slate-400">0.40 = 40% (Dùng tính Giá App)</span>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">Trích Lập Thuế HKD</label>
                     <input type="number" step="0.001" id="cfg-TAX_RATE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="0.045">
-                    <span class="text-[10px] text-slate-500">Mặc định: 0.045 = 4.5%</span>
+                    <span class="text-[10px] text-slate-400">0.045 = 4.5%</span>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">Phí Quản Trị Master</label>
                     <input type="number" step="0.001" id="cfg-MASTER_ROYALTY" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="0.02">
-                    <span class="text-[10px] text-slate-500">Thù lao SaaS (0.02 = 2%)</span>
+                    <span class="text-[10px] text-slate-400">0.02 = 2% Thù lao SaaS</span>
                 </div>
             </div>
             <div>
                 <label class="block text-xs font-medium text-slate-300 mb-1">Hạn Mức Giữ Tiền COD Của Shipper (VNĐ)</label>
                 <input type="number" id="cfg-COD_HOLDING_LIMIT" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-yellow-400 font-mono focus:outline-none focus:border-yellow-500" placeholder="1000000">
+                <span class="text-[10px] text-slate-400">Vượt hạn mức này tài xế không được nhận thêm đơn COD.</span>
             </div>
         </div>
 
@@ -124,14 +150,17 @@
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">PIN Quản Lý Ca (Level 1)</label>
                     <input type="password" maxlength="6" id="cfg-ADMIN_PIN_LV1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono text-center tracking-widest focus:outline-none focus:border-red-500" placeholder="••••">
+                    <span class="text-[10px] text-slate-400">Dùng duyệt tiền mặt & chuyển khoản tay.</span>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">PIN Super Admin (Level 2)</label>
                     <input type="password" maxlength="6" id="cfg-ADMIN_PIN_LV2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono text-center tracking-widest focus:outline-none focus:border-red-500" placeholder="••••">
+                    <span class="text-[10px] text-slate-400">Dùng sửa cấu hình tài chính & gỡ shipper.</span>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">Email Nhận Báo Cáo Thuế 23:59</label>
                     <input type="email" id="cfg-TAX_REPORT_EMAIL" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-red-500" placeholder="haiau2205@gmail.com">
+                    <span class="text-[10px] text-slate-400">Gửi tự động bảng P&L cuối ngày.</span>
                 </div>
             </div>
         </div>
@@ -146,9 +175,9 @@
             <h4 class="font-bold text-base text-white">Xác Nhận Thay Đổi Cấu Hình</h4>
         </div>
         <p class="text-xs text-slate-300 leading-relaxed">
-            Các thay đổi này sẽ ảnh hưởng ngay lập tức đến công thức định giá, chiết khấu và báo cáo thuế của hệ thống.
+            Các thay đổi (bao gồm tọa độ GPS gốc, phí sàn và trần khuyến mãi) sẽ ảnh hưởng tức thì đến cước ship và dòng tiền toàn hệ thống.
         </p>
-        <div id="config-diff-list" class="max-h-36 overflow-y-auto p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 space-y-1 font-mono">
+        <div id="config-diff-list" class="max-h-40 overflow-y-auto p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 space-y-1 font-mono">
             <!-- Tự động nạp danh sách tham số thay đổi -->
         </div>
         <div>
@@ -167,15 +196,19 @@
 <script>
 /**
  * =========================================================================
- * CONTROLLER: CONFIG CONTROLLER (ĐIỀU PHỐI CẤU HÌNH HỆ THỐNG)
- * Vai trò: Đồng bộ dữ liệu hai chiều giữa Form UI và Google Sheets [SYS_CONFIG].
- * Bọc thép: Diffing state, Input Sanitization, PIN Level 2 Authorization.
+ * CONTROLLER: SYSTEM CONFIG CONTROLLER (SAAS ENTERPRISE v2.1)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
+ * Vai trò:
+ *   - Đồng bộ tham số cấu hình động hai chiều giữa UI và Google Sheets [SYS_CONFIG].
+ *   - Bắt tọa độ GPS thiết bị chính xác cao (Hardware Assisted Geolocation).
+ *   - Tự động sinh liên kết đối soát vị trí thực tế trên Google Maps.
+ *   - Rào chắn Diffing state, Input Validation và xác thực bảo mật PIN Level 2.
  * =========================================================================
  */
 const ConfigController = (function() {
-    // Danh sách toàn bộ Key cấu hình chuẩn hóa theo [SYS_CONFIG]
+    // Danh bạ 19 Key cấu hình chuẩn hóa theo [SYS_CONFIG]
     const CONFIG_KEYS = [
-        "STORE_NAME", "STORE_PHONE", "STORE_ADDRESS",
+        "STORE_NAME", "STORE_PHONE", "STORE_ADDRESS", "STORE_LAT", "STORE_LNG",
         "PLATFORM_FEE_RATE", "PROMO_CAP_RATE", "TAX_RATE", "MASTER_ROYALTY", "COD_HOLDING_LIMIT",
         "BANK_CODE", "BANK_ACCOUNT", "BANK_OWNER",
         "META_PIXEL_ID", "TIKTOK_PIXEL_ID", "GTM_ID",
@@ -186,25 +219,25 @@ const ConfigController = (function() {
     let pendingChanges = {};
 
     /**
-     * Nạp dữ liệu cấu hình từ Backend Google Apps Script
+     * Nạp dữ liệu cấu hình hệ thống từ Google Apps Script
      */
     async function loadConfig() {
         const btnReload = document.getElementById("btn-reload-config");
         const btnSave = document.getElementById("btn-save-config");
-        
+
         try {
             if (btnReload) btnReload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải...';
             if (btnSave) btnSave.disabled = true;
 
             const configData = await Thim5API.callGAS("getSysConfig");
             if (!configData || typeof configData !== "object") {
-                throw new Error("Dữ liệu cấu hình trả về không hợp lệ.");
+                throw new Error("Dữ liệu cấu hình máy chủ trả về không hợp lệ.");
             }
 
             // Lưu trữ snapshot nguyên bản để đối soát thay đổi
             originalSnapshot = Object.assign({}, configData);
 
-            // Bơm dữ liệu vào từng ô input trên form
+            // Bơm dữ liệu vào từng ô input tương ứng
             CONFIG_KEYS.forEach(key => {
                 const inputElem = document.getElementById("cfg-" + key);
                 if (inputElem) {
@@ -212,7 +245,10 @@ const ConfigController = (function() {
                 }
             });
 
-            console.log("✅ [ConfigController] Đã nạp thành công cấu hình hệ thống.");
+            // Cập nhật link xem trước vị trí quán trên Google Maps
+            updateMapsPreviewLink();
+
+            console.log("✅ [ConfigController] Đã nạp thành công 19 tham số cấu hình hệ thống.");
         } catch (error) {
             alert("❌ Không thể tải cấu hình hệ thống: " + error.message);
             console.error("[ConfigController] Lỗi loadConfig:", error);
@@ -223,7 +259,81 @@ const ConfigController = (function() {
     }
 
     /**
-     * Thu thập các giá trị đang hiển thị trên form
+     * Bắt tọa độ GPS thực tế của quán thông qua HTML5 Geolocation API
+     */
+    function detectCurrentGPS() {
+        const btn = document.getElementById("btn-auto-gps");
+
+        if (!navigator.geolocation) {
+            alert("⚠️ Trình duyệt hoặc thiết bị của anh không hỗ trợ định vị GPS tự động. Vui lòng nhập tay tọa độ.");
+            return;
+        }
+
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lấy GPS...';
+
+        const geoOptions = {
+            enableHighAccuracy: true, // Ép dùng chip GPS phần cứng để sai số < 10m
+            timeout: 10000,           // Chờ tối đa 10 giây
+            maximumAge: 0             // Không dùng tọa độ lưu đệm cũ
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude.toFixed(6);
+                const lng = position.coords.longitude.toFixed(6);
+                const accuracy = Math.round(position.coords.accuracy);
+
+                document.getElementById("cfg-STORE_LAT").value = lat;
+                document.getElementById("cfg-STORE_LNG").value = lng;
+
+                updateMapsPreviewLink();
+
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> Đã lấy GPS';
+                setTimeout(() => { btn.innerHTML = originalText; }, 2500);
+
+                alert(`📍 Đã bắt được tọa độ chính xác của Bếp!\nVĩ độ (Lat): ${lat}\nKinh độ (Lng): ${lng}\nSai số ước tính: ±${accuracy}m`);
+            },
+            function(err) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+
+                let errMsg = "Không thể lấy vị trí GPS.";
+                if (err.code === err.PERMISSION_DENIED) {
+                    errMsg = "Trình duyệt đang chặn quyền truy cập vị trí. Vui lòng cấp quyền vị trí cho trang web trong cài đặt trình duyệt.";
+                } else if (err.code === err.POSITION_UNAVAILABLE) {
+                    errMsg = "Tín hiệu GPS không khả dụng tại vị trí hiện tại.";
+                } else if (err.code === err.TIMEOUT) {
+                    errMsg = "Quá thời gian kết nối GPS vệ tinh (10s). Vui lòng thử lại.";
+                }
+
+                alert("⚠️ " + errMsg);
+                console.warn("[ConfigController] Geolocation Error:", err);
+            },
+            geoOptions
+        );
+    }
+
+    /**
+     * Cập nhật liên kết xem thử vị trí trên Google Maps vệ tinh
+     */
+    function updateMapsPreviewLink() {
+        const lat = (document.getElementById("cfg-STORE_LAT").value || "").trim();
+        const lng = (document.getElementById("cfg-STORE_LNG").value || "").trim();
+        const link = document.getElementById("link-preview-maps");
+
+        if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+            link.href = `https://www.google.com/maps?q=${lat},${lng}`;
+            link.classList.remove("hidden");
+        } else {
+            link.classList.add("hidden");
+        }
+    }
+
+    /**
+     * Thu thập dữ liệu hiện thời trên toàn bộ các trường nhập
      */
     function getFormData() {
         const currentData = {};
@@ -237,24 +347,32 @@ const ConfigController = (function() {
     }
 
     /**
-     * Mở hộp thoại xác nhận thay đổi và kiểm duyệt diff
+     * Mở modal xác nhận thay đổi và kiểm tra rào chắn logic
      */
     function openConfirmModal() {
         const currentData = getFormData();
         pendingChanges = {};
 
-        // Kiểm tra logic tài chính cơ bản trước khi mở modal
+        // 1. Kiểm duyệt rào chắn tài chính: Khóa trần khuyến mãi
         const promoCap = parseFloat(currentData["PROMO_CAP_RATE"]);
         if (promoCap > 0.15) {
             const confirmRisk = confirm("⚠️ CẢNH BÁO TÀI CHÍNH: Trần khuyến mãi đang vượt mức 15% (" + (promoCap * 100) + "%). Việc này có thể làm âm dòng tiền thực thu của quán. Anh Hải Âu có chắc chắn muốn thiết lập mức này?");
             if (!confirmRisk) return;
         }
 
-        // Quét các trường dữ liệu có sự thay đổi thực tế
+        // 2. Kiểm duyệt tọa độ GPS hợp lệ
+        const lat = parseFloat(currentData["STORE_LAT"]);
+        const lng = parseFloat(currentData["STORE_LNG"]);
+        if (isNaN(lat) || lat < -90 || lat > 90 || isNaN(lng) || lng < -180 || lng > 180) {
+            alert("⚠️ Tọa độ GPS của quán không hợp lệ. Vĩ độ phải nằm trong khoảng [-90, 90] và Kinh độ [-180, 180].");
+            return;
+        }
+
+        // 3. Quét các trường dữ liệu có sự thay đổi thực tế
         CONFIG_KEYS.forEach(key => {
             const oldVal = String(originalSnapshot[key] !== undefined ? originalSnapshot[key] : "").trim();
             const newVal = String(currentData[key] !== undefined ? currentData[key] : "").trim();
-            
+
             if (oldVal !== newVal) {
                 pendingChanges[key] = currentData[key];
             }
@@ -266,7 +384,7 @@ const ConfigController = (function() {
             return;
         }
 
-        // Render danh sách thay đổi vào Modal để quản trị viên đối soát trực quan
+        // 4. Render danh sách thay đổi vào Modal để đối soát trực quan
         const diffListElem = document.getElementById("config-diff-list");
         diffListElem.innerHTML = "";
         changedKeys.forEach(key => {
@@ -290,7 +408,7 @@ const ConfigController = (function() {
     }
 
     /**
-     * Đóng hộp thoại xác nhận
+     * Đóng modal xác nhận
      */
     function closeConfirmModal() {
         const modal = document.getElementById("modal-confirm-config");
@@ -343,6 +461,8 @@ const ConfigController = (function() {
 
     return {
         loadConfig: loadConfig,
+        detectCurrentGPS: detectCurrentGPS,
+        updateMapsPreviewLink: updateMapsPreviewLink,
         openConfirmModal: openConfirmModal,
         closeConfirmModal: closeConfirmModal,
         executeSave: executeSave
