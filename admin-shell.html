@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LongHoaFood Master - Bảng Điều Khiển Quản Trị</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0F172A;
+            color: #F8FAFC;
+        }
+
+        /* Tùy biến thanh cuộn chuẩn Enterprise */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1E293B;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748B;
+        }
+
+        /* Hiệu ứng chuyển động mượt mà cho Viewport SPA */
+        .view-fade-in {
+            animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Trạng thái Menu Sidebar Active */
+        .nav-item-active {
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.03) 100%);
+            border-left: 4px solid #EF4444;
+            color: #FFFFFF !important;
+            font-weight: 600;
+        }
+
+        /* Banner cảnh báo Staging cố định */
+        .staging-stripe {
+            background: repeating-linear-gradient(
+                45deg,
+                #F59E0B,
+                #F59E0B 10px,
+                #D97706 10px,
+                #D97706 20px
+            );
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased selection:bg-red-500 selection:text-white">
+
+    <!-- 1. THANH ĐIỀU HƯỚNG BÊN TRÁI (SIDEBAR) -->
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0 select-none">
+        <div>
+            <!-- Header Brand -->
+            <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+                <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center font-bold text-white shadow-lg shadow-red-500/30">
+                    T5
+                </div>
+                <div>
+                    <h1 class="font-bold text-sm tracking-wide leading-none text-white">THÍM 5 MASTER</h1>
+                    <span class="text-[10px] text-slate-400 font-mono tracking-tighter">SaaS Enterprise v2.6</span>
+                </div>
+            </div>
+
+            <!-- Menu Modules -->
+            <nav class="p-3 space-y-1" id="main-nav">
+                <button onclick="Router.navigate('tab-pl')" id="nav-tab-pl" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all">
+                    <i class="fa-solid fa-chart-pie w-5 text-center text-emerald-400"></i>
+                    <span>Tài Chính & P&L</span>
+                </button>
+                <button onclick="Router.navigate('tab-menu')" id="nav-tab-menu" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all">
+                    <i class="fa-solid fa-utensils w-5 text-center text-amber-400"></i>
+                    <span>Ma Trận Thực Đơn</span>
+                </button>
+                <button onclick="Router.navigate('tab-orders')" id="nav-tab-orders" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all">
+                    <i class="fa-solid fa-receipt w-5 text-center text-blue-400"></i>
+                    <span>Điều Phối Đơn Hàng</span>
+                </button>
+                <button onclick="Router.navigate('tab-crm')" id="nav-tab-crm" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all">
+                    <i class="fa-solid fa-users-viewfinder w-5 text-center text-purple-400"></i>
+                    <span>Khách Hàng CRM</span>
+                </button>
+                <button onclick="Router.navigate('tab-config')" id="nav-tab-config" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all">
+                    <i class="fa-solid fa-sliders w-5 text-center text-slate-400"></i>
+                    <span>Cấu Hình Hệ Thống</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Trạng Thái Hạ Tầng & Phiên Bản -->
+        <div class="p-4 border-t border-slate-800 text-xs">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-slate-400 font-medium">Hạ tầng:</span>
+                <span id="env-badge" class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase">Loading...</span>
+            </div>
+            <div class="text-[11px] text-slate-400 truncate" id="active-endpoint-display">
+                Đang nạp kết nối...
+            </div>
+        </div>
+    </aside>
+
+    <!-- 2. KHU VỰC NỘI DUNG CHÍNH (MAIN WORKSPACE) -->
+    <main class="flex-1 flex flex-col min-w-0 bg-slate-950">
+        <!-- Topbar Giám Sát -->
+        <header class="h-16 border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-4">
+                <h2 id="current-view-title" class="font-bold text-slate-100 text-base">Tổng Quan Tài Chính & P&L</h2>
+                <span id="staging-warning-tag" class="hidden px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold">
+                    <i class="fa-solid fa-flask mr-1"></i> MÔI TRƯỜNG THỬ NGHIỆM
+                </span>
+            </div>
+
+            <!-- Công Cụ Vận Hành Nhanh -->
+            <div class="flex items-center gap-3">
+                <button onclick="Router.reloadCurrentView()" title="Tải lại dữ liệu" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 border border-slate-700/60 transition-all">
+                    <i class="fa-solid fa-rotate text-xs"></i>
+                </button>
+                <div class="h-4 w-px bg-slate-800"></div>
+                <div class="text-right leading-none">
+                    <div class="text-xs font-semibold text-slate-200">Anh Hải Âu</div>
+                    <span class="text-[10px] text-emerald-400">Super Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 3. KHU VỰC HIỂN THỊ COMPONENT VIEW (SPA VIEWPORT) -->
+        <section id="app-viewport" class="flex-1 overflow-y-auto p-6 relative">
+            <div class="flex items-center justify-center h-full text-slate-400 gap-3">
+                <i class="fa-solid fa-circle-notch fa-spin text-red-500 text-xl"></i>
+                <span>Đang tải thành phần hệ thống...</span>
+            </div>
+        </section>
+    </main>
+
+    <!-- 4. NẠP HỆ THẦN KINH GIAO TIẾP & BỘ ĐIỀU HƯỚNG SPA -->
+    <script src="api.js"></script>
+    <script>
+        /**
+         * BỘ ĐIỀU HƯỚNG ĐỘNG (SPA ROUTER ENGINE)
+         * Nạp động các tệp tab-*.html vào Viewport không qua tải lại trang.
+         */
+        const Router = (function() {
+            let currentTab = "";
+
+            const ViewTitles = {
+                "tab-pl": "Báo Cáo Tài Chính & Dòng Tiền P&L",
+                "tab-menu": "Ma Trận Định Giá Thực Đơn & Phí Sàn",
+                "tab-orders": "Điều Phối Đơn Hàng & Giám Sát Bếp",
+                "tab-crm": "Quản Trị Khách Hàng CRM & Điểm Tích Lũy",
+                "tab-config": "Bảng Điều Khiển Cấu Hình [SYS_CONFIG]"
+            };
+
+            return {
+                init: function() {
+                    // Cập nhật giao diện theo môi trường
+                    const isTest = Thim5API.isStaging();
+                    const badge = document.getElementById("env-badge");
+                    const warning = document.getElementById("staging-warning-tag");
+                    const endpointTxt = document.getElementById("active-endpoint-display");
+
+                    if (isTest) {
+                        badge.innerText = "STAGING";
+                        badge.className += " bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                        warning.classList.remove("hidden");
+                        endpointTxt.innerText = "Host: test.anngonlonghoa.com.vn";
+                    } else {
+                        badge.innerText = "PRODUCTION";
+                        badge.className += " bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                        endpointTxt.innerText = "Host: anngonlonghoa.com.vn";
+                    }
+
+                    // Điều hướng tab mặc định
+                    this.navigate("tab-pl");
+                },
+
+                navigate: async function(tabName) {
+                    if (currentTab === tabName) return;
+
+                    const viewport = document.getElementById("app-viewport");
+                    const titleElem = document.getElementById("current-view-title");
+
+                    // Bật hiệu ứng chờ
+                    viewport.innerHTML = `
+                        <div class="flex items-center justify-center h-full text-slate-400 gap-3 view-fade-in">
+                            <i class="fa-solid fa-circle-notch fa-spin text-red-500 text-xl"></i>
+                            <span>Đang truy xuất dữ liệu ${tabName}...</span>
+                        </div>
+                    `;
+
+                    // Đổi trạng thái thanh menu
+                    document.querySelectorAll("#main-nav button").forEach(btn => btn.classList.remove("nav-item-active"));
+                    const activeBtn = document.getElementById("nav-" + tabName);
+                    if (activeBtn) activeBtn.classList.add("nav-item-active");
+
+                    try {
+                        const response = await fetch(`${tabName}.html`);
+                        if (!response.ok) throw new Error(`Không thể nạp view ${tabName}.html (Lỗi ${response.status})`);
+                        
+                        const htmlContent = await response.text();
+                        viewport.innerHTML = `<div class="view-fade-in h-full">${htmlContent}</div>`;
+                        
+                        currentTab = tabName;
+                        titleElem.innerText = ViewTitles[tabName] || "Khu Vực Quản Trị";
+
+                        // Tự động kích hoạt hàm khởi tạo riêng của Tab (nếu có)
+                        const initFuncName = "init" + tabName.replace("tab-", "").replace(/^\w/, c => c.toUpperCase());
+                        if (typeof window[initFuncName] === "function") {
+                            window[initFuncName]();
+                        }
+                    } catch (error) {
+                        viewport.innerHTML = `
+                            <div class="p-6 rounded-xl bg-red-900/20 border border-red-800 text-red-400 text-sm view-fade-in">
+                                <h4 class="font-bold text-base mb-1"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Lỗi Tải Giao Diện</h4>
+                                <p>${error.message}</p>
+                            </div>
+                        `;
+                    }
+                },
+
+                reloadCurrentView: function() {
+                    const temp = currentTab;
+                    currentTab = "";
+                    this.navigate(temp);
+                }
+            };
+        })();
+
+        // Kích hoạt khi trang tải xong DOM
+        document.addEventListener("DOMContentLoaded", () => Router.init());
+    </script>
+</body>
+</html>
