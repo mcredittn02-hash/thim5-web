@@ -1,88 +1,100 @@
 /**
  * =========================================================================
- * FILE: api.js - BẢN BỌC THÉP CHỐNG LỖI 302 REDIRECT & HTML UNEXPECTED TOKEN
- * HỆ THỐNG: Mì Trộn & Cơm Trộn Thím 5 Master
+ * MODULE: THIM5 API MIDDLEWARE (CẦU NỐI FRONTEND & BACKEND)
+ * Vai trò: Giao tiếp độc quyền với Google Apps Script (CoreRouter.gs).
+ * Tính năng: Nhận diện môi trường, Hàng đợi (Queue) chống nghẽn 302, Auto-Retry.
  * =========================================================================
  */
-const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbwZZoE51LGSlZbE85BH_sB2bzWwB_omtZaPFI_vevlAh56bs8CrpGTPMfdg2FfzadcY/exec"
-};
+const Thim5API = (function() {
+    // 1. NHẬN DIỆN MÔI TRƯỜNG DỰA TRÊN DOMAIN
+    const HOSTNAME = window.location.hostname;
+    const IS_STAGING = HOSTNAME.includes("test") || HOSTNAME.includes("localhost") || HOSTNAME.includes("127.0.0.1");
 
-let requestQueue = Promise.resolve();
+    // 2. ĐỊNH TUYẾN URL (ROUTING GATEWAY)
+    const ENV_ENDPOINTS = {
+        PRODUCTION: "https://script.google.com/macros/s/AKfycb_PROD_URL_HERE/exec", 
+        STAGING: "https://script.google.com/macros/s/AKfycbx6ZrlsN-vodh5UwjPPbFin9rWyg6GRV4fVQJkcayMR5uScTsvheJUDniRCPKMhlFsO/exec"  
+    };
 
-const Thim5API = {
-  async callGAS(action, params = {}) {
-    return new Promise((resolve, reject) => {
-      requestQueue = requestQueue.then(async () => {
-        try {
-          const res = await Thim5API.executeWithRetry(action, params, 2);
-          resolve(res);
-        } catch (err) {
-          reject(err);
+    const ACTIVE_API_URL = IS_STAGING ? ENV_ENDPOINTS.STAGING : ENV_ENDPOINTS.PRODUCTION;
+
+    if (IS_STAGING) {
+        console.warn("🔧 [Thim5API] HỆ THỐNG ĐANG CHẠY TRÊN MÔI TRƯỜNG TEST (STAGING).");
+        console.warn("🔗 End-point đang sử dụng:", ACTIVE_API_URL);
+    }
+
+    // 3. KHỞI TẠO HÀNG ĐỢI TUẦN TỰ (RATE-LIMITING QUEUE)
+    let requestQueue = Promise.resolve();
+
+    /**
+     * HÀM GỬI HTTP POST NỘI BỘ
+     * Sử dụng Content-Type: text/plain để vượt qua bài kiểm tra CORS Preflight
+     */
+    async function sendRequest(action, params) {
+        const payload = {
+            action: action,
+            params: params || {}
+        };
+
+        const response = await fetch(ACTIVE_API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8", 
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            throw new Error("Lỗi kết nối máy chủ HTTP: " + response.status);
         }
-        await new Promise(r => setTimeout(r, 100));
-      });
-    });
-  },
 
-  async executeWithRetry(action, params, maxRetries = 2) {
-    let lastError = null;
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        return await Thim5API.sendRequest(action, params);
-      } catch (err) {
-        lastError = err;
-        console.warn(`[Thim5API] Lỗi gọi '${action}' (Lần ${attempt + 1}):`, err.message);
-        if (attempt < maxRetries) {
-          await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.message || "Lỗi xử lý từ máy chủ Backend.");
         }
-      }
+
+        return result.data;
     }
-    throw lastError;
-  },
 
-  async sendRequest(action, params = {}) {
-    // Ép mọi hành động cập nhật trạng thái, đơn hàng, cấu hình đều đi qua POST có đính kèm action rõ ràng trên URL
-    const isWriteAction = true; // Luôn dùng POST cho mọi thao tác gọi từ trang quản trị để tránh cache và lỗi 302
-
-    const postUrl = CONFIG.API_URL + "?action=" + encodeURIComponent(action) + "&method=api&_t=" + Date.now();
-    const formData = new URLSearchParams();
-    formData.append("action", action);
-    formData.append("method", "api");
-    formData.append("payload", typeof params === "string" ? params : JSON.stringify(params || {}));
-
-    // Phẳng hóa toàn bộ tham số để doPost(e) bắt được cả qua e.parameter lẫn postData
-    if (params && typeof params === "object") {
-      for (const k in params) {
-        if (params[k] !== undefined && params[k] !== null && typeof params[k] !== "object") {
-          formData.append(k, params[k]);
+    // 4. MỞ RỘNG CỔNG GIAO TIẾP CHO TOÀN BỘ VIEW TRÊN FRONTEND
+    return {
+        /**
+         * Hàm gọi API trung tâm với cơ chế thử lại tự động (Exponential Backoff)
+         * @param {string} action - Tên Action đã khai báo trong API_ROUTES
+         * @param {Object} params - Dữ liệu tham số gửi kèm
+         * @param {number} maxRetries - Số lần thử lại tối đa khi mạng rớt
+         */
+        callGAS: function(action, params = {}, maxRetries = 2) {
+            return new Promise((resolve, reject) => {
+                requestQueue = requestQueue.then(async () => {
+                    let lastError = null;
+                    
+                    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                        try {
+                            const data = await sendRequest(action, params);
+                            resolve(data);
+                            break;
+                        } catch (error) {
+                            lastError = error;
+                            console.warn("[Thim5API] Lỗi gọi " + action + " (Lần " + (attempt + 1) + "/" + (maxRetries + 1) + "): " + error.message);
+                            
+                            if (attempt < maxRetries) {
+                                await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
+                            } else {
+                                reject(lastError);
+                            }
+                        }
+                    }
+                    
+                    // Giãn cách 150ms giữa các request để bảo vệ quota Google Sheets
+                    await new Promise(r => setTimeout(r, 150));
+                });
+            });
+        },
+        
+        isStaging: function() {
+            return IS_STAGING;
         }
-      }
-    }
-
-    const response = await fetch(postUrl, {
-      method: "POST",
-      mode: "cors",
-      redirect: "follow",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-      },
-      body: formData.toString()
-    });
-
-    const textRes = await response.text();
-    
-    // Kiểm tra gắt gao: Nếu Google Apps Script trả về HTML (bắt đầu bằng < hoặc <!DOCTYPE) -> Báo lỗi ngay lập tức
-    if (!textRes || textRes.trim().startsWith("<") || textRes.includes("<!DOCTYPE")) {
-      throw new Error("GAS trả về HTML thay vì JSON. Kiểm tra lại quyền Deploy 'Anyone' hoặc tên Action: " + action);
-    }
-
-    try {
-      return JSON.parse(textRes);
-    } catch (e) {
-      throw new Error("Phản hồi không phải JSON hợp lệ: " + textRes.substring(0, 100));
-    }
-  }
-};
-
-window.Thim5API = Thim5API;
+    };
+})();
