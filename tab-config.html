@@ -1,478 +1,1756 @@
-<!-- BẢNG ĐIỀU KHIỂN CẤU HÌNH HỆ THỐNG DỘNG [SYS_CONFIG] - V2.1 ENTERPRISE -->
-<div class="max-w-6xl mx-auto space-y-6 pb-12">
-    <!-- Top Action Bar -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-lg">
-        <div>
-            <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-red-500"></i> Bảng Điều Khiển Cấu Hình Trung Tâm
-            </h3>
-            <p class="text-xs text-slate-400 mt-1">Các tham số dưới đây điều khiển trực tiếp logic giá, tọa độ GPS, cước vận chuyển và dòng tiền.</p>
-        </div>
+<!-- MODULE: TRẠM ĐIỀU PHỐI SUPER ADMIN LEVEL 2 [TAB_CONFIG_MASTER] -->
+<div class="max-w-7xl mx-auto space-y-6 pb-16">
+
+    <!-- 1. TOPBAR TRẠNG THÁI KẾT NỐI & ĐỊNH DANH SUPER ADMIN -->
+    <div class="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-center gap-3">
-            <button onclick="initTabConfig()" id="btn-reload-config" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition flex items-center gap-2">
-                <i class="fa-solid fa-arrows-rotate"></i> Tải lại
-            </button>
-            <button onclick="ConfigController.openConfirmModal()" id="btn-save-config" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/30 transition flex items-center gap-2">
-                <i class="fa-solid fa-floppy-disk"></i> Lưu Cấu Hình
+            <div class="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl font-black shadow-inner">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h2 class="text-base font-black text-white uppercase tracking-wider" id="disp-cfg-header-title">
+                        Quản Trị Master Enterprise • Cài Đặt Lõi
+                    </h2>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-300 border border-amber-500/30 font-mono">
+                        Super Admin Lv2
+                    </span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">
+                    Trạm kiểm soát toàn năng: Đa ngành F&B, Thù lao Master, Cổng VietQR & Thuế HKD 4.5%.
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+            <div class="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2 text-xs font-mono">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-slate-300" id="txt-cfg-sync-clock">00:00:00</span>
+            </div>
+            <button type="button" onclick="SuperAdminConfigController.reloadConfigFromDB()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition flex items-center gap-1.5 shadow">
+                <i class="fa-solid fa-rotate text-blue-400"></i>
+                <span>Tải Lại CSDL</span>
             </button>
         </div>
     </div>
 
-    <!-- Form Container (5 Nhóm Thông Số Động) -->
-    <form id="config-form" onsubmit="event.preventDefault()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        <!-- CARD 1: THÔNG TIN ĐIỂM BÁN & ĐỊNH VỊ GPS BẾP TRUNG TÂM -->
-        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-                <div class="flex items-center gap-2 text-sm font-bold text-blue-400">
-                    <i class="fa-solid fa-store"></i> 1. ĐIỂM BÁN & TỌA ĐỘ GPS BẾP
+    <!-- KHUNG CHỨA TOÀN BỘ 8 KHỐI NỘI DUNG SUPER ADMIN -->
+    <div class="space-y-6">
+
+        <!-- ========================================================================= -->
+        <!-- KHỐI 1: CẤU HÌNH ĐA NGÀNH F&B, THÙ LAO MASTER ĐỘNG & QUỸ ADS CHUỖI       -->
+        <!-- ========================================================================= -->
+        <div class="bg-slate-900/70 border-2 border-amber-500/40 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 relative overflow-hidden">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-3 gap-2">
+                <div>
+                    <h3 class="text-sm font-black text-amber-300 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-globe text-amber-400"></i>
+                        1. Cấu Hình Đa Ngành F&B, Thù Lao Master (Sếp Âu) & Quỹ Ads Chuỗi
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">
+                        Điều chỉnh linh hoạt tỷ lệ % trích lập trên doanh thu thực thu D2C cho từng chi nhánh.
+                    </p>
                 </div>
-                <button type="button" onclick="ConfigController.detectCurrentGPS()" id="btn-auto-gps" class="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[11px] font-bold transition flex items-center gap-1.5 shadow">
-                    <i class="fa-solid fa-location-crosshairs"></i> Lấy GPS Hiện Tại
+                <span class="self-start sm:self-auto px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[11px] font-mono font-bold">
+                    Node: Master Root Portal
+                </span>
+            </div>
+
+            <!-- Dòng 1: Ngành hàng & 2 Tỷ lệ % Động -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                
+                <!-- Lĩnh Vực Hoạt Động (Category) -->
+                <div class="md:col-span-5 space-y-1">
+                    <label class="block text-xs font-bold text-slate-300">
+                        Lĩnh Vực Hoạt Động (Category):
+                    </label>
+                    <select id="cfgIndustryType" onchange="SuperAdminConfigController.handleIndustryChange(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-bold text-white focus:outline-none focus:border-amber-500 transition">
+                        <option value="FAST_FOOD" selected>🍜 Thức Ăn Nhanh / Mì Trộn / Cơm</option>
+                        <option value="DRINKS">🧋 Trà Sữa / Cà Phê / Giải Khát</option>
+                        <option value="PUBS">🍻 Quán Nhậu / Mồi Bén / Lẩu Nướng</option>
+                        <option value="RESTAURANT">🍱 Cơm Trưa / Bếp Gia Đình</option>
+                    </select>
+                </div>
+
+                <!-- Tỷ Lệ Thù Lao Sếp Âu (% D2C Hoàn Toàn Động) -->
+                <div class="md:col-span-4 space-y-1">
+                    <label class="block text-xs font-bold text-amber-300">
+                        Thù Lao Master Sếp Âu (% D2C):
+                    </label>
+                    <div class="relative flex items-center">
+                        <input type="number" step="0.1" min="0" max="20" id="cfgHubRoyaltyRate" value="2.0" class="w-full bg-slate-950 border border-amber-500/50 rounded-xl pl-3 pr-8 py-2.5 text-sm font-mono font-black text-amber-400 focus:outline-none focus:border-amber-400">
+                        <span class="absolute right-3 font-mono font-bold text-amber-400 text-xs">%</span>
+                    </div>
+                </div>
+
+                <!-- Quỹ Marketing Ads Chuỗi (% D2C Động) -->
+                <div class="md:col-span-3 space-y-1">
+                    <label class="block text-xs font-bold text-sky-300">
+                        Quỹ Marketing Ads (% D2C):
+                    </label>
+                    <div class="relative flex items-center">
+                        <input type="number" step="0.1" min="0" max="10" id="cfgMarketingBudgetRate" value="1.0" class="w-full bg-slate-950 border border-sky-500/50 rounded-xl pl-3 pr-8 py-2.5 text-sm font-mono font-black text-sky-400 focus:outline-none focus:border-sky-400">
+                        <span class="absolute right-3 font-mono font-bold text-sky-400 text-xs">%</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Dòng 2: Ngưỡng Food Cost Trần & AOV Mục Tiêu -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 border-t border-slate-800/80">
+                
+                <!-- Ngưỡng Food Cost Trần An Toàn -->
+                <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-red-400">
+                            Ngưỡng Food Cost Trần An Toàn (%):
+                        </label>
+                        <span class="text-[10px] text-slate-400 font-mono" id="disp-cost-rate-hint">(Nước: ~25%, Mì: ~35%)</span>
+                    </div>
+                    <div class="relative flex items-center">
+                        <input type="number" step="1" min="10" max="60" id="cfgTargetMaxFoodCostRate" value="35" class="w-full bg-slate-950 border border-red-500/40 rounded-xl pl-3 pr-8 py-2 text-xs font-mono font-bold text-red-300 focus:outline-none focus:border-red-500">
+                        <span class="absolute right-3 font-mono font-bold text-red-400 text-xs">%</span>
+                    </div>
+                </div>
+
+                <!-- Giá Trị Trung Bình Đơn Kỳ Vọng (Target AOV) -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-300">
+                        Giá Trị Trung Bình Đơn Kỳ Vọng (AOV Mục Tiêu - VNĐ):
+                    </label>
+                    <input type="number" step="1000" id="cfgTargetAOV" value="50000" placeholder="50000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-emerald-500">
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- KHỐI 2: CỔNG NHẬN TIỀN ĐA NGÂN HÀNG & VÍ MOMO CHUẨN VIETQR NAPAS247       -->
+        <!-- ========================================================================= -->
+        <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-building-columns text-blue-400"></i>
+                        2. Tài Khoản Ngân Hàng / Ví MoMo Chuẩn VietQR Nhận Tiền Khách
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">
+                        Tự động sinh mã VietQR Napas247 khóa cứng số tiền và cú pháp đơn hàng cho kênh D2C.
+                    </p>
+                </div>
+                <span class="px-2.5 py-1 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[11px] font-mono font-bold">
+                    Napas247 Dynamic
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                
+                <!-- Chọn Ngân Hàng Hoặc Ví MoMo -->
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-300">
+                        Chọn Ngân Hàng / Ví Nhận Tiền:
+                    </label>
+                    <select id="cfgBankSelect" onchange="SuperAdminConfigController.handleBankSelectChange()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-blue-500">
+                        <option value="MB|970422" selected>Ngân Hàng Quân Đội (MB Bank)</option>
+                        <option value="VCB|970436">Ngân Hàng Vietcombank (VCB)</option>
+                        <option value="TCB|970407">Ngân Hàng Techcombank (TCB)</option>
+                        <option value="ACB|970416">Ngân Hàng Á Châu (ACB)</option>
+                        <option value="CTG|970415">Ngân Hàng VietinBank (CTG)</option>
+                        <option value="BIDV|970418">Ngân Hàng Đầu Tư & Phát Triển (BIDV)</option>
+                        <option value="VPB|970432">Ngân Hàng Việt Nam Thịnh Vượng (VPBank)</option>
+                        <option value="TPB|970423">Ngân Hàng Tiên Phong (TPBank)</option>
+                        <option value="MOMO|971025">Ví Điện Tử MoMo (Napas Bin 971025)</option>
+                    </select>
+                </div>
+
+                <!-- Số Tài Khoản Hoặc SĐT MoMo -->
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-300" id="lbl-cfg-bank-acc">
+                        Số Tài Khoản / Số Điện Thoại Nhận Tiền:
+                    </label>
+                    <input type="text" id="cfgBankAccount" value="3939388888" placeholder="Nhập số tài khoản ngân hàng hoặc SĐT MoMo" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-blue-300 focus:outline-none focus:border-blue-500">
+                </div>
+
+                <!-- Tên Chủ Tài Khoản (In hoa không dấu) -->
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-300">
+                        Họ & Tên Chủ Tài Khoản (In Hoa Không Dấu):
+                    </label>
+                    <input type="text" id="cfgAccountHolderName" value="NGUYEN HAI AU" placeholder="NGUYEN HAI AU" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white uppercase focus:outline-none focus:border-blue-500">
+                </div>
+
+                <!-- Loại Chủ Thể Tài Khoản (HKD vs Cá Nhân) -->
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-300">
+                        Loại Chủ Thể Tài Khoản Thụ Hưởng:
+                    </label>
+                    <select id="cfgAccountTypeLabel" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-blue-500">
+                        <option value="Tài khoản Hộ Kinh Doanh" selected>Hộ Kinh Doanh Thím 5 (Xuất hóa đơn thuế 4.5%)</option>
+                        <option value="Tài khoản Cá nhân">Tài khoản Cá nhân (Nguyễn Hải Âu)</option>
+                    </select>
+                </div>
+
+            </div>
+
+        </div>
+        <!-- ========================================================================= -->
+        <!-- KHỐI 3: TRÌNH TẠO MÃ QR STANDEE ĐẶT MÓN ĐỘNG (IN ẤN / STANDEE / MENU BÀN) -->
+        <!-- ========================================================================= -->
+        <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-qrcode text-amber-400"></i>
+                        3. Mã QR Đặt Món Động Của Quán (Phục Vụ In Ấn Standee & Menu Để Bàn)
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">
+                        Tự động vẽ lại mã QR chuẩn xác mỗi khi thay đổi địa chỉ tên miền hoặc đường dẫn Web D2C.
+                    </p>
+                </div>
+                <span class="px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/20 text-[11px] font-mono font-bold">
+                    Standee 300 DPI
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                
+                <!-- Cột Trái: Khung Hiển Thị Mã QR & Nút Thao Tác Nhanh -->
+                <div class="md:col-span-4 flex flex-col items-center justify-center p-4 bg-slate-950 rounded-2xl border border-slate-800 text-center space-y-3">
+                    <div class="p-2 bg-white rounded-2xl border-2 border-amber-400 shadow-lg shadow-amber-500/10 inline-block">
+                        <img id="dynamicStoreQrImg" src="" alt="Mã QR Đặt Món Thím 5" class="w-44 h-44 rounded-xl object-contain block">
+                    </div>
+                    <span class="text-[11px] text-slate-400 font-medium">
+                        Quét mã để truy cập thẳng Web D2C
+                    </span>
+                    
+                    <div class="grid grid-cols-2 gap-2 w-full pt-1">
+                        <button type="button" onclick="SuperAdminConfigController.downloadStoreQrImage()" class="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold shadow transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-download text-xs"></i> Tải Ảnh PNG
+                        </button>
+                        <button type="button" onclick="SuperAdminConfigController.copyStoreWebUrl()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-bold border border-slate-700 transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-copy text-xs text-amber-400"></i> Sao Chép
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cột Phải: Hướng Dẫn & Ô Nhập Đường Dẫn Web -->
+                <div class="md:col-span-8 space-y-3 text-xs">
+                    
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-200">
+                            Đường Dẫn Web Quán (Domain riêng hoặc Link Web App triển khai):
+                        </label>
+                        <input type="url" id="cfgStoreWebUrl" placeholder="VD: https://thim5.anngonlonghoa.com.vn hoặc để trống để tự động nhận diện" oninput="SuperAdminConfigController.generateStoreDynamicQr(this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs font-mono text-amber-300 focus:outline-none focus:border-amber-500 transition">
+                        <p class="text-[10px] text-slate-500 leading-relaxed">
+                            Mẹo: Nếu anh Hải Âu trỏ tên miền thương hiệu riêng, hãy dán URL vào đây để toàn bộ Standee in ấn tự động đồng bộ theo domain mới.
+                        </p>
+                    </div>
+
+                    <!-- Khối Hướng Dẫn In Ấn Chuẩn F&B -->
+                    <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-2 text-slate-400">
+                        <span class="font-bold text-slate-300 flex items-center gap-1.5 text-[11px]">
+                            <i class="fa-solid fa-lightbulb text-amber-400"></i> Chiến Lược Điểm Chạm (Touchpoints) Tối Ưu Tỷ Lệ Đặt Lại:
+                        </span>
+                        <ul class="list-disc list-inside space-y-1 text-[11px] leading-relaxed text-slate-400">
+                            <li><strong class="text-slate-300">Sticker Dán Nắp Hộp:</strong> In mã QR dán trên từng hộp mì giao cho khách, kèm thông điệp: <em>"Quét mã đặt lại đơn sau - Tặng nước suối & tham gia Vòng quay may mắn"</em>.</li>
+                            <li><strong class="text-slate-300">Standee Để Bàn Thu Ngân:</strong> Hướng dẫn khách ăn tại quán quét mã đặt món tự động để tích điểm thành viên chu kỳ tháng 2 - 4 - 7 - 12 đơn.</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- KHỐI 4: BẢNG ĐIỀU HÀNH CÔNG THỨC ĐỊNH GIÁ NGƯỢC & BẬC THANG PHÍ SHIP      -->
+        <!-- ========================================================================= -->
+        <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-red-500"></i>
+                        4. Công Thức Định Giá Ngược Đa Kênh & Bậc Thang Hỗ Trợ Cước Giao Hàng
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">
+                        Tự động tính giá D2C rẻ hơn App sàn, khóa trần khuyến mãi toàn đơn và thiết lập nấc trợ giá ship.
+                    </p>
+                </div>
+                <span class="px-2.5 py-1 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 text-[11px] font-mono font-bold">
+                    Margin Guard
+                </span>
+            </div>
+
+            <!-- Mục 1: Công Thức Định Giá Ngược D2C Từ Giá Sàn App -->
+            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-calculator text-sky-400"></i>
+                        1. Định Giá D2C Từ Giá Sàn: D2C = Giá Sàn × (1 - % Tỷ Lệ Lệch)
+                    </label>
+                    <span class="text-[10px] text-slate-500 font-mono">Khuyên dùng: 10% - 15%</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                    
+                    <!-- Ô Nhập % Lệch Giá D2C So Với Sàn -->
+                    <div class="md:col-span-5 space-y-1">
+                        <label class="block text-[11px] font-semibold text-slate-300">
+                            Tỷ Lệ Giảm Giá D2C So Với Sàn (%):
+                        </label>
+                        <div class="relative flex items-center">
+                            <input type="number" step="1" min="0" max="40" id="cfgD2cDiscountRate" value="12" oninput="SuperAdminConfigController.previewPricingDemo(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-3 pr-8 py-2 text-sm font-mono font-black text-amber-400 focus:outline-none focus:border-amber-400">
+                            <span class="absolute right-3 font-mono font-bold text-amber-400 text-xs">%</span>
+                        </div>
+                    </div>
+
+                    <!-- Khung Mô Phỏng Giá Nhảy Thời Gian Thực (Live Pricing Demo) -->
+                    <div class="md:col-span-7 p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1">
+                        <span class="text-[10px] text-slate-400 block font-semibold">
+                            Mô phỏng Mì Trộn Tóp Mỡ Trứng Lòng Đào:
+                        </span>
+                        <div id="demoPricingCalc" class="text-xs font-mono font-extrabold text-emerald-400 flex items-center gap-2">
+                            <span>Sàn App: 45.000đ</span>
+                            <i class="fa-solid fa-arrow-right text-[10px] text-slate-500"></i>
+                            <span>D2C: 39.000đ (Lệch 12%)</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Mục 2: Khóa Trần Tổng Ngân Sách Khuyến Mãi Toàn Đơn -->
+            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-pink-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved text-pink-400"></i>
+                        2. Khóa Trần Tổng Ngân Sách Khuyến Mãi Toàn Đơn (Voucher + Ship + Quà Vòng Quay):
+                    </label>
+                    <span class="text-[10px] text-pink-400/80 font-mono">Chống Âm Dòng Tiền Ngầm</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                    <div class="md:col-span-5 space-y-1">
+                        <label class="block text-[11px] font-semibold text-slate-300">
+                            Tỷ Lệ Khuyến Mãi Tối Đa Trên Tổng Tiền Món (%):
+                        </label>
+                        <div class="relative flex items-center">
+                            <input type="number" step="1" min="5" max="30" id="cfgMaxPromoBudgetRate" value="15" class="w-full bg-slate-900 border border-pink-500/40 rounded-xl pl-3 pr-8 py-2 text-sm font-mono font-black text-pink-400 focus:outline-none focus:border-pink-400">
+                            <span class="absolute right-3 font-mono font-bold text-pink-400 text-xs">%</span>
+                        </div>
+                    </div>
+                    <div class="md:col-span-7 text-[11px] text-slate-400 leading-relaxed">
+                        Hệ thống tự động chặn đứng không cho gộp mã nếu tổng chiết khấu (giảm giá món + trợ giá ship + quà tặng Gamification) vượt quá tỷ lệ này.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mục 3: Bậc Thang Hỗ Trợ Cước Ship Kéo Ticket Size AOV -->
+            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-truck-fast text-emerald-400"></i>
+                        3. Bậc Thang Hỗ Trợ Phí Ship (Nếu số tiền trợ giá vượt tiền ship thực tế, Web hiện 0đ Freeship):
+                    </label>
+                    <span class="text-[10px] text-slate-500 font-mono">Đòn Bẩy Gom Đơn AOV</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    
+                    <!-- BẬC 1: ĐƠN GOM NHỎ (AOV 100K) -->
+                    <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-amber-400 text-[11px] uppercase tracking-wider">
+                                Bậc 1 (Đơn Gom Nhỏ):
+                            </span>
+                            <span class="text-[10px] text-slate-400 font-mono">Từ 2 phần mì</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2.5 items-center">
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Đơn Tối Thiểu (VNĐ):</label>
+                                <input type="number" step="5000" id="cfgShipMinBill1" value="100000" placeholder="100000" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 font-mono font-bold text-white text-xs focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Mức Trợ Giá Ship (VNĐ):</label>
+                                <input type="number" step="1000" id="cfgShipSubsidy1" value="15000" placeholder="15000" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 font-mono font-bold text-emerald-400 text-xs focus:outline-none focus:border-emerald-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BẬC 2: ĐƠN MÂM LỚN / VIP (AOV 150K) -->
+                    <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-amber-400 text-[11px] uppercase tracking-wider">
+                                Bậc 2 (Đơn Mâm Lớn / VIP):
+                            </span>
+                            <span class="text-[10px] text-slate-400 font-mono">Đơn nhóm văn phòng</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2.5 items-center">
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Đơn Tối Thiểu (VNĐ):</label>
+                                <input type="number" step="5000" id="cfgShipMinBill2" value="150000" placeholder="150000" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 font-mono font-bold text-white text-xs focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] text-slate-400 mb-0.5">Mức Trợ Giá Ship (VNĐ):</label>
+                                <input type="number" step="1000" id="cfgShipSubsidy2" value="25000" placeholder="25000" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 font-mono font-bold text-emerald-400 text-xs focus:outline-none focus:border-emerald-500">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Nút Lưu Nhanh Công Thức & Bậc Thang Ship -->
+            <button type="button" onclick="SuperAdminConfigController.handleSaveDynamicFormulas()" id="btn-save-pricing-formulas" class="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>CẬP NHẬT CÔNG THỨC ĐỊNH GIÁ & BẬC THANG BÙ SHIP TOÀN HỆ THỐNG</span>
+            </button>
+
+        </div>
+        <!-- ========================================================================= -->
+        <!-- KHỐI 5: CẤU HÌNH THUẾ HỘ KINH DOANH & BÁO CÁO KÊ KHAI TỰ ĐỘNG (23H59)      -->
+        <!-- ========================================================================= -->
+        <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice-dollar text-blue-400"></i>
+                        5. Cấu Hình Thuế Hộ Kinh Doanh & Báo Cáo Kê Khai (23h59)
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">
+                        Chỉ Super Admin mới có quyền điều chỉnh thuế suất và danh sách email nhận báo cáo thuế định kỳ.
+                    </p>
+                </div>
+                <span class="px-2.5 py-1 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[11px] font-mono font-bold">
+                    Thông Tư 40/2021
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                
+                <!-- Tỷ lệ thuế khoán HKD (% động) -->
+                <div class="md:col-span-4 space-y-1">
+                    <label class="block text-xs font-bold text-slate-300">
+                        Tỷ Lệ Thuế Khoán HKD Kênh D2C (%):
+                    </label>
+                    <div class="relative flex items-center">
+                        <input type="number" step="0.1" min="0" max="15" id="cfgTaxRatePercent" value="4.5" class="w-full bg-slate-950 border border-blue-500/50 rounded-xl pl-3 pr-8 py-2.5 text-sm font-mono font-black text-blue-400 focus:outline-none focus:border-blue-400">
+                        <span class="absolute right-3 font-mono font-bold text-blue-400 text-xs">%</span>
+                    </div>
+                    <span class="text-[10px] text-slate-500 block">Chuẩn F&B: 3.0% GTGT + 1.5% TNCN = 4.5%</span>
+                </div>
+
+                <!-- Danh sách email kế toán nhận báo cáo -->
+                <div class="md:col-span-8 space-y-1">
+                    <label class="block text-xs font-bold text-slate-300">
+                        Danh Sách Email Nhận Báo Cáo Thuế Hàng Ngày (Cách nhau bằng dấu phẩy):
+                    </label>
+                    <input type="text" id="cfgTaxReportEmails" value="haiau2205@gmail.com, cobala9551@gmail.com" placeholder="haiau2205@gmail.com, ketoan@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-blue-500 transition">
+                    <span class="text-[10px] text-slate-500 block">Hệ thống gửi bảng kê doanh thu và thuế trích lập lúc 23:59 mỗi đêm.</span>
+                </div>
+
+            </div>
+
+            <!-- Các nút thao tác nghiệp vụ Thuế -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <button type="button" onclick="SuperAdminConfigController.handleManualSendTaxReport()" class="py-2.5 px-4 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-bold transition flex items-center justify-center gap-2 shadow">
+                    <i class="fa-solid fa-paper-plane text-blue-400"></i>
+                    <span>Xuất & Gửi Báo Cáo Thuế Hôm Nay Ngay</span>
+                </button>
+                <button type="button" onclick="SuperAdminConfigController.handleActivateTaxAutoTrigger()" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 shadow">
+                    <i class="fa-solid fa-clock text-amber-400"></i>
+                    <span>Kích Hoạt Tự Động Gửi Email Lúc 23:59</span>
                 </button>
             </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Tên Thương Hiệu / Chi Nhánh</label>
-                <input type="text" id="cfg-STORE_NAME" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="Mì Trộn Thím 5">
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Hotline CSKH / Hotline Đặt Món</label>
-                <input type="text" id="cfg-STORE_PHONE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="0979531213">
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Địa Chỉ Bếp Hiển Thị Cho Khách</label>
-                <textarea id="cfg-STORE_ADDRESS" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" placeholder="TX. Hòa Thành, Tây Ninh"></textarea>
-            </div>
-            <!-- TỌA ĐỘ GPS BẾP (DÙNG ĐỂ TÍNH CỰ LY SHIPPER TỰ ĐỘNG) -->
-            <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-2">
-                <div class="flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                    <span>Tọa Độ Gốc Tính Cước Ship (Haversine):</span>
-                    <a id="link-preview-maps" href="#" target="_blank" class="hidden text-blue-400 hover:underline flex items-center gap-1 text-[10px]">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Xem Trên Maps
-                    </a>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- KHỐI 6: THÔNG TIN HẠ TẦNG BẾP, TÂM GPS HAVERSINE & GIỜ MỞ CỬA BÁN HÀNG    -->
+        <!-- ========================================================================= -->
+        <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-kitchen-set text-amber-400"></i>
+                        6. Thông Tin Vận Hành Bếp, Tọa Độ GPS Gốc & Khung Giờ Mở Bán
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">
+                        Thiết lập tâm điểm tính khoảng cách giao hàng Haversine và giới hạn giờ nhận đơn của bếp.
+                    </p>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-0.5">Vĩ độ (Latitude)</label>
-                        <input type="text" id="cfg-STORE_LAT" onchange="ConfigController.updateMapsPreviewLink()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-blue-300 font-mono font-bold focus:outline-none focus:border-blue-500" placeholder="10.9825">
+                <span class="px-2.5 py-1 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-mono font-bold">
+                    GPS Core
+                </span>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                
+                <!-- URL Ảnh Bìa / Banner Cover Quán -->
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-300">
+                        Ảnh Bìa / Banner Cover Quán (URL hình ảnh hiển thị trên Header Web D2C):
+                    </label>
+                    <input type="url" id="cfgStoreCoverUrl" placeholder="https://images.unsplash.com/... hoặc link ảnh Google Drive" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-amber-500">
+                </div>
+
+                <!-- Tên Quán, Tên Chủ Quán, SĐT Hotline -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-300">Tên Thương Hiệu Quán:</label>
+                        <input type="text" id="cfgStoreName" value="Mì Trộn & Cơm Trộn Thím 5" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-amber-500">
                     </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-0.5">Kinh độ (Longitude)</label>
-                        <input type="text" id="cfg-STORE_LNG" onchange="ConfigController.updateMapsPreviewLink()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-blue-300 font-mono font-bold focus:outline-none focus:border-blue-500" placeholder="106.1265">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-300">Họ Tên Quản Trị / Founder:</label>
+                        <input type="text" id="cfgOwnerName" value="Nguyễn Hải Âu" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-300">Số Điện Thoại Hotline / Zalo Bếp:</label>
+                        <input type="text" id="cfgStorePhone" value="0979531213" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 focus:outline-none focus:border-amber-500">
                     </div>
                 </div>
-                <span class="text-[10px] text-slate-400 block italic">Hệ thống sẽ lấy điểm ghim này làm mốc 0km để tính cước phí giao hàng.</span>
+
+                <!-- Địa Chỉ Hiển Thị & Tọa Độ GPS -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                    <div class="md:col-span-6 space-y-1">
+                        <label class="block font-bold text-slate-300">Địa Chỉ Cơ Sở Bếp Hiển Thị:</label>
+                        <input type="text" id="cfgStoreAddress" value="Nguyễn Văn Linh, TX. Hòa Thành, Tây Ninh" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div class="md:col-span-4 space-y-1">
+                        <label class="block font-bold text-slate-300">Tọa Độ Tâm GPS (Lat, Lng):</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="cfgLat" value="11.285267" placeholder="Latitude" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500">
+                            <input type="text" id="cfgLng" value="106.133347" placeholder="Longitude" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-xs font-mono text-emerald-400 focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="button" onclick="SuperAdminConfigController.getCurrentLocationGps()" class="w-full py-2 px-3 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow">
+                            <i class="fa-solid fa-location-crosshairs text-blue-400"></i>
+                            <span>Lấy GPS</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cấu Hình Khung Giờ Mở Cửa Tự Động Hằng Ngày -->
+                <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-business-time text-amber-400"></i>
+                            Khung Giờ Bếp Nhận Đơn Tự Động Hằng Ngày:
+                        </span>
+                        <span class="text-[10px] text-slate-500 font-mono">Tự động khóa ngoài giờ</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="block text-[10px] text-slate-400">Giờ Bắt Đầu Mở Bếp (0 - 23h):</label>
+                            <input type="number" min="0" max="23" id="cfgAutoOpenHour" value="6" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white focus:outline-none focus:border-amber-500">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-[10px] text-slate-400">Giờ Đóng Cửa Nghỉ Bếp (0 - 23h):</label>
+                            <input type="number" min="0" max="23" id="cfgAutoCloseHour" value="22" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white focus:outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+                </div>
+
             </div>
+
         </div>
 
-        <!-- CARD 2: RÀO CHẮN TÀI CHÍNH & KHẤU TRỪ SÀN -->
-        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4">
-            <div class="flex items-center gap-2 pb-3 border-b border-slate-800 text-sm font-bold text-emerald-400">
-                <i class="fa-solid fa-shield-halved"></i> 2. RÀO CHẮN TÀI CHÍNH & DÒNG TIỀN
-            </div>
-            <div class="grid grid-cols-2 gap-3">
+        <!-- ========================================================================= -->
+        <!-- KHỐI 7: THEO DÕI PIXEL QUẢNG CÁO & MARKETING GAMIFICATION ĐỘNG           -->
+        <!-- ========================================================================= -->
+        <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Khóa Trần Khuyến Mãi (<= 15%)</label>
-                    <input type="number" step="0.01" id="cfg-PROMO_CAP_RATE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-emerald-400 font-bold focus:outline-none focus:border-emerald-500" placeholder="0.15">
-                    <span class="text-[10px] text-slate-400">0.15 = 15% (Chặn âm dòng tiền)</span>
+                    <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-bullhorn text-pink-400"></i>
+                        7. Mã Theo Dõi Quảng Cáo (Pixel) & Chiến Dịch Gamification Động
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">
+                        Tự động kích hoạt phễu đo lường Ads Meta/TikTok và tối ưu Retention bằng quà tặng tăng AOV.
+                    </p>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Tổng Khấu Trừ Nền Tảng</label>
-                    <input type="number" step="0.01" id="cfg-PLATFORM_FEE_RATE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-amber-400 font-bold focus:outline-none focus:border-amber-500" placeholder="0.40">
-                    <span class="text-[10px] text-slate-400">0.40 = 40% (Dùng tính Giá App)</span>
-                </div>
+                <span class="px-2.5 py-1 rounded-xl bg-pink-500/10 text-pink-400 border border-pink-500/20 text-[11px] font-mono font-bold">
+                    Tracking & AOV
+                </span>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Trích Lập Thuế HKD</label>
-                    <input type="number" step="0.001" id="cfg-TAX_RATE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="0.045">
-                    <span class="text-[10px] text-slate-400">0.045 = 4.5%</span>
+
+            <div class="space-y-4 text-xs">
+                
+                <!-- Khai Báo Meta Pixel & TikTok Pixel ID -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-sky-400">Meta Pixel ID (Facebook Ads):</label>
+                        <input type="text" id="cfgMetaPixelId" placeholder="VD: 123456789012345 (Để trống nếu không chạy)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-bold text-pink-400">TikTok Pixel ID (TikTok Ads):</label>
+                        <input type="text" id="cfgTiktokPixelId" placeholder="VD: C123456789ABCDEF (Để trống nếu không chạy)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-pink-500">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Phí Quản Trị Master</label>
-                    <input type="number" step="0.001" id="cfg-MASTER_ROYALTY" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" placeholder="0.02">
-                    <span class="text-[10px] text-slate-400">0.02 = 2% Thù lao SaaS</span>
+
+                <!-- Bảng 5 Cấp Bậc Huy Hiệu Tháng (Mốc 0 - 2 - 4 - 7 - 12 Đơn) -->
+                <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-amber-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-award text-amber-400"></i>
+                            Bảng 5 Cấp Bậc Huy Hiệu Theo Tháng (Mốc 0 - 2 - 4 - 7 - 12 đơn):
+                        </span>
+                        <button type="button" onclick="SuperAdminConfigController.loadGamificationConfigFromDB()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold transition flex items-center gap-1">
+                            <i class="fa-solid fa-rotate text-sky-400"></i> Tải Lại Tiers
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[550px]">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase">
+                                    <th class="py-1.5 px-2">Cấp</th>
+                                    <th class="py-1.5 px-2">Mốc Đơn</th>
+                                    <th class="py-1.5 px-2">Huy Hiệu Mặc Định</th>
+                                    <th class="py-1.5 px-2">Từ Khóa Tính Cách (|)</th>
+                                    <th class="py-1.5 px-2">Giảm (%)</th>
+                                    <th class="py-1.5 px-2 text-center">Freeship 2km</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tierConfigTbody" class="text-slate-300 divide-y divide-slate-800/60 font-mono text-[11px]">
+                                <tr><td colspan="6" class="text-center py-4 text-slate-500 font-sans">Đang tải cấu hình Tiers...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+
+                <!-- Ngưỡng Tặng Nước Đóng Chai Kéo Ticket Size AOV -->
+                <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                    <span class="font-bold text-emerald-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-bottle-water text-emerald-400"></i>
+                        Ngưỡng Tặng Nước Giải Ngấy Kéo Ticket Size Đơn Hàng (AOV Upsell):
+                    </span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+                            <span class="text-[10px] font-bold text-amber-400 block">Mốc 1 (Kéo bill 1 phần lên 2 phần):</span>
+                            <div class="flex gap-2">
+                                <input type="number" step="5000" id="upsellMinBill1" value="50000" class="w-24 bg-slate-950 border border-slate-700 rounded-xl px-2 py-1.5 text-xs font-mono font-bold text-white text-center">
+                                <input type="text" id="upsellGiftName1" value="1 Chai Nước Suối Ướp Lạnh (0đ)" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200">
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+                            <span class="text-[10px] font-bold text-amber-400 block">Mốc 2 (Kéo bill nhóm / Mâm VIP):</span>
+                            <div class="flex gap-2">
+                                <input type="number" step="5000" id="upsellMinBill2" value="99000" class="w-24 bg-slate-950 border border-slate-700 rounded-xl px-2 py-1.5 text-xs font-mono font-bold text-white text-center">
+                                <input type="text" id="upsellGiftName2" value="1 Lon Pepsi/7Up Ướp Lạnh (0đ)" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chiến Dịch Giới Thiệu Bạn Mới (Viral Referral) -->
+                <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                    <span class="font-bold text-pink-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-plus text-pink-400"></i>
+                        Chiến Dịch Giới Thiệu Bạn Mới (Viral Referral):
+                    </span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="block text-[10px] text-slate-400">Ưu Đãi Bạn Mới (VNĐ):</label>
+                            <input type="number" step="1000" id="refInviteeDisc" value="5000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-pink-400">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block text-[10px] text-slate-400">Đơn Tối Thiểu Áp Dụng (VNĐ):</label>
+                            <input type="number" step="5000" id="refMinSpend" value="40000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" onclick="SuperAdminConfigController.saveGamificationConfigToDB()" class="w-full py-2.5 rounded-xl bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 border border-pink-500/40 text-xs font-bold transition flex items-center justify-center gap-2 shadow">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Lưu Riêng Chiến Dịch Marketing & Gamification</span>
+                </button>
+
             </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Hạn Mức Giữ Tiền COD Của Shipper (VNĐ)</label>
-                <input type="number" id="cfg-COD_HOLDING_LIMIT" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-yellow-400 font-mono focus:outline-none focus:border-yellow-500" placeholder="1000000">
-                <span class="text-[10px] text-slate-400">Vượt hạn mức này tài xế không được nhận thêm đơn COD.</span>
-            </div>
+
         </div>
 
-        <!-- CARD 3: CỔNG THANH TOÁN VIETQR ĐỘNG -->
-        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4">
-            <div class="flex items-center gap-2 pb-3 border-b border-slate-800 text-sm font-bold text-amber-400">
-                <i class="fa-solid fa-qrcode"></i> 3. CỔNG THANH TOÁN VIETQR TỰ ĐỘNG
-            </div>
-            <div class="grid grid-cols-2 gap-3">
+        <!-- ========================================================================= -->
+        <!-- KHỐI 8: AN NINH PHÂN QUYỀN & BẢO MẬT 2FA ĐỔI SUPER PIN LEVEL 2            -->
+        <!-- ========================================================================= -->
+        <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Mã Ngân Hàng (Bank Code)</label>
-                    <input type="text" id="cfg-BANK_CODE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-amber-500" placeholder="MB, VCB, TCB...">
+                    <h3 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-amber-400"></i>
+                        8. An Ninh Phân Quyền & Bảo Mật 2 Lớp Đổi Super PIN (OTP Gmail)
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">
+                        Phân cấp bảo mật: PIN Lv1 cho quản lý ca và Super PIN Lv2 bảo vệ qua hộp thư Gmail Founder.
+                    </p>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Số Tài Khoản</label>
-                    <input type="text" id="cfg-BANK_ACCOUNT" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-amber-400 font-mono font-bold focus:outline-none focus:border-amber-500" placeholder="3939388888">
+                <span class="px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[11px] font-mono font-bold">
+                    2FA Security
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                
+                <!-- Đổi Mã PIN Level 1 (Chủ quán / Quản lý ca) -->
+                <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                    <div>
+                        <span class="font-bold text-sky-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-key"></i> Đổi Mã PIN Level 1 (Quản lý Bếp / Thu ngân):
+                        </span>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Dùng để xác nhận đơn hàng, nghe loa MBBank và in hóa đơn.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="password" maxlength="6" id="inputNewPinLv1" placeholder="Nhập PIN Lv1 mới (VD: 1985)" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-center text-white tracking-widest focus:outline-none focus:border-sky-500">
+                        <button type="button" onclick="SuperAdminConfigController.handleSavePinLevel1()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold transition shadow">
+                            Lưu PIN Lv1
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Đổi Super PIN Level 2 (Bảo mật OTP Gmail) -->
+                <div class="p-4 rounded-2xl bg-slate-950 border border-amber-500/30 space-y-3">
+                    <div>
+                        <span class="font-bold text-amber-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-lock"></i> Đổi Super PIN Level 2 (Bảo Mật OTP Gmail):
+                        </span>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Yêu cầu nhận mã OTP 6 số gửi về hòm thư Gmail chính chủ của anh Hải Âu.</p>
+                    </div>
+                    <button type="button" onclick="SuperAdminConfigController.openSuperPinResetModal()" class="w-full py-2.5 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold transition flex items-center justify-center gap-2 shadow">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>Bấm Nhận Mã OTP Qua Email Để Đổi Super PIN</span>
+                    </button>
+                </div>
+
             </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Tên Chủ Tài Khoản (Viết hoa không dấu)</label>
-                <input type="text" id="cfg-BANK_OWNER" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-semibold uppercase focus:outline-none focus:border-amber-500" placeholder="NGUYEN HAI AU">
-            </div>
+
         </div>
 
-        <!-- CARD 4: TIẾP THỊ & TRACKING PIXELS -->
-        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4">
-            <div class="flex items-center gap-2 pb-3 border-b border-slate-800 text-sm font-bold text-purple-400">
-                <i class="fa-solid fa-bullseye"></i> 4. TIẾP THỊ & TRACKING PIXELS
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Meta (Facebook) Pixel ID</label>
-                <input type="text" id="cfg-META_PIXEL_ID" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-purple-300 font-mono focus:outline-none focus:border-purple-500" placeholder="123456789012345">
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">TikTok Pixel ID</label>
-                <input type="text" id="cfg-TIKTOK_PIXEL_ID" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-purple-300 font-mono focus:outline-none focus:border-purple-500" placeholder="C123456789ABCDEF">
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-slate-300 mb-1">Google Tag Manager (GTM) ID</label>
-                <input type="text" id="cfg-GTM_ID" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-purple-300 font-mono focus:outline-none focus:border-purple-500" placeholder="GTM-XXXXXXX">
-            </div>
-        </div>
-
-        <!-- CARD 5: BẢO MẬT & BÁO CÁO HỆ THỐNG -->
-        <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-4 md:col-span-2">
-            <div class="flex items-center gap-2 pb-3 border-b border-slate-800 text-sm font-bold text-red-400">
-                <i class="fa-solid fa-lock"></i> 5. BẢO MẬT PHÂN QUYỀN & BÁO CÁO TỰ ĐỘNG
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">PIN Quản Lý Ca (Level 1)</label>
-                    <input type="password" maxlength="6" id="cfg-ADMIN_PIN_LV1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono text-center tracking-widest focus:outline-none focus:border-red-500" placeholder="••••">
-                    <span class="text-[10px] text-slate-400">Dùng duyệt tiền mặt & chuyển khoản tay.</span>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">PIN Super Admin (Level 2)</label>
-                    <input type="password" maxlength="6" id="cfg-ADMIN_PIN_LV2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white font-mono text-center tracking-widest focus:outline-none focus:border-red-500" placeholder="••••">
-                    <span class="text-[10px] text-slate-400">Dùng sửa cấu hình tài chính & gỡ shipper.</span>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Email Nhận Báo Cáo Thuế 23:59</label>
-                    <input type="email" id="cfg-TAX_REPORT_EMAIL" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-red-500" placeholder="haiau2205@gmail.com">
-                    <span class="text-[10px] text-slate-400">Gửi tự động bảng P&L cuối ngày.</span>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-
-<!-- MODAL XÁC NHẬN BẢO MẬT & NHẬP PIN LEVEL 2 -->
-<div id="modal-confirm-config" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4">
-        <div class="flex items-center gap-3 text-amber-400">
-            <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-            <h4 class="font-bold text-base text-white">Xác Nhận Thay Đổi Cấu Hình</h4>
-        </div>
-        <p class="text-xs text-slate-300 leading-relaxed">
-            Các thay đổi (bao gồm tọa độ GPS gốc, phí sàn và trần khuyến mãi) sẽ ảnh hưởng tức thì đến cước ship và dòng tiền toàn hệ thống.
-        </p>
-        <div id="config-diff-list" class="max-h-40 overflow-y-auto p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 space-y-1 font-mono">
-            <!-- Tự động nạp danh sách tham số thay đổi -->
-        </div>
-        <div>
-            <label class="block text-xs font-semibold text-red-400 mb-1">Nhập PIN Super Admin (Level 2) để duyệt:</label>
-            <input type="password" id="input-confirm-pin" maxlength="6" class="w-full bg-slate-950 border border-red-500/50 rounded-xl px-4 py-2.5 text-center text-lg font-mono tracking-widest text-white focus:outline-none focus:border-red-500" placeholder="••••">
-            <span id="pin-error-msg" class="hidden text-[11px] text-red-400 mt-1">Mã PIN không chính xác. Vui lòng kiểm tra lại.</span>
-        </div>
-        <div class="flex items-center justify-end gap-3 pt-2">
-            <button onclick="ConfigController.closeConfirmModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">Hủy bỏ</button>
-            <button onclick="ConfigController.executeSave()" id="btn-execute-save" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/30 transition flex items-center gap-2">
-                <i class="fa-solid fa-check"></i> Xác Nhận Lưu
+        <!-- NÚT LƯU & ĐỒNG BỘ TOÀN HỆ THỐNG TỔNG THỂ -->
+        <div class="pt-2">
+            <button type="button" onclick="SuperAdminConfigController.saveSystemSettingsSubmit()" id="btn-save-master-system" class="w-full py-4 rounded-2xl bg-gradient-to-r from-red-600 via-amber-600 to-emerald-600 hover:opacity-95 text-white text-sm font-black tracking-wider uppercase shadow-2xl shadow-red-600/30 transition flex items-center justify-center gap-2.5">
+                <i class="fa-solid fa-floppy-disk text-base"></i>
+                <span>LƯU & ĐỒNG BỘ TOÀN BỘ CẤU HÌNH LÕI MASTER VÀO CSDL HỆ THỐNG</span>
             </button>
         </div>
+
+    </div>
+
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL XÁC THỰC OTP GMAIL ĐỔI SUPER PIN LEVEL 2 (MODAL BẢO MẬT 2 LỚP)      -->
+<!-- ========================================================================= -->
+<div id="superPinOtpModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
+    <div class="bg-slate-900 border-2 border-amber-500/50 w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center space-y-4">
+        
+        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl mx-auto shadow-inner">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+
+        <div>
+            <h4 class="text-sm font-black text-white uppercase tracking-wider">
+                Xác Thực OTP Đổi Super PIN
+            </h4>
+            <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                Mã OTP bảo mật 6 số đã được gửi tới Gmail chính chủ của anh Hải Âu. Vui lòng nhập để hoàn tất:
+            </p>
+        </div>
+
+        <div class="space-y-3 text-left">
+            <div class="space-y-1">
+                <label class="block text-[11px] font-bold text-slate-400">Nhập Mã OTP (6 Số):</label>
+                <input type="tel" maxlength="6" id="superOtpInput" placeholder="123456" class="w-full bg-slate-950 border border-amber-500/50 rounded-xl py-2.5 text-center text-lg font-mono font-black text-amber-400 tracking-[0.4em] focus:outline-none focus:border-amber-400">
+            </div>
+
+            <div class="space-y-1">
+                <label class="block text-[11px] font-bold text-slate-400">Nhập Mã Super PIN Mới (Level 2):</label>
+                <input type="password" maxlength="6" id="newSuperPinInput" placeholder="••••" class="w-full bg-slate-950 border border-slate-700 rounded-xl py-2.5 text-center text-lg font-mono font-black text-white tracking-[0.4em] focus:outline-none focus:border-emerald-500">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 pt-2">
+            <button type="button" onclick="document.getElementById('superPinOtpModal').classList.add('hidden')" class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+                Hủy Bỏ
+            </button>
+            <button type="button" onclick="SuperAdminConfigController.handleSubmitSuperPinReset()" id="btn-submit-otp-pin" class="py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-black shadow-lg shadow-amber-600/30 transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-check"></i> Xác Nhận Đổi
+            </button>
+        </div>
+
     </div>
 </div>
 <script>
 /**
  * =========================================================================
- * CONTROLLER: SYSTEM CONFIG CONTROLLER (SAAS ENTERPRISE v2.1)
+ * CONTROLLER: SUPER ADMIN LEVEL 2 MASTER CONFIG SUITE (v2.8 ENTERPRISE)
  * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
+ * Kiến trúc: Headless Reactive State Hydration & 2FA Admin Gateway
  * Vai trò:
- *   - Đồng bộ tham số cấu hình động hai chiều giữa UI và Google Sheets [SYS_CONFIG].
- *   - Bắt tọa độ GPS thiết bị chính xác cao (Hardware Assisted Geolocation).
- *   - Tự động sinh liên kết đối soát vị trí thực tế trên Google Maps.
- *   - Rào chắn Diffing state, Input Validation và xác thực bảo mật PIN Level 2.
+ *   - Quản trị tập trung 100% tham số lõi của chuỗi F&B từ [SYS_CONFIG].
+ *   - Cung cấp Reactive Presets cho 4 ngành hàng F&B (Fast Food, Drinks, Pubs, Cơm).
+ *   - Mô phỏng định giá ngược D2C vs Sàn thời gian thực (Live Price Demo).
+ *   - Đồng bộ đa ngân hàng VietQR Napas247 và ví MoMo động.
+ *   - Rào chắn bảo mật 2FA OTP qua Gmail chính chủ của anh Hải Âu.
  * =========================================================================
  */
-const ConfigController = (function() {
-    // Danh bạ 19 Key cấu hình chuẩn hóa theo [SYS_CONFIG]
-    const CONFIG_KEYS = [
-        "STORE_NAME", "STORE_PHONE", "STORE_ADDRESS", "STORE_LAT", "STORE_LNG",
-        "PLATFORM_FEE_RATE", "PROMO_CAP_RATE", "TAX_RATE", "MASTER_ROYALTY", "COD_HOLDING_LIMIT",
-        "BANK_CODE", "BANK_ACCOUNT", "BANK_OWNER",
-        "META_PIXEL_ID", "TIKTOK_PIXEL_ID", "GTM_ID",
-        "ADMIN_PIN_LV1", "ADMIN_PIN_LV2", "TAX_REPORT_EMAIL"
-    ];
+const SuperAdminConfigController = (function() {
+    // Bộ nhớ đệm lưu trữ cấu hình hiện thời nạp từ CSDL
+    let activeConfigCache = null;
+    let clockIntervalId = null;
 
-    let originalSnapshot = {};
-    let pendingChanges = {};
+    // Bảng giá trị mặc định an toàn tuyệt đối (Fallback Defaults)
+    const SYSTEM_DEFAULTS = {
+        industryType: "FAST_FOOD",
+        hubRoyaltyRate: 0.02,       // 2.0% Phí Master Sếp Âu
+        marketingBudgetRate: 0.01,  // 1.0% Quỹ Marketing Ads
+        targetMaxFoodCostRate: 0.35,// 35% Trần Food Cost
+        targetAOV: 50000,           // 50.000đ AOV mục tiêu
+        d2cDiscountRate: 0.12,      // 12% Giảm D2C so với sàn
+        maxPromoBudgetRate: 0.15,   // 15% Khóa trần khuyến mãi toàn đơn
+        taxRatePercent: 4.5,        // 4.5% Thuế khoán HKD
+        taxReportEmails: "haiau2205@gmail.com",
+        storeName: "Mì Trộn & Cơm Trộn Thím 5",
+        ownerName: "Nguyễn Hải Âu",
+        storePhone: "0979531213",
+        storeAddress: "Nguyễn Văn Linh, TX. Hòa Thành, Tây Ninh",
+        lat: "11.285267",
+        lng: "106.133347",
+        autoOpenHour: 6,
+        autoCloseHour: 22,
+        bankCode: "MB",
+        bankBin: "970422",
+        bankAccount: "3939388888",
+        accountHolderName: "NGUYEN HAI AU",
+        accountTypeLabel: "Tài khoản Hộ Kinh Doanh",
+        shipMinBill1: 100000,
+        shipSubsidy1: 15000,
+        shipMinBill2: 150000,
+        shipSubsidy2: 25000
+    };
 
     /**
-     * Nạp dữ liệu cấu hình hệ thống từ Google Apps Script
+     * Khởi động controller khi view được nạp
      */
-    async function loadConfig() {
-        const btnReload = document.getElementById("btn-reload-config");
-        const btnSave = document.getElementById("btn-save-config");
+    function init() {
+        startLiveClock();
+        reloadConfigFromDB();
+    }
 
-        try {
-            if (btnReload) btnReload.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải...';
-            if (btnSave) btnSave.disabled = true;
-
-            const configData = await Thim5API.callGAS("getSysConfig");
-            if (!configData || typeof configData !== "object") {
-                throw new Error("Dữ liệu cấu hình máy chủ trả về không hợp lệ.");
+    /**
+     * Đồng hồ đếm giây thời gian thực trên thanh trạng thái
+     */
+    function startLiveClock() {
+        if (clockIntervalId) clearInterval(clockIntervalId);
+        clockIntervalId = setInterval(function() {
+            const now = new Date();
+            const clockEl = document.getElementById("txt-cfg-sync-clock");
+            if (clockEl) {
+                clockEl.innerText = now.toTimeString().split(" ")[0];
             }
+        }, 1000);
+    }
 
-            // Lưu trữ snapshot nguyên bản để đối soát thay đổi
-            originalSnapshot = Object.assign({}, configData);
-
-            // Bơm dữ liệu vào từng ô input tương ứng
-            CONFIG_KEYS.forEach(key => {
-                const inputElem = document.getElementById("cfg-" + key);
-                if (inputElem) {
-                    inputElem.value = (configData[key] !== undefined && configData[key] !== null) ? configData[key] : "";
+    /**
+     * Tải lại toàn bộ cấu hình từ CSDL Backend Google Sheets
+     */
+    async function reloadConfigFromDB() {
+        try {
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const res = await Thim5API.callGAS("getSysConfig");
+                const configData = (res && res.data) ? res.data : res;
+                if (configData && typeof configData === "object") {
+                    activeConfigCache = configData;
+                    loadDynamicConfigToInputs(configData);
+                    return;
                 }
-            });
+            }
+        } catch (err) {
+            console.warn("⚠️ [SuperAdminConfig] Không thể tải từ Backend, sử dụng cấu hình mặc định:", err);
+        }
 
-            // Cập nhật link xem trước vị trí quán trên Google Maps
-            updateMapsPreviewLink();
+        // Nếu không có API hoặc lỗi mạng -> dùng cấu hình mặc định
+        activeConfigCache = Object.assign({}, SYSTEM_DEFAULTS);
+        loadDynamicConfigToInputs(activeConfigCache);
+    }
 
-            console.log("✅ [ConfigController] Đã nạp thành công 19 tham số cấu hình hệ thống.");
-        } catch (error) {
-            alert("❌ Không thể tải cấu hình hệ thống: " + error.message);
-            console.error("[ConfigController] Lỗi loadConfig:", error);
-        } finally {
-            if (btnReload) btnReload.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Tải lại';
-            if (btnSave) btnSave.disabled = false;
+    /**
+     * Bóc tách và gán dữ liệu từ CSDL vào từng ô Input trên giao diện
+     * @param {Object} cfg - Đối tượng cấu hình từ máy chủ
+     */
+    function loadDynamicConfigToInputs(cfg) {
+        if (!cfg) return;
+
+        // 1. KHỐI 1: ĐA NGÀNH & BẢN QUYỀN MASTER
+        const industry = cfg.industryType || cfg.INDUSTRY_TYPE || SYSTEM_DEFAULTS.industryType;
+        const selIndustry = document.getElementById("cfgIndustryType");
+        if (selIndustry) selIndustry.value = industry;
+
+        const royalty = (cfg.hubRoyaltyRate !== undefined) ? Number(cfg.hubRoyaltyRate) : 
+                        ((cfg.MASTER_ROYALTY !== undefined) ? Number(cfg.MASTER_ROYALTY) : SYSTEM_DEFAULTS.hubRoyaltyRate);
+        const inpRoyalty = document.getElementById("cfgHubRoyaltyRate");
+        if (inpRoyalty) inpRoyalty.value = (royalty * 100).toFixed(1);
+
+        const mktBudget = (cfg.marketingBudgetRate !== undefined) ? Number(cfg.marketingBudgetRate) : 
+                          ((cfg.ADS_BUDGET !== undefined) ? Number(cfg.ADS_BUDGET) : SYSTEM_DEFAULTS.marketingBudgetRate);
+        const inpMkt = document.getElementById("cfgMarketingBudgetRate");
+        if (inpMkt) inpMkt.value = (mktBudget * 100).toFixed(1);
+
+        const targetCost = (cfg.targetMaxFoodCostRate !== undefined) ? Number(cfg.targetMaxFoodCostRate) : 
+                           ((cfg.MAX_FOOD_COST !== undefined) ? Number(cfg.MAX_FOOD_COST) : SYSTEM_DEFAULTS.targetMaxFoodCostRate);
+        const inpCost = document.getElementById("cfgTargetMaxFoodCostRate");
+        if (inpCost) inpCost.value = Math.round(targetCost * 100);
+
+        const aov = cfg.targetAOV || cfg.TARGET_AOV || SYSTEM_DEFAULTS.targetAOV;
+        const inpAov = document.getElementById("cfgTargetAOV");
+        if (inpAov) inpAov.value = aov;
+
+        // 2. KHỐI 2: CỔNG NHẬN TIỀN NGÂN HÀNG & MOMO
+        const bankCode = cfg.bankCode || cfg.BANK_CODE || SYSTEM_DEFAULTS.bankCode;
+        const bankBin = cfg.bankBin || cfg.BANK_BIN || SYSTEM_DEFAULTS.bankBin;
+        const bankVal = bankCode + "|" + bankBin;
+        const selBank = document.getElementById("cfgBankSelect");
+        if (selBank) {
+            // Kiểm tra xem option có tồn tại không
+            const exists = Array.from(selBank.options).some(opt => opt.value === bankVal);
+            if (exists) selBank.value = bankVal;
+        }
+
+        const bankAcc = cfg.bankAccount || cfg.BANK_ACCOUNT_NO || cfg.momoAccount || SYSTEM_DEFAULTS.bankAccount;
+        const inpBankAcc = document.getElementById("cfgBankAccount");
+        if (inpBankAcc) inpBankAcc.value = bankAcc;
+
+        const accName = cfg.accountHolderName || cfg.BANK_ACCOUNT_NAME || cfg.momoName || SYSTEM_DEFAULTS.accountHolderName;
+        const inpAccName = document.getElementById("cfgAccountHolderName");
+        if (inpAccName) inpAccName.value = String(accName).toUpperCase();
+
+        const accType = cfg.accountTypeLabel || SYSTEM_DEFAULTS.accountTypeLabel;
+        const selAccType = document.getElementById("cfgAccountTypeLabel");
+        if (selAccType) selAccType.value = accType;
+
+        // 3. KHỐI 3: MÃ QR ĐẶT MÓN ĐỘNG
+        const webUrl = cfg.webAppUrl || cfg.STORE_WEB_URL || window.location.href.split("?")[0];
+        const inpWebUrl = document.getElementById("cfgStoreWebUrl");
+        if (inpWebUrl) inpWebUrl.value = webUrl;
+        generateStoreDynamicQr(webUrl);
+
+        // 4. KHỐI 4: ĐỊNH GIÁ NGƯỢC & BẬC SHIP
+        const d2cRate = (cfg.d2cDiscountRate !== undefined) ? Number(cfg.d2cDiscountRate) : 
+                        ((cfg.D2C_DISCOUNT_RATE !== undefined) ? Number(cfg.D2C_DISCOUNT_RATE) : SYSTEM_DEFAULTS.d2cDiscountRate);
+        const inpD2cRate = document.getElementById("cfgD2cDiscountRate");
+        if (inpD2cRate) inpD2cRate.value = Math.round(d2cRate * 100);
+        previewPricingDemo(Math.round(d2cRate * 100));
+
+        const promoCap = (cfg.maxPromoBudgetRate !== undefined) ? Number(cfg.maxPromoBudgetRate) : 
+                         ((cfg.PROMO_CAP_RATE !== undefined) ? Number(cfg.PROMO_CAP_RATE) : SYSTEM_DEFAULTS.maxPromoBudgetRate);
+        const inpPromoCap = document.getElementById("cfgMaxPromoBudgetRate");
+        if (inpPromoCap) inpPromoCap.value = Math.round(promoCap * 100);
+
+        // Bậc thang bù ship
+        const shipRules = cfg.shippingRules || {};
+        const bill1 = shipRules.subsidyTier1_MinBill || cfg.SHIP_MIN_BILL_1 || SYSTEM_DEFAULTS.shipMinBill1;
+        const sub1 = shipRules.subsidyTier1_Amount || cfg.SHIP_SUBSIDY_1 || SYSTEM_DEFAULTS.shipSubsidy1;
+        const bill2 = shipRules.subsidyTier2_MinBill || cfg.SHIP_MIN_BILL_2 || SYSTEM_DEFAULTS.shipMinBill2;
+        const sub2 = shipRules.subsidyTier2_Amount || cfg.SHIP_SUBSIDY_2 || SYSTEM_DEFAULTS.shipSubsidy2;
+
+        if (document.getElementById("cfgShipMinBill1")) document.getElementById("cfgShipMinBill1").value = bill1;
+        if (document.getElementById("cfgShipSubsidy1")) document.getElementById("cfgShipSubsidy1").value = sub1;
+        if (document.getElementById("cfgShipMinBill2")) document.getElementById("cfgShipMinBill2").value = bill2;
+        if (document.getElementById("cfgShipSubsidy2")) document.getElementById("cfgShipSubsidy2").value = sub2;
+
+        // 5. KHỐI 5: THUẾ HKD & EMAIL KẾ TOÁN
+        const taxRate = (cfg.taxRateDefault !== undefined) ? Number(cfg.taxRateDefault) : 
+                        ((cfg.TAX_RATE !== undefined) ? Number(cfg.TAX_RATE) : (SYSTEM_DEFAULTS.taxRatePercent / 100));
+        const inpTax = document.getElementById("cfgTaxRatePercent");
+        if (inpTax) inpTax.value = (taxRate * 100).toFixed(1);
+
+        const taxEmails = cfg.taxReportEmails || cfg.TAX_REPORT_EMAIL || SYSTEM_DEFAULTS.taxReportEmails;
+        const inpTaxEmails = document.getElementById("cfgTaxReportEmails");
+        if (inpTaxEmails) inpTaxEmails.value = taxEmails;
+
+        // 6. KHỐI 6: HẠ TẦNG BẾP & GPS
+        if (document.getElementById("cfgStoreCoverUrl")) document.getElementById("cfgStoreCoverUrl").value = cfg.storeCoverUrl || cfg.STORE_COVER_URL || "";
+        if (document.getElementById("cfgStoreName")) document.getElementById("cfgStoreName").value = cfg.storeName || cfg.STORE_NAME || SYSTEM_DEFAULTS.storeName;
+        if (document.getElementById("cfgOwnerName")) document.getElementById("cfgOwnerName").value = cfg.ownerName || cfg.OWNER_NAME || SYSTEM_DEFAULTS.ownerName;
+        if (document.getElementById("cfgStorePhone")) document.getElementById("cfgStorePhone").value = cfg.phone || cfg.STORE_PHONE || SYSTEM_DEFAULTS.storePhone;
+        if (document.getElementById("cfgStoreAddress")) document.getElementById("cfgStoreAddress").value = cfg.address || cfg.STORE_ADDRESS || SYSTEM_DEFAULTS.storeAddress;
+
+        const latVal = (cfg.centerCoords && cfg.centerCoords.lat) ? cfg.centerCoords.lat : (cfg.lat || cfg.STORE_LAT || SYSTEM_DEFAULTS.lat);
+        const lngVal = (cfg.centerCoords && cfg.centerCoords.lng) ? cfg.centerCoords.lng : (cfg.lng || cfg.STORE_LNG || SYSTEM_DEFAULTS.lng);
+        if (document.getElementById("cfgLat")) document.getElementById("cfgLat").value = latVal;
+        if (document.getElementById("cfgLng")) document.getElementById("cfgLng").value = lngVal;
+
+        if (document.getElementById("cfgAutoOpenHour")) document.getElementById("cfgAutoOpenHour").value = (cfg.autoOpenHour !== undefined) ? cfg.autoOpenHour : SYSTEM_DEFAULTS.autoOpenHour;
+        if (document.getElementById("cfgAutoCloseHour")) document.getElementById("cfgAutoCloseHour").value = (cfg.autoCloseHour !== undefined) ? cfg.autoCloseHour : SYSTEM_DEFAULTS.autoCloseHour;
+
+        // 7. KHỐI 7: PIXELS QUẢNG CÁO
+        if (document.getElementById("cfgMetaPixelId")) document.getElementById("cfgMetaPixelId").value = cfg.metaPixelId || cfg.META_PIXEL_ID || "";
+        if (document.getElementById("cfgTiktokPixelId")) document.getElementById("cfgTiktokPixelId").value = cfg.tiktokPixelId || cfg.TIKTOK_PIXEL_ID || "";
+
+        // Đồng bộ giao diện phụ trợ
+        handleBankSelectChange();
+    }
+
+    /**
+     * BỘ REACTIVE PRESETS: TỰ ĐỘNG THAY ĐỔI THEO 4 NGÀNH F&B
+     * @param {string} val - Mã ngành (FAST_FOOD, DRINKS, PUBS, RESTAURANT)
+     */
+    function handleIndustryChange(val) {
+        const inpCost = document.getElementById("cfgTargetMaxFoodCostRate");
+        const inpAov = document.getElementById("cfgTargetAOV");
+        const hintCost = document.getElementById("disp-cost-rate-hint");
+
+        if (val === "DRINKS") {
+            if (inpCost) inpCost.value = 25;
+            if (inpAov) inpAov.value = 35000;
+            if (hintCost) hintCost.innerText = "(Trà sữa/Cà phê: Cost ~22% - 25%)";
+        } else if (val === "PUBS") {
+            if (inpCost) inpCost.value = 42;
+            if (inpAov) inpAov.value = 200000;
+            if (hintCost) hintCost.innerText = "(Quán nhậu/Bia: Cost ~40% - 42%)";
+        } else if (val === "RESTAURANT") {
+            if (inpCost) inpCost.value = 38;
+            if (inpAov) inpAov.value = 85000;
+            if (hintCost) hintCost.innerText = "(Cơm trưa/Gia đình: Cost ~35% - 38%)";
+        } else {
+            // FAST_FOOD mặc định
+            if (inpCost) inpCost.value = 35;
+            if (inpAov) inpAov.value = 50000;
+            if (hintCost) hintCost.innerText = "(Mì trộn/Cơm nhanh: Cost ~32% - 35%)";
         }
     }
 
     /**
-     * Bắt tọa độ GPS thực tế của quán thông qua HTML5 Geolocation API
+     * MÔ PHỎNG GIÁ NHẢY THỜI GIAN THỰC THEO % LỆCH GIÁ D2C
+     * @param {number|string} rateVal - % Lệch giá D2C so với App sàn
      */
-    function detectCurrentGPS() {
-        const btn = document.getElementById("btn-auto-gps");
+    function previewPricingDemo(rateVal) {
+        const r = (parseFloat(rateVal) || 12) / 100;
+        const demoAppPrice = 45000; // Giá sàn giả định tô mì
+        const demoD2CPrice = Math.round((demoAppPrice * (1 - r)) / 1000) * 1000;
+        const demoEl = document.getElementById("demoPricingCalc");
+        if (demoEl) {
+            demoEl.innerHTML = `
+                <span>Sàn App: ${demoAppPrice.toLocaleString("vi-VN")}đ</span>
+                <i class="fa-solid fa-arrow-right text-[10px] text-slate-500"></i>
+                <span class="text-emerald-400">D2C: ${demoD2CPrice.toLocaleString("vi-VN")}đ (Lệch ${Math.round(r * 100)}%)</span>
+            `;
+        }
+    }
 
-        if (!navigator.geolocation) {
-            alert("⚠️ Trình duyệt hoặc thiết bị của anh không hỗ trợ định vị GPS tự động. Vui lòng nhập tay tọa độ.");
+    /**
+     * ĐỊNH DẠNG Ô NHẬP TÙY THEO NGÂN HÀNG THƯỜNG HOẶC VÍ MOMO
+     */
+    function handleBankSelectChange() {
+        const selBank = document.getElementById("cfgBankSelect");
+        const val = selBank ? selBank.value : "";
+        const lblAcc = document.getElementById("lbl-cfg-bank-acc");
+        const inpAcc = document.getElementById("cfgBankAccount");
+
+        if (val.indexOf("MOMO") !== -1) {
+            if (lblAcc) lblAcc.innerText = "Số Điện Thoại Ví MoMo Nhận Tiền:";
+            if (inpAcc) inpAcc.placeholder = "Nhập SĐT Ví MoMo (VD: 0979531213)";
+        } else {
+            if (lblAcc) lblAcc.innerText = "Số Tài Khoản Ngân Hàng Nhận Tiền:";
+            if (inpAcc) inpAcc.placeholder = "Nhập Số tài khoản Ngân hàng (VD: 3939388888)";
+        }
+    }
+  /**
+     * VẼ MÃ QR STANDEE THỜI GIAN THỰC KHI NHẬP HOẶC ĐỔI URL QUÁN
+     * @param {string} [url] - Đường dẫn Web App đặt món
+     */
+    function generateStoreDynamicQr(url) {
+        const targetUrl = (url && url.trim()) ? url.trim() : (window.location.href.split("?")[0]);
+        const qrImg = document.getElementById("dynamicStoreQrImg");
+        if (qrImg && targetUrl) {
+            qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(targetUrl) + "&margin=10";
+        }
+    }
+
+    /**
+     * TẢI ẢNH MÃ QR STANDEE ĐỘ NÉT CAO (PNG 300 DPI) VỀ MÁY
+     * Bọc thép xử lý Blob tránh lỗi CORS khi tải ảnh từ máy chủ bên thứ ba.
+     */
+    async function downloadStoreQrImage() {
+        const qrImg = document.getElementById("dynamicStoreQrImg");
+        if (!qrImg || !qrImg.src) {
+            alert("⚠️ Chưa có hình ảnh mã QR để tải!");
             return;
         }
 
-        const originalText = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lấy GPS...';
+        try {
+            const res = await fetch(qrImg.src);
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
 
-        const geoOptions = {
-            enableHighAccuracy: true, // Ép dùng chip GPS phần cứng để sai số < 10m
-            timeout: 10000,           // Chờ tối đa 10 giây
-            maximumAge: 0             // Không dùng tọa độ lưu đệm cũ
-        };
+            const a = document.createElement("a");
+            a.href = blobUrl;
+            a.download = "QR_Standee_Thim5_Master.png";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+
+            alert("📥 Đã tải file ảnh mã QR Standee độ nét cao về máy thành công!");
+        } catch (err) {
+            // Fallback tải trực tiếp nếu fetch bị chặn
+            const a = document.createElement("a");
+            a.href = qrImg.src;
+            a.target = "_blank";
+            a.download = "QR_Standee_Thim5_Master.png";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    }
+
+    /**
+     * SAO CHÉP LINK WEB ĐẶT MÓN VÀO BỘ NHỚ TẠM (CLIPBOARD)
+     */
+    function copyStoreWebUrl() {
+        const inpUrl = document.getElementById("cfgStoreWebUrl");
+        const targetUrl = (inpUrl && inpUrl.value.trim()) ? inpUrl.value.trim() : window.location.href.split("?")[0];
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(targetUrl).then(function() {
+                alert("📋 Đã sao chép đường dẫn Web quán vào bộ nhớ tạm:\n" + targetUrl);
+            }).catch(function() {
+                prompt("Nhấn Ctrl+C để sao chép đường dẫn:", targetUrl);
+            });
+        } else {
+            prompt("Nhấn Ctrl+C để sao chép đường dẫn:", targetUrl);
+        }
+    }
+
+    /**
+     * BẮT TỌA ĐỘ GPS TÂM BẾP BẰNG HTML5 GEOLOCATION
+     * Tự động điền chính xác vĩ độ (Lat) và kinh độ (Lng) phục vụ công thức Haversine.
+     */
+    function getCurrentLocationGps() {
+        if (!navigator.geolocation) {
+            alert("⚠️ Trình duyệt của thiết bị không hỗ trợ định vị GPS!");
+            return;
+        }
+
+        const btnGps = event ? event.target.closest("button") : null;
+        const origText = btnGps ? btnGps.innerHTML : "";
+        if (btnGps) {
+            btnGps.disabled = true;
+            btnGps.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-blue-400"></i> Đang định vị...';
+        }
 
         navigator.geolocation.getCurrentPosition(
-            function(position) {
-                const lat = position.coords.latitude.toFixed(6);
-                const lng = position.coords.longitude.toFixed(6);
-                const accuracy = Math.round(position.coords.accuracy);
+            function(pos) {
+                const lat = pos.coords.latitude.toFixed(6);
+                const lng = pos.coords.longitude.toFixed(6);
 
-                document.getElementById("cfg-STORE_LAT").value = lat;
-                document.getElementById("cfg-STORE_LNG").value = lng;
+                const inpLat = document.getElementById("cfgLat");
+                const inpLng = document.getElementById("cfgLng");
+                if (inpLat) inpLat.value = lat;
+                if (inpLng) inpLng.value = lng;
 
-                updateMapsPreviewLink();
-
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> Đã lấy GPS';
-                setTimeout(() => { btn.innerHTML = originalText; }, 2500);
-
-                alert(`📍 Đã bắt được tọa độ chính xác của Bếp!\nVĩ độ (Lat): ${lat}\nKinh độ (Lng): ${lng}\nSai số ước tính: ±${accuracy}m`);
-            },
-            function(err) {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-
-                let errMsg = "Không thể lấy vị trí GPS.";
-                if (err.code === err.PERMISSION_DENIED) {
-                    errMsg = "Trình duyệt đang chặn quyền truy cập vị trí. Vui lòng cấp quyền vị trí cho trang web trong cài đặt trình duyệt.";
-                } else if (err.code === err.POSITION_UNAVAILABLE) {
-                    errMsg = "Tín hiệu GPS không khả dụng tại vị trí hiện tại.";
-                } else if (err.code === err.TIMEOUT) {
-                    errMsg = "Quá thời gian kết nối GPS vệ tinh (10s). Vui lòng thử lại.";
+                if (btnGps) {
+                    btnGps.disabled = false;
+                    btnGps.innerHTML = origText;
                 }
 
-                alert("⚠️ " + errMsg);
-                console.warn("[ConfigController] Geolocation Error:", err);
+                alert(`📍 Đã lấy tọa độ GPS thực tế của Bếp thành công!\nVĩ độ (Lat): ${lat}\nKinh độ (Lng): ${lng}`);
             },
-            geoOptions
+            function(err) {
+                if (btnGps) {
+                    btnGps.disabled = false;
+                    btnGps.innerHTML = origText;
+                }
+                alert("❌ Không thể lấy GPS: " + err.message + "\nVui lòng bật quyền truy cập vị trí trên trình duyệt.");
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }
 
     /**
-     * Cập nhật liên kết xem thử vị trí trên Google Maps vệ tinh
+     * XUẤT VÀ GỬI EMAIL BÁO CÁO THUẾ HÔM NAY NGAY LẬP TỨC
      */
-    function updateMapsPreviewLink() {
-        const lat = (document.getElementById("cfg-STORE_LAT").value || "").trim();
-        const lng = (document.getElementById("cfg-STORE_LNG").value || "").trim();
-        const link = document.getElementById("link-preview-maps");
+    async function handleManualSendTaxReport() {
+        const inpEmail = document.getElementById("cfgTaxReportEmails");
+        const targetEmail = inpEmail ? inpEmail.value.trim() : "haiau2205@gmail.com";
 
-        if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-            link.href = `https://www.google.com/maps?q=${lat},${lng}`;
-            link.classList.remove("hidden");
-        } else {
-            link.classList.add("hidden");
+        if (!targetEmail) {
+            alert("⚠️ Vui lòng nhập ít nhất một địa chỉ Email nhận báo cáo thuế!");
+            if (inpEmail) inpEmail.focus();
+            return;
         }
-    }
 
-    /**
-     * Thu thập dữ liệu hiện thời trên toàn bộ các trường nhập
-     */
-    function getFormData() {
-        const currentData = {};
-        CONFIG_KEYS.forEach(key => {
-            const inputElem = document.getElementById("cfg-" + key);
-            if (inputElem) {
-                currentData[key] = inputElem.value.trim();
+        const ok = confirm(`Xác nhận xuất bảng kê khai doanh thu và trích lập Thuế HKD 4.5% gửi về:\n${targetEmail}?`);
+        if (!ok) return;
+
+        try {
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const res = await Thim5API.callGAS("triggerManualTaxReportExport", { email: targetEmail });
+                alert("✅ " + ((res && res.message) ? res.message : "Đã kích hoạt gửi bảng kê thuế thành công về email!"));
+            } else {
+                alert(`📧 [Mô Phỏng] Đã gửi thành công Báo cáo Thuế & P&L về hòm thư: ${targetEmail}`);
             }
-        });
-        return currentData;
+        } catch (err) {
+            alert("❌ Lỗi gửi email báo cáo thuế: " + err.message);
+        }
     }
 
     /**
-     * Mở modal xác nhận thay đổi và kiểm tra rào chắn logic
+     * KÍCH HOẠT HẸN GIỜ TỰ ĐỘNG GỬI BÁO CÁO THUẾ LÚC 23:59 (GAS TIME TRIGGER)
      */
-    function openConfirmModal() {
-        const currentData = getFormData();
-        pendingChanges = {};
+    async function handleActivateTaxAutoTrigger() {
+        const ok = confirm("Xác nhận cài đặt Lập lịch tự động (Time-driven Trigger) trên Google Apps Script để chốt sổ và gửi email lúc 23:59 mỗi đêm?");
+        if (!ok) return;
 
-        // 1. Kiểm duyệt rào chắn tài chính: Khóa trần khuyến mãi
-        const promoCap = parseFloat(currentData["PROMO_CAP_RATE"]);
-        if (promoCap > 0.15) {
-            const confirmRisk = confirm("⚠️ CẢNH BÁO TÀI CHÍNH: Trần khuyến mãi đang vượt mức 15% (" + (promoCap * 100) + "%). Việc này có thể làm âm dòng tiền thực thu của quán. Anh Hải Âu có chắc chắn muốn thiết lập mức này?");
-            if (!confirmRisk) return;
-        }
-
-        // 2. Kiểm duyệt tọa độ GPS hợp lệ
-        const lat = parseFloat(currentData["STORE_LAT"]);
-        const lng = parseFloat(currentData["STORE_LNG"]);
-        if (isNaN(lat) || lat < -90 || lat > 90 || isNaN(lng) || lng < -180 || lng > 180) {
-            alert("⚠️ Tọa độ GPS của quán không hợp lệ. Vĩ độ phải nằm trong khoảng [-90, 90] và Kinh độ [-180, 180].");
-            return;
-        }
-
-        // 3. Quét các trường dữ liệu có sự thay đổi thực tế
-        CONFIG_KEYS.forEach(key => {
-            const oldVal = String(originalSnapshot[key] !== undefined ? originalSnapshot[key] : "").trim();
-            const newVal = String(currentData[key] !== undefined ? currentData[key] : "").trim();
-
-            if (oldVal !== newVal) {
-                pendingChanges[key] = currentData[key];
+        try {
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const res = await Thim5API.callGAS("setupDailyTaxReportTrigger", {});
+                alert("✅ " + ((res && res.message) ? res.message : "Đã kích hoạt lịch gửi báo cáo thuế tự động lúc 23:59 thành công!"));
+            } else {
+                alert("✅ [Mô Phỏng] Đã kích hoạt hẹn giờ tự động gửi báo cáo thuế lúc 23:59!");
             }
-        });
+        } catch (err) {
+            alert("❌ Lỗi kích hoạt lịch tự động: " + err.message);
+        }
+    }
 
-        const changedKeys = Object.keys(pendingChanges);
-        if (changedKeys.length === 0) {
-            alert("ℹ️ Không có thông số nào thay đổi so với cấu hình hiện tại.");
+    /**
+     * NẠP DỮ LIỆU CẤU HÌNH GAMIFICATION TỪ CSDL HOẶC GÁN MẶC ĐỊNH
+     */
+    async function loadGamificationConfigFromDB() {
+        try {
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const res = await Thim5API.callGAS("getLoyaltyGamificationConfig", {});
+                const cfg = (res && res.data) ? res.data : res;
+                if (cfg && cfg.tiers && Array.isArray(cfg.tiers)) {
+                    renderTierConfigTable(cfg.tiers);
+                    hydrateUpsellAndReferral(cfg);
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn("⚠️ Không thể tải cấu hình Gamification từ CSDL, nạp bộ khung mặc định.");
+        }
+
+        // Khung Gamification 5 Tiers mặc định chuẩn F&B
+        const defaultTiers = [
+            { level: 0, minOrders: 0, defaultBadge: "🌱 Tấm Chiếu Mới", prefixPool: ["Bạn Mới", "Tân Binh"], discount: 0.00, freeship: false },
+            { level: 1, minOrders: 2, defaultBadge: "🥢 Khách Gu Ruột", prefixPool: ["Bạn Thân", "Gu Chuẩn"], discount: 0.01, freeship: false },
+            { level: 2, minOrders: 4, defaultBadge: "💖 Fen Cứng Thím 5", prefixPool: ["Fen Cứng", "Nghiện Mì"], discount: 0.02, freeship: false },
+            { level: 3, minOrders: 7, defaultBadge: "👑 Chiến Thần Mì Trộn", prefixPool: ["Chiến Thần", "Bụng Thép"], discount: 0.03, freeship: false },
+            { level: 4, minOrders: 12, defaultBadge: "💎 Tri Kỷ Đất Thánh", prefixPool: ["Tri Kỷ", "Cổ Đông Không Vốn"], discount: 0.03, freeship: true }
+        ];
+
+        renderTierConfigTable(defaultTiers);
+    }
+
+    /**
+     * VẼ BẢNG CẤU HÌNH 5 CẤP BẬC TIERS THÁNG VỚI CÁC Ô NHẬP LIỆU
+     * @param {Array} tiers - Danh sách cấu hình 5 cấp bậc thành viên
+     */
+    function renderTierConfigTable(tiers) {
+        const tbody = document.getElementById("tierConfigTbody");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        if (!tiers || !Array.isArray(tiers) || tiers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-slate-500 font-sans">Chưa có cấu hình Tiers.</td></tr>';
             return;
         }
 
-        // 4. Render danh sách thay đổi vào Modal để đối soát trực quan
-        const diffListElem = document.getElementById("config-diff-list");
-        diffListElem.innerHTML = "";
-        changedKeys.forEach(key => {
-            const oldVal = originalSnapshot[key] || "(trống)";
-            const newVal = pendingChanges[key] || "(trống)";
-            const row = document.createElement("div");
-            row.className = "flex justify-between border-b border-slate-900 pb-1";
-            row.innerHTML = `<span class="text-slate-300 font-semibold">${key}:</span> <span class="text-red-400 line-through">${oldVal}</span> ➔ <span class="text-emerald-400 font-bold">${newVal}</span>`;
-            diffListElem.appendChild(row);
+        tiers.forEach(function(t, idx) {
+            const poolText = Array.isArray(t.prefixPool) ? t.prefixPool.join(" | ") : String(t.prefixPool || "");
+            const discPct = ((Number(t.discount) || 0) * 100).toFixed(1);
+            const isFreeship = (t.freeship === true || String(t.freeship).toUpperCase() === "TRUE");
+
+            const tr = document.createElement("tr");
+            tr.className = "hover:bg-slate-800/30 transition border-b border-slate-800/40";
+            tr.innerHTML = `
+                <td class="py-2 px-2 font-bold text-amber-400">Lv.${t.level !== undefined ? t.level : idx}</td>
+                <td class="py-2 px-2">
+                    <input type="number" min="0" max="99" id="tierOrders_${idx}" value="${t.minOrders || 0}" class="w-14 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono font-bold text-white text-center focus:outline-none focus:border-amber-500">
+                </td>
+                <td class="py-2 px-2">
+                    <input type="text" id="tierBadge_${idx}" value="${t.defaultBadge || ''}" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-sans text-slate-200 focus:outline-none focus:border-amber-500">
+                </td>
+                <td class="py-2 px-2">
+                    <input type="text" id="tierPool_${idx}" value="${poolText}" placeholder="Từ khóa 1 | Từ khóa 2" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-sans text-slate-300 focus:outline-none focus:border-sky-500">
+                </td>
+                <td class="py-2 px-2">
+                    <div class="flex items-center gap-1">
+                        <input type="number" step="0.1" min="0" max="20" id="tierDisc_${idx}" value="${discPct}" class="w-14 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs font-mono font-bold text-emerald-400 text-center focus:outline-none focus:border-emerald-500">
+                        <span class="text-[10px] text-slate-400">%</span>
+                    </div>
+                </td>
+                <td class="py-2 px-2 text-center">
+                    <input type="checkbox" id="tierFreeship_${idx}" ${isFreeship ? 'checked' : ''} class="w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-0 cursor-pointer">
+                </td>
+            `;
+            tbody.appendChild(tr);
         });
-
-        // Reset trạng thái ô nhập PIN và mở modal
-        const pinInput = document.getElementById("input-confirm-pin");
-        const pinError = document.getElementById("pin-error-msg");
-        if (pinInput) pinInput.value = "";
-        if (pinError) pinError.classList.add("hidden");
-
-        const modal = document.getElementById("modal-confirm-config");
-        if (modal) modal.classList.remove("hidden");
-        if (pinInput) pinInput.focus();
     }
 
     /**
-     * Đóng modal xác nhận
+     * BƠM DỮ LIỆU UPSELL NƯỚC UỐNG & CHIẾN DỊCH REFERRAL
      */
-    function closeConfirmModal() {
-        const modal = document.getElementById("modal-confirm-config");
-        if (modal) modal.classList.add("hidden");
-        pendingChanges = {};
+    function hydrateUpsellAndReferral(cfg) {
+        if (!cfg) return;
+
+        if (cfg.drinkUpsell && Array.isArray(cfg.drinkUpsell) && cfg.drinkUpsell.length >= 2) {
+            const u1 = cfg.drinkUpsell[0];
+            const u2 = cfg.drinkUpsell[1];
+            if (document.getElementById("upsellMinBill1")) document.getElementById("upsellMinBill1").value = u1.minBill || 50000;
+            if (document.getElementById("upsellGiftName1")) document.getElementById("upsellGiftName1").value = u1.giftName || "1 Chai Nước Suối Ướp Lạnh (0đ)";
+            if (document.getElementById("upsellMinBill2")) document.getElementById("upsellMinBill2").value = u2.minBill || 99000;
+            if (document.getElementById("upsellGiftName2")) document.getElementById("upsellGiftName2").value = u2.giftName || "1 Lon Pepsi/7Up Ướp Lạnh (0đ)";
+        }
+
+        if (cfg.referral) {
+            if (document.getElementById("refInviteeDisc")) document.getElementById("refInviteeDisc").value = cfg.referral.inviteeDiscount || 5000;
+            if (document.getElementById("refMinSpend")) document.getElementById("refMinSpend").value = cfg.referral.inviteeMinSpend || 40000;
+        }
     }
 
     /**
-     * Thực thi lưu cấu hình mới lên Backend Google Apps Script
+     * LƯU RIÊNG TOÀN BỘ CẤU HÌNH MARKETING & GAMIFICATION VÀO CSDL
      */
-    async function executeSave() {
-        const pinInput = document.getElementById("input-confirm-pin");
-        const pinError = document.getElementById("pin-error-msg");
-        const btnExecute = document.getElementById("btn-execute-save");
+    async function saveGamificationConfigToDB() {
+        const tiers = [];
+        for (let i = 0; i < 5; i++) {
+            const inpOrders = document.getElementById("tierOrders_" + i);
+            const inpBadge = document.getElementById("tierBadge_" + i);
+            const inpPool = document.getElementById("tierPool_" + i);
+            const inpDisc = document.getElementById("tierDisc_" + i);
+            const chkFreeship = document.getElementById("tierFreeship_" + i);
 
-        const enteredPin = pinInput ? pinInput.value.trim() : "";
-        const expectedPin = String(originalSnapshot["ADMIN_PIN_LV2"] || "2026").trim();
+            if (inpOrders && inpBadge) {
+                const pool = inpPool ? inpPool.value.split("|").map(s => s.trim()).filter(Boolean) : [];
+                tiers.push({
+                    level: i,
+                    minOrders: parseInt(inpOrders.value, 10) || 0,
+                    defaultBadge: inpBadge.value.trim(),
+                    prefixPool: pool,
+                    discount: (parseFloat(inpDisc ? inpDisc.value : 0) || 0) / 100,
+                    freeship: chkFreeship ? chkFreeship.checked : false
+                });
+            }
+        }
 
-        // Kiểm duyệt mã PIN Super Admin (Level 2)
-        if (enteredPin !== expectedPin) {
-            if (pinError) pinError.classList.remove("hidden");
-            if (pinInput) pinInput.focus();
+        const payload = {
+            monthlyReset: true,
+            tiers: tiers,
+            drinkUpsell: [
+                {
+                    minBill: Number(document.getElementById("upsellMinBill1").value) || 50000,
+                    giftName: document.getElementById("upsellGiftName1").value.trim(),
+                    cost: 2000
+                },
+                {
+                    minBill: Number(document.getElementById("upsellMinBill2").value) || 99000,
+                    giftName: document.getElementById("upsellGiftName2").value.trim(),
+                    cost: 8200
+                }
+            ],
+            referral: {
+                enabled: true,
+                inviteeDiscount: Number(document.getElementById("refInviteeDisc").value) || 5000,
+                inviteeMinSpend: Number(document.getElementById("refMinSpend").value) || 40000
+            }
+        };
+
+        const btnSave = event ? event.target.closest("button") : null;
+        const origBtnText = btnSave ? btnSave.innerHTML : "";
+
+        try {
+            if (btnSave) {
+                btnSave.disabled = true;
+                btnSave.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang Lưu Chiến Dịch...';
+            }
+
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const res = await Thim5API.callGAS("saveLoyaltyGamificationConfig", payload);
+                alert("🎉 " + ((res && res.message) ? res.message : "Đã cập nhật chiến dịch Gamification thành công vào CSDL!"));
+            } else {
+                alert("🎉 [Mô Phỏng] Đã lưu thành công 5 Cấp bậc Tiers & Chiến dịch Marketing!");
+            }
+        } catch (err) {
+            alert("❌ Lỗi lưu Gamification: " + err.message);
+        } finally {
+            if (btnSave) {
+                btnSave.disabled = false;
+                btnSave.innerHTML = origBtnText;
+            }
+        }
+    }
+  /**
+     * ĐỔI MÃ PIN LEVEL 1 DÀNH CHO QUẢN LÝ CA / BẾP TRƯỞNG
+     */
+    async function handleSavePinLevel1() {
+        const inpPin = document.getElementById("inputNewPinLv1");
+        const newPin = inpPin ? inpPin.value.trim() : "";
+
+        if (!newPin || newPin.length < 4) {
+            alert("⚠️ Vui lòng nhập mã PIN Level 1 mới có ít nhất từ 4 đến 6 chữ số!");
+            if (inpPin) inpPin.focus();
             return;
+        }
+
+        const ok = confirm(`Xác nhận đổi mã PIN Level 1 (Quản lý ca) thành: "${newPin}"?`);
+        if (!ok) return;
+
+        try {
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const res = await Thim5API.callGAS("updateManagerPinLevel1", { pin: newPin });
+                alert("✅ " + ((res && res.message) ? res.message : "Đã cập nhật mã PIN Level 1 thành công!"));
+                if (inpPin) inpPin.value = "";
+            } else {
+                alert(`✅ [Mô Phỏng] Đã đổi thành công PIN Level 1 sang: ${newPin}`);
+                if (inpPin) inpPin.value = "";
+            }
+        } catch (err) {
+            alert("❌ Lỗi đổi PIN Level 1: " + err.message);
+        }
+    }
+
+    /**
+     * GỬI MÃ OTP 6 SỐ VỀ GMAIL CHÍNH CHỦ ĐỂ MỞ KHÓA ĐỔI SUPER PIN LEVEL 2
+     */
+    async function openSuperPinResetModal() {
+        const targetEmail = (activeConfigCache && activeConfigCache.taxReportEmails) ? 
+            activeConfigCache.taxReportEmails.split(",")[0].trim() : "haiau2205@gmail.com";
+
+        const ok = confirm(`Hệ thống sẽ gửi mã OTP xác thực 6 số về Gmail chính chủ của anh Hải Âu (${targetEmail}).\n\nAnh có muốn tiếp tục?`);
+        if (!ok) return;
+
+        try {
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const res = await Thim5API.callGAS("sendSuperPinResetOtp", { email: targetEmail });
+                alert("📧 " + ((res && res.message) ? res.message : `Mã OTP xác thực đã được gửi về hộp thư: ${targetEmail}`));
+            } else {
+                alert(`📧 [Mô Phỏng] Đã gửi mã OTP 6 số ngẫu nhiên về Gmail: ${targetEmail}`);
+            }
+
+            // Mở modal nhập OTP
+            const modal = document.getElementById("superPinOtpModal");
+            if (modal) {
+                document.getElementById("superOtpInput").value = "";
+                document.getElementById("newSuperPinInput").value = "";
+                modal.classList.remove("hidden");
+                document.getElementById("superOtpInput").focus();
+            }
+        } catch (err) {
+            alert("❌ Lỗi gửi mã OTP qua Gmail: " + err.message);
+        }
+    }
+
+    /**
+     * XÁC THỰC MÃ OTP VÀ LƯU MÃ SUPER PIN LEVEL 2 MỚI
+     */
+    async function handleSubmitSuperPinReset() {
+        const inpOtp = document.getElementById("superOtpInput");
+        const inpNewPin = document.getElementById("newSuperPinInput");
+        const otpVal = inpOtp ? inpOtp.value.trim() : "";
+        const newPinVal = inpNewPin ? inpNewPin.value.trim() : "";
+
+        if (!otpVal || otpVal.length !== 6) {
+            alert("⚠️ Vui lòng nhập chính xác mã OTP bảo mật gồm 6 chữ số!");
+            if (inpOtp) inpOtp.focus();
+            return;
+        }
+
+        if (!newPinVal || newPinVal.length < 4) {
+            alert("⚠️ Mã Super PIN mới phải có ít nhất từ 4 đến 6 chữ số!");
+            if (inpNewPin) inpNewPin.focus();
+            return;
+        }
+
+        const btnSubmit = document.getElementById("btn-submit-otp-pin");
+        const origText = btnSubmit ? btnSubmit.innerHTML : "";
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang xác thực...';
         }
 
         try {
-            if (btnExecute) {
-                btnExecute.disabled = true;
-                btnExecute.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lưu...';
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const res = await Thim5API.callGAS("verifyOtpAndSaveSuperPin", {
+                    otp: otpVal,
+                    newPin: newPinVal
+                });
+
+                if (res && (res.success || res.status === "SUCCESS")) {
+                    alert("👑 " + (res.message || "Xác thực OTP thành công! Đã cập nhật Super PIN Level 2 mới!"));
+                    document.getElementById("superPinOtpModal").classList.add("hidden");
+                    localStorage.setItem("thim5_admin_active_pin", newPinVal);
+                } else {
+                    alert("❌ " + ((res && res.message) ? res.message : "Mã OTP không chính xác hoặc đã hết hạn!"));
+                }
+            } else {
+                alert(`👑 [Mô Phỏng] Đã xác thực thành công! Super PIN Level 2 mới là: ${newPinVal}`);
+                document.getElementById("superPinOtpModal").classList.add("hidden");
+                localStorage.setItem("thim5_admin_active_pin", newPinVal);
             }
-
-            // Gọi API cập nhật cấu hình động
-            const response = await Thim5API.callGAS("updateSysConfig", pendingChanges);
-
-            // Cập nhật lại snapshot dữ liệu với các giá trị vừa lưu
-            Object.assign(originalSnapshot, pendingChanges);
-
-            alert("✅ " + (response.message || "Đã cập nhật cấu hình hệ thống thành công!"));
-            closeConfirmModal();
-        } catch (error) {
-            alert("❌ Lỗi khi cập nhật cấu hình: " + error.message);
-            console.error("[ConfigController] Lỗi executeSave:", error);
+        } catch (err) {
+            alert("❌ Lỗi xác thực OTP: " + err.message);
         } finally {
-            if (btnExecute) {
-                btnExecute.disabled = false;
-                btnExecute.innerHTML = '<i class="fa-solid fa-check"></i> Xác Nhận Lưu';
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = origText;
             }
         }
     }
 
+    /**
+     * LƯU NHANH CÔNG THỨC ĐỊNH GIÁ NGƯỢC D2C & BẬC THANG BÙ SHIP (KHỐI 4)
+     */
+    async function handleSaveDynamicFormulas() {
+        const d2cRateVal = parseFloat(document.getElementById("cfgD2cDiscountRate").value) || 12;
+        const promoRateVal = parseFloat(document.getElementById("cfgMaxPromoBudgetRate").value) || 15;
+
+        if (d2cRateVal < 0 || d2cRateVal > 40) {
+            alert("⚠️ Tỷ lệ giảm giá D2C so với sàn phải nằm trong khoảng từ 0% đến 40%!");
+            return;
+        }
+
+        if (promoRateVal < 5 || promoRateVal > 30) {
+            alert("⚠️ Khóa trần khuyến mãi toàn đơn phải nằm trong khoảng an toàn từ 5% đến 30%!");
+            return;
+        }
+
+        const payload = {
+            d2cDiscountRate: d2cRateVal / 100,
+            maxPromoBudgetRate: promoRateVal / 100,
+            shippingRules: {
+                subsidyTier1_MinBill: Number(document.getElementById("cfgShipMinBill1").value) || 100000,
+                subsidyTier1_Amount: Number(document.getElementById("cfgShipSubsidy1").value) || 15000,
+                subsidyTier2_MinBill: Number(document.getElementById("cfgShipMinBill2").value) || 150000,
+                subsidyTier2_Amount: Number(document.getElementById("cfgShipSubsidy2").value) || 25000
+            }
+        };
+
+        const btn = document.getElementById("btn-save-pricing-formulas");
+        const origText = btn ? btn.innerHTML : "";
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang cập nhật công thức...';
+        }
+
+        try {
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const res = await Thim5API.callGAS("updateDynamicPricingSettings", payload);
+                alert("✅ " + ((res && res.message) ? res.message : "Đã đồng bộ công thức định giá và bậc thang bù ship thành công!"));
+            } else {
+                alert("✅ [Mô Phỏng] Đã lưu thành công công thức định giá D2C và bậc thang bù ship!");
+            }
+            previewPricingDemo(d2cRateVal);
+        } catch (err) {
+            alert("❌ Lỗi lưu công thức: " + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        }
+    }
+
+    /**
+     * HÀM TRUNG TÂM: KIỂM DUYỆT TOÀN DIỆN & LƯU TỔNG THỂ CẤU HÌNH SUPER ADMIN VÀO CSDL
+     */
+    async function saveSystemSettingsSubmit() {
+        // 1. Thu thập dữ liệu từ các khối
+        const bankParts = (document.getElementById("cfgBankSelect").value || "MB|970422").split("|");
+        const bankCode = bankParts[0] || "MB";
+        const bankBin = bankParts[1] || "970422";
+        const bankAccount = document.getElementById("cfgBankAccount").value.trim();
+        const accountHolderName = document.getElementById("cfgAccountHolderName").value.trim().toUpperCase();
+        const accountTypeLabel = document.getElementById("cfgAccountTypeLabel").value;
+
+        const storeName = document.getElementById("cfgStoreName").value.trim();
+        const ownerName = document.getElementById("cfgOwnerName").value.trim();
+        const storePhone = document.getElementById("cfgStorePhone").value.trim();
+        const storeAddress = document.getElementById("cfgStoreAddress").value.trim();
+        const storeCoverUrl = document.getElementById("cfgStoreCoverUrl").value.trim();
+        const webAppUrl = document.getElementById("cfgStoreWebUrl").value.trim();
+
+        const latVal = document.getElementById("cfgLat").value.trim();
+        const lngVal = document.getElementById("cfgLng").value.trim();
+        const autoOpenHour = parseInt(document.getElementById("cfgAutoOpenHour").value, 10);
+        const autoCloseHour = parseInt(document.getElementById("cfgAutoCloseHour").value, 10);
+
+        const industryType = document.getElementById("cfgIndustryType").value;
+        const royaltyRate = parseFloat(document.getElementById("cfgHubRoyaltyRate").value);
+        const marketingRate = parseFloat(document.getElementById("cfgMarketingBudgetRate").value);
+        const targetCostRate = parseFloat(document.getElementById("cfgTargetMaxFoodCostRate").value);
+        const targetAOV = parseInt(document.getElementById("cfgTargetAOV").value, 10);
+
+        const d2cDiscountRate = parseFloat(document.getElementById("cfgD2cDiscountRate").value);
+        const maxPromoRate = parseFloat(document.getElementById("cfgMaxPromoBudgetRate").value);
+        const taxRate = parseFloat(document.getElementById("cfgTaxRatePercent").value);
+        const taxReportEmails = document.getElementById("cfgTaxReportEmails").value.trim();
+
+        const metaPixelId = document.getElementById("cfgMetaPixelId").value.trim();
+        const tiktokPixelId = document.getElementById("cfgTiktokPixelId").value.trim();
+
+        // 2. RÀO CHẮN KIỂM DUYỆT (VALIDATION GUARD)
+        if (!storeName) {
+            alert("⚠️ Vui lòng nhập Tên Thương Hiệu Quán!");
+            document.getElementById("cfgStoreName").focus();
+            return;
+        }
+
+        if (!storePhone) {
+            alert("⚠️ Vui lòng nhập Số Điện Thoại Hotline của Bếp!");
+            document.getElementById("cfgStorePhone").focus();
+            return;
+        }
+
+        if (!bankAccount) {
+            alert("⚠️ Vui lòng nhập Số Tài Khoản Ngân Hàng hoặc SĐT Ví MoMo thụ hưởng!");
+            document.getElementById("cfgBankAccount").focus();
+            return;
+        }
+
+        if (!accountHolderName) {
+            alert("⚠️ Vui lòng nhập Tên Chủ Tài Khoản (In hoa không dấu)!");
+            document.getElementById("cfgAccountHolderName").focus();
+            return;
+        }
+
+        if (isNaN(royaltyRate) || royaltyRate < 0 || royaltyRate > 20) {
+            alert("⚠️ Tỷ lệ Thù lao Master Sếp Âu phải nằm trong khoảng từ 0% đến 20%!");
+            document.getElementById("cfgHubRoyaltyRate").focus();
+            return;
+        }
+
+        if (isNaN(marketingRate) || marketingRate < 0 || marketingRate > 10) {
+            alert("⚠️ Quỹ Marketing Ads phải nằm trong khoảng từ 0% đến 10%!");
+            document.getElementById("cfgMarketingBudgetRate").focus();
+            return;
+        }
+
+        if (isNaN(targetCostRate) || targetCostRate < 10 || targetCostRate > 60) {
+            alert("⚠️ Ngưỡng Food Cost trần an toàn phải nằm trong khoảng từ 10% đến 60%!");
+            document.getElementById("cfgTargetMaxFoodCostRate").focus();
+            return;
+        }
+
+        if (isNaN(taxRate) || taxRate < 0 || taxRate > 15) {
+            alert("⚠️ Tỷ lệ Thuế khoán HKD phải nằm trong khoảng từ 0% đến 15%!");
+            document.getElementById("cfgTaxRatePercent").focus();
+            return;
+        }
+
+        // 3. ĐÓNG GÓI PAYLOAD CHUẨN DOANH NGHIỆP MULTI-TENANT
+        const masterPayload = {
+            storeName: storeName,
+            ownerName: ownerName,
+            phone: storePhone,
+            address: storeAddress,
+            storeCoverUrl: storeCoverUrl,
+            webAppUrl: webAppUrl,
+
+            bankCode: bankCode,
+            bankBin: bankBin,
+            bankAccount: bankAccount,
+            momoAccount: bankAccount,
+            accountHolderName: accountHolderName,
+            momoName: accountHolderName,
+            accountTypeLabel: accountTypeLabel,
+
+            lat: latVal,
+            lng: lngVal,
+            centerCoords: { lat: latVal, lng: lngVal },
+            autoOpenHour: isNaN(autoOpenHour) ? 6 : autoOpenHour,
+            autoCloseHour: isNaN(autoCloseHour) ? 22 : autoCloseHour,
+
+            industryType: industryType,
+            hubRoyaltyRate: royaltyRate / 100,
+            marketingBudgetRate: marketingRate / 100,
+            targetMaxFoodCostRate: targetCostRate / 100,
+            targetAOV: isNaN(targetAOV) ? 50000 : targetAOV,
+
+            d2cDiscountRate: (isNaN(d2cDiscountRate) ? 12 : d2cDiscountRate) / 100,
+            maxPromoBudgetRate: (isNaN(maxPromoRate) ? 15 : maxPromoRate) / 100,
+            taxRateDefault: (isNaN(taxRate) ? 4.5 : taxRate) / 100,
+            taxReportEmails: taxReportEmails,
+
+            shippingRules: {
+                subsidyTier1_MinBill: Number(document.getElementById("cfgShipMinBill1").value) || 100000,
+                subsidyTier1_Amount: Number(document.getElementById("cfgShipSubsidy1").value) || 15000,
+                subsidyTier2_MinBill: Number(document.getElementById("cfgShipMinBill2").value) || 150000,
+                subsidyTier2_Amount: Number(document.getElementById("cfgShipSubsidy2").value) || 25000
+            },
+
+            metaPixelId: metaPixelId,
+            tiktokPixelId: tiktokPixelId
+        };
+
+        const btnSave = document.getElementById("btn-save-master-system");
+        const origText = btnSave ? btnSave.innerHTML : "";
+        if (btnSave) {
+            btnSave.disabled = true;
+            btnSave.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-base"></i> ĐANG ĐỒNG BỘ CSDL MASTER...';
+        }
+
+        try {
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                const res = await Thim5API.callGAS("updateSysConfig", masterPayload);
+                alert("🎉 " + ((res && res.message) ? res.message : "ĐÃ LƯU VÀ ĐỒNG BỘ TOÀN BỘ CẤU HÌNH LÕI MASTER THÀNH CÔNG VÀO CSDL!"));
+            } else {
+                alert("🎉 [Mô Phỏng] Đã lưu và đồng bộ toàn bộ Cấu hình Lõi Super Admin Level 2 vào CSDL!");
+            }
+
+            activeConfigCache = Object.assign({}, masterPayload);
+            generateStoreDynamicQr(webAppUrl);
+            previewPricingDemo(d2cDiscountRate);
+
+        } catch (err) {
+            console.error("❌ Lỗi lưu cấu hình tổng thể:", err);
+            alert("❌ Không thể đồng bộ cấu hình vào máy chủ: " + err.message);
+        } finally {
+            if (btnSave) {
+                btnSave.disabled = false;
+                btnSave.innerHTML = origText;
+            }
+        }
+    }
+
+    // EXPORT CÁC HÀM CÔNG KHAI RA PUBLIC INTERFACE
     return {
-        loadConfig: loadConfig,
-        detectCurrentGPS: detectCurrentGPS,
-        updateMapsPreviewLink: updateMapsPreviewLink,
-        openConfirmModal: openConfirmModal,
-        closeConfirmModal: closeConfirmModal,
-        executeSave: executeSave
+        init: init,
+        reloadConfigFromDB: reloadConfigFromDB,
+        handleIndustryChange: handleIndustryChange,
+        previewPricingDemo: previewPricingDemo,
+        handleBankSelectChange: handleBankSelectChange,
+        generateStoreDynamicQr: generateStoreDynamicQr,
+        downloadStoreQrImage: downloadStoreQrImage,
+        copyStoreWebUrl: copyStoreWebUrl,
+        getCurrentLocationGps: getCurrentLocationGps,
+        handleManualSendTaxReport: handleManualSendTaxReport,
+        handleActivateTaxAutoTrigger: handleActivateTaxAutoTrigger,
+        loadGamificationConfigFromDB: loadGamificationConfigFromDB,
+        saveGamificationConfigToDB: saveGamificationConfigToDB,
+        handleSavePinLevel1: handleSavePinLevel1,
+        openSuperPinResetModal: openSuperPinResetModal,
+        handleSubmitSuperPinReset: handleSubmitSuperPinReset,
+        handleSaveDynamicFormulas: handleSaveDynamicFormulas,
+        saveSystemSettingsSubmit: saveSystemSettingsSubmit
     };
 })();
 
-/**
- * Hàm khởi tạo tiêu chuẩn được kích hoạt tự động bởi Router trong admin-shell.html
- */
-function initTabConfig() {
-    ConfigController.loadConfig();
-}
+// Tự động kích hoạt khi tài liệu DOM hoàn tất
+document.addEventListener("DOMContentLoaded", function() {
+    SuperAdminConfigController.init();
+    SuperAdminConfigController.loadGamificationConfigFromDB();
+});
 </script>
