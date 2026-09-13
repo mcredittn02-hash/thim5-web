@@ -303,25 +303,28 @@
 
     </main>
 
-    <!-- ========================================================================= -->
-    <!-- 5. MODAL TÙY CHỌN MÓN: CHỌN KHẨU VỊ CAY & SÚP KÈM (SMART DEFAULT CAY NHẸ) -->
+   <!-- ========================================================================= -->
+    <!-- 5. MODAL TÙY CHỌN MÓN THÔNG MINH (ẨN CAY VỚI NƯỚC, BẬT TOPPING KÉO AOV) -->
     <!-- ========================================================================= -->
     <div id="modal-dish-customizer" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/80 backdrop-blur-sm p-0 sm:p-4">
         
-        <div class="bg-slate-900 border-t sm:border-2 border-slate-800 sm:border-amber-500/40 w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in slide-in-from-bottom-5 duration-200">
+        <div class="bg-slate-900 border-t sm:border-2 border-slate-800 sm:border-amber-500/40 w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] animate-in slide-in-from-bottom-5 duration-200">
             
             <!-- Header Modal Tùy Chọn -->
             <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 shrink-0">
                 <div class="flex items-center gap-2.5 min-w-0">
-                    <img id="cust-dish-img" src="" alt="Món" class="w-10 h-10 rounded-xl object-cover border border-slate-700 shrink-0">
+                    <img id="cust-dish-img" src="" alt="Món Ăn" class="w-11 h-11 rounded-xl object-cover border border-slate-700 shrink-0 shadow">
                     <div class="min-w-0">
                         <h4 id="cust-dish-name" class="text-sm font-black text-white truncate">Tên Món Ăn</h4>
-                        <span id="cust-dish-price" class="text-xs font-mono font-bold text-amber-400">0 đ</span>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span id="cust-dish-base-price" class="text-xs font-mono font-bold text-amber-400">0 đ</span>
+                            <span id="cust-dish-cat-badge" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-400 border border-slate-700">Món Khô</span>
+                        </div>
                     </div>
                 </div>
                 <button type="button" 
                         onclick="D2CStoreFrontController.closeCustomizerModal()" 
-                        class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center border border-slate-700">
+                        class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center border border-slate-700 transition">
                     <i class="fa-solid fa-xmark text-xs"></i>
                 </button>
             </div>
@@ -329,19 +332,19 @@
             <!-- Body Modal Tùy Chọn: Cuộn Tự Do -->
             <div class="p-4 space-y-4 overflow-y-auto custom-scroll text-xs">
                 
-                <!-- KHỐI 1: CHỌN KHẨU VỊ CAY (MẶC ĐỊNH LÀ CAY NHẸ) -->
-                <div class="space-y-2">
+                <!-- KHỐI 1: CHỌN KHẨU VỊ CAY SA TẾ (CHỈ HIỆN VỚI MÓN ĂN CHÍNH, TỰ ĐỘNG ẨN KHI LÀ NƯỚC UỐNG) -->
+                <div id="box-taste-selector" class="space-y-2">
                     <div class="flex items-center justify-between">
                         <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
                             <i class="fa-solid fa-pepper-hot text-red-500"></i> Khẩu Vị Cay Sa Tế:
                         </label>
-                        <span class="text-[10px] font-mono text-amber-400 font-bold bg-amber-400/10 px-2 py-0.5 rounded-full">
+                        <span class="text-[9.5px] font-mono text-amber-400 font-bold bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
                             Bắt buộc
                         </span>
                     </div>
                     
                     <div class="grid grid-cols-3 gap-2">
-                        <!-- Tùy chọn 1: Không Cay -->
+                        <!-- Không Cay -->
                         <button type="button" 
                                 data-taste="Không Cay" 
                                 onclick="D2CStoreFrontController.selectTaste('Không Cay', this)" 
@@ -350,7 +353,7 @@
                             <span class="font-bold text-[11px] text-slate-300">Không Cay</span>
                         </button>
 
-                        <!-- Tùy chọn 2: Cay Nhẹ (MẶC ĐỊNH CHUẨN VỊ) -->
+                        <!-- Cay Nhẹ (MẶC ĐỊNH CHUẨN VỊ) -->
                         <button type="button" 
                                 data-taste="Cay Nhẹ" 
                                 onclick="D2CStoreFrontController.selectTaste('Cay Nhẹ', this)" 
@@ -360,7 +363,7 @@
                             <span class="text-[9px] text-amber-400/80 font-mono">Chuẩn vị</span>
                         </button>
 
-                        <!-- Tùy chọn 3: Cay Xé Lưỡi -->
+                        <!-- Cay Xé Lưỡi -->
                         <button type="button" 
                                 data-taste="Cay Xé Lưỡi" 
                                 onclick="D2CStoreFrontController.selectTaste('Cay Xé Lưỡi', this)" 
@@ -371,10 +374,10 @@
                     </div>
                 </div>
 
-                <!-- KHỐI 2: CHỌN CHÉN SÚP ĂN KÈM (DÀNH CHO MÓN KHÔ) -->
+                <!-- KHỐI 2: CHỌN SÚP NÓNG ĂN KÈM MIỄN PHÍ (CHỈ HIỆN VỚI MÓN KHÔ) -->
                 <div id="box-soup-selector" class="space-y-2 pt-1 border-t border-slate-800/80">
                     <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
-                        <i class="fa-solid fa-bowl-rice text-amber-400"></i> Chén Súp Nóng Ăn Kèm (Miễn Phí):
+                        <i class="fa-solid fa-bowl-rice text-amber-400"></i> Chén Súp Nóng Đi Kèm (Miễn Phí):
                     </label>
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" 
@@ -393,38 +396,52 @@
                     </div>
                 </div>
 
-                <!-- KHỐI 3: GHI CHÚ ĐẶC BIỆT CHO BẾP -->
+                <!-- KHỐI 3: DANH SÁCH TOPPING THÊM CÓ TÍNH TIỀN (VŨ KHÍ KÉO AOV BIÊN LÃI CAO) -->
+                <div id="box-topping-selector" class="space-y-2 pt-1 border-t border-slate-800/80">
+                    <div class="flex items-center justify-between">
+                        <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
+                            <i class="fa-solid fa-plus-circle text-emerald-400"></i> Thêm Topping Đậm Đà:
+                        </label>
+                        <span class="text-[10px] text-slate-500 font-mono">Chọn nhiều món</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-1.5" id="customizer-toppings-list">
+                        <!-- Danh sách Topping được JavaScript render động theo danh mục -->
+                    </div>
+                </div>
+
+                <!-- KHỐI 4: GHI CHÚ ĐẶC BIỆT CHO BẾP -->
                 <div class="space-y-1.5 pt-1 border-t border-slate-800/80">
                     <label class="font-bold text-slate-300 text-[11px]">Ghi chú cho Bếp (Không bắt buộc):</label>
                     <input type="text" 
                            id="cust-dish-note" 
-                           placeholder="VD: Không hành lá, nhiều sốt trộn, tóp mỡ để riêng..." 
-                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                           placeholder="VD: Nhiều sốt trộn, hành phi để riêng, ít ngọt..." 
+                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition">
                 </div>
 
             </div>
 
-            <!-- Footer Modal: Số Lượng & Nút Thêm Vào Giỏ -->
+            <!-- Footer Modal: Số Lượng & Nút Thêm Vào Giỏ Kèm Tổng Tiền Động -->
             <div class="p-3.5 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-3 shrink-0">
                 <!-- Tăng giảm số lượng -->
                 <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 gap-2">
                     <button type="button" 
                             onclick="D2CStoreFrontController.adjustCustomizerQty(-1)" 
-                            class="w-7 h-7 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 flex items-center justify-center font-bold">
+                            class="w-7 h-7 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 flex items-center justify-center font-bold transition">
                         <i class="fa-solid fa-minus text-[10px]"></i>
                     </button>
                     <span id="cust-dish-qty" class="w-6 text-center font-mono font-bold text-xs text-white">1</span>
                     <button type="button" 
                             onclick="D2CStoreFrontController.adjustCustomizerQty(1)" 
-                            class="w-7 h-7 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 flex items-center justify-center font-bold">
+                            class="w-7 h-7 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 flex items-center justify-center font-bold transition">
                         <i class="fa-solid fa-plus text-[10px]"></i>
                     </button>
                 </div>
 
-                <!-- Nút Xác Nhận Thêm -->
+                <!-- Nút Xác Nhận Thêm Với Tổng Giá Thực Tế Đã Cộng Topping -->
                 <button type="button" 
                         onclick="D2CStoreFrontController.confirmAddToCart()" 
-                        class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-600/20 transition flex items-center justify-center gap-2">
+                        class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-600 via-amber-600 to-amber-500 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-600/20 transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-basket-shopping"></i>
                     <span>Thêm Vào Giỏ • </span>
                     <span id="cust-total-btn-price" class="font-mono">0 đ</span>
