@@ -1634,12 +1634,10 @@
             }
         }
 
-        /**
-         * TÍNH TOÁN BIỂU PHÍ SHIP VÀ HIỂN THỊ CỰ LY THÔNG MINH (< 300m, mét, km)
-         */
-        /**
-         * TÍNH TOÁN BIỂU PHÍ SHIP VÀ KHÓA TRẦN TRỢ GIÁ SHIP BẰNG ĐÚNG PHÍ SHIP
-         * Triệt tiêu hoàn toàn cảm giác bị hụt 3k của khách hàng khi trợ giá > phí ship
+       /**
+         * TÍNH TOÁN BIỂU PHÍ SHIP VÀ KHÓA TRẦN TRỢ GIÁ CHUẨN XÁC THEO CƯỚC THỰC TẾ
+         * - Nếu trợ giá >= cước ship: Thể hiện trợ giá = đúng cước ship (Freeship 100%).
+         * - Nếu trợ giá < cước ship: Thể hiện đúng mức trợ giá và trừ trực tiếp vào bill.
          */
         function recalculateShippingFee() {
             var dist = (appState.calculatedDistanceKm !== undefined && appState.calculatedDistanceKm !== null) 
@@ -1648,13 +1646,13 @@
 
             var fee = STORE_BASE_CONFIG.shipBaseFee; // Mặc định nấc 2km đầu là 12.000đ
 
-            // Nếu khoảng cách vượt quá cự ly cơ sở (2km) thì cộng thêm phí mỗi km
+            // Nếu cự ly vượt quá mốc cơ sở (2km) thì cộng thêm phí mỗi km phát sinh
             if (dist > STORE_BASE_CONFIG.shipBaseDistanceKm) {
                 var extraKm = dist - STORE_BASE_CONFIG.shipBaseDistanceKm;
                 fee += Math.round(extraKm * STORE_BASE_CONFIG.shipExtraFeePerKm);
             }
 
-            // Tính tổng tiền món ăn trong giỏ hàng
+            // Tính tổng tiền các món ăn có tính phí trong giỏ
             var subtotal = 0;
             appState.cartItems.forEach(function(i) {
                 if (!i.isGift) {
@@ -1662,23 +1660,23 @@
                 }
             });
 
-            // 1. TÍNH MỨC TRỢ GIÁ THEO BẬC THANG AOV (100k -> 15k, 150k -> 25k)
+            // 1. TÍNH MỨC TRỢ GIÁ LÝ THUYẾT THEO BẬC THANG DOANH THU ĐƠN HÀNG (AOV)
             var rawSubsidy = 0;
             if (subtotal >= STORE_BASE_CONFIG.subsidyTier2Min) {
-                rawSubsidy = STORE_BASE_CONFIG.subsidyTier2Amount;
+                rawSubsidy = STORE_BASE_CONFIG.subsidyTier2Amount; // Đơn >= 150k được mức 25k
             } else if (subtotal >= STORE_BASE_CONFIG.subsidyTier1Min) {
-                rawSubsidy = STORE_BASE_CONFIG.subsidyTier1Amount;
+                rawSubsidy = STORE_BASE_CONFIG.subsidyTier1Amount; // Đơn >= 100k được mức 15k
             }
 
-            // 2. KHÓA TRẦN TOÁN HỌC: TRỢ GIÁ TỐI ĐA CHỈ BẰNG ĐÚNG PHÍ SHIP
-            // Nếu trợ giá 15k mà ship chỉ có 12k -> Gán trợ giá = 12k (Freeship 100%)
+            // 2. KHÓA TRẦN NGHIỆP VỤ: TRỢ GIÁ TỐI ĐA CHỈ ĐƯỢC BẰNG ĐÚNG PHÍ SHIP THỰC TẾ
             var appliedSubsidy = Math.min(fee, rawSubsidy);
             var actualShip = Math.max(0, fee - appliedSubsidy);
 
+            // Lưu vào State giá trị chính xác
             appState.shippingFee = fee;
-            appState.shippingSubsidy = appliedSubsidy; // Lưu vào State đúng số tiền khấu trừ thực tế
+            appState.shippingSubsidy = appliedSubsidy;
 
-            // 3. ĐỊNH DẠNG HIỂN THỊ KHOẢNG CÁCH THÔNG MINH CHO KHÁCH
+            // 3. ĐỊNH DẠNG HIỂN THỊ CỰ LY THÔNG MINH CHO KHÁCH HÀNG
             var txtDist = document.getElementById("txt-calc-distance");
             var txtFee = document.getElementById("txt-calc-shipping-fee");
             var tagSubsidy = document.getElementById("txt-calc-subsidy-tag");
@@ -1712,11 +1710,58 @@
                 }
             }
 
-            // Đồng bộ sang bảng tổng kết đơn hàng phía dưới
+            // Đồng bộ trực tiếp sang bảng tổng kết đơn hàng phía dưới
             updateCheckoutSummary();
         }
 
         /**
+         * CẬP NHẬT TỔNG KẾT ĐƠN HÀNG TRÊN BILL CHECKOUT VÀ MÃ VIETQR KHÓA CỨNG
+         */
+        function updateCheckoutSummary() {
+            var subtotal = 0;
+            appState.cartItems.forEach(function(i) {
+                if (!i.isGift) {
+                    subtotal += (i.price * i.quantity);
+                }
+            });
+
+            var fee = appState.shippingFee;
+            var sub = appState.shippingSubsidy; // Đã được khóa trần qua Math.min(fee, rawSubsidy)
+            var actualShip = Math.max(0, fee - sub);
+            var finalTotal = subtotal + actualShip;
+
+            var elSub = document.getElementById("chk-summary-subtotal");
+            var elFee = document.getElementById("chk-summary-shipping-fee");
+            var elSubTag = document.getElementById("chk-summary-subsidy");
+            var elFinal = document.getElementById("chk-summary-final-total");
+
+            if (elSub) elSub.innerText = subtotal.toLocaleString("vi-VN") + " đ";
+            if (elFee) elFee.innerText = fee.toLocaleString("vi-VN") + " đ";
+
+            // HIỂN THỊ DÒNG TRỢ GIÁ SHIP CHUẨN MINH BẠCH TÀI CHÍNH
+            if (elSubTag) {
+                if (sub > 0) {
+                    if (actualShip === 0) {
+                        // Trường hợp trợ giá >= phí ship: Bằng đúng phí ship và đóng dấu Freeship
+                        elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ (Freeship)";
+                    } else {
+                        // Trường hợp trợ giá < phí ship: Hiện đúng số tiền giảm và trừ trực tiếp
+                        elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ";
+                    }
+                } else {
+                    elSubTag.innerText = "-0 đ";
+                }
+            }
+
+            if (elFinal) elFinal.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
+
+            // Tạo mã VietQR động khóa cứng chính xác số tiền thực thu
+            if (appState.selectedPaymentMethod === "VIETQR") {
+                renderDynamicVietQr(finalTotal);
+            }
+        }
+         
+                /**
          * CẬP NHẬT TỔNG KẾT ĐƠN HÀNG CHECKOUT & KHÓA TIỀN MÃ VIETQR CHUẨN XÁC
          */
         function updateCheckoutSummary() {
