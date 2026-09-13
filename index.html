@@ -1140,111 +1140,237 @@
             onSearchInput("");
         }
 
+        // =========================================================================
+        // DANH MỤC TOPPING ĂN KÈM CHUẨN F&B (VŨ KHÍ TĂNG BIÊN LÃI & KÉO AOV D2C)
+        // =========================================================================
+        var TOPPING_PRESETS = [
+            { id: "top_trung", name: "Trứng Lòng Đào Béo Ngậy", price: 6000, icon: "🥚" },
+            { id: "top_topmo", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn", price: 16000, icon: "🥓" },
+            { id: "top_bovien", name: "Bò Viên Gân Giòn (3 Viên)", price: 12000, icon: "🍡" },
+            { id: "top_xaxiu", name: "Xá Xíu Mềm Thơm Thêm", price: 15000, icon: "🥩" },
+            { id: "top_vatmi", name: "Thêm 1 Vắt Mì Trộn", price: 8000, icon: "🍜" }
+        ];
+
+        // Mảng lưu trữ các Topping đang được tick chọn trong Modal
+        var activeCustomizerToppings = [];
+
         /**
-         * QUẢN TRỊ MODAL TÙY CHỌN MÓN (KHẨU VỊ CAY & SÚP KÈM)
+         * MỞ MODAL TÙY CHỌN MÓN THÔNG MINH:
+         * - Nếu là Nước Suối/Nước Ngọt (giai-khat): Bơm thẳng vào giỏ (Quick Add), không hỏi cay!
+         * - Nếu là Món Khô/Nước: Mở Modal, MẶC ĐỊNH Cay Nhẹ + Súp Tóp Mỡ + Bật bảng Topping!
+         * 
+         * @param {string} dishId - Mã định danh món ăn
          */
         function openCustomizerModal(dishId) {
             var dish = FALLBACK_MENU.find(function(d) { return d.id === dishId; });
             if (!dish) return;
 
+            // 1. RÀO CHẮN DANH MỤC: NẾU LÀ NƯỚC UỐNG ĐÓNG CHAI -> QUICK ADD KHÔNG CẦN HỎI CAY
+            if (dish.cat === "giai-khat" && dish.id === "M10") {
+                // Thêm nhanh Nước suối vào giỏ hàng
+                appState.cartItems.push({
+                    id: dish.id + "_" + Date.now(),
+                    dishId: dish.id,
+                    name: dish.name,
+                    price: dish.price,
+                    quantity: 1,
+                    taste: "Không Cay",
+                    soup: "",
+                    note: "",
+                    toppings: [],
+                    isGift: false
+                });
+
+                updateAovAndCartUI();
+                alert("💧 Đã thêm 1 phần \"" + dish.name + "\" vào giỏ hàng thành công!");
+                return;
+            }
+
+            // 2. KHỞI TẠO TRẠNG THÁI MODAL CHO MÓN ĂN CHÍNH
             appState.currentCustomizingDish = dish;
             appState.customizerQty = 1;
-            appState.currentTaste = "Cay Nhẹ"; // MẶC ĐỊNH CHUẨN VỊ THÍM 5
+            appState.currentTaste = "Cay Nhẹ"; // Luôn khóa mặc định là Cay Nhẹ chuẩn vị
             appState.currentSoup = "Súp Tóp Mỡ Hành Lá";
+            activeCustomizerToppings = []; // Reset mảng topping đã chọn
 
             var modal = document.getElementById("modal-dish-customizer");
             var elImg = document.getElementById("cust-dish-img");
             var elName = document.getElementById("cust-dish-name");
-            var elPrice = document.getElementById("cust-dish-price");
+            var elBasePrice = document.getElementById("cust-dish-base-price");
+            var elCatBadge = document.getElementById("cust-dish-cat-badge");
             var elQty = document.getElementById("cust-dish-qty");
+            var boxTaste = document.getElementById("box-taste-selector");
             var boxSoup = document.getElementById("box-soup-selector");
+            var boxTopping = document.getElementById("box-topping-selector");
+            var noteEl = document.getElementById("cust-dish-note");
 
             if (elImg) elImg.src = dish.img;
             if (elName) elName.innerText = dish.name;
-            if (elPrice) elPrice.innerText = dish.price.toLocaleString("vi-VN") + " đ";
+            if (elBasePrice) elBasePrice.innerText = dish.price.toLocaleString("vi-VN") + " đ";
             if (elQty) elQty.innerText = "1";
+            if (noteEl) noteEl.value = "";
 
-            // Nếu là nước uống thì ẩn chọn chén súp
-            if (boxSoup) {
-                if (dish.cat === "giai-khat") boxSoup.classList.add("hidden");
-                else boxSoup.classList.remove("hidden");
+            // 3. ĐIỀU CHỈNH GIAO DIỆN PHÙ HỢP VỚI TỪNG DANH MỤC MÓN
+            if (dish.cat === "giai-khat") {
+                // Nhóm Giải Khát (VD: Trà Đào 1L): Ẩn 100% Khẩu vị cay và Chén súp
+                if (elCatBadge) elCatBadge.innerText = "Giải Khát (1L)";
+                if (boxTaste) boxTaste.classList.add("hidden");
+                if (boxSoup) boxSoup.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.add("hidden");
+                appState.currentTaste = "Không Cay";
+                appState.currentSoup = "";
+            } else if (dish.cat === "nuoc") {
+                // Nhóm Món Nước Súp (Canh): Mở khẩu vị cay, nhưng ẩn chén súp kèm
+                if (elCatBadge) elCatBadge.innerText = "Món Nước Súp";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                if (boxSoup) boxSoup.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.remove("hidden");
+                appState.currentSoup = "";
+                selectTaste("Cay Nhẹ");
+                renderCustomizerToppingsList();
+            } else if (dish.cat === "an-kem") {
+                // Nhóm Ăn Kèm Lẻ (Tóp mỡ hũ, Trứng đào lẻ): Ẩn súp, ẩn topping thêm
+                if (elCatBadge) elCatBadge.innerText = "Món Ăn Kèm";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                if (boxSoup) boxSoup.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.add("hidden");
+                selectTaste("Cay Nhẹ");
+            } else {
+                // Nhóm Mì Trộn Khô & Combo Đại Tiệc: MỞ TOÀN BỘ CÁC TÙY CHỌN
+                if (elCatBadge) elCatBadge.innerText = (dish.cat === "combo") ? "Combo Đại Tiệc" : "Mì Trộn Khô";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                if (boxSoup) boxSoup.classList.remove("hidden");
+                if (boxTopping) boxTopping.classList.remove("hidden");
+
+                selectTaste("Cay Nhẹ");
+                selectSoup("Súp Tóp Mỡ Hành Lá");
+                renderCustomizerToppingsList();
             }
 
-            // Đặt lại nút khẩu vị về Cay Nhẹ
-            selectTaste("Cay Nhẹ");
-            selectSoup("Súp Tóp Mỡ Hành Lá");
             updateCustomizerPrice();
 
             if (modal) modal.classList.remove("hidden");
         }
 
-        function closeCustomizerModal() {
-            var modal = document.getElementById("modal-dish-customizer");
-            if (modal) modal.classList.add("hidden");
+        /**
+         * RENDER DANH SÁCH TOPPING CHỌN THÊM CÓ TÍNH TIỀN
+         */
+        function renderCustomizerToppingsList() {
+            var container = document.getElementById("customizer-toppings-list");
+            if (!container) return;
+
+            container.innerHTML = TOPPING_PRESETS.map(function(top) {
+                var isChecked = activeCustomizerToppings.some(function(t) { return t.id === top.id; });
+                return `
+                    <label class="p-2 rounded-xl bg-slate-950 border ${isChecked ? 'border-amber-500 bg-amber-500/5' : 'border-slate-800'} hover:border-slate-700 transition flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" 
+                                   value="${top.id}" 
+                                   ${isChecked ? 'checked' : ''} 
+                                   onchange="D2CStoreFrontController.toggleCustomizerTopping('${top.id}', this.checked)"
+                                   class="w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-0 cursor-pointer">
+                            <span class="text-base">${top.icon}</span>
+                            <span class="text-xs font-bold text-slate-200">${top.name}</span>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-emerald-400">+${top.price.toLocaleString("vi-VN")} đ</span>
+                    </label>
+                `;
+            }).join("");
         }
 
-        function selectTaste(taste, btnEl) {
-            appState.currentTaste = taste;
-            document.querySelectorAll(".btn-taste-option").forEach(function(b) {
-                var t = b.getAttribute("data-taste");
-                if (t === taste) {
-                    b.className = "btn-taste-option p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-center transition flex flex-col items-center gap-1 active";
-                } else {
-                    b.className = "btn-taste-option p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-center transition flex flex-col items-center gap-1";
+        /**
+         * XỬ LÝ TICK / BỎ TICK CHỌN TOPPING THÊM
+         */
+        function toggleCustomizerTopping(topId, isChecked) {
+            var toppingItem = TOPPING_PRESETS.find(function(t) { return t.id === topId; });
+            if (!toppingItem) return;
+
+            if (isChecked) {
+                // Thêm vào mảng nếu chưa có
+                if (!activeCustomizerToppings.some(function(t) { return t.id === topId; })) {
+                    activeCustomizerToppings.push(toppingItem);
                 }
-            });
-        }
+            } else {
+                // Gỡ khỏi mảng nếu bỏ tick
+                activeCustomizerToppings = activeCustomizerToppings.filter(function(t) {
+                    return t.id !== topId;
+                });
+            }
 
-        function selectSoup(soup, btnEl) {
-            appState.currentSoup = soup;
-            document.querySelectorAll(".btn-soup-option").forEach(function(b) {
-                var s = b.getAttribute("data-soup");
-                if (s === soup) {
-                    b.className = "btn-soup-option p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-left transition flex items-center justify-between active";
-                } else {
-                    b.className = "btn-soup-option p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-left transition flex items-center justify-between";
-                }
-            });
-        }
-
-        function adjustCustomizerQty(delta) {
-            var n = appState.customizerQty + delta;
-            if (n < 1) n = 1;
-            appState.customizerQty = n;
-            var elQty = document.getElementById("cust-dish-qty");
-            if (elQty) elQty.innerText = String(n);
+            renderCustomizerToppingsList();
             updateCustomizerPrice();
         }
 
+        /**
+         * TÍNH TOÁN TỔNG TIỀN ĐỘNG (GIÁ GỐC MÓN + TỔNG TIỀN TOPPING) * SỐ LƯỢNG
+         */
         function updateCustomizerPrice() {
             if (!appState.currentCustomizingDish) return;
-            var total = appState.currentCustomizingDish.price * appState.customizerQty;
+
+            var basePrice = appState.currentCustomizingDish.price;
+            var toppingsPrice = 0;
+
+            activeCustomizerToppings.forEach(function(top) {
+                toppingsPrice += top.price;
+            });
+
+            var unitPriceWithToppings = basePrice + toppingsPrice;
+            var grandTotal = unitPriceWithToppings * appState.customizerQty;
+
             var elBtnPrice = document.getElementById("cust-total-btn-price");
-            if (elBtnPrice) elBtnPrice.innerText = total.toLocaleString("vi-VN") + " đ";
+            if (elBtnPrice) {
+                elBtnPrice.innerText = grandTotal.toLocaleString("vi-VN") + " đ";
+            }
         }
 
+        /**
+         * ĐÓNG GÓI MÓN ĂN VÀ TOPPING ĐƯỢC CHỌN VÀO GIỎ HÀNG THỰC TẾ
+         */
         function confirmAddToCart() {
             if (!appState.currentCustomizingDish) return;
+
             var noteEl = document.getElementById("cust-dish-note");
             var noteVal = noteEl ? noteEl.value.trim() : "";
 
-            var item = {
+            // Tính đơn giá thực tế của từng suất (đã bao gồm Topping)
+            var toppingsTotalUnit = 0;
+            var toppingNamesList = [];
+
+            activeCustomizerToppings.forEach(function(top) {
+                toppingsTotalUnit += top.price;
+                toppingNamesList.push(top.name);
+            });
+
+            var finalUnitPrice = appState.currentCustomizingDish.price + toppingsTotalUnit;
+
+            // Tạo đối tượng món ăn chuẩn hóa đẩy vào giỏ
+            var cartItem = {
                 id: appState.currentCustomizingDish.id + "_" + Date.now(),
                 dishId: appState.currentCustomizingDish.id,
                 name: appState.currentCustomizingDish.name,
-                price: appState.currentCustomizingDish.price,
+                basePrice: appState.currentCustomizingDish.price,
+                price: finalUnitPrice,
                 quantity: appState.customizerQty,
                 taste: appState.currentTaste,
-                soup: (appState.currentCustomizingDish.cat !== "giai-khat") ? appState.currentSoup : "",
+                soup: (appState.currentCustomizingDish.cat === "kho" || appState.currentCustomizingDish.cat === "combo") ? appState.currentSoup : "",
                 note: noteVal,
+                toppings: activeCustomizerToppings.slice(), // Nhân bản mảng topping
+                toppingSummary: toppingNamesList.join(", "),
                 isGift: false
             };
 
-            appState.cartItems.push(item);
+            appState.cartItems.push(cartItem);
             closeCustomizerModal();
             updateAovAndCartUI();
-        }
 
+            // Hiển thị thông báo Toast nhanh cho khách
+            var toastMsg = "🍜 Đã thêm " + cartItem.quantity + "x " + cartItem.name;
+            if (toppingNamesList.length > 0) {
+                toastMsg += " (+ " + toppingNamesList.join(", ") + ")";
+            }
+            toastMsg += " vào giỏ hàng thành công!";
+            console.log("✅ [CartEngine]", toastMsg);
+        }
         /**
          * BỘ ĐIỀU PHỐI GIỎ HÀNG & RÀO CHẮN CART TAMPERING GUARD
          */
