@@ -74,6 +74,7 @@
       </div>
 
       <button type="button" 
+              id="btnSubmitKdsPin"
               onclick="KitchenKdsController.handleKdsAuthLogin()" 
               class="w-full max-w-[200px] mx-auto py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 hover:opacity-95 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 transition active:scale-95 flex items-center justify-center gap-2">
         <i class="fa-solid fa-lock-open text-xs"></i>
@@ -193,6 +194,7 @@
       var currentFilter = 'all';
       var kdsPollingTimer = null;
       var isCallingApi = false;
+      var localCancelledOrders = [];
 
       var cachedShippers = [
           { name: "Nguyễn Hải Âu", phone: "0969004693" },
@@ -223,23 +225,29 @@
                       })
                       .catch(function(err) { reject(err); });
               } else {
-                  console.warn("⚠️ Đang chạy chế độ mô phỏng KDS...");
                   setTimeout(function() {
                       resolve(getMockKdsData());
-                  }, 400);
+                  }, 300);
               }
           });
       }
 
       function checkKdsAuth() {
           var savedPin = localStorage.getItem("thim5_kds_auth");
+          var overlay = document.getElementById("kdsAuthOverlay");
           if (savedPin === "1985" || savedPin === "2026") {
-              var overlay = document.getElementById("kdsAuthOverlay");
               if (overlay) overlay.style.display = "none";
               initKDS();
           } else {
-              var overlay = document.getElementById("kdsAuthOverlay");
               if (overlay) overlay.style.display = "flex";
+              var pinInput = document.getElementById("kdsPinInput");
+              if (pinInput) {
+                  pinInput.value = "";
+                  pinInput.focus();
+                  pinInput.onkeydown = function(e) {
+                      if (e.key === "Enter") handleKdsAuthLogin();
+                  };
+              }
           }
       }
 
@@ -247,13 +255,13 @@
           var pinInput = document.getElementById("kdsPinInput");
           var pin = pinInput ? pinInput.value.trim() : "";
           var err = document.getElementById("kdsAuthError");
+          var overlay = document.getElementById("kdsAuthOverlay");
           if (err) err.style.display = "none";
 
           if (pin === "1985" || pin === "2026") {
               localStorage.setItem("thim5_kds_auth", pin);
-              var overlay = document.getElementById("kdsAuthOverlay");
               if (overlay) overlay.style.display = "none";
-              initAudioContext();
+              try { initAudioContext(); } catch(e) {}
               initKDS();
           } else {
               if (err) {
@@ -285,7 +293,9 @@
                   loadKitchenOrders(true);
               }, 10000);
           }
-          document.body.addEventListener('click', initAudioContext, { once: true });
+          document.body.addEventListener('click', function() {
+              try { initAudioContext(); } catch(e) {}
+          }, { once: true });
       }
 
       function initAudioContext() {
@@ -374,7 +384,14 @@
               } else if (res && Array.isArray(res.orders)) {
                   orders = res.orders;
               }
-              rawOrdersCache = orders;
+
+              rawOrdersCache = orders.filter(function(o) {
+                  var code = String(o.code || "").trim();
+                  var isCancelledStatus = (o.status === "CANCELLED" || o.status === "Đã Hủy" || Number(o.step) === -1);
+                  var isLocallyCancelled = (localCancelledOrders.indexOf(code) !== -1);
+                  return !isCancelledStatus && !isLocallyCancelled;
+              });
+
               updateFilterCounts(rawOrdersCache);
               renderKitchenUI();
           } catch (err) {
@@ -420,9 +437,7 @@
           }
           renderKitchenUI();
       }
-    /**
-       * VẼ GIAO DIỆN BẾP KDS & PHÂN QUYỀN ĐIỀU PHỐI SHIPPER BẢO HỘ
-       */
+
       function renderKitchenUI() {
           var grid = document.getElementById("kitchenOrdersGrid");
           if (!grid) return;
@@ -490,15 +505,12 @@
 
               html += `
                   <div class="p-4 rounded-3xl bg-slate-900 border-2 ${isNeedCook ? 'border-orange-500/80 order-card-urgent' : (isWaitCod ? 'border-amber-500/40 bg-amber-950/10' : 'border-slate-800')} shadow-xl flex flex-col justify-between space-y-3">
-                      
-                      <!-- Header Thẻ Đơn -->
                       <div>
                           <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2">
                               <span class="font-mono font-black text-amber-400 text-base">${cleanCode}</span>
                               <span class="text-[10.5px] font-mono text-slate-400">⏰ ${o.time || 'Vừa xong'}</span>
                           </div>
 
-                          <!-- Huy hiệu thanh toán -->
                           <div class="mb-2">
                               ${isPaidOnline ? `
                                   <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
@@ -511,25 +523,21 @@
                               `}
                           </div>
 
-                          <!-- Khách & Cự ly -->
                           <div class="text-[11px] text-slate-400 space-y-0.5">
                               <div>Khách: <strong class="text-white">${o.name}</strong> • SĐT: <strong class="text-slate-200">${o.phone}</strong></div>
                               <div class="truncate">Nơi nhận: <strong class="text-slate-300">${o.address || 'Hòa Thành, Tây Ninh'}</strong></div>
                           </div>
 
-                          <!-- Danh sách món & Topping -->
                           <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 my-2">
                               <div class="text-[9.5px] font-black uppercase tracking-widest text-slate-500 mb-1">Món Ăn & Topping Đã Đặt:</div>
                               <div class="text-xs space-y-0.5 leading-relaxed">${formattedItemsHtml}</div>
                           </div>
 
-                          <!-- Khẩu vị khách dặn -->
                           <div class="p-2 rounded-xl bg-orange-500/10 border border-orange-500/30 text-[11px] text-orange-300">
                               🌶️ <strong>Khẩu vị:</strong> ${o.taste || 'Cay Nhẹ (Chuẩn vị Thím 5)'}
                           </div>
                       </div>
 
-                      <!-- Khu vực Nút Tác Vụ Bếp & Điều Phối Shipper -->
                       <div class="space-y-1.5 pt-1">
                           ${isWaitCod ? `
                               <div class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center font-bold text-amber-300 text-[11px]">
@@ -551,7 +559,6 @@
                           ` : (isPacked ? `
                               <div class="space-y-1.5">
                                   ${isShipperLocked ? `
-                                      <!-- Trường hợp đơn COD đã được Shipper gọi xác minh khóa cứng -->
                                       <div class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center text-emerald-300 text-[11px]">
                                           📦 Món đã đóng hộp giữ nhiệt! Chờ tài xế bảo hộ:
                                           <div class="font-black text-amber-400 text-xs mt-0.5">🛵 ${assignedShipperName}</div>
@@ -560,7 +567,6 @@
                                           BÀN GIAO CHO ${assignedShipperName.split('(')[0].trim().toUpperCase()}
                                       </button>
                                   ` : `
-                                      <!-- Trường hợp đơn VietQR tự do chưa có Shipper nhận -->
                                       <div class="p-1.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[10.5px]">
                                           📦 Đã đóng gói xong! Bếp trưởng chỉ định Shipper:
                                       </div>
@@ -580,7 +586,6 @@
                               </div>
                           ` : '')))}
 
-                          <!-- Nút Hủy Đơn -->
                           <button type="button" onclick="KitchenKdsController.handleKitchenCancel('${cleanCode}')" class="w-full py-1.5 rounded-xl bg-slate-950 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 border border-slate-800 text-[10.5px] font-bold transition">
                               🚫 Hủy Đơn (Khách Báo Zalo / Hết Nguyên Liệu)
                           </button>
@@ -593,16 +598,37 @@
           grid.innerHTML = html;
       }
 
-      /**
-       * BẾP BÀN GIAO ĐƠN CHO SHIPPER (KẾT NỐI CHUẨN XÁC VỚI API KITCHENASSIGNSHIPPER)
-       */
+      async function handleCookDone(orderCode) {
+          var cleanCode = String(orderCode || "").trim();
+          var btn = document.getElementById("btn_cook_" + cleanCode);
+          if (btn) {
+              btn.innerText = "⏳ Đang cập nhật trạng thái đóng gói...";
+              btn.disabled = true;
+          }
+
+          try {
+              await callBackend(
+                  "kitchenUpdateStatus", 
+                  [cleanCode, "COOK_DONE", ""], 
+                  "kitchenUpdateStatus", 
+                  { orderCode: cleanCode, action: "COOK_DONE", note: "" }
+              );
+              loadKitchenOrders();
+          } catch (err) {
+              alert("❌ Lỗi cập nhật Bếp: " + err.message);
+              if (btn) {
+                  btn.innerText = "ĐÃ NẤU XONG ➔ ĐÓNG GÓI CHỜ SHIP";
+                  btn.disabled = false;
+              }
+          }
+      }
+
       async function handleAssignShipper(orderCode, isPreLocked) {
           var cleanCode = String(orderCode || "").trim();
           var shipName = "";
           var shipPhone = "";
 
           if (isPreLocked) {
-              // Lấy thông tin tài xế đã khóa cứng từ bộ nhớ đệm
               var matched = rawOrdersCache.find(function(o) { return String(o.code || "").trim() === cleanCode; });
               var fullLabel = matched ? String(matched.shipper || "") : "";
               shipName = fullLabel.split("(")[0].trim() || "Tài Xế";
@@ -629,10 +655,23 @@
           }
       }
 
-            async function handleKitchenCancel(orderCode) {
+      async function handleKitchenCancel(orderCode) {
           var cleanCode = String(orderCode || "").trim();
+          if (!cleanCode) return;
+
           var reason = prompt("Nhập lý do hủy đơn " + cleanCode + " (VD: Khách nhắn Zalo hủy, Hết topping...):", "Khách nhắn Zalo hủy");
-          if (!reason || !reason.trim()) return;
+          if (reason === null || !reason.trim()) return;
+
+          if (localCancelledOrders.indexOf(cleanCode) === -1) {
+              localCancelledOrders.push(cleanCode);
+          }
+
+          rawOrdersCache = rawOrdersCache.filter(function(o) {
+              return String(o.code || "").trim() !== cleanCode;
+          });
+
+          updateFilterCounts(rawOrdersCache);
+          renderKitchenUI();
 
           try {
               await callBackend(
@@ -641,33 +680,14 @@
                   "kitchenUpdateStatus", 
                   { orderCode: cleanCode, action: "CANCEL", note: reason }
               );
-              alert("✅ Đã hủy đơn " + cleanCode + " thành công trên hệ thống!");
-              loadKitchenOrders();
           } catch (err) {
-              alert("❌ Lỗi hủy đơn: " + err.message);
+              console.warn("⚠️ Lỗi đồng bộ lệnh hủy về máy chủ:", err.message);
           }
       }
 
       function getMockKdsData() {
           return {
-              orders: [
-                  {
-                      code: "DH260913_8892",
-                      time: "15:30",
-                      status: "COOKING",
-                      step: 2,
-                      name: "Anh Tuấn",
-                      phone: "0988.123.456",
-                      address: "125 Hùng Vương, KP4, TT. Hòa Thành, Tây Ninh",
-                      dist: 1.4,
-                      items: "2x Mì Trộn Xá Xíu Tóp Mỡ (Súp Tóp Mỡ Hành Lá • Trứng Lòng Đào) | 1x Trà Đào 1L",
-                      taste: "Cay Nhẹ (Chuẩn vị Thím 5)",
-                      method: "VIETQR",
-                      total: 146000,
-                      shipper: "",
-                      note: ""
-                  }
-              ]
+              orders: []
           };
       }
 
@@ -683,7 +703,9 @@
       };
   })();
 
-  window.onload = KitchenKdsController.checkKdsAuth;
+  window.onload = function() {
+      KitchenKdsController.checkKdsAuth();
+  };
   </script>
 </body>
 </html>
