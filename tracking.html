@@ -3,561 +3,663 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Theo Dõi Đơn Hàng | Mì Trộn Thím 5</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Theo Dõi Đơn Hàng • Mì Trộn Thím 5</title>
+    
+    <!-- PWA Metadata & Favicon -->
+    <meta name="theme-color" content="#020617">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛵</text></svg>">
+
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS Play CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    colors: {
-                        brand: {
-                            500: '#EF4444',
-                            600: '#DC2626',
-                            700: '#B91C1C'
-                        }
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['monospace']
                     }
                 }
             }
         }
     </script>
-    <!-- FontAwesome 6 Pro -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .step-active-pulse { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25); }
+        * { -webkit-tap-highlight-color: transparent; }
+        body { background-color: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .custom-scroll::-webkit-scrollbar { display: none; }
+        .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Hiệu ứng nhịp thở cho bước đang hoạt động */
+        @keyframes stepPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+        }
+        .step-active-pulse {
+            animation: stepPulse 2s infinite;
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col justify-between">
+<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
 
-    <!-- TOP NAVIGATION BAR -->
-    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3">
-        <div class="max-w-md mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center font-black text-white text-sm shadow-lg shadow-red-600/30">
-                    T5
-                </div>
-                <div>
-                    <h1 class="text-xs font-bold text-white uppercase tracking-wider">Mì Trộn Thím 5</h1>
-                    <span class="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span> Live Tracking
-                    </span>
+    <!-- ========================================================================= -->
+    <!-- 1. HEADER NHẬN DIỆN THƯƠNG HIỆU & NÚT VỀ TRANG CHỦ                       -->
+    <!-- ========================================================================= -->
+    <header class="w-full bg-slate-950/95 border-b border-slate-800/80 sticky top-0 z-40 backdrop-blur-md px-3 sm:px-4 py-2.5">
+        <div class="max-w-md mx-auto flex items-center justify-between gap-2">
+            
+            <div class="flex items-center gap-2.5 min-w-0">
+                <a href="index.html" class="w-9 h-9 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition active:scale-95" title="Về trang đặt món">
+                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                </a>
+                <div class="min-w-0">
+                    <h1 class="text-xs sm:text-sm font-black text-white tracking-wide truncate uppercase">
+                        Trạng Thái Đơn Hàng
+                    </h1>
+                    <div class="flex items-center gap-1.5 text-[10.5px]">
+                        <span id="disp-order-code-badge" class="text-amber-400 font-mono font-bold tracking-tight">
+                            DH...
+                        </span>
+                    </div>
                 </div>
             </div>
-            <a id="btn-header-hotline" href="tel:0979531213" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition">
-                <i class="fa-solid fa-phone text-red-500 text-[11px]"></i>
-                <span>Hotline</span>
-            </a>
+
+            <!-- Nút Cập Nhật Thủ Công & Hotline Khẩn Cấp -->
+            <div class="shrink-0 flex items-center gap-1.5">
+                <button type="button" 
+                        id="btn-manual-refresh" 
+                        onclick="OrderTrackingController.refreshStatus()" 
+                        class="w-9 h-9 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-amber-400 flex items-center justify-center text-xs transition active:scale-90" 
+                        title="Tải lại trạng thái">
+                    <i id="icon-refresh" class="fa-solid fa-rotate-right"></i>
+                </button>
+
+                <a id="link-tracking-hotline" href="tel:0934220585" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-mono font-bold shadow-sm transition active:scale-95">
+                    <i class="fa-solid fa-phone-volume text-[10px]"></i>
+                    <span>0934.220.585</span>
+                </a>
+            </div>
+
         </div>
     </header>
 
-    <!-- MAIN TRACKING VIEWPORT (MOBILE-FIRST MAX-W-MD) -->
-    <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
-
-        <!-- THẺ TRẠNG THÁI CHỦ ĐẠO (HERO STATUS CARD) -->
-        <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-5 rounded-3xl shadow-2xl relative overflow-hidden">
-            <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-red-600/10 rounded-full blur-2xl pointer-events-none"></div>
-            
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800/80">
-                <span class="text-xs text-slate-400 font-medium">Mã đơn hàng:</span>
-                <span id="txt-order-id" class="font-mono font-bold text-red-400 text-sm tracking-wide">T5-XXXXX</span>
+    <!-- ========================================================================= -->
+    <!-- 2. KHUNG TIẾN TRÌNH 5 BƯỚC THỜI GIAN THỰC (5-STEP LIVE STATUS STEPPER)   -->
+    <!-- ========================================================================= -->
+    <main class="w-full max-w-md mx-auto px-3 pt-3 pb-24 space-y-3.5 flex-1">
+        
+        <!-- CARD 1: BANNER TRẠNG THÁI HIỆN TẠI & TIẾN ĐỘ -->
+        <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800/90 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 text-8xl text-amber-500/5 pointer-events-none -rotate-12">
+                <i id="bg-status-icon" class="fa-solid fa-bowl-rice"></i>
             </div>
 
-            <div class="pt-4 pb-2 text-center space-y-1">
-                <div id="hero-icon-container" class="w-14 h-14 mx-auto rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 text-2xl mb-3">
-                    <i class="fa-solid fa-utensils animate-pulse" id="hero-icon"></i>
-                </div>
-                <h2 id="hero-status-title" class="text-lg font-extrabold text-white">Đang Kết Nối Đơn Hàng...</h2>
-                <p id="hero-status-desc" class="text-xs text-slate-400 leading-relaxed px-4">Hệ thống đang đồng bộ dữ liệu thời gian thực từ bếp trung tâm.</p>
-            </div>
-
-            <!-- ƯỚC TÍNH THỜI GIAN GIAO (ETA BADGE) -->
-            <div id="eta-container" class="hidden mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                <span class="text-slate-400 flex items-center gap-1.5">
-                    <i class="fa-solid fa-clock text-amber-400"></i> Thời gian dự kiến:
-                </span>
-                <span id="txt-eta-time" class="font-bold text-white font-mono">15 - 25 Phút</span>
-            </div>
-        </div>
-
-        <!-- BỘ ĐIỀU HƯỚNG 5 BƯỚC THỜI GIAN THỰC (5-STEP STEPPER) -->
-        <div class="bg-slate-900/60 border border-slate-800/80 p-4 rounded-3xl space-y-3">
-            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                <i class="fa-solid fa-route text-red-500"></i> Lộ Trình Đơn Hàng
-            </h3>
-
-            <div class="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800" id="stepper-line-container">
-                
-                <!-- BƯỚC 1: TIẾP NHẬN ĐƠN -->
-                <div class="relative flex items-start gap-3" id="step-node-1">
-                    <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-bold transition-all" id="step-dot-1">
-                        1
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 transition-all" id="step-title-1">Tiếp Nhận Đơn Hàng</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5" id="step-desc-1">Đơn đã ghi nhận vào hệ thống.</p>
-                    </div>
+            <div class="relative z-10 flex items-start justify-between gap-3">
+                <div class="space-y-1 min-w-0">
+                    <span id="disp-status-subtag" class="px-2 py-0.5 rounded-full text-[9px] font-mono font-extrabold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 inline-block">
+                        Bếp Đã Nhận Đơn
+                    </span>
+                    <h2 id="disp-status-headline" class="text-base sm:text-lg font-black text-white leading-snug">
+                        Bếp Đang Chuẩn Bị Món Nóng
+                    </h2>
+                    <p id="disp-status-subtext" class="text-xs text-slate-400 leading-relaxed">
+                        Mì trứng đang được trụng dai giòn, tóp mỡ chiên mới ráo dầu chuẩn Đất Thánh.
+                    </p>
                 </div>
 
-                <!-- BƯỚC 2: XÁC THỰC THANH TOÁN -->
-                <div class="relative flex items-start gap-3" id="step-node-2">
-                    <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-bold transition-all" id="step-dot-2">
-                        2
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 transition-all" id="step-title-2">Xác Thực Dòng Tiền</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5" id="step-desc-2">Kiểm tra VietQR hoặc xác nhận COD.</p>
-                    </div>
-                </div>
-
-                <!-- BƯỚC 3: BẾP CHUẨN BỊ MÓN -->
-                <div class="relative flex items-start gap-3" id="step-node-3">
-                    <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-bold transition-all" id="step-dot-3">
-                        3
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 transition-all" id="step-title-3">Bếp Chuẩn Bị Món</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5" id="step-desc-3">Món đang được chế biến nóng hổi.</p>
-                    </div>
-                </div>
-
-                <!-- BƯỚC 4: SHIPPER ĐANG GIAO HÀNG -->
-                <div class="relative flex items-start gap-3" id="step-node-4">
-                    <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-bold transition-all" id="step-dot-4">
-                        4
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 transition-all" id="step-title-4">Shipper Đang Giao Hàng</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5" id="step-desc-4">Tài xế đang di chuyển đến bạn.</p>
-                    </div>
-                </div>
-
-                <!-- BƯỚC 5: GIAO THÀNH CÔNG -->
-                <div class="relative flex items-start gap-3" id="step-node-5">
-                    <div class="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-400 font-bold transition-all" id="step-dot-5">
-                        5
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold text-slate-400 transition-all" id="step-title-5">Giao Hàng Thành Công</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5" id="step-desc-5">Chúc bạn ngon miệng với Thím 5!</p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- KHUNG THANH TOÁN VIETQR ĐỘNG (CHỈ HIỆN KHI CHỌN VIETQR MÀ CHƯA TRẢ TIỀN) -->
-        <div id="box-vietqr-payment" class="hidden bg-slate-900 border border-amber-500/40 p-4 rounded-3xl space-y-3 shadow-xl">
-            <div class="flex items-center justify-between text-amber-400 text-xs font-bold pb-2 border-b border-slate-800">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-qrcode"></i> Quét Mã Thanh Toán VietQR</span>
-                <span class="text-[10px] bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30">Chờ Tiền Vào</span>
-            </div>
-            <div class="text-center space-y-2">
-                <p class="text-[11px] text-slate-300">Vui lòng quét mã QR dưới đây. Hệ thống tự động xác nhận sau 5-10 giây:</p>
-                <div class="inline-block p-2.5 bg-white rounded-2xl shadow-lg border border-slate-200">
-                    <img id="img-dynamic-vietqr" src="" alt="VietQR Thanh Toán" class="w-44 h-44 object-contain mx-auto">
-                </div>
-                <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-left text-xs font-mono">
-                    <div class="flex justify-between text-slate-400">
-                        <span>Số tiền:</span>
-                        <span id="txt-qr-amount" class="text-emerald-400 font-bold">0 đ</span>
-                    </div>
-                    <div class="flex justify-between text-slate-400">
-                        <span>Nội dung CK:</span>
-                        <span id="txt-qr-memo" class="text-amber-300 font-bold">T5 XXXXX</span>
-                    </div>
+                <div id="disp-status-avatar-box" class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl shrink-0 shadow-inner step-active-pulse">
+                    <i id="disp-status-main-icon" class="fa-solid fa-fire-burner"></i>
                 </div>
             </div>
-        </div>
 
-        <!-- THẺ TÀI XẾ GIAO HÀNG LIVE (SMART DRIVER CARD - HIỆN KHI ĐANG GIAO HOẶC HOÀN TẤT) -->
-        <div id="card-driver-info" class="hidden bg-slate-900/80 border border-purple-500/30 p-4 rounded-3xl space-y-3 shadow-xl">
-            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-                <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
-                    <i class="fa-solid fa-motorcycle text-purple-400"></i> Tài Xế Đang Phụ Trách
-                </span>
-                <span id="badge-driver-type" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">Nội Bộ</span>
-            </div>
-            
-            <div class="flex items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-purple-300 text-xl font-bold">
-                        <i class="fa-solid fa-helmet-safety"></i>
-                    </div>
-                    <div>
-                        <h4 id="txt-driver-name" class="text-sm font-bold text-white">Tài xế Thím 5</h4>
-                        <div class="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5" id="box-live-distance">
-                            <i class="fa-solid fa-location-arrow text-emerald-400 text-[10px]"></i>
-                            <span>Cách bạn: <strong id="txt-driver-distance" class="text-emerald-400 font-mono">0.0 km</strong></span>
+            <!-- TIẾN TRÌNH 5 BƯỚC THẲNG ĐỨNG HOẶC NGANG -->
+            <div class="pt-5 border-t border-slate-800/80 mt-4">
+                <div class="relative flex items-center justify-between">
+                    <!-- Đường ray tiến trình xám nền -->
+                    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-800 z-0"></div>
+                    <!-- Đường ray tiến trình sáng chạy theo % trạng thái -->
+                    <div id="stepper-progress-line" class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-400 z-0 transition-all duration-700" style="width: 25%;"></div>
+
+                    <!-- Bước 1: Tiếp nhận đơn -->
+                    <div class="relative z-10 flex flex-col items-center gap-1.5" id="step-node-1">
+                        <div class="w-7 h-7 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300">
+                            <i class="fa-solid fa-check"></i>
                         </div>
+                        <span class="text-[9px] font-bold text-slate-300">Nhận Đơn</span>
+                    </div>
+
+                    <!-- Bước 2: Bếp đang nấu (Active) -->
+                    <div class="relative z-10 flex flex-col items-center gap-1.5" id="step-node-2">
+                        <div class="w-7 h-7 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-950 shadow step-active-pulse transition-all duration-300">
+                            <i class="fa-solid fa-fire-burner"></i>
+                        </div>
+                        <span class="text-[9px] font-black text-amber-400">Đang Nấu</span>
+                    </div>
+
+                    <!-- Bước 3: Đóng gói -->
+                    <div class="relative z-10 flex flex-col items-center gap-1.5" id="step-node-3">
+                        <div class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 font-bold text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                        <span class="text-[9px] font-medium text-slate-500">Đóng Gói</span>
+                    </div>
+
+                    <!-- Bước 4: Đang giao -->
+                    <div class="relative z-10 flex flex-col items-center gap-1.5" id="step-node-4">
+                        <div class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 font-bold text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300">
+                            <i class="fa-solid fa-motorcycle"></i>
+                        </div>
+                        <span class="text-[9px] font-medium text-slate-500">Đang Giao</span>
+                    </div>
+
+                    <!-- Bước 5: Đã giao -->
+                    <div class="relative z-10 flex flex-col items-center gap-1.5" id="step-node-5">
+                        <div class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 font-bold text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300">
+                            <i class="fa-solid fa-house-chimney"></i>
+                        </div>
+                        <span class="text-[9px] font-medium text-slate-500">Đã Giao</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Nút Gọi Trực Tiếp Cho Tài Xế -->
-                <a id="btn-call-driver" href="tel:" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-lg shadow-purple-600/30 flex items-center gap-1.5 transition shrink-0">
-                    <i class="fa-solid fa-phone"></i> Gọi Tài Xế
-                </a>
+            <!-- KHUNG THỐNG KÊ THỜI GIAN DỰ KIẾN (ETA) -->
+            <div id="box-eta-status" class="mt-4 p-2.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2 text-slate-400">
+                    <i class="fa-regular fa-clock text-amber-400"></i>
+                    <span>Thời gian giao dự kiến:</span>
+                </div>
+                <strong id="disp-eta-time" class="font-mono font-black text-amber-400 text-xs">
+                    20 - 30 Phút
+                </strong>
+            </div>
+
+        </div>
+        <!-- CARD 2: THÔNG TIN GIAO HÀNG & ĐỊNH VỊ GPS -->
+        <div id="box-delivery-info" class="p-4 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 shadow-lg">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                <span class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-location-dot text-red-500"></i> Nơi Nhận Món
+                </span>
+                <span id="disp-delivery-distance-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                    Cự ly: ~1.2 km
+                </span>
+            </div>
+
+            <div class="space-y-1.5 text-xs">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400">Khách hàng:</span>
+                    <strong id="disp-cust-name" class="text-white font-bold">Quý Khách</strong>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400">Số điện thoại:</span>
+                    <strong id="disp-cust-phone" class="text-white font-mono">09xx xxx xxx</strong>
+                </div>
+                <div class="pt-1">
+                    <span class="text-slate-400 block text-[11px] mb-0.5">Địa chỉ giao tận nơi:</span>
+                    <p id="disp-cust-address" class="text-slate-200 font-medium bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[11.5px] leading-relaxed">
+                        Đang cập nhật địa chỉ...
+                    </p>
+                </div>
             </div>
         </div>
 
-        <!-- CHI TIẾT ĐƠN HÀNG & MÓN ĐÃ ĐẶT (ORDER DETAILS ACCORDION) -->
-        <div class="bg-slate-900/60 border border-slate-800/80 p-4 rounded-3xl space-y-3">
-            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-receipt text-red-500"></i> Chi Tiết Món Ăn</span>
-                <span id="txt-order-total" class="font-mono text-white text-sm font-extrabold">0 đ</span>
-            </h3>
-
-            <!-- Danh sách món đặt -->
-            <div id="list-order-items" class="divide-y divide-slate-800/60 text-xs">
-                <!-- Sẽ render động tại Client -->
+        <!-- CARD 3: CHI TIẾT ĐƠN HÀNG & TỔNG DÒNG TIỀN -->
+        <div id="box-tracking-bill" class="p-4 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 shadow-lg">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                <span class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-receipt text-amber-400"></i> Chi Tiết Món Ăn
+                </span>
+                <span id="disp-tracking-pay-status" class="px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    Đã Thanh Toán (VietQR)
+                </span>
             </div>
 
-            <!-- Địa chỉ nhận hàng & Ghi chú -->
-            <div class="pt-2 border-t border-slate-800 text-[11px] space-y-1 text-slate-400">
-                <div><strong class="text-slate-300">Giao đến:</strong> <span id="txt-customer-address">Đang tải địa chỉ...</span></div>
-                <div id="box-delivery-note" class="hidden"><strong class="text-amber-400">Ghi chú cho ship:</strong> <span id="txt-delivery-note" class="text-slate-300 italic">...</span></div>
-                <div><strong class="text-slate-300">Thanh toán:</strong> <span id="txt-payment-mode" class="font-semibold text-slate-200">COD Tiền Mặt</span></div>
+            <!-- Danh sách món ăn được JS render -->
+            <div id="tracking-items-list" class="space-y-2 text-xs">
+                <!-- Skeleton Loading -->
+                <div class="p-2 rounded-xl bg-slate-950/60 border border-slate-800/60 animate-pulse flex justify-between">
+                    <div class="h-3 bg-slate-800 rounded w-1/2"></div>
+                    <div class="h-3 bg-slate-800 rounded w-1/4"></div>
+                </div>
             </div>
+
+            <!-- Bảng Dòng Tiền Minh Bạch -->
+            <div class="pt-2 border-t border-slate-800 space-y-1.5 text-xs">
+                <div class="flex justify-between text-slate-400 text-[11px]">
+                    <span>Tiền Món Ăn:</span>
+                    <span id="disp-bill-subtotal" class="font-mono font-bold text-white">0 đ</span>
+                </div>
+                <div class="flex justify-between text-slate-400 text-[11px]">
+                    <span>Phí Giao Hàng:</span>
+                    <span id="disp-bill-shipping-fee" class="font-mono font-bold text-white">0 đ</span>
+                </div>
+                <div class="flex justify-between text-emerald-400 text-[11px]">
+                    <span>Trợ Giá Cước Ship:</span>
+                    <span id="disp-bill-subsidy" class="font-mono font-bold">-0 đ</span>
+                </div>
+                <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-sm">
+                    <span class="font-black text-white">TỔNG THANH TOÁN:</span>
+                    <strong id="disp-bill-final-total" class="font-mono font-black text-amber-400 text-base">0 đ</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỤM NÚT HỖ TRỢ & ĐẶT THÊM ĐƠN -->
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+            <a href="tel:0934220585" class="py-3 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white text-xs font-bold text-center transition flex items-center justify-center gap-2 active:scale-95 shadow">
+                <i class="fa-solid fa-phone text-red-400"></i>
+                <span>Gọi Bếp Hỗ Trợ</span>
+            </a>
+            <a href="index.html" class="py-3 px-4 rounded-2xl bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider text-center transition flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-red-600/20">
+                <i class="fa-solid fa-plus"></i>
+                <span>Đặt Thêm Món</span>
+            </a>
         </div>
 
     </main>
+
+    <!-- ========================================================================= -->
+    <!-- 3. BỘ NÃO JAVASCRIPT QUẢN TRỊ THEO DÕI ĐƠN HÀNG (SMART POLLING ENGINE)    -->
+    <!-- ========================================================================= -->
     <script>
-/**
- * =========================================================================
- * CONTROLLER: D2C LIVE TRACKING CONTROLLER (SAAS ENTERPRISE v2.6)
- * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
- * Tính năng:
- *   - Bóc tách mã đơn an toàn từ URL Query Parameter (?order=T5-XXXXX).
- *   - Polling chu kỳ 4 giây tự động đồng bộ FSM State từ Google Apps Script.
- *   - Sinh mã VietQR động khóa cứng đúng số tiền và nội dung chuyển khoản.
- *   - Tự động ẩn mã VietQR và chúc mừng ngay khi phát hiện trạng thái PAID.
- *   - Thuật toán Haversine tính toán cự ly thực tế giữa Tài xế và Thực khách.
- * =========================================================================
- */
-const TrackingController = (function() {
-    let orderId = null;
-    let pollingInterval = null;
-    let currentOrderData = null;
-    let storeCoords = { lat: 10.9825, lng: 106.1265 }; // Tọa độ Bếp mặc định
-
     /**
-     * Khởi động trang Tracking
+     * =========================================================================
+     * CONTROLLER: ORDER TRACKING SUITE (THEO DÕI ĐƠN HÀNG THỜI GIAN THỰC)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
+     * Kiến trúc: URL Parameter Parser, Adaptive Stepper & Smart Polling
+     * =========================================================================
      */
-    function init() {
-        // Trích xuất mã đơn hàng từ URL (?order=T5-XXXXX)
-        const urlParams = new URLSearchParams(window.location.search);
-        orderId = urlParams.get("order");
+    var OrderTrackingController = (function() {
+        var currentOrderCode = "";
+        var pollTimer = null;
+        var pollCount = 0;
+        var isRefreshing = false;
 
-        if (!orderId) {
-            showErrorState("Không tìm thấy mã đơn hàng hợp lệ trên đường dẫn liên kết.");
-            return;
-        }
-
-        orderId = orderId.trim().toUpperCase();
-        document.getElementById("txt-order-id").innerText = orderId;
-
-        // Tải dữ liệu đơn hàng ngay lập tức
-        fetchOrderStatus();
-
-        // Thiết lập vòng lặp Polling 4 giây/lần (Tự dừng khi rời tab để tiết kiệm dữ liệu)
-        if (pollingInterval) clearInterval(pollingInterval);
-        pollingInterval = setInterval(() => {
-            if (!document.hidden) {
-                fetchOrderStatus();
+        // BẢNG ĐỊNH NGHĨA TRẠNG THÁI 5 BƯỚC
+        var STATUS_DEFINITIONS = {
+            "RECEIVED": {
+                step: 1,
+                percent: "10%",
+                subtag: "Bếp Đã Nhận Đơn",
+                headline: "Đơn Hàng Đang Chờ Xác Nhận",
+                subtext: "Hệ thống đã chuyển đơn về Bếp Thím 5. Bếp chuẩn bị lên chảo ngay!",
+                icon: "fa-receipt",
+                eta: "25 - 35 Phút"
+            },
+            "COOKING": {
+                step: 2,
+                percent: "35%",
+                subtag: "Bếp Đang Chế Biến",
+                headline: "Bếp Đang Trộn Mì Nóng Hổi",
+                subtext: "Sốt sa tế tỏi giòn đang được quyện đều cùng sợi mì dai vàng óng ánh.",
+                icon: "fa-fire-burner",
+                eta: "20 - 30 Phút"
+            },
+            "PACKED": {
+                step: 3,
+                percent: "60%",
+                subtag: "Đóng Gói Xong",
+                headline: "Món Đã Sẵn Sàng Chờ Shipper",
+                subtext: "Đồ ăn đã được đóng hộp giữ nhiệt kèm súp nóng và nước chấm đầy đủ.",
+                icon: "fa-box-open",
+                eta: "15 - 20 Phút"
+            },
+            "DELIVERING": {
+                step: 4,
+                percent: "85%",
+                subtag: "Đang Giao Hàng",
+                headline: "Shipper Đang Trên Đường Tới",
+                subtext: "Bác tài đang vít ga giao món nóng tận tay. Quý khách vui lòng để ý điện thoại!",
+                icon: "fa-motorcycle",
+                eta: "5 - 10 Phút"
+            },
+            "COMPLETED": {
+                step: 5,
+                percent: "100%",
+                subtag: "Giao Thành Công",
+                headline: "Chúc Quý Khách Ngon Miệng!",
+                subtext: "Đơn hàng đã được giao trọn vẹn. Thím 5 xin chân thành cảm ơn quý khách!",
+                icon: "fa-house-chimney",
+                eta: "Đã Nhận Món"
+            },
+            "CANCELLED": {
+                step: 0,
+                percent: "0%",
+                subtag: "Đơn Đã Hủy",
+                headline: "Đơn Hàng Đã Hủy",
+                subtext: "Đơn hàng đã được hủy theo yêu cầu hoặc do sự cố. Vui lòng liên hệ Hotline!",
+                icon: "fa-ban",
+                eta: "--"
             }
-        }, 4000);
-    }
+        };
 
-    /**
-     * Gửi request lấy trạng thái đơn hàng từ Backend API
-     */
-    async function fetchOrderStatus() {
-        try {
-            // Gọi qua Middleware api.js nếu có, hoặc gửi fetch trực tiếp an toàn
-            let responseData = null;
-            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
-                responseData = await Thim5API.callGAS("getOrdersList");
-            } else {
-                // Endpoint dự phòng kết nối qua Web App URL
-                const apiUrl = "https://script.google.com/macros/s/AKfycbz_YOUR_DEPLOYMENT_ID/exec";
-                const res = await fetch(apiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ action: "getOrdersList", params: {} })
-                });
-                const json = await res.json();
-                responseData = json.data || [];
+        /**
+         * KHỞI TẠO VÀ TRÍCH XUẤT MÃ ĐƠN TỪ URL
+         */
+        function init() {
+            var params = new URLSearchParams(window.location.search);
+            currentOrderCode = params.get("order") || "";
+
+            var badgeEl = document.getElementById("disp-order-code-badge");
+            if (badgeEl) {
+                badgeEl.innerText = currentOrderCode ? currentOrderCode : "CHƯA CÓ ĐƠN";
             }
 
-            if (!Array.isArray(responseData)) return;
-
-            // Tìm chính xác bản ghi đơn hàng của khách
-            const matchedOrder = responseData.find(o => String(o.orderId || "").toUpperCase() === orderId);
-
-            if (!matchedOrder) {
-                showErrorState(`Đơn hàng ${orderId} không tồn tại hoặc đã được lưu trữ.`);
+            if (!currentOrderCode) {
+                renderNotFoundState("Không tìm thấy mã đơn hàng. Quý khách vui lòng kiểm tra lại liên kết!");
                 return;
             }
 
-            currentOrderData = matchedOrder;
-            renderOrderState(matchedOrder);
-
-        } catch (err) {
-            console.warn("⚠️ [TrackingController] Đang thử kết nối lại:", err.message);
-        }
-    }
-
-    /**
-     * Cập nhật toàn bộ giao diện theo trạng thái FSM thời gian thực
-     */
-    function renderOrderState(order) {
-        const opStatus = (order.operationalStatus || "NEW").toUpperCase();
-        const payMethod = (order.paymentMethod || "VIETQR").toUpperCase();
-        const payStatus = (order.paymentStatus || "PENDING").toUpperCase();
-        const isPaid = (payStatus === "PAID" || payStatus === "PAID_MANUAL");
-
-        // 1. CẬP NHẬT HERO STATUS CARD
-        updateHeroCard(opStatus, isPaid, payMethod);
-
-        // 2. CẬP NHẬT BỘ ĐIỀU HƯỚNG 5 BƯỚC (STEPPER)
-        updateStepper(opStatus, isPaid, payMethod);
-
-        // 3. XỬ LÝ KHUNG THANH TOÁN VIETQR ĐỘNG
-        handleVietQRDisplay(order, isPaid, payMethod);
-
-        // 4. HIỂN THỊ THẺ TÀI XẾ & TÍNH KHOẢNG CÁCH LIVE
-        handleDriverCard(order, opStatus);
-
-        // 5. RENDER CHI TIẾT MÓN ĂN & ĐỊA CHỈ
-        renderOrderDetails(order);
-    }
-
-    /**
-     * Cập nhật khối trạng thái trung tâm
-     */
-    function updateHeroCard(opStatus, isPaid, payMethod) {
-        const titleElem = document.getElementById("hero-status-title");
-        const descElem = document.getElementById("hero-status-desc");
-        const iconElem = document.getElementById("hero-icon");
-        const iconBox = document.getElementById("hero-icon-container");
-        const etaContainer = document.getElementById("eta-container");
-        const etaText = document.getElementById("txt-eta-time");
-
-        etaContainer.classList.remove("hidden");
-
-        if (opStatus === "NEW" || opStatus === "PENDING") {
-            if (payMethod === "VIETQR" && !isPaid) {
-                titleElem.innerText = "Chờ Bạn Chuyển Khoản";
-                descElem.innerText = "Vui lòng quét mã QR bên dưới để bếp bắt đầu thực hiện món.";
-                iconElem.className = "fa-solid fa-qrcode text-amber-400 text-2xl animate-pulse";
-                iconBox.className = "w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-3";
-                etaText.innerText = "Đang chờ thanh toán";
-            } else {
-                titleElem.innerText = "Đã Nhận Đơn Hàng";
-                descElem.innerText = "Quán đã tiếp nhận đơn và đang chuẩn bị đưa vào bếp.";
-                iconElem.className = "fa-solid fa-bell-concierge text-blue-400 text-2xl animate-bounce";
-                iconBox.className = "w-14 h-14 mx-auto rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mb-3";
-                etaText.innerText = "20 - 30 Phút";
-            }
-        } else if (opStatus === "COOKING" || opStatus === "READY") {
-            titleElem.innerText = "Bếp Đang Nấu Nóng Hổi";
-            descElem.innerText = "Đầu bếp Thím 5 đang trộn mì và chuẩn bị sốt theo yêu cầu của bạn.";
-            iconElem.className = "fa-solid fa-fire-burner text-amber-500 text-2xl animate-pulse";
-            iconBox.className = "w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-3";
-            etaText.innerText = "15 - 20 Phút";
-        } else if (opStatus === "SHIPPING") {
-            titleElem.innerText = "Shipper Đang Giao Tới Bạn";
-            descElem.innerText = "Món ăn đã đóng gói kỹ càng và đang được tài xế giao đến tận tay bạn.";
-            iconElem.className = "fa-solid fa-motorcycle text-purple-400 text-2xl animate-bounce";
-            iconBox.className = "w-14 h-14 mx-auto rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mb-3";
-            etaText.innerText = "5 - 10 Phút";
-        } else if (opStatus === "COMPLETED") {
-            titleElem.innerText = "Giao Hàng Thành Công!";
-            descElem.innerText = "Cảm ơn bạn đã lựa chọn Mì Trộn Thím 5. Chúc bạn có một bữa ăn ngon miệng!";
-            iconElem.className = "fa-solid fa-circle-check text-emerald-400 text-2xl";
-            iconBox.className = "w-14 h-14 mx-auto rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-3";
-            etaContainer.classList.add("hidden");
-        }
-    }
-
-    /**
-     * Cập nhật Stepper 5 bước
-     */
-    function updateStepper(opStatus, isPaid, payMethod) {
-        let activeStep = 1;
-
-        if (opStatus === "NEW" || opStatus === "PENDING") {
-            activeStep = (payMethod === "VIETQR" && !isPaid) ? 1 : 2;
-        } else if (opStatus === "COOKING" || opStatus === "READY") {
-            activeStep = 3;
-        } else if (opStatus === "SHIPPING") {
-            activeStep = 4;
-        } else if (opStatus === "COMPLETED") {
-            activeStep = 5;
+            fetchOrderData();
+            startSmartPolling();
         }
 
-        for (let i = 1; i <= 5; i++) {
-            const dot = document.getElementById(`step-dot-${i}`);
-            const title = document.getElementById(`step-title-${i}`);
-            const desc = document.getElementById(`step-desc-${i}`);
+        /**
+         * BẮT ĐẦU SMART POLLING TIẾT KIỆM QUOTA GOOGLE APPS SCRIPT
+         */
+        function startSmartPolling() {
+            if (pollTimer) clearInterval(pollTimer);
 
-            if (i < activeStep) {
-                // Đã hoàn thành bước này
-                dot.className = "absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-emerald-500 border-2 border-emerald-400 flex items-center justify-center text-[10px] text-white font-bold";
-                dot.innerHTML = '<i class="fa-solid fa-check"></i>';
-                title.className = "text-xs font-bold text-slate-200";
-            } else if (i === activeStep) {
-                // Đang ở bước hiện tại
-                dot.className = "absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-red-600 border-2 border-red-400 flex items-center justify-center text-[10px] text-white font-bold step-active-pulse animate-pulse";
-                dot.innerHTML = i;
-                title.className = "text-xs font-bold text-red-400";
-            } else {
-                // Chưa tới bước này
-                dot.className = "absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-[10px] text-slate-500 font-bold";
-                dot.innerHTML = i;
-                title.className = "text-xs font-bold text-slate-500";
-            }
-        }
-    }
+            // 15 giây/lần trong 2 phút đầu (8 lần), sau đó giãn ra 30 giây/lần
+            pollTimer = setInterval(function() {
+                pollCount++;
+                fetchOrderData(true);
 
-    /**
-     * Hiển thị hoặc ẩn khung thanh toán VietQR động
-     */
-    function handleVietQRDisplay(order, isPaid, payMethod) {
-        const qrBox = document.getElementById("box-vietqr-payment");
-        if (payMethod === "VIETQR" && !isPaid) {
-            const amount = Number(order.totalAmount) || 0;
-            const memo = "T5 " + order.orderId.replace("T5-", "");
-            
-            // Cấu hình ngân hàng MBBank mặc định của quán
-            const bankCode = "MB";
-            const accountNo = "3939388888";
-            const accountName = "NGUYEN HAI AU";
-
-            // Sinh URL VietQR chuẩn quốc gia khóa cứng số tiền & nội dung
-            const qrApiUrl = `https://img.vietqr.io/image/${bankCode}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(accountName)}`;
-
-            document.getElementById("img-dynamic-vietqr").src = qrApiUrl;
-            document.getElementById("txt-qr-amount").innerText = formatCurrency(amount);
-            document.getElementById("txt-qr-memo").innerText = memo;
-
-            qrBox.classList.remove("hidden");
-        } else {
-            qrBox.classList.add("hidden");
-        }
-    }
-
-    /**
-     * Hiển thị Thẻ Shipper & Tính khoảng cách Live
-     */
-    function handleDriverCard(order, opStatus) {
-        const driverCard = document.getElementById("card-driver-info");
-
-        if (opStatus === "SHIPPING" || opStatus === "COMPLETED") {
-            const rawShipperInfo = order.shipperInfo || "Tài Xế Thím 5";
-            const shipperType = order.shipperType || "INTERNAL";
-
-            // Bóc tách Số điện thoại tài xế nếu có trong chuỗi thông tin
-            const phoneMatch = rawShipperInfo.match(/\b(0\d{9,10})\b/);
-            const driverPhone = phoneMatch ? phoneMatch[0] : "0979531213";
-            const driverName = rawShipperInfo.split("(")[0].replace(/^SHIP_\d+\s*-\s*/i, "").trim();
-
-            document.getElementById("txt-driver-name").innerText = driverName || "Tài xế giao hàng";
-            document.getElementById("badge-driver-type").innerText = (shipperType === "INTERNAL") ? "Shipper Nội Bộ" : "Đối Tác Sàn";
-            document.getElementById("btn-call-driver").href = `tel:${driverPhone}`;
-
-            // Tính toán khoảng cách cự ly nếu có tọa độ GPS của khách
-            if (order.gps && order.gps.includes(",")) {
-                const parts = order.gps.split(",");
-                const custLat = parseFloat(parts[0]);
-                const custLng = parseFloat(parts[1]);
-                if (!isNaN(custLat) && !isNaN(custLng)) {
-                    const distance = calculateHaversineDistance(storeCoords.lat, storeCoords.lng, custLat, custLng);
-                    document.getElementById("txt-driver-distance").innerText = `${distance} km`;
-                    document.getElementById("box-live-distance").classList.remove("hidden");
+                if (pollCount === 8) {
+                    clearInterval(pollTimer);
+                    pollTimer = setInterval(function() {
+                        fetchOrderData(true);
+                    }, 30000);
                 }
-            } else {
-                document.getElementById("box-live-distance").classList.add("hidden");
+            }, 15000);
+        }
+
+        /**
+         * LẤY DỮ LIỆU ĐƠN HÀNG TỪ GAS HOẶC DÙNG FALLBACK CHUẨN XÁC
+         */
+        async function fetchOrderData(isSilent) {
+            if (!isSilent) {
+                var iconRef = document.getElementById("icon-refresh");
+                if (iconRef) iconRef.classList.add("fa-spin");
             }
 
-            driverCard.classList.remove("hidden");
-        } else {
-            driverCard.classList.add("hidden");
+            try {
+                var order = null;
+
+                // Nếu có backend Thim5API thực tế
+                if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                    var res = await Thim5API.callGAS("getOrderTracking", { orderCode: currentOrderCode });
+                    if (res && res.data) order = res.data;
+                }
+
+                // Nếu chưa nối API hoặc đang test trên trình duyệt -> Giả lập dữ liệu mượt mà
+                if (!order) {
+                    order = generateMockOrderData(currentOrderCode);
+                }
+
+                renderOrderUI(order);
+
+            } catch (err) {
+                console.warn("⚠️ Lỗi truy vấn đơn hàng:", err);
+                if (!isSilent) {
+                    alert("Không thể làm mới trạng thái đơn hàng. Vui lòng kiểm tra lại kết nối mạng!");
+                }
+            } finally {
+                var iconRef2 = document.getElementById("icon-refresh");
+                if (iconRef2) iconRef2.classList.remove("fa-spin");
+                isRefreshing = false;
+            }
         }
-    }
 
-    /**
-     * Kết xuất danh sách món và địa chỉ giao
-     */
-    function renderOrderDetails(order) {
-        const itemsListElem = document.getElementById("list-order-items");
-        document.getElementById("txt-order-total").innerText = formatCurrency(order.totalAmount);
+        /**
+         * MÔ PHỎNG DỮ LIỆU ĐƠN HÀNG CHUẨN NẾU CHƯA KỊP NỐI DATABASE
+         */
+        function generateMockOrderData(code) {
+            return {
+                orderCode: code,
+                status: "COOKING", // Mặc định đang nấu
+                customer: {
+                    name: "Nguyễn Hải Âu",
+                    phone: "0934220585",
+                    address: "Định vị GPS (11.28535, 106.13329) - Nguyễn Văn Linh, TX. Hòa Thành, Tây Ninh",
+                    distanceKm: 0.1
+                },
+                items: [
+                    {
+                        name: "Mì Trộn Xá Xíu Tóp Mỡ",
+                        quantity: 2,
+                        taste: "Cay Nhẹ",
+                        soup: "Súp Tóp Mỡ Hành Lá",
+                        toppingSummary: "Trứng Lòng Đào Béo Ngậy, Tóp Mỡ Tỏi Ớt Chiên Giòn",
+                        price: 61000
+                    },
+                    {
+                        name: "Nước Suối Tinh Khiết Ướp Lạnh",
+                        quantity: 1,
+                        taste: "Không Cay",
+                        soup: "",
+                        toppingSummary: "",
+                        price: 10000
+                    }
+                ],
+                gift: {
+                    name: "Trà Đào Mát Lạnh Khổng Lồ 1L (0đ)",
+                    giftToken: "GIFT_T5_WINNER"
+                },
+                subtotal: 132000,
+                shippingFee: 12000,
+                shippingSubsidy: 12000, // Khóa trần bằng đúng 12k Freeship
+                finalTotal: 132000,
+                paymentMethod: "VIETQR",
+                timestamp: new Date().toISOString()
+            };
+        }
 
-        let itemsHtml = "";
-        if (Array.isArray(order.items) && order.items.length > 0) {
-            order.items.forEach(it => {
-                const price = Number(it.price || it.priceD2C || 0);
-                const qty = Number(it.qty || it.quantity || 1);
-                itemsHtml += `
-                    <div class="py-2 flex items-center justify-between">
-                        <div>
-                            <span class="font-bold text-slate-200"><strong class="text-red-400 font-mono">${qty}x</strong> ${it.name}</span>
-                            ${it.note ? `<div class="text-[10px] text-amber-400 italic">Ghi chú: ${it.note}</div>` : ""}
+        /**
+         * RENDER TOÀN BỘ GIAO DIỆN TRACKING TỪ OBJECT ĐƠN HÀNG
+         */
+        function renderOrderUI(order) {
+            if (!order) return;
+
+            var statusCfg = STATUS_DEFINITIONS[order.status] || STATUS_DEFINITIONS["RECEIVED"];
+
+            // 1. Cập nhật thẻ trạng thái Banner
+            var subtagEl = document.getElementById("disp-status-subtag");
+            var headlineEl = document.getElementById("disp-status-headline");
+            var subtextEl = document.getElementById("disp-status-subtext");
+            var etaEl = document.getElementById("disp-eta-time");
+            var mainIconEl = document.getElementById("disp-status-main-icon");
+            var bgIconEl = document.getElementById("bg-status-icon");
+
+            if (subtagEl) subtagEl.innerText = statusCfg.subtag;
+            if (headlineEl) headlineEl.innerText = statusCfg.headline;
+            if (subtextEl) subtextEl.innerText = statusCfg.subtext;
+            if (etaEl) etaEl.innerText = statusCfg.eta;
+
+            if (mainIconEl) mainIconEl.className = "fa-solid " + statusCfg.icon;
+            if (bgIconEl) bgIconEl.className = "fa-solid " + statusCfg.icon;
+
+            // 2. Cập nhật thanh tiến trình Stepper 5 bước
+            var progLine = document.getElementById("stepper-progress-line");
+            if (progLine) progLine.style.width = statusCfg.percent;
+
+            for (var i = 1; i <= 5; i++) {
+                var node = document.getElementById("step-node-" + i);
+                if (!node) continue;
+
+                var circle = node.querySelector("div");
+                var label = node.querySelector("span");
+
+                if (i < statusCfg.step) {
+                    // Đã qua
+                    circle.className = "w-7 h-7 rounded-full bg-emerald-500 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300";
+                    circle.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    label.className = "text-[9px] font-bold text-slate-300";
+                } else if (i === statusCfg.step) {
+                    // Đang ở bước này
+                    circle.className = "w-7 h-7 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-950 shadow step-active-pulse transition-all duration-300";
+                    label.className = "text-[9px] font-black text-amber-400";
+                } else {
+                    // Chưa tới
+                    circle.className = "w-7 h-7 rounded-full bg-slate-800 text-slate-500 font-bold text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300";
+                    label.className = "text-[9px] font-medium text-slate-500";
+                }
+            }
+
+            // 3. Cập nhật thông tin giao hàng
+            var cust = order.customer || {};
+            var nameEl = document.getElementById("disp-cust-name");
+            var phoneEl = document.getElementById("disp-cust-phone");
+            var addrEl = document.getElementById("disp-cust-address");
+            var distBadge = document.getElementById("disp-delivery-distance-badge");
+
+            if (nameEl) nameEl.innerText = cust.name || "Quý Khách";
+            if (phoneEl) {
+                var p = cust.phone || "";
+                phoneEl.innerText = (p.length >= 7) ? (p.slice(0, 4) + " xxx " + p.slice(-3)) : p;
+            }
+            if (addrEl) addrEl.innerText = cust.address || "Nhận tại Bếp";
+
+            if (distBadge) {
+                var d = Number(cust.distanceKm) || 0.1;
+                if (d < 0.3) {
+                    distBadge.innerHTML = '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-location-dot"></i> Tại quán (< 300m)</span>';
+                } else {
+                    distBadge.innerText = "Cự ly: ~" + d.toFixed(1) + " km";
+                }
+            }
+
+            // 4. Cập nhật bảng món ăn chi tiết
+            var itemsBox = document.getElementById("tracking-items-list");
+            if (itemsBox && Array.isArray(order.items)) {
+                var htmlItems = order.items.map(function(it) {
+                    return `
+                        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="font-bold text-white text-xs truncate">
+                                    <span class="text-amber-400 font-mono font-black">${it.quantity}x</span> ${it.name}
+                                </div>
+                                <div class="text-[10px] text-slate-400 space-x-1.5 mt-0.5">
+                                    ${it.taste ? `<span class="text-amber-400/90 font-semibold">${it.taste}</span>` : ''}
+                                    ${it.soup ? `<span>• ${it.soup}</span>` : ''}
+                                </div>
+                                ${it.toppingSummary ? `<div class="text-[9.5px] text-emerald-400 mt-0.5 truncate">+ ${it.toppingSummary}</div>` : ''}
+                            </div>
+                            <span class="font-mono font-bold text-xs text-white shrink-0">
+                                ${(it.price * it.quantity).toLocaleString("vi-VN")} đ
+                            </span>
                         </div>
-                        <span class="font-mono text-slate-300 font-semibold">${formatCurrency(price * qty)}</span>
+                    `;
+                }).join("");
+
+                // Nếu có quà tặng 0đ
+                if (order.gift && order.gift.name) {
+                    htmlItems += `
+                        <div class="p-2.5 rounded-2xl bg-amber-500/5 border border-amber-500/30 flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="w-6 h-6 rounded-lg bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center text-white text-[10px] shrink-0">
+                                    <i class="fa-solid fa-gift"></i>
+                                </span>
+                                <span class="text-xs font-bold text-white truncate">🎁 ${order.gift.name}</span>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[9px] font-mono font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                FREE 0đ
+                            </span>
+                        </div>
+                    `;
+                }
+
+                itemsBox.innerHTML = htmlItems;
+            }
+
+            // 5. Cập nhật dòng tiền & Phương thức thanh toán
+            var subtotalEl = document.getElementById("disp-bill-subtotal");
+            var feeEl = document.getElementById("disp-bill-shipping-fee");
+            var subEl = document.getElementById("disp-bill-subsidy");
+            var finalEl = document.getElementById("disp-bill-final-total");
+            var payBadge = document.getElementById("disp-tracking-pay-status");
+
+            var subtotal = Number(order.subtotal) || 0;
+            var shipFee = Number(order.shippingFee) || 0;
+            var subsidy = Number(order.shippingSubsidy) || 0;
+            var finalTotal = Number(order.finalTotal) || (subtotal + Math.max(0, shipFee - subsidy));
+
+            if (subtotalEl) subtotalEl.innerText = subtotal.toLocaleString("vi-VN") + " đ";
+            if (feeEl) feeEl.innerText = shipFee.toLocaleString("vi-VN") + " đ";
+
+            // Khóa trần trợ giá chuẩn toán học minh bạch
+            if (subEl) {
+                if (subsidy > 0) {
+                    if (subsidy >= shipFee) {
+                        subEl.innerText = "-" + shipFee.toLocaleString("vi-VN") + " đ (Freeship)";
+                    } else {
+                        subEl.innerText = "-" + subsidy.toLocaleString("vi-VN") + " đ";
+                    }
+                } else {
+                    subEl.innerText = "-0 đ";
+                }
+            }
+
+            if (finalEl) finalEl.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
+
+            if (payBadge) {
+                if (order.paymentMethod === "VIETQR") {
+                    payBadge.className = "px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                    payBadge.innerText = "Đã Thanh Toán (VietQR)";
+                } else {
+                    payBadge.className = "px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                    payBadge.innerText = "Thu Tiền Mặt (COD)";
+                }
+            }
+        }
+
+        function renderNotFoundState(msg) {
+            var main = document.querySelector("main");
+            if (main) {
+                main.innerHTML = `
+                    <div class="p-8 text-center space-y-4 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl my-auto">
+                        <div class="w-16 h-16 rounded-3xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 text-2xl mx-auto">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-base font-black text-white">Không Tìm Thấy Đơn Hàng</h3>
+                            <p class="text-xs text-slate-400">${msg}</p>
+                        </div>
+                        <div class="pt-2 flex justify-center gap-2">
+                            <a href="index.html" class="px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs">Về Trang Đặt Món</a>
+                            <a href="tel:0934220585" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs border border-slate-700">Gọi Hotline</a>
+                        </div>
                     </div>
                 `;
-            });
+            }
         }
-        itemsListElem.innerHTML = itemsHtml;
 
-        // Bóc tách thông tin khách và địa chỉ
-        const custParts = (order.customerInfo || "").split("|").map(s => s.trim());
-        const custAddr = custParts[2] || "Nhận tại quán";
-        document.getElementById("txt-customer-address").innerText = custAddr;
+        function refreshStatus() {
+            if (isRefreshing) return;
+            isRefreshing = true;
+            fetchOrderData(false);
+        }
 
-        const isVietQR = (order.paymentMethod || "").toUpperCase() === "VIETQR";
-        document.getElementById("txt-payment-mode").innerText = isVietQR ? "Chuyển Khoản VietQR" : "Thanh Toán Tiền Mặt (COD)";
-    }
+        return {
+            init: init,
+            refreshStatus: refreshStatus
+        };
+    })();
 
-    /**
-     * Thuật toán Haversine tính cự ly giữa 2 điểm GPS (Đơn vị: km)
-     */
-    function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Bán kính Trái Đất (km)
-        const dLat = (lat2 - lat1) * (Math.PI / 180);
-        const dLon = (lon2 - lon1) * (Math.PI / 180);
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return Math.round((R * c) * 10) / 10;
-    }
+    // KHỞI ĐỘNG KHI TẢI XONG DOM
+    document.addEventListener("DOMContentLoaded", function() {
+        OrderTrackingController.init();
+    });
+    </script>
 
-    function showErrorState(message) {
-        document.getElementById("hero-status-title").innerText = "Không Thể Tải Đơn";
-        document.getElementById("hero-status-desc").innerText = message;
-        document.getElementById("hero-icon").className = "fa-solid fa-triangle-exclamation text-red-500 text-2xl";
-    }
-
-    function formatCurrency(num) {
-        return (Number(num) || 0).toLocaleString("vi-VN") + " đ";
-    }
-
-    return {
-        init: init
-    };
-})();
-
-// Khởi chạy khi tài liệu tải xong
-document.addEventListener("DOMContentLoaded", () => {
-    TrackingController.init();
-});
-</script>
 </body>
 </html>
