@@ -420,13 +420,18 @@
           }
           renderKitchenUI();
       }
-
+    /**
+       * VẼ GIAO DIỆN BẾP KDS & PHÂN QUYỀN ĐIỀU PHỐI SHIPPER BẢO HỘ
+       */
       function renderKitchenUI() {
           var grid = document.getElementById("kitchenOrdersGrid");
           if (!grid) return;
 
           var activeOrders = (rawOrdersCache || []).filter(function(o) {
-              return o.status !== "CANCELLED" && o.status !== "Đã Hủy" && Number(o.step) >= 0 && Number(o.step) <= 3;
+              var code = String(o.code || "").trim();
+              var isCancelledStatus = (o.status === "CANCELLED" || o.status === "Đã Hủy" || Number(o.step) === -1);
+              var isLocallyCancelled = (localCancelledOrders.indexOf(code) !== -1);
+              return !isCancelledStatus && !isLocallyCancelled && Number(o.step) >= 0 && Number(o.step) <= 3;
           });
 
           var displayOrders = activeOrders;
@@ -452,8 +457,8 @@
           if (displayOrders.length === 0) {
               grid.innerHTML = `
                   <div class="col-span-full p-12 rounded-3xl bg-slate-900/60 border border-slate-800 text-center text-slate-400 space-y-2">
-                      <div class="text-4xl">🍳</div>
-                      <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider">Không Có Đơn Trong Mục Này</h3>
+                      <div class="text-4xl">🎉</div>
+                      <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider">Không Có Đơn Nào Trong Mục Này</h3>
                       <p class="text-[11px] text-slate-500">Bếp KDS đang tự động lắng nghe đơn hàng mới từ Web D2C...</p>
                   </div>
               `;
@@ -469,13 +474,18 @@
               var isNeedCook = (stepNum === 2);
               var isPacked = (stepNum === 2.5);
               var isWaitCod = (stepNum === 0);
+              var isDelivering = (stepNum === 3);
+
+              var assignedShipperName = String(o.shipper || "").trim();
+              var isShipperLocked = (assignedShipperName.length > 0);
 
               var formattedItemsHtml = (o.items || '').split(" | ").map(function(itemText) {
                   return `<div class="py-1 border-b border-slate-800/80 last:border-none text-slate-200 font-bold">• ${itemText}</div>`;
               }).join("");
 
               var shipperOptionsHtml = cachedShippers.map(function(s) {
-                  return `<option value="${s.name}|${s.phone}">🛵 ${s.name} (${s.phone})</option>`;
+                  var isSelected = (assignedShipperName.indexOf(s.name) !== -1 || assignedShipperName.indexOf(s.phone) !== -1) ? "selected" : "";
+                  return `<option value="${s.name}|${s.phone}" ${isSelected}>🛵 ${s.name} (${s.phone})</option>`;
               }).join("");
 
               html += `
@@ -519,7 +529,7 @@
                           </div>
                       </div>
 
-                      <!-- Khu vực Nút Tác Vụ Bếp -->
+                      <!-- Khu vực Nút Tác Vụ Bếp & Điều Phối Shipper -->
                       <div class="space-y-1.5 pt-1">
                           ${isWaitCod ? `
                               <div class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center font-bold text-amber-300 text-[11px]">
@@ -529,29 +539,46 @@
                                   🔒 Bếp Khóa (Chờ Shipper Xác Minh)
                               </button>
                           ` : (isNeedCook ? `
+                              ${isShipperLocked ? `
+                                  <div class="p-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center text-amber-400 text-[10.5px] font-bold">
+                                      🛵 Đơn đã khóa cứng cho tài xế: <strong>${assignedShipperName}</strong>
+                                  </div>
+                              ` : ''}
                               <button type="button" id="btn_cook_${cleanCode}" onclick="KitchenKdsController.handleCookDone('${cleanCode}')" class="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-1.5 active:scale-95">
                                   <i class="fa-solid fa-fire-burner"></i>
                                   <span>ĐÃ NẤU XONG ➔ ĐÓNG GÓI CHỜ SHIP</span>
                               </button>
                           ` : (isPacked ? `
                               <div class="space-y-1.5">
-                                  <div class="p-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center font-bold text-emerald-300 text-[10.5px]">
-                                      📦 Đã đóng gói xong! Bàn giao cho Shipper:
-                                  </div>
-                                  <div class="flex gap-1.5">
-                                      <select id="ship_select_${cleanCode}" class="flex-1 bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-2 font-bold outline-none">
-                                          ${shipperOptionsHtml}
-                                      </select>
-                                      <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}')" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition active:scale-95 shadow">
-                                          Gán Giao
+                                  ${isShipperLocked ? `
+                                      <!-- Trường hợp đơn COD đã được Shipper gọi xác minh khóa cứng -->
+                                      <div class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center text-emerald-300 text-[11px]">
+                                          📦 Món đã đóng hộp giữ nhiệt! Chờ tài xế bảo hộ:
+                                          <div class="font-black text-amber-400 text-xs mt-0.5">🛵 ${assignedShipperName}</div>
+                                      </div>
+                                      <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', true)" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition active:scale-95 shadow">
+                                          BÀN GIAO CHO ${assignedShipperName.split('(')[0].trim().toUpperCase()}
                                       </button>
-                                  </div>
+                                  ` : `
+                                      <!-- Trường hợp đơn VietQR tự do chưa có Shipper nhận -->
+                                      <div class="p-1.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[10.5px]">
+                                          📦 Đã đóng gói xong! Bếp trưởng chỉ định Shipper:
+                                      </div>
+                                      <div class="flex gap-1.5">
+                                          <select id="ship_select_${cleanCode}" class="flex-1 bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-2 font-bold outline-none">
+                                              ${shipperOptionsHtml}
+                                          </select>
+                                          <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', false)" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition active:scale-95 shadow">
+                                              Gán Giao
+                                          </button>
+                                      </div>
+                                  `}
                               </div>
-                          ` : `
+                          ` : (isDelivering ? `
                               <div class="p-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[11px]">
-                                  🛵 Đang giao bởi: <strong>${o.shipper || 'Shipper'}</strong>
+                                  🛵 Đang giao bởi: <strong>${assignedShipperName || 'Shipper'}</strong>
                               </div>
-                          `))}
+                          ` : '')))}
 
                           <!-- Nút Hủy Đơn -->
                           <button type="button" onclick="KitchenKdsController.handleKitchenCancel('${cleanCode}')" class="w-full py-1.5 rounded-xl bg-slate-950 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 border border-slate-800 text-[10.5px] font-bold transition">
@@ -566,56 +593,43 @@
           grid.innerHTML = html;
       }
 
-      async function handleCookDone(orderCode) {
+      /**
+       * BẾP BÀN GIAO ĐƠN CHO SHIPPER (KẾT NỐI CHUẨN XÁC VỚI API KITCHENASSIGNSHIPPER)
+       */
+      async function handleAssignShipper(orderCode, isPreLocked) {
           var cleanCode = String(orderCode || "").trim();
-          var btn = document.getElementById("btn_cook_" + cleanCode);
-          if (btn) {
-              btn.innerText = "⏳ Đang cập nhật trạng thái đóng gói...";
-              btn.disabled = true;
+          var shipName = "";
+          var shipPhone = "";
+
+          if (isPreLocked) {
+              // Lấy thông tin tài xế đã khóa cứng từ bộ nhớ đệm
+              var matched = rawOrdersCache.find(function(o) { return String(o.code || "").trim() === cleanCode; });
+              var fullLabel = matched ? String(matched.shipper || "") : "";
+              shipName = fullLabel.split("(")[0].trim() || "Tài Xế";
+              shipPhone = (fullLabel.match(/\((.*?)\)/) || ["", ""])[1];
+          } else {
+              var select = document.getElementById("ship_select_" + cleanCode);
+              if (!select) return;
+              var parts = select.value.split("|");
+              shipName = parts[0];
+              shipPhone = parts[1];
           }
 
           try {
               await callBackend(
-                  "kitchenUpdateStatus", 
-                  [cleanCode, "COOK_DONE", ""], 
-                  "kitchenUpdateStatus", 
-                  { orderCode: cleanCode, action: "COOK_DONE", note: "" }
+                  "kitchenAssignShipper", 
+                  [cleanCode, shipName, shipPhone], 
+                  "kitchenAssignShipper", 
+                  { orderCode: cleanCode, shipperName: shipName, shipperPhone: shipPhone }
               );
+              alert("✅ Đã bàn giao đơn " + cleanCode + " cho tài xế " + shipName + " đi giao!");
               loadKitchenOrders();
           } catch (err) {
-              alert("❌ Lỗi cập nhật Bếp: " + err.message);
-              if (btn) {
-                  btn.innerText = "ĐÃ NẤU XONG ➔ ĐÓNG GÓI CHỜ SHIP";
-                  btn.disabled = false;
-              }
+              alert("❌ Lỗi bàn giao Shipper: " + err.message);
           }
       }
 
-      async function handleAssignShipper(orderCode) {
-          var cleanCode = String(orderCode || "").trim();
-          var select = document.getElementById("ship_select_" + cleanCode);
-          if (!select) return;
-
-          var parts = select.value.split("|");
-          var shipName = parts[0];
-          var shipPhone = parts[1];
-          var shipperLabel = shipName + " (" + shipPhone + ")";
-
-          try {
-              await callBackend(
-                  "shipperUpdateStep", 
-                  [cleanCode, shipperLabel, 3], 
-                  "shipperUpdateStep", 
-                  { orderCode: cleanCode, shipperName: shipperLabel, stepNumber: 3 }
-              );
-              alert("✅ Đã bàn giao đơn " + cleanCode + " cho tài xế " + shipName + "!");
-              loadKitchenOrders();
-          } catch (err) {
-              alert("❌ Lỗi gán Shipper: " + err.message);
-          }
-      }
-
-      async function handleKitchenCancel(orderCode) {
+            async function handleKitchenCancel(orderCode) {
           var cleanCode = String(orderCode || "").trim();
           var reason = prompt("Nhập lý do hủy đơn " + cleanCode + " (VD: Khách nhắn Zalo hủy, Hết topping...):", "Khách nhắn Zalo hủy");
           if (!reason || !reason.trim()) return;
