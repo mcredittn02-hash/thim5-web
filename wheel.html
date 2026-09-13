@@ -1,856 +1,643 @@
 <!-- ========================================================================= -->
-<!-- COMPONENT: VÒNG QUAY MAY MẮN KÉO AOV & MINI CRM GEN Z [WHEEL_COMPONENT]  -->
-<!-- Kiến trúc: Canvas 60fps Native, Zero-Touch Gift Injection, Web Audio API  -->
+<!-- COMPONENT: VÒNG QUAY MAY MẮN THẦN VỊ (TÍCH HỢP MINI CRM ĐỒNG BỘ BACKEND)  -->
+<!-- Phiên bản: v2.9 Enterprise SaaS • Tự động co giãn theo cấp bậc khách hàng -->
 <!-- ========================================================================= -->
-
-<div id="modal-lucky-wheel" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
+<div id="modal-lucky-wheel" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-2 sm:p-4 select-none">
     
-    <!-- Modal Dialog Container (Max-w-md, Dark Mode chuẩn Enterprise) -->
-    <div class="relative bg-slate-900 border-2 border-amber-500/40 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col my-auto animate-in fade-in zoom-in-95 duration-200">
+    <div class="relative bg-slate-900 border-2 border-amber-500/50 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] animate-in zoom-in-95 duration-200">
         
-        <!-- 1. HEADER MODAL: TIÊU ĐỀ & NÚT ĐÓNG -->
-        <div class="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 shrink-0">
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base font-black shadow-inner">
-                    <i class="fa-solid fa-dharmachakra fa-spin text-sm" style="--fa-animation-duration: 15s;"></i>
+        <!-- Hào quang chuyển động nền Modal -->
+        <div class="absolute -top-24 -left-24 w-52 h-52 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -right-24 w-52 h-52 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- HEADER MODAL VÒNG QUAY -->
+        <div class="p-3 sm:p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80 shrink-0 relative z-10">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div id="wheel-header-icon-box" class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-red-600 flex items-center justify-center text-white text-base font-black shadow-lg shadow-amber-500/20 shrink-0">
+                    <i class="fa-solid fa-dharmachakra"></i>
                 </div>
-                <div>
-                    <h3 class="text-sm sm:text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
-                        Vòng Quay Thần Vị • 100% Trúng
-                    </h3>
-                    <p class="text-[10px] text-slate-400">Đơn từ 79.000đ nhận ngay 1 lượt quay miễn phí!</p>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                        <h3 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider truncate">Vòng Quay Thần Vị</h3>
+                        <span id="disp-crm-badge-tag" class="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                            Cấp 1: Mầm Non
+                        </span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 truncate">100% Trúng Thưởng Món Tặng • Tích Lũy Thăng Hạng</p>
                 </div>
             </div>
-            <button type="button" onclick="WheelComponentController.closeModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-700">
-                <i class="fa-solid fa-xmark text-sm"></i>
+            <button type="button" 
+                    onclick="WheelComponentController.closeModal()" 
+                    class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center border border-slate-700 transition active:scale-90">
+                <i class="fa-solid fa-xmark text-xs"></i>
             </button>
         </div>
 
-        <!-- 2. BODY MODAL: KHU VỰC ĐỊNH DANH CRM & SÂN KHẤU CANVAS -->
-        <div class="p-4 sm:p-5 space-y-4 overflow-y-auto max-h-[82vh] custom-scroll">
+        <!-- BODY MODAL: CUỘN NỘI DUNG TỰ DO -->
+        <div class="p-3.5 sm:p-4 space-y-3.5 overflow-y-auto custom-scroll text-xs relative z-10 flex flex-col items-center">
             
-            <!-- KHU VỰC TRA CỨU SĐT & VINH DANH HUY HIỆU GEN Z -->
-            <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-                <div class="flex items-center justify-between">
-                    <label class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
-                        <i class="fa-solid fa-id-card text-amber-400"></i> Định Danh Nhận Quà:
-                    </label>
-                    <span id="lbl-wheel-spin-count" class="text-[10px] font-mono font-black text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                        Lượt quay: 0
-                    </span>
-                </div>
-
-                <div class="flex gap-2">
-                    <input type="tel" id="inp-wheel-customer-phone" maxlength="11" placeholder="Nhập SĐT để nạp huy hiệu & quà..." oninput="WheelComponentController.onPhoneInput(this.value)" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white tracking-wider focus:outline-none focus:border-amber-500 transition">
-                    <button type="button" onclick="WheelComponentController.lookupCustomerProfile()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition flex items-center gap-1.5 shadow">
-                        <i class="fa-solid fa-magnifying-glass text-xs text-sky-400"></i>
-                        <span>Tra Cứu</span>
-                    </button>
-                </div>
-
-                <!-- Banner Vinh Danh Huy Hiệu Gen Z (Ẩn khi chưa tra cứu) -->
-                <div id="box-customer-badge-info" class="hidden p-2.5 rounded-xl bg-slate-900/90 border border-amber-500/30 space-y-1">
-                    <div class="flex items-center justify-between">
-                        <span id="txt-badge-full-title" class="text-xs font-black text-amber-300 flex items-center gap-1.5">
-                            🍜 Chiến Thần Sa Tế • Hệ Nghiện Định Kỳ
+            <!-- KHU VỰC THẺ HUY HIỆU MINI CRM (KẾT NỐI DATA THỰC TỪ GOOGLE SHEETS) -->
+            <div id="crm-profile-card" class="w-full p-2.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between gap-2 shadow-inner">
+                <div class="flex items-center gap-2 min-w-0">
+                    <div id="badge-avatar-icon" class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm shrink-0">
+                        🌱
+                    </div>
+                    <div class="min-w-0">
+                        <span id="badge-title-label" class="text-[11px] font-black text-white block truncate">
+                            Mầm Non Đất Thánh
                         </span>
-                        <span id="txt-badge-orders-count" class="text-[10px] font-mono font-bold text-slate-400">
-                            4 đơn/tháng
+                        <span id="badge-sub-order-count" class="text-[9.5px] font-mono text-slate-400 block truncate">
+                            Tiến độ: Đang đồng bộ lịch sử...
                         </span>
                     </div>
-                    <p id="txt-badge-slogan" class="text-[10px] text-slate-400 italic">
-                        "Mỗi tuần một bát, đói khát muộn phiền tan biến!"
-                    </p>
-                    <p id="txt-badge-next-goal" class="text-[10px] font-bold text-emerald-400 font-mono pt-0.5">
-                        Còn 3 đơn nữa để lên hạng "Chiến Thần Đóng Đô"!
-                    </p>
+                </div>
+                <div class="text-right shrink-0">
+                    <span id="badge-next-reward-tag" class="text-[10px] font-mono font-bold text-amber-400 block">
+                        Kế tiếp: Cấp 2
+                    </span>
+                    <span id="badge-orders-remain-label" class="text-[9px] text-slate-500 block">Còn 2 đơn</span>
                 </div>
             </div>
 
-            <!-- THANH ĐO TRẠNG THÁI GIỎ HÀNG AOV THỜI GIAN THỰC -->
-            <div id="box-aov-status-bar" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span class="text-slate-400 text-[11px]" id="txt-aov-progress-msg">Đang kiểm tra giỏ hàng...</span>
-                </div>
-                <strong class="font-mono font-black text-white text-xs" id="txt-current-cart-subtotal">0 đ</strong>
-            </div>
-
-            <!-- SÂN KHẤU CANVAS VÒNG QUAY CHUẨN 60FPS -->
-            <div class="relative w-full aspect-square max-w-[340px] mx-auto flex items-center justify-center select-none py-2">
+            <!-- CỤM BÁNH XE QUAY CANVAS CHUYÊN NGHIỆP -->
+            <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center my-1 shrink-0">
                 
-                <!-- Hiệu ứng vầng hào quang phát sáng (Ambient Glow) -->
-                <div class="absolute inset-0 rounded-full bg-amber-500/10 blur-xl pointer-events-none"></div>
+                <!-- Viền Đèn LED Neon Chuyển Động Xung Quanh -->
+                <div id="wheel-led-ring" class="absolute inset-0 rounded-full border-4 border-amber-500/50 shadow-2xl shadow-amber-500/30 pointer-events-none"></div>
+                <div class="absolute -inset-1.5 rounded-full border border-red-500/30 pointer-events-none animate-pulse"></div>
 
-                <!-- Thẻ Canvas Chính (Vẽ nan quạt và giải thưởng) -->
-                <canvas id="lucky-wheel-canvas" width="680" height="680" class="w-full h-full object-contain drop-shadow-2xl"></canvas>
+                <!-- Thẻ Canvas Vẽ 8 Ô Giải Thưởng Retina Sắc Nét -->
+                <canvas id="wheel-canvas" width="600" height="600" class="w-full h-full rounded-full transition-transform duration-[4500ms] cubic-bezier(0.12, 0.9, 0.22, 1)"></canvas>
 
-                <!-- Kim Chỉ Thần Vị (Pointer 3D phía trên đỉnh) -->
-                <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20 flex flex-col items-center pointer-events-none drop-shadow-lg">
-                    <div class="w-6 h-8 bg-gradient-to-b from-amber-300 via-amber-500 to-amber-600 [clip-path:polygon(50%_100%,0%_0%,100%_0%)] shadow-md"></div>
-                    <div class="w-3.5 h-3.5 rounded-full bg-amber-200 border-2 border-amber-600 -mt-7 shadow"></div>
+                <!-- Kim Chỉ Hướng Cố Định Đỉnh Vòng Quay -->
+                <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none drop-shadow-lg">
+                    <div class="w-6 h-8 bg-gradient-to-b from-amber-300 via-amber-500 to-red-600 rounded-t-lg shadow-md" style="clip-path: polygon(50% 100%, 0 0, 100% 0);"></div>
+                    <span class="w-2.5 h-2.5 rounded-full bg-white shadow -mt-7"></span>
                 </div>
 
-                <!-- Nút Bấm Trung Tâm Vòng Quay (Center Core Button) -->
-                <button type="button" id="btn-center-spin" onclick="WheelComponentController.triggerSpin()" class="absolute z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 border-4 border-slate-900 shadow-2xl flex flex-col items-center justify-center text-slate-950 font-black hover:scale-105 active:scale-95 transition duration-150 group cursor-pointer">
-                    <i class="fa-solid fa-play text-sm text-slate-950 group-hover:scale-110 transition"></i>
-                    <span class="text-[10px] uppercase tracking-tighter mt-0.5 font-black">QUAY</span>
+                <!-- Nút Bấm Trung Tâm Vòng Quay -->
+                <button type="button" 
+                        id="btn-trigger-spin" 
+                        onclick="WheelComponentController.spinWheel()" 
+                        class="absolute z-20 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-red-600 via-amber-600 to-amber-500 text-white font-black text-xs uppercase tracking-wider flex flex-col items-center justify-center shadow-2xl shadow-red-600/50 border-2 sm:border-4 border-amber-300 hover:scale-105 active:scale-95 transition">
+                    <i class="fa-solid fa-play text-xs ml-0.5"></i>
+                    <span class="text-[9px] sm:text-[10px] mt-0.5 font-black tracking-widest">QUAY</span>
                 </button>
 
             </div>
 
-            <!-- NÚT BẤM KÍCH HOẠT LỚN PHÍA DƯỚI -->
-            <button type="button" id="btn-bottom-spin" onclick="WheelComponentController.triggerSpin()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-red-500 to-amber-600 hover:opacity-95 text-white text-xs sm:text-sm font-black uppercase tracking-wider shadow-xl shadow-amber-500/20 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-gift text-base"></i>
-                <span>QUAY NGAY • 100% NHẬN MÓN TẶNG</span>
-            </button>
+            <!-- THANH TIẾN TRÌNH BẬC THANG CỘT MỐC (MILESTONES 2 - 4 - 7 - 12) -->
+            <div class="w-full space-y-1.5 pt-1">
+                <div class="flex items-center justify-between text-[10.5px]">
+                    <span class="font-bold text-slate-300 flex items-center gap-1">
+                        <i class="fa-solid fa-layer-group text-amber-400"></i> Bậc Thang Cột Mốc Đơn Hàng:
+                    </span>
+                    <span id="disp-current-milestone-text" class="font-mono font-bold text-amber-400 text-[10px]">
+                        Mốc 1: 2 Đơn / 79k
+                    </span>
+                </div>
 
-            <p class="text-[10px] text-center text-slate-500 italic">
-                * Mỗi đơn hàng từ 79k chỉ được áp dụng 1 món quà may mắn để bảo đảm chất lượng món tốt nhất.
-            </p>
-
-        </div>
-
-    </div>
-
-    <!-- POPUP KẾT QUẢ TRÚNG THƯỞNG & PHÁO HOA CONFETTI OVERLAY -->
-    <div id="wheel-result-popup" class="hidden absolute inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-lg p-4">
-        
-        <!-- Canvas Pháo Hoa Confetti Ngầm -->
-        <canvas id="wheel-confetti-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
-
-        <div class="relative z-20 bg-slate-900 border-2 border-amber-400 w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center space-y-4 animate-in zoom-in-95 duration-200">
-            
-            <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center text-white text-3xl mx-auto shadow-lg shadow-amber-500/30 animate-bounce">
-                <i class="fa-solid fa-trophy"></i>
+                <!-- Bảng 4 Nấc Cột Mốc 2 - 4 - 7 - 12 -->
+                <div class="grid grid-cols-4 gap-1 text-center font-mono">
+                    <div id="milestone-box-2" class="p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 transition-all duration-300">
+                        <span class="text-[9px] block text-slate-500">Mốc 1</span>
+                        <strong class="text-xs font-bold text-slate-400">2 Đơn</strong>
+                        <span class="text-[8.5px] block text-slate-500 mt-0.5">Trứng Đào</span>
+                    </div>
+                    <div id="milestone-box-4" class="p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 transition-all duration-300">
+                        <span class="text-[9px] block text-slate-500">Mốc 2</span>
+                        <strong class="text-xs font-bold text-slate-400">4 Đơn</strong>
+                        <span class="text-[8.5px] block text-slate-500 mt-0.5">Tóp Mỡ 16k</span>
+                    </div>
+                    <div id="milestone-box-7" class="p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 transition-all duration-300">
+                        <span class="text-[9px] block text-slate-500">Mốc 3</span>
+                        <strong class="text-xs font-bold text-slate-400">7 Đơn</strong>
+                        <span class="text-[8.5px] block text-slate-500 mt-0.5">Trà Đào 1L</span>
+                    </div>
+                    <div id="milestone-box-12" class="p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 transition-all duration-300">
+                        <span class="text-[9px] block text-slate-500">Mốc 4</span>
+                        <strong class="text-xs font-bold text-slate-400">12 Đơn</strong>
+                        <span class="text-[8.5px] block text-slate-500 mt-0.5">Combo 89k</span>
+                    </div>
+                </div>
+            </div>
+            <!-- KHUNG THÔNG BÁO TRÚNG THƯỞNG (ẨN MẶC ĐỊNH, BẬT KHI QUAY XONG) -->
+            <div id="wheel-reward-result-box" class="hidden w-full p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-red-500/10 to-amber-500/10 border-2 border-amber-500/60 text-center space-y-2 animate-in zoom-in-95 duration-300">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center text-white text-lg mx-auto shadow-md">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-emerald-400 font-mono">Chúc Mừng Quý Khách!</span>
+                    <h4 id="disp-reward-name" class="text-sm font-black text-white mt-0.5">Trứng Lòng Đào Béo Ngậy 0đ</h4>
+                    <p class="text-[10px] text-slate-300 mt-1">Món quà may mắn đã được kích hoạt. Nhấn nút bên dưới để đưa vào giỏ hàng ngay!</p>
+                </div>
+                <div class="pt-1">
+                    <button type="button" 
+                            onclick="WheelComponentController.acceptGiftAndClose()" 
+                            class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 hover:opacity-95 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 transition active:scale-95 flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-cart-arrow-down text-xs"></i>
+                        <span>Đưa Vào Giỏ Hàng Ngay</span>
+                    </button>
+                </div>
             </div>
 
-            <div class="space-y-1">
-                <span class="text-[11px] font-bold uppercase tracking-widest text-amber-400">Chúc Mừng Quý Khách!</span>
-                <h4 id="txt-winning-prize-name" class="text-base sm:text-lg font-black text-white">
-                    1 Quả Trứng Lòng Đào Béo Ngậy
-                </h4>
-                <p class="text-[11px] text-slate-400 pt-1" id="txt-winning-prize-desc">
-                    Món quà đã được xác thực an toàn bởi cỗ máy Gamification Thím 5.
+            <!-- KHUNG CẢNH BÁO ĐIỀU KIỆN AOV (HIỆN KHI ĐƠN CHƯA ĐẠT 79K) -->
+            <div id="wheel-aov-status-box" class="w-full p-3 rounded-2xl bg-slate-950 border border-slate-800 text-center space-y-1">
+                <div class="flex items-center justify-center gap-1.5 text-slate-300 font-bold text-[11px]">
+                    <i class="fa-solid fa-gift text-amber-400"></i>
+                    <span id="disp-wheel-condition-title">Điều Kiện Tham Gia:</span>
+                </div>
+                <p id="disp-wheel-condition-desc" class="text-[10.5px] text-slate-400 leading-tight">
+                    Đơn hàng từ <strong class="text-amber-400 font-mono">79.000đ</strong> nhận ngay 1 lượt quay miễn phí!
                 </p>
             </div>
 
-            <!-- Hộp Hiển Thị Mã Token Quà Tặng -->
-            <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[11px] text-slate-400 flex items-center justify-between">
-                <span>Mã Xác Thực:</span>
-                <strong id="txt-winning-token" class="text-amber-400 font-bold">GIFT_SLOT_1_XXXXXX</strong>
-            </div>
+        </div>
 
-            <!-- Nút 1-Chạm Bơm Thẳng Vào Giỏ Hàng -->
-            <button type="button" onclick="WheelComponentController.claimAndInjectToCart()" id="btn-claim-gift-action" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-emerald-500/30 transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-cart-arrow-down text-sm"></i>
-                <span>NHẬN QUÀ 0Đ VÀO GIỎ HÀNG NGAY</span>
-            </button>
-
+        <!-- FOOTER MODAL: GHI CHÚ MINH BẠCH THƯƠNG HIỆU -->
+        <div class="p-3 border-t border-slate-800 bg-slate-950 text-center shrink-0 relative z-10">
+            <span class="text-[10px] text-slate-500 font-medium">
+                • Áp dụng 1 phần quà / 1 đơn hàng • Không quy đổi thành tiền mặt •
+            </span>
         </div>
 
     </div>
 
 </div>
+
+<!-- ========================================================================= -->
+<!-- BỘ NÃO JAVASCRIPT QUẢN TRỊ GAMIFICATION & CANVAS RETINA ENGINE            -->
+<!-- ========================================================================= -->
 <script>
 /**
  * =========================================================================
- * COMPONENT CONTROLLER: VÒNG QUAY MAY MẮN & MINI CRM GEN Z (v2.7 ENTERPRISE)
+ * CONTROLLER: LUCKY WHEEL ENGINE (VÒNG QUAY THẦN VỊ v2.9 ENTERPRISE)
  * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
- * Kiến trúc: HTML5 Canvas Super-Sampling 2X & Native Web Audio Synthesizer
- * Vai trò:
- *   - Render 6 ô quà tặng chuẩn F&B kiểm soát dòng tiền Food Cost <= 5%.
- *   - Phát âm thanh kim gõ lách cách cơ khí chân thực không cần file MP3.
- *   - Tra cứu hồ sơ hội viên CRM tự động đọc vị Huy hiệu Gen Z theo SĐT.
- *   - Quản trị trạng thái giỏ hàng mở khóa lượt quay khi đạt mốc >= 79.000đ.
+ * Kiến trúc: Retina Canvas 600x600, Web Audio Synthesizer, Tiered Milestones
  * =========================================================================
  */
-const WheelComponentController = (function() {
-    // 1. TRẠNG THÁI NỘI TẠI CỦA VÒNG QUAY (STATE MANAGEMENT)
-    let canvas = null;
-    let ctx = null;
-    let wheelSlots = [];
-    let minOrderThreshold = 79000; // Mốc mở khóa giỏ hàng tối thiểu
-    let currentRotationAngle = 0;   // Góc xoay hiện tại (radian)
-    let isSpinning = false;
-    let currentCustomerPhone = "";
-    let customerProfileCache = null;
-    let currentCartSubtotal = 0;
-    let lastTickSlotIndex = -1;
-    let debounceTimer = null;
+var WheelComponentController = (function() {
+    var isSpinning = false;
+    var currentRotationAngle = 0;
+    var currentSubtotal = 0;
+    var currentCustomerPhone = "";
+    var wonPrizeObject = null;
+    var currentCrmProfile = null;
 
-    // 6 Ô Giải thưởng dự phòng an toàn tuyệt đối (Chuẩn F&B Vốn Thấp - Cảm Nhận Cao)
-    const DEFAULT_SLOTS = [
-        { slotId: "SLOT_1", name: "Trứng Lòng Đào", type: "TOPPING", color: "#EF4444", textColor: "#FFFFFF" },
-        { slotId: "SLOT_2", name: "Nước Suối Lạnh", type: "DRINK", color: "#3B82F6", textColor: "#FFFFFF" },
-        { slotId: "SLOT_3", name: "Thêm Vắt Mì", type: "TOPPING", color: "#F59E0B", textColor: "#0F172A" },
-        { slotId: "SLOT_4", name: "Trà Đào Mát Lạnh", type: "DRINK", color: "#10B981", textColor: "#FFFFFF" },
-        { slotId: "SLOT_5", name: "Súp Bò Viên", type: "SOUP", color: "#8B5CF6", textColor: "#FFFFFF" },
-        { slotId: "SLOT_6", name: "Voucher 15k Đơn 120k", type: "VOUCHER", color: "#EC4899", textColor: "#FFFFFF" }
+    // CẤU HÌNH 8 MÚI GIẢI THƯỞNG CHUẨN BIÊN LỢI NHUẬN F&B
+    var WHEEL_SEGMENTS = [
+        { id: "p1", name: "Trứng Đào 0đ", icon: "🥚", color: "#B45309", textColor: "#FEF3C7", weight: 35, type: "item" },
+        { id: "p2", name: "Freeship 12k", icon: "🛵", color: "#065F46", textColor: "#D1FAE5", weight: 20, type: "ship" },
+        { id: "p3", name: "Tóp Mỡ Giòn 0đ", icon: "🥓", color: "#991B1B", textColor: "#FEE2E2", weight: 20, type: "item" },
+        { id: "p4", name: "Voucher 5k", icon: "🎟️", color: "#1E293B", textColor: "#F8FAFC", weight: 10, type: "voucher" },
+        { id: "p5", name: "Trà Đào 1L 0đ", icon: "🍹", color: "#C2410C", textColor: "#FFEDD5", weight: 5, type: "item" },
+        { id: "p6", name: "Bò Viên Gân 0đ", icon: "🍡", color: "#7C2D12", textColor: "#FFEDD5", weight: 5, type: "item" },
+        { id: "p7", name: "Chúc May Mắn", icon: "✨", color: "#0F172A", textColor: "#94A3B8", weight: 3, type: "empty" },
+        { id: "p8", name: "Xá Xíu Thêm 0đ", icon: "🥩", color: "#831843", textColor: "#FCE7F3", weight: 2, type: "item" }
     ];
 
-    // =========================================================================
-    // 2. BỘ TỔNG HỢP ÂM THANH NATIVE (WEB AUDIO API SYNTHESIZER)
-    // Hoàn toàn không phụ thuộc file âm thanh ngoài, không lo mạng lag hay lỗi 404
-    // =========================================================================
-    const WebAudioEngine = (function() {
-        let audioCtx = null;
+    // BẢNG BẬC THANG CỘT MỐC ĐƠN HÀNG CRM (2 - 4 - 7 - 12)
+    var CRM_MILESTONES = {
+        tier1: { orders: 2, label: "Mầm Non Đất Thánh", icon: "🌱", bonusGift: "Trứng Lòng Đào 0đ" },
+        tier2: { orders: 4, label: "Thực Khách Sành Ăn", icon: "🥉", bonusGift: "Hũ Tóp Mỡ Giòn Cay 16k" },
+        tier3: { orders: 7, label: "Tín Đồ Mì Trộn Sa Tế", icon: "🥈", bonusGift: "Trà Đào Mát Lạnh 1L" },
+        tier4: { orders: 12, label: "Thần Vị Hoàng Gia", icon: "👑", bonusGift: "Combo Đại Tiệc 89k" }
+    };
 
-        function getAudioContext() {
-            if (!audioCtx) {
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (AudioContextClass) {
-                    audioCtx = new AudioContextClass();
-                }
-            }
-            if (audioCtx && audioCtx.state === "suspended") {
-                audioCtx.resume();
-            }
-            return audioCtx;
+    /**
+     * VẼ BÁNH XE CANVAS PHÂN GIẢI RETINA (600x600) SẮC NÉT
+     */
+    function drawRetinaWheelCanvas() {
+        var canvas = document.getElementById("wheel-canvas");
+        if (!canvas) return;
+
+        var ctx = canvas.getContext("2d");
+        var width = canvas.width;
+        var height = canvas.height;
+        var center = width / 2;
+        var radius = center - 15;
+        var totalSegments = WHEEL_SEGMENTS.length;
+        var anglePerSegment = (2 * Math.PI) / totalSegments;
+
+        ctx.clearRect(0, 0, width, height);
+
+        // Vẽ từng múi giải thưởng
+        for (var i = 0; i < totalSegments; i++) {
+            var seg = WHEEL_SEGMENTS[i];
+            var startAngle = i * anglePerSegment;
+            var endAngle = startAngle + anglePerSegment;
+
+            // 1. Vẽ hình quạt
+            ctx.beginPath();
+            ctx.moveTo(center, center);
+            ctx.arc(center, center, radius, startAngle, endAngle);
+            ctx.closePath();
+            ctx.fillStyle = seg.color;
+            ctx.fill();
+
+            // 2. Viền phân cách giữa các múi
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "#020617";
+            ctx.stroke();
+
+            // 3. Vẽ Icon & Tên giải thưởng
+            ctx.save();
+            ctx.translate(center, center);
+            ctx.rotate(startAngle + anglePerSegment / 2);
+
+            // Vẽ Icon giải thưởng
+            ctx.font = "bold 28px sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(seg.icon, radius * 0.72, 0);
+
+            // Vẽ Chữ tên giải thưởng
+            ctx.font = "900 16px 'Plus Jakarta Sans', sans-serif";
+            ctx.fillStyle = seg.textColor;
+            ctx.fillText(seg.name, radius * 0.44, 0);
+
+            ctx.restore();
         }
 
-        /**
-         * Phát tiếng lách cách khi nan quạt đi qua kim chỉ (Mechanical Tick)
-         */
-        function playTickSound() {
-            try {
-                const ctx = getAudioContext();
-                if (!ctx) return;
+        // Vẽ tâm tròn kim loại giữa bánh xe
+        ctx.beginPath();
+        ctx.arc(center, center, 42, 0, 2 * Math.PI);
+        ctx.fillStyle = "#020617";
+        ctx.fill();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#F59E0B";
+        ctx.stroke();
 
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
+        // Vòng ren trang trí trong tâm
+        ctx.beginPath();
+        ctx.arc(center, center, 36, 0, 2 * Math.PI);
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = "rgba(245, 158, 11, 0.4)";
+        ctx.stroke();
+    }
 
-                osc.type = "triangle";
-                // Tần số trượt từ 700Hz xuống 180Hz trong 25ms tạo âm gõ cơ khí
-                osc.frequency.setValueAtTime(750, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.025);
+    /**
+     * TỔNG HỢP ÂM THANH CƠ HỌC KIM GÕ QUA WEB AUDIO API (NATIVE AUDIO SYNTH)
+     */
+    function playMechanicalTickSound() {
+        try {
+            var AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            var actx = new AudioContext();
+            var osc = actx.createOscillator();
+            var gain = actx.createGain();
 
-                gain.gain.setValueAtTime(0.18, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.025);
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(580, actx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(120, actx.currentTime + 0.04);
+
+            gain.gain.setValueAtTime(0.18, actx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.04);
+
+            osc.connect(gain);
+            gain.connect(actx.destination);
+
+            osc.start();
+            osc.stop(actx.currentTime + 0.04);
+        } catch (e) {
+            // Bỏ qua nếu trình duyệt chưa có tương tác người dùng
+        }
+    }
+
+    /**
+     * ÂM THANH HỢP ÂM ĐÔ TRƯỞNG CHIẾN THẮNG KHI TRÚNG THƯỞNG
+     */
+    function playVictoryChime() {
+        try {
+            var AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            var actx = new AudioContext();
+            var notes = [523.25, 659.25, 783.99, 1046.50]; // Hợp âm C - E - G - C cao
+
+            notes.forEach(function(freq, index) {
+                var osc = actx.createOscillator();
+                var gain = actx.createGain();
+
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(freq, actx.currentTime + (index * 0.1));
+
+                gain.gain.setValueAtTime(0.2, actx.currentTime + (index * 0.1));
+                gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + (index * 0.1) + 0.35);
 
                 osc.connect(gain);
-                gain.connect(ctx.destination);
+                gain.connect(actx.destination);
 
-                osc.start();
-                osc.stop(ctx.currentTime + 0.028);
-            } catch (e) {}
+                osc.start(actx.currentTime + (index * 0.1));
+                osc.stop(actx.currentTime + (index * 0.1) + 0.35);
+            });
+        } catch (e) {
+            // Bỏ qua lỗi âm thanh
         }
-
-        /**
-         * Phát hợp âm chiến thắng Fanfare khi trúng thưởng
-         */
-        function playWinFanfare() {
-            try {
-                const ctx = getAudioContext();
-                if (!ctx) return;
-
-                const notes = [523.25, 659.25, 783.99, 1046.50]; // Đô - Mi - Sol - Đô cao
-                notes.forEach(function(freq, index) {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-
-                    osc.type = "sine";
-                    osc.frequency.setValueAtTime(freq, ctx.currentTime + (index * 0.09));
-
-                    gain.gain.setValueAtTime(0.15, ctx.currentTime + (index * 0.09));
-                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (index * 0.09) + 0.4);
-
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-
-                    osc.start(ctx.currentTime + (index * 0.09));
-                    osc.stop(ctx.currentTime + (index * 0.09) + 0.42);
-                });
-            } catch (e) {}
-        }
-
-        return {
-            init: getAudioContext,
-            playTick: playTickSound,
-            playWin: playWinFanfare
-        };
-    })();
-
-    // =========================================================================
-    // 3. KHỞI TẠO VÒNG ĐỜI & GIAO TIẾP VỚI HỆ THỐNG
-    // =========================================================================
-    function init() {
-        canvas = document.getElementById("lucky-wheel-canvas");
-        if (!canvas) return;
-        ctx = canvas.getContext("2d");
-
-        // Đăng ký tương tác âm thanh người dùng lần đầu
-        document.addEventListener("click", function userTouchInit() {
-            WebAudioEngine.init();
-            document.removeEventListener("click", userTouchInit);
-        }, { once: true });
-
-        loadWheelConfigFromBackend();
     }
-
     /**
-     * Nạp cấu hình các ô quà tặng từ Google Sheets thông qua API
+     * ĐỒNG BỘ HỒ SƠ MINI CRM TỪ BACKEND GOOGLE SHEETS
+     * Truy vấn số đơn hoàn tất để xếp hạng Bậc Thang Cột Mốc 2 - 4 - 7 - 12
      */
-    async function loadWheelConfigFromBackend() {
+    async function fetchCustomerCrmData(phone) {
+        var cardCountLabel = document.getElementById("badge-sub-order-count");
+        var badgeTitleLabel = document.getElementById("badge-title-label");
+        var badgeAvatar = document.getElementById("badge-avatar-icon");
+        var nextTag = document.getElementById("badge-next-reward-tag");
+        var remainLabel = document.getElementById("badge-orders-remain-label");
+        var topBadgeTag = document.getElementById("disp-crm-badge-tag");
+
+        if (!phone || phone.length < 9) {
+            // Khách vãng lai chưa nhập số điện thoại
+            currentCrmProfile = {
+                phone: "",
+                totalOrders: 0,
+                tierIndex: 1,
+                tierName: "Mầm Non Đất Thánh",
+                tierIcon: "🌱",
+                nextMilestone: 2,
+                ordersRemaining: 2
+            };
+            updateCrmMilestonesUI(currentCrmProfile);
+            return;
+        }
+
         try {
+            var profile = null;
             if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
-                const res = await Thim5API.callGAS("getPublicWheelConfig");
-                if (res && res.slots && Array.isArray(res.slots) && res.slots.length >= 4) {
-                    wheelSlots = res.slots;
-                    minOrderThreshold = Number(res.minOrderAmount) || 79000;
-                    drawWheel(currentRotationAngle);
-                    return;
-                }
+                var res = await Thim5API.callGAS("getCustomerCrmProfile", { phone: phone });
+                if (res && res.data) profile = res.data;
             }
+
+            if (!profile) {
+                // Fallback nếu chưa kết nối API
+                profile = {
+                    phone: phone,
+                    totalOrders: 1,
+                    tierIndex: 1,
+                    tierName: "Mầm Non Đất Thánh",
+                    tierIcon: "🌱",
+                    nextMilestone: 2,
+                    ordersRemaining: 1
+                };
+            }
+
+            currentCrmProfile = profile;
+
+            // Cập nhật thẻ CRM
+            if (badgeTitleLabel) badgeTitleLabel.innerText = profile.tierName;
+            if (badgeAvatar) badgeAvatar.innerText = profile.tierIcon;
+            if (cardCountLabel) cardCountLabel.innerText = "Đã ăn: " + profile.totalOrders + " đơn tích lũy";
+            if (topBadgeTag) topBadgeTag.innerText = "Cấp " + profile.tierIndex + ": " + profile.tierName;
+
+            if (profile.ordersRemaining > 0) {
+                if (nextTag) nextTag.innerText = "Kế tiếp: Cấp " + (profile.tierIndex + 1);
+                if (remainLabel) remainLabel.innerText = "Còn " + profile.ordersRemaining + " đơn";
+            } else {
+                if (nextTag) nextTag.innerText = "Hạng Cao Nhất";
+                if (remainLabel) remainLabel.innerText = "Thần Vị Hoàng Gia";
+            }
+
+            updateCrmMilestonesUI(profile);
+
         } catch (err) {
-            console.warn("⚠️ Không thể tải cấu hình vòng quay từ Backend, nạp 6 giải chuẩn F&B.");
+            console.warn("⚠️ Lỗi truy vấn Mini CRM Vòng Quay:", err);
         }
-
-        // Gán giải thưởng mặc định nếu chưa kết nối Backend
-        wheelSlots = DEFAULT_SLOTS;
-        drawWheel(currentRotationAngle);
     }
 
     /**
-     * CẬP NHẬT TRẠNG THÁI GIỎ HÀNG TỪ INDEX.HTML VÀO VÒNG QUAY
-     * @param {number} subtotal - Tổng tiền món ăn hiện tại của giỏ hàng
+     * CẬP NHẬT GIAO DIỆN BẢNG 4 NẤC CỘT MỐC (2 - 4 - 7 - 12)
      */
-    function syncCartSubtotal(subtotal) {
-        currentCartSubtotal = Number(subtotal) || 0;
+    function updateCrmMilestonesUI(profile) {
+        var box2 = document.getElementById("milestone-box-2");
+        var box4 = document.getElementById("milestone-box-4");
+        var box7 = document.getElementById("milestone-box-7");
+        var box12 = document.getElementById("milestone-box-12");
+        var statusTxt = document.getElementById("disp-current-milestone-text");
 
-        const txtSubtotal = document.getElementById("txt-current-cart-subtotal");
-        const txtMsg = document.getElementById("txt-aov-progress-msg");
-        const btnCenter = document.getElementById("btn-center-spin");
-        const btnBottom = document.getElementById("btn-bottom-spin");
+        var orders = profile ? Number(profile.totalOrders) || 0 : 0;
 
-        if (txtSubtotal) {
-            txtSubtotal.innerText = currentCartSubtotal.toLocaleString("vi-VN") + " đ";
-        }
+        // Reset toàn bộ bảng về trạng thái chờ
+        [box2, box4, box7, box12].forEach(function(b) {
+            if (b) b.className = "p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 transition-all duration-300";
+        });
 
-        if (currentCartSubtotal >= minOrderThreshold) {
-            if (txtMsg) {
-                txtMsg.innerHTML = '<span class="text-emerald-400 font-bold">🎉 Đủ điều kiện quay 100% trúng quà!</span>';
-            }
-            if (btnCenter) btnCenter.classList.remove("opacity-50", "grayscale");
-            if (btnBottom) {
-                btnBottom.classList.remove("opacity-50", "cursor-not-allowed");
-                btnBottom.innerHTML = '<i class="fa-solid fa-gift text-base"></i><span>BẤM QUAY NGAY • 100% NHẬN MÓN TẶNG</span>';
-            }
+        // Sáng đèn nấc đạt được
+        if (orders >= 12) {
+            if (box12) box12.className = "p-1.5 rounded-xl bg-amber-500/20 border-2 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/20";
+            if (statusTxt) statusTxt.innerText = "Mốc 4: Đã Mở Khóa Thần Vị 12 Đơn";
+        } else if (orders >= 7) {
+            if (box7) box7.className = "p-1.5 rounded-xl bg-orange-500/20 border-2 border-orange-400 text-orange-300 shadow-lg shadow-orange-500/20";
+            if (statusTxt) statusTxt.innerText = "Mốc 3: Đã Mở Khóa Tín Đồ 7 Đơn";
+        } else if (orders >= 4) {
+            if (box4) box4.className = "p-1.5 rounded-xl bg-amber-500/15 border-2 border-amber-500/80 text-amber-300";
+            if (statusTxt) statusTxt.innerText = "Mốc 2: Đã Mở Khóa Sành Ăn 4 Đơn";
         } else {
-            const gap = minOrderThreshold - currentCartSubtotal;
-            if (txtMsg) {
-                txtMsg.innerHTML = `Thêm <strong class="text-amber-400 font-mono">${gap.toLocaleString("vi-VN")}đ</strong> để mở khóa Vòng Quay!`;
-            }
-            if (btnCenter) btnCenter.classList.add("opacity-50");
-            if (btnBottom) {
-                btnBottom.innerHTML = `<i class="fa-solid fa-lock text-sm"></i><span>CHỌN THÊM ${gap.toLocaleString("vi-VN")}đ ĐỂ MỞ KHÓA</span>`;
-            }
+            if (box2) box2.className = "p-1.5 rounded-xl bg-amber-500/10 border border-amber-500/60 text-amber-300";
+            if (statusTxt) statusTxt.innerText = "Mốc 1: Mầm Non (2 Tô / 79k)";
         }
     }
 
     /**
-     * MỞ MODAL VÒNG QUAY MAY MẮN
-     * @param {number} [cartAmount] - Tổng tiền giỏ hàng hiện thời
-     * @param {string} [phone] - Số điện thoại nếu khách đã nhập ở bước trước
+     * KÍCH HOẠT VÒNG QUAY ROULETTE & GHI NHẬN TRANSACTION CRM
      */
-    function openModal(cartAmount, phone) {
-        const modal = document.getElementById("modal-lucky-wheel");
-        if (!modal) return;
+    function spinWheel() {
+        if (isSpinning) return;
 
-        if (cartAmount !== undefined) {
-            syncCartSubtotal(cartAmount);
+        // 1. Chốt chặn điều kiện AOV 79.000đ
+        if (currentSubtotal < 79000) {
+            alert("⚠️ Đơn hàng của bạn đang là " + currentSubtotal.toLocaleString("vi-VN") + "đ.\nVui lòng chọn thêm món để đạt mốc tối thiểu 79.000đ nhận lượt quay miễn phí!");
+            return;
         }
 
-        if (phone) {
-            const inpPhone = document.getElementById("inp-wheel-customer-phone");
-            if (inpPhone) inpPhone.value = phone;
-            onPhoneInput(phone);
+        // 2. Chốt chặn chống gian lận Session
+        if (sessionStorage.getItem("t5_wheel_spun_active") === "true") {
+            alert("ℹ️ Quý khách đã nhận phần quà may mắn cho đơn hàng này rồi!\nVui lòng hoàn tất thanh toán để nhận món nóng.");
+            return;
         }
 
-        modal.classList.remove("hidden");
-        drawWheel(currentRotationAngle);
+        isSpinning = true;
+        var btnSpin = document.getElementById("btn-trigger-spin");
+        var resultBox = document.getElementById("wheel-reward-result-box");
+        var aovBox = document.getElementById("wheel-aov-status-box");
+
+        if (btnSpin) btnSpin.disabled = true;
+        if (resultBox) resultBox.classList.add("hidden");
+        if (aovBox) aovBox.classList.remove("hidden");
+
+        // 3. Thuật toán chọn giải thưởng có trọng số an toàn biên lợi nhuận
+        var totalWeight = WHEEL_SEGMENTS.reduce(function(sum, s) { return sum + s.weight; }, 0);
+        var randomNum = Math.floor(Math.random() * totalWeight);
+        var chosenIndex = 0;
+        var currentWeightSum = 0;
+
+        for (var i = 0; i < WHEEL_SEGMENTS.length; i++) {
+            currentWeightSum += WHEEL_SEGMENTS[i].weight;
+            if (randomNum < currentWeightSum) {
+                chosenIndex = i;
+                break;
+            }
+        }
+
+        wonPrizeObject = WHEEL_SEGMENTS[chosenIndex];
+
+        // 4. Tính toán góc quay đích: Đưa tâm múi về vị trí 12 giờ (đỉnh kim)
+        var segmentAngle = 360 / WHEEL_SEGMENTS.length;
+        var extraRounds = 5 + Math.floor(Math.random() * 2); // Xoay 5-6 vòng tròn
+        var targetSegmentCenter = (chosenIndex * segmentAngle) + (segmentAngle / 2);
+        
+        var stopAngle = 360 - targetSegmentCenter + 270;
+        var finalAngle = currentRotationAngle + (extraRounds * 360) + (stopAngle - (currentRotationAngle % 360));
+        currentRotationAngle = finalAngle;
+
+        var canvas = document.getElementById("wheel-canvas");
+        if (canvas) {
+            canvas.style.transform = "rotate(" + finalAngle + "deg)";
+        }
+
+        // Mô phỏng tiếng kim gõ ngắt quãng theo nhịp quay
+        var tickInterval = setInterval(function() {
+            playMechanicalTickSound();
+        }, 120);
+
+        setTimeout(function() {
+            clearInterval(tickInterval);
+        }, 3800);
+
+        // 5. Hoàn tất vòng quay sau 4.55 giây
+        setTimeout(function() {
+            isSpinning = false;
+            playVictoryChime();
+
+            // Khóa trạng thái trong session
+            sessionStorage.setItem("t5_wheel_spun_active", "true");
+
+            var generatedToken = "T5_" + Date.now().toString(36).toUpperCase() + "_" + Math.floor(100 + Math.random() * 900);
+            wonPrizeObject.assignedToken = generatedToken;
+
+            // GHI NHẬN NGẦM TRANSACTION VÀO GOOGLE SHEETS
+            logRewardToBackend(wonPrizeObject, generatedToken);
+
+            // Hiển thị khung chúc mừng trúng thưởng
+            if (resultBox) {
+                resultBox.classList.remove("hidden");
+                var nameEl = document.getElementById("disp-reward-name");
+                if (nameEl) nameEl.innerText = wonPrizeObject.name;
+            }
+
+            if (aovBox) aovBox.classList.add("hidden");
+
+            if (btnSpin) {
+                btnSpin.disabled = false;
+                btnSpin.innerHTML = '<i class="fa-solid fa-check text-xs"></i><span class="text-[9px] mt-0.5 font-bold">XONG</span>';
+            }
+        }, 4550);
+    }
+
+    /**
+     * GỬI GIAO DỊCH TRÚNG THƯỞNG VỀ MÁY CHỦ MINI CRM (NON-BLOCKING)
+     */
+    async function logRewardToBackend(prize, token) {
+        try {
+            var payload = {
+                phone: currentCustomerPhone || "Khách Vãng Lai",
+                giftName: prize.name,
+                giftToken: token,
+                subtotal: currentSubtotal,
+                tierName: currentCrmProfile ? currentCrmProfile.tierName : "Mầm Non Đất Thánh"
+            };
+
+            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                await Thim5API.callGAS("logWheelRewardTransaction", payload);
+            }
+        } catch (e) {
+            console.warn("⚠️ Ghi nhận CRM ngoại tuyến:", e);
+        }
+    }
+
+    /**
+     * BƠM QUÀ TẶNG VÀO GIỎ HÀNG VÀ ĐÓNG MODAL
+     */
+    function acceptGiftAndClose() {
+        if (!wonPrizeObject) {
+            closeModal();
+            return;
+        }
+
+        var giftPayload = {
+            id: "GIFT_" + wonPrizeObject.id,
+            name: wonPrizeObject.name,
+            icon: wonPrizeObject.icon,
+            type: wonPrizeObject.type,
+            giftToken: wonPrizeObject.assignedToken || ("T5GIFT_" + Date.now().toString(36).toUpperCase()),
+            appliedAt: new Date().toISOString()
+        };
+
+        // Bắn sự kiện toàn cục sang cho index.html
+        window.dispatchEvent(new CustomEvent("t5_gift_injected", { detail: giftPayload }));
+
+        closeModal();
+
+        // Tự động mở Drawer giỏ hàng để khách kiểm tra
+        if (window.D2CStoreFrontController && typeof window.D2CStoreFrontController.openCartDrawer === "function") {
+            window.D2CStoreFrontController.openCartDrawer();
+        }
+    }
+
+    /**
+     * MỞ MODAL VÒNG QUAY & ĐỒNG BỘ CẤP BẬC MINI CRM
+     */
+    function openModal(subtotal, phone) {
+        currentSubtotal = Number(subtotal) || 0;
+        currentCustomerPhone = String(phone || "").trim();
+
+        var modal = document.getElementById("modal-lucky-wheel");
+        var condTitle = document.getElementById("disp-wheel-condition-title");
+        var condDesc = document.getElementById("disp-wheel-condition-desc");
+
+        // Cập nhật trạng thái điều kiện AOV
+        if (currentSubtotal >= 79000) {
+            if (condTitle) condTitle.innerHTML = '<span class="text-emerald-400 font-black">🎉 ĐÃ MỞ KHÓA VÒNG QUAY!</span>';
+            if (condDesc) condDesc.innerHTML = 'Đơn hàng đạt <strong class="text-emerald-400 font-mono">' + currentSubtotal.toLocaleString("vi-VN") + 'đ</strong>. Nhấn <strong>QUAY</strong> để nhận quà!';
+        } else {
+            var gap = 79000 - currentSubtotal;
+            if (condTitle) condTitle.innerHTML = '<span class="text-amber-400 font-bold">Chưa Đủ Điều Kiện:</span>';
+            if (condDesc) condDesc.innerHTML = 'Thêm <strong class="text-amber-400 font-mono">' + gap.toLocaleString("vi-VN") + 'đ</strong> vào giỏ để mở khóa lượt quay!';
+        }
+
+        // Nạp dữ liệu CRM thực tế
+        fetchCustomerCrmData(currentCustomerPhone);
+
+        if (modal) modal.classList.remove("hidden");
+
+        // Vẽ Canvas Retina
+        drawRetinaWheelCanvas();
     }
 
     /**
      * ĐÓNG MODAL VÒNG QUAY
      */
     function closeModal() {
-        if (isSpinning) return; // Đang quay không cho tắt ngang tránh lỗi State
-        const modal = document.getElementById("modal-lucky-wheel");
+        var modal = document.getElementById("modal-lucky-wheel");
         if (modal) modal.classList.add("hidden");
     }
 
-    /**
-     * XỬ LÝ SỰ KIỆN NHẬP SĐT (DEBOUNCE 400MS)
-     */
-    function onPhoneInput(val) {
-        currentCustomerPhone = String(val || "").trim();
-        clearTimeout(debounceTimer);
-
-        // Khi gõ đủ từ 10 chữ số trở lên -> tự động kích hoạt tra cứu
-        if (currentCustomerPhone.length >= 10) {
-            debounceTimer = setTimeout(function() {
-                lookupCustomerProfile();
-            }, 400);
-        } else {
-            document.getElementById("box-customer-badge-info").classList.add("hidden");
-            document.getElementById("lbl-wheel-spin-count").innerText = "Lượt quay: 0";
-        }
-    }
-
-    /**
-     * TRA CỨU HỒ SƠ HỘI VIÊN & HUY HIỆU GEN Z THEO SĐT QUA API
-     */
-    async function lookupCustomerProfile() {
-        const inpPhone = document.getElementById("inp-wheel-customer-phone");
-        const phone = inpPhone ? inpPhone.value.trim() : currentCustomerPhone;
-
-        if (!phone || phone.length < 10) {
-            alert("⚠️ Vui lòng nhập số điện thoại hợp lệ (10 chữ số) để nhận diện quyền lợi!");
-            if (inpPhone) inpPhone.focus();
-            return;
-        }
-
-        try {
-            let profile = null;
-            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
-                const res = await Thim5API.callGAS("getCustomerProfile", { phone: phone });
-                profile = (res && res.data) ? res.data : res;
-            }
-
-            if (profile && profile.success) {
-                customerProfileCache = profile;
-                renderBadgeInfo(profile);
-            }
-        } catch (e) {
-            console.warn("⚠️ Không thể tra cứu CRM, hiển thị danh xưng Tân Binh mặc định.");
-            renderBadgeInfo({
-                name: "Khách Quen",
-                monthlyOrders: 0,
-                fullBadge: "Thực Thần Mì Trộn • Tân Binh Lạc Lối",
-                slogan: "Ăn thử một lần cho biết, ai ngờ dính tới giờ!",
-                nextGoalText: "Đặt 2 đơn trong tháng này để mở khóa 'Dân Chơi Nhập Môn'!",
-                availableSpins: 1
-            });
-        }
-    }
-
-    /**
-     * HIỂN THỊ HUY HIỆU GEN Z LÊN GIAO DIỆN
-     */
-    function renderBadgeInfo(profile) {
-        const boxBadge = document.getElementById("box-customer-badge-info");
-        const txtTitle = document.getElementById("txt-badge-full-title");
-        const txtOrders = document.getElementById("txt-badge-orders-count");
-        const txtSlogan = document.getElementById("txt-badge-slogan");
-        const txtGoal = document.getElementById("txt-badge-next-goal");
-        const lblSpins = document.getElementById("lbl-wheel-spin-count");
-
-        if (boxBadge) boxBadge.classList.remove("hidden");
-        if (txtTitle) txtTitle.innerText = "🔥 " + (profile.fullBadge || "Hội Viên Thím 5");
-        if (txtOrders) txtOrders.innerText = (profile.monthlyOrders || 0) + " đơn/tháng";
-        if (txtSlogan) txtSlogan.innerText = `"${profile.slogan || 'Đậm vị tóp mỡ sa tế Đất Thánh!'}"`;
-        if (txtGoal) txtGoal.innerText = profile.nextGoalText || "";
-        if (lblSpins) lblSpins.innerText = "Lượt quay: " + (profile.availableSpins !== undefined ? profile.availableSpins : 1);
-    }
-
-    // =========================================================================
-    // 4. CỖ MÁY VẼ CANVAS NATIVE 60FPS (SUPER-SAMPLING RESOLUTION 680X680)
-    // =========================================================================
-    function drawWheel(angle) {
-        if (!ctx || !canvas) return;
-
-        const width = canvas.width;
-        const height = canvas.height;
-        const centerX = width / 2;
-        const centerY = height / 2;
-        const radius = (width / 2) - 24; // Khoảng đệm viền ngoài
-        const slotCount = wheelSlots.length;
-        if (slotCount === 0) return;
-
-        const arc = (2 * Math.PI) / slotCount;
-
-        ctx.clearRect(0, 0, width, height);
-
-        // Lưu ngữ cảnh trước khi xoay toàn bộ vòng
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(angle);
-
-        // A. VẼ TỪNG NAN QUẠT GIẢI THƯỞNG
-        for (let i = 0; i < slotCount; i++) {
-            const slot = wheelSlots[i];
-            const slotAngle = i * arc;
-
-            ctx.beginPath();
-            ctx.fillStyle = slot.color || (i % 2 === 0 ? "#EF4444" : "#F59E0B");
-            ctx.moveTo(0, 0);
-            ctx.arc(0, 0, radius, slotAngle, slotAngle + arc);
-            ctx.lineTo(0, 0);
-            ctx.fill();
-
-            // Đường chỉ viền kim loại phân cách các ô
-            ctx.beginPath();
-            ctx.strokeStyle = "rgba(15, 23, 42, 0.4)";
-            ctx.lineWidth = 3;
-            ctx.moveTo(0, 0);
-            ctx.lineTo(Math.cos(slotAngle) * radius, Math.sin(slotAngle) * radius);
-            ctx.stroke();
-
-            // B. VẼ CHỮ & ICON TRÊN NAN QUẠT
-            ctx.save();
-            ctx.rotate(slotAngle + (arc / 2));
-            ctx.textAlign = "right";
-            ctx.textBaseline = "middle";
-            ctx.fillStyle = slot.textColor || "#FFFFFF";
-            ctx.font = "900 24px 'Plus Jakarta Sans', sans-serif";
-            ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-            ctx.shadowBlur = 4;
-
-            // Cắt ngắn nếu tên quá dài để không bị lẹm vào tâm
-            let displayName = slot.name || "Món Quà";
-            if (displayName.length > 18) {
-                displayName = displayName.substring(0, 16) + "...";
-            }
-
-            ctx.fillText(displayName, radius - 38, 0);
-
-            // Vẽ chấm tròn đinh tán ở đầu mỗi ô quà
-            ctx.beginPath();
-            ctx.arc(radius - 14, 0, 4, 0, 2 * Math.PI);
-            ctx.fillStyle = "#FDE047";
-            ctx.fill();
-
-            ctx.restore();
-        }
-
-        ctx.restore(); // Khôi phục hệ trục tọa độ gốc không xoay
-
-        // C. VẼ VIỀN NGOÀI VÒNG QUAY KHỐI KIM LOẠI 3D SANG TRỌNG
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        ctx.strokeStyle = "#F59E0B";
-        ctx.lineWidth = 14;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius + 7, 0, 2 * Math.PI);
-        ctx.strokeStyle = "#0F172A";
-        ctx.lineWidth = 4;
-        ctx.stroke();
-
-        // D. VẼ ĐÈN LED CHẠY VIỀN TRÒN NGOÀI
-        const ledCount = slotCount * 4;
-        for (let l = 0; l < ledCount; l++) {
-            const ledAngle = (l * (2 * Math.PI / ledCount)) + (angle * 0.5);
-            const lx = centerX + Math.cos(ledAngle) * (radius - 1);
-            const ly = centerY + Math.sin(ledAngle) * (radius - 1);
-
-            ctx.beginPath();
-            ctx.arc(lx, ly, 3.5, 0, 2 * Math.PI);
-            ctx.fillStyle = (l % 2 === 0) ? "#FEF08A" : "#FFFFFF";
-            ctx.shadowColor = "#F59E0B";
-            ctx.shadowBlur = 6;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-
-        // E. VẼ TRỤC TÂM BÁNH ĐÀ (CENTER HUB 3D)
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, 56, 0, 2 * Math.PI);
-        ctx.fillStyle = "#0F172A";
-        ctx.fill();
-        ctx.strokeStyle = "#F59E0B";
-        ctx.lineWidth = 6;
-        ctx.stroke();
-    }
-  // =========================================================================
-    // 5. CỖ MÁY HOẠT HỌA XOAY VẬT LÝ 60FPS & KẾT NỐI API SERVER-SIDE
-    // =========================================================================
-
-    /**
-     * KÍCH HOẠT QUY TRÌNH QUAY THƯỞNG BẢO CHỨNG BỞI BACKEND
-     */
-    async function triggerSpin() {
-        if (isSpinning) return;
-
-        // 1. RÀO CHẮN 1: KIỂM TRA ĐIỀU KIỆN GIỎ HÀNG TỐI THIỂU
-        if (currentCartSubtotal < minOrderThreshold) {
-            const gap = minOrderThreshold - currentCartSubtotal;
-            alert(`🍜 Đơn hàng hiện tại (${currentCartSubtotal.toLocaleString("vi-VN")}đ) chưa đạt mốc ${minOrderThreshold.toLocaleString("vi-VN")}đ.\n\nQuý khách vui lòng chọn thêm ${gap.toLocaleString("vi-VN")}đ (ví dụ: 1 ly trà đào hoặc 1 chén súp) để mở khóa Vòng Quay 100% Trúng Thưởng!`);
-            return;
-        }
-
-        // 2. RÀO CHẮN 2: KIỂM TRA SỐ ĐIỆN THOẠI ĐỊNH DANH
-        const inpPhone = document.getElementById("inp-wheel-customer-phone");
-        const phone = inpPhone ? inpPhone.value.trim() : currentCustomerPhone;
-        if (!phone || phone.length < 10) {
-            alert("📱 Quý khách vui lòng nhập Số Điện Thoại trước khi quay để hệ thống ghi nhận mã quà tặng và tích điểm Hội Viên!");
-            if (inpPhone) inpPhone.focus();
-            return;
-        }
-        currentCustomerPhone = phone;
-
-        // Khóa giao diện chống double-click
-        isSpinning = true;
-        setSpinButtonsState(false);
-
-        // Đánh thức Web Audio Context nếu đang bị trình duyệt treo
-        WebAudioEngine.init();
-
-        let spinResult = null;
-
-        try {
-            // GỌI BACKEND XÁC THỰC SERVER-SIDE (ZERO-TRUST WEIGHTED RNG)
-            if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
-                const res = await Thim5API.callGAS("spinLuckyWheel", {
-                    subtotal: currentCartSubtotal,
-                    customerPhone: currentCustomerPhone
-                });
-                spinResult = (res && res.data) ? res.data : res;
-            }
-        } catch (err) {
-            console.warn("⚠️ Không thể gọi API quay thưởng, chuyển sang chế độ mô phỏng an toàn:", err);
-        }
-
-        // Fallback mô phỏng phía client nếu Backend chưa phản hồi kịp
-        if (!spinResult || !spinResult.success) {
-            const randomSlotIdx = Math.floor(Math.random() * wheelSlots.length);
-            const slot = wheelSlots[randomSlotIdx];
-            const slotCount = wheelSlots.length;
-            const arcDeg = 360 / slotCount;
-            const targetAngleDeg = 1440 + (360 - (randomSlotIdx * arcDeg + (arcDeg / 2)));
-            const timeCode = new Date().toTimeString().split(" ")[0].replace(/:/g, "");
-
-            spinResult = {
-                success: true,
-                winningSlotIndex: randomSlotIdx,
-                slotId: slot.slotId,
-                giftName: slot.name,
-                giftType: slot.type,
-                giftToken: "GIFT_" + slot.slotId + "_" + timeCode,
-                stopAngle: targetAngleDeg,
-                message: "Chúc mừng bạn đã trúng: " + slot.name + "!"
-            };
-        }
-
-        // KÍCH HOẠT HOẠT HỌA XOAY CANVAS 60FPS
-        animateWheelRotation(spinResult);
-    }
-
-    /**
-     * THUẬT TOÁN HÃM PHANH MƯỢT MÀ (EASE-OUT CUBIC) TRÊN CANVAS 60FPS
-     * @param {Object} result - Dữ liệu giải thưởng trả về từ Server
-     */
-    function animateWheelRotation(result) {
-        const startAngle = currentRotationAngle;
-        const totalRotationDeg = result.stopAngle || 1440;
-        const targetAngleRad = (totalRotationDeg * Math.PI) / 180;
-        const duration = 4500; // 4.5 giây xoay tạo hồi hộp
-        const startTime = performance.now();
-
-        const slotCount = wheelSlots.length;
-        const arc = (2 * Math.PI) / slotCount;
-
-        function step(now) {
-            const elapsed = now - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-
-            // Đường cong hãm phanh Cubic Ease-Out: f(t) = 1 - (1 - t)^3
-            const easeOut = 1 - Math.pow(1 - progress, 3);
-            currentRotationAngle = startAngle + (targetAngleRad - startAngle) * easeOut;
-
-            // Tính toán nan quạt đi qua kim chỉ (nằm ở góc -PI/2 trên đỉnh) để gõ âm thanh
-            const normalizedAngle = (currentRotationAngle % (2 * Math.PI) + (2 * Math.PI)) % (2 * Math.PI);
-            const pointerAngle = (1.5 * Math.PI - normalizedAngle + (2 * Math.PI)) % (2 * Math.PI);
-            const currentSlotIndex = Math.floor(pointerAngle / arc);
-
-            if (currentSlotIndex !== lastTickSlotIndex) {
-                WebAudioEngine.playTick();
-                lastTickSlotIndex = currentSlotIndex;
-            }
-
-            drawWheel(currentRotationAngle);
-
-            if (progress < 1) {
-                requestAnimationFrame(step);
-            } else {
-                // Hoàn tất quay -> Dừng lại và mở Popup trao giải
-                isSpinning = false;
-                setSpinButtonsState(true);
-                onSpinCompleted(result);
-            }
-        }
-
-        requestAnimationFrame(step);
-    }
-
-    /**
-     * KHÓA HOẶC MỞ TRẠNG THÁI NÚT QUAY TRÁNH DOUBLE-CLICK
-     */
-    function setSpinButtonsState(enabled) {
-        const btnCenter = document.getElementById("btn-center-spin");
-        const btnBottom = document.getElementById("btn-bottom-spin");
-
-        if (btnCenter) {
-            btnCenter.disabled = !enabled;
-            if (enabled) {
-                btnCenter.classList.remove("pointer-events-none", "opacity-50");
-            } else {
-                btnCenter.classList.add("pointer-events-none", "opacity-50");
-            }
-        }
-
-        if (btnBottom) {
-            btnBottom.disabled = !enabled;
-            if (enabled) {
-                btnBottom.classList.remove("pointer-events-none", "opacity-50");
-            } else {
-                btnBottom.classList.add("pointer-events-none", "opacity-50");
-            }
-        }
-    }
-
-    // =========================================================================
-    // 6. POPUP CHIẾN THẮNG, PHÁO HOA CONFETTI & BƠM QUÀ 0Đ VÀO GIỎ
-    // =========================================================================
-    let currentWinningPrize = null;
-
-    /**
-     * KHI HOÀN TẤT LƯỢT QUAY: PHÁT ÂM THANH CHIẾN THẮNG & HIỆN POPUP
-     */
-    function onSpinCompleted(prizeData) {
-        currentWinningPrize = prizeData;
-
-        // Phát hợp âm Fanfare chiến thắng
-        WebAudioEngine.playWin();
-
-        const popup = document.getElementById("wheel-result-popup");
-        const txtName = document.getElementById("txt-winning-prize-name");
-        const txtToken = document.getElementById("txt-winning-token");
-
-        if (txtName) txtName.innerText = prizeData.giftName || "1 Món Quà Đặc Biệt";
-        if (txtToken) txtToken.innerText = prizeData.giftToken || "GIFT_VERIFIED";
-
-        if (popup) {
-            popup.classList.remove("hidden");
-            launchConfetti();
-        }
-    }
-
-    /**
-     * CỖ MÁY PHÁO HOA CONFETTI CANVAS TỰ NHIÊN RỰC RỠ
-     */
-    function launchConfetti() {
-        const confettiCanvas = document.getElementById("wheel-confetti-canvas");
-        if (!confettiCanvas) return;
-
-        const cCtx = confettiCanvas.getContext("2d");
-        confettiCanvas.width = confettiCanvas.offsetWidth || 380;
-        confettiCanvas.height = confettiCanvas.offsetHeight || 500;
-
-        const particles = [];
-        const colors = ["#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#8B5CF6", "#EC4899", "#FDE047"];
-
-        for (let i = 0; i < 65; i++) {
-            particles.push({
-                x: confettiCanvas.width / 2,
-                y: confettiCanvas.height / 2,
-                vx: (Math.random() - 0.5) * 12,
-                vy: (Math.random() - 0.7) * 14,
-                size: Math.random() * 7 + 4,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                rotation: Math.random() * 360,
-                rotationSpeed: (Math.random() - 0.5) * 10,
-                opacity: 1
-            });
-        }
-
-        let animationFrameId = null;
-        const startTime = performance.now();
-
-        function renderConfetti(now) {
-            const elapsed = now - startTime;
-            cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-
-            let hasAlive = false;
-            particles.forEach(function(p) {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.35; // Trọng lực rơi
-                p.rotation += p.rotationSpeed;
-                p.opacity -= 0.012; // Mờ dần
-
-                if (p.opacity > 0) {
-                    hasAlive = true;
-                    cCtx.save();
-                    cCtx.translate(p.x, p.y);
-                    cCtx.rotate((p.rotation * Math.PI) / 180);
-                    cCtx.fillStyle = p.color;
-                    cCtx.globalAlpha = Math.max(0, p.opacity);
-                    cCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-                    cCtx.restore();
-                }
-            });
-
-            if (hasAlive && elapsed < 2500) {
-                animationFrameId = requestAnimationFrame(renderConfetti);
-            } else {
-                cCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-                cancelAnimationFrame(animationFrameId);
-            }
-        }
-
-        requestAnimationFrame(renderConfetti);
-    }
-
-    /**
-     * BƠM MÓN QUÀ 0Đ TRỰC TIẾP VÀO GIỎ HÀNG INDEX.HTML (ZERO-TOUCH INJECTION)
-     */
-    function claimAndInjectToCart() {
-        if (!currentWinningPrize) return;
-
-        // 1. Tạo đối tượng món quà 0đ theo chuẩn cấu trúc giỏ hàng D2C
-        const giftPayload = {
-            isGift: true,
-            id: "gift_" + (currentWinningPrize.slotId || "slot_1"),
-            name: "🎁 [QUÀ TẶNG] " + currentWinningPrize.giftName,
-            price: 0,
-            quantity: 1,
-            foodCost: 0,
-            giftToken: currentWinningPrize.giftToken,
-            customerPhone: currentCustomerPhone
-        };
-
-        // 2. PHÁT SỰ KIỆN TOÀN CỤC CUSTOM EVENT SANG TRANG INDEX.HTML
-        window.dispatchEvent(new CustomEvent("t5_gift_injected", {
-            detail: giftPayload
-        }));
-
-        // 3. Đóng popup và modal
-        const popup = document.getElementById("wheel-result-popup");
-        if (popup) popup.classList.add("hidden");
-        closeModal();
-
-        // 4. Thông báo chúc mừng người dùng
-        alert(`🎉 Chúc mừng quý khách! Món quà "${currentWinningPrize.giftName}" (0đ) đã được thêm trực tiếp vào giỏ hàng thành công!\n\nQuý khách chỉ cần bấm "Xác Nhận Đặt Hàng" để bếp hoàn tất món.`);
-    }
-
-    // EXPORT CÁC HÀM CÔNG KHAI RA PUBLIC INTERFACE
+    // GIAO DIỆN CÔNG KHAI
     return {
-        init: init,
         openModal: openModal,
         closeModal: closeModal,
-        syncCartSubtotal: syncCartSubtotal,
-        onPhoneInput: onPhoneInput,
-        lookupCustomerProfile: lookupCustomerProfile,
-        triggerSpin: triggerSpin,
-        claimAndInjectToCart: claimAndInjectToCart
+        spinWheel: spinWheel,
+        acceptGiftAndClose: acceptGiftAndClose,
+        drawRetinaWheelCanvas: drawRetinaWheelCanvas,
+        fetchCustomerCrmData: fetchCustomerCrmData
     };
 })();
 
-// Tự động khởi tạo bộ Canvas khi tài liệu DOM nạp xong
-document.addEventListener("DOMContentLoaded", function() {
-    WheelComponentController.init();
-});
+// TỰ ĐỘNG KHỞI TẠO VẼ CANVAS KHI COMPONENT GẮN VÀO DOM
+(function() {
+    setTimeout(function() {
+        if (typeof WheelComponentController !== "undefined") {
+            WheelComponentController.drawRetinaWheelCanvas();
+        }
+    }, 100);
+})();
 </script>
