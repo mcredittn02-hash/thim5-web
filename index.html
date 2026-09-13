@@ -1538,24 +1538,35 @@
                 }
             });
         }
-
         /**
-         * THUẬT TOÁN HAVERSINE ĐO KHOẢNG CÁCH TỪ BẾP TÂY NINH (11.285267, 106.133347)
+         * THUẬT TOÁN HAVERSINE ĐO KHOẢNG CÁCH CHÍNH XÁC ĐẾN TỪNG MÉT
+         * Gốc tọa độ Bếp Thím 5: (11.285267, 106.133347)
+         * 
+         * @param {number} lat1 - Vĩ độ điểm 1
+         * @param {number} lon1 - Kinh độ điểm 1
+         * @param {number} lat2 - Vĩ độ điểm 2
+         * @param {number} lon2 - Kinh độ điểm 2
+         * @returns {number} Khoảng cách tính bằng kilomet (km)
          */
         function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-            var R = 6371; // Bán kính trái đất (km)
+            var R = 6371; // Bán kính trung bình Trái Đất (km)
             var dLat = (lat2 - lat1) * (Math.PI / 180);
             var dLon = (lon2 - lon1) * (Math.PI / 180);
+            
             var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                     Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
                     Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                    
             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
+            return R * c; // Trả về số km thực tế chính xác (không làm tròn sớm)
         }
 
+        /**
+         * LẤY VỊ TRÍ GPS HIỆN TẠI VÀ ÉP CẬP NHẬT GIAO DIỆN TỨC THÌ
+         */
         function detectCustomerGps() {
             if (!navigator.geolocation) {
-                alert("⚠️ Thiết bị của quý khách không hỗ trợ GPS!");
+                alert("⚠️ Thiết bị của quý khách không hỗ trợ tính năng định vị GPS!");
                 return;
             }
 
@@ -1563,31 +1574,41 @@
             var origText = btn ? btn.innerHTML : "";
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lấy vị trí...';
+                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang bắt tọa độ...';
             }
 
             navigator.geolocation.getCurrentPosition(
                 function(pos) {
-                    var uLat = pos.coords.latitude;
-                    var uLng = pos.coords.longitude;
+                    var uLat = Number(pos.coords.latitude);
+                    var uLng = Number(pos.coords.longitude);
+
+                    // Cập nhật vị trí khách hàng vào State
                     appState.customerLocation = { lat: uLat, lng: uLng };
 
-                    var dist = calculateHaversineDistance(
+                    // Đo cự ly chính xác từ tâm Bếp Thím 5 Hòa Thành
+                    var exactDistKm = calculateHaversineDistance(
                         STORE_BASE_CONFIG.coords.lat, STORE_BASE_CONFIG.coords.lng,
                         uLat, uLng
                     );
 
-                    appState.calculatedDistanceKm = Math.round(dist * 10) / 10;
-                    recalculateShippingFee();
+                    // Gán khoảng cách thực tế vào State (không bị kẹt 1.8km)
+                    appState.calculatedDistanceKm = exactDistKm;
 
+                    // Điền tọa độ vào ô địa chỉ nếu khách chưa nhập
                     var addrEl = document.getElementById("chk-customer-address");
-                    if (addrEl && !addrEl.value.trim()) {
+                    if (addrEl) {
                         addrEl.value = `Định vị GPS (${uLat.toFixed(5)}, ${uLng.toFixed(5)}) - Hòa Thành, Tây Ninh`;
                     }
 
+                    // TÍNH TOÁN LẠI PHÍ SHIP VÀ CẬP NHẬT GIAO DIỆN NGAY LẬP TỨC
+                    recalculateShippingFee();
+
                     if (btn) {
                         btn.disabled = false;
-                        btn.innerHTML = origText;
+                        btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> Đã Lấy Vị Trí';
+                        setTimeout(function() {
+                            if (btn) btn.innerHTML = origText;
+                        }, 2500);
                     }
                 },
                 function(err) {
@@ -1595,59 +1616,98 @@
                         btn.disabled = false;
                         btn.innerHTML = origText;
                     }
-                    alert("❌ Không thể lấy GPS: " + err.message + "\nVui lòng nhập địa chỉ giao hàng.");
+                    console.warn("Lỗi GPS:", err.message);
+                    alert("❌ Không thể lấy tọa độ GPS tự động (" + err.message + ").\nQuý khách vui lòng nhập địa chỉ cụ thể bằng tay!");
                 },
-                { enableHighAccuracy: true, timeout: 8000 }
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         }
 
+        /**
+         * KHI KHÁCH GÕ ĐỊA CHỈ TAY (CHỈ DÙNG 1.8KM KHI CHƯA HỀ CÓ GPS)
+         */
         function onAddressInput(val) {
+            // Nếu khách ĐÃ CÓ tọa độ GPS thực tế thì TUYỆT ĐỐI KHÔNG ghi đè lại 1.8km
             if (!appState.customerLocation) {
-                appState.calculatedDistanceKm = 1.8; // Giả định cự ly trung bình nội thị Hòa Thành
+                appState.calculatedDistanceKm = 1.8;
                 recalculateShippingFee();
             }
         }
 
+        /**
+         * TÍNH TOÁN BIỂU PHÍ SHIP VÀ HIỂN THỊ CỰ LY THÔNG MINH (< 300m, mét, km)
+         */
         function recalculateShippingFee() {
-            var dist = appState.calculatedDistanceKm || 1.8;
-            var fee = STORE_BASE_CONFIG.shipBaseFee;
+            var dist = (appState.calculatedDistanceKm !== undefined && appState.calculatedDistanceKm !== null) 
+                       ? appState.calculatedDistanceKm 
+                       : 1.8;
 
+            var fee = STORE_BASE_CONFIG.shipBaseFee; // Mặc định nấc 2km đầu là 12.000đ
+
+            // Nếu khoảng cách vượt quá cự ly cơ sở (2km) thì cộng thêm phí mỗi km
             if (dist > STORE_BASE_CONFIG.shipBaseDistanceKm) {
                 var extraKm = dist - STORE_BASE_CONFIG.shipBaseDistanceKm;
                 fee += Math.round(extraKm * STORE_BASE_CONFIG.shipExtraFeePerKm);
             }
 
+            // Tính tổng tiền món ăn trong giỏ
             var subtotal = 0;
-            appState.cartItems.forEach(function(i) { subtotal += (i.price * i.quantity); });
+            appState.cartItems.forEach(function(i) {
+                if (!i.isGift) {
+                    subtotal += (i.price * i.quantity);
+                }
+            });
 
+            // Áp dụng Bậc thang trợ giá ship (100k giảm 15k, 150k giảm 25k)
             var subsidy = 0;
-            if (subtotal >= STORE_BASE_CONFIG.subsidyTier2Min) subsidy = STORE_BASE_CONFIG.subsidyTier2Amount;
-            else if (subtotal >= STORE_BASE_CONFIG.subsidyTier1Min) subsidy = STORE_BASE_CONFIG.subsidyTier1Amount;
+            if (subtotal >= STORE_BASE_CONFIG.subsidyTier2Min) {
+                subsidy = STORE_BASE_CONFIG.subsidyTier2Amount;
+            } else if (subtotal >= STORE_BASE_CONFIG.subsidyTier1Min) {
+                subsidy = STORE_BASE_CONFIG.subsidyTier1Amount;
+            }
 
             var actualShip = Math.max(0, fee - subsidy);
             appState.shippingFee = fee;
             appState.shippingSubsidy = subsidy;
 
+            // ĐỊNH DẠNG HIỂN THỊ KHOẢNG CÁCH THÔNG MINH CHO NGƯỜI DÙNG
             var txtDist = document.getElementById("txt-calc-distance");
             var txtFee = document.getElementById("txt-calc-shipping-fee");
             var tagSubsidy = document.getElementById("txt-calc-subsidy-tag");
 
-            if (txtDist) txtDist.innerText = `Cự ly: ~${dist} km`;
-            if (txtFee) txtFee.innerText = actualShip.toLocaleString("vi-VN") + " đ";
+            if (txtDist) {
+                if (dist < 0.3) {
+                    // Dưới 300 mét (Đang ngồi tại quán hoặc sát vách)
+                    var meters = Math.max(5, Math.round(dist * 1000));
+                    txtDist.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-location-dot"></i> Tại quán (~${meters}m)</span>`;
+                } else if (dist < 1.0) {
+                    // Dưới 1 km: Hiển thị theo đơn vị mét
+                    var meters = Math.round(dist * 1000);
+                    txtDist.innerText = `Cự ly: ~${meters}m`;
+                } else {
+                    // Từ 1 km trở lên: Hiển thị 1 chữ số thập phân
+                    txtDist.innerText = `Cự ly: ~${dist.toFixed(1)} km`;
+                }
+            }
+
+            if (txtFee) {
+                txtFee.innerText = actualShip.toLocaleString("vi-VN") + " đ";
+            }
 
             if (tagSubsidy) {
                 if (subsidy > 0) {
                     tagSubsidy.classList.remove("hidden");
-                    tagSubsidy.innerText = `(Giảm -${subsidy.toLocaleString("vi-VN")}đ)`;
+                    tagSubsidy.innerText = `(Trợ giá -${subsidy.toLocaleString("vi-VN")}đ)`;
                 } else {
                     tagSubsidy.classList.add("hidden");
                 }
             }
 
+            // Đồng bộ sang bảng tổng kết đơn hàng phía dưới
             updateCheckoutSummary();
         }
 
-        function updateCheckoutSummary() {
+                function updateCheckoutSummary() {
             var subtotal = 0;
             appState.cartItems.forEach(function(i) { subtotal += (i.price * i.quantity); });
 
