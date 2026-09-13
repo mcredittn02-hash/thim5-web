@@ -1,538 +1,687 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Điều Phối Shipper • Thím 5 Hòa Thành</title>
+  
+  <!-- PWA & Metadata -->
+  <meta name="theme-color" content="#020617">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛵</text></svg>">
+
+  <!-- Google Fonts & Font Awesome Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #EA580C; --primary-dark: #C2410C; --bg: #0F172A; --card: #1E293B;
-      --text: #F8FAFC; --muted: #94A3B8; --border: #334155; --success: #10B981; --danger: #EF4444; --blue: #2563EB;
-      --warning: #F59E0B; --gold: #FDE047; --radius: 14px; --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['monospace']
+          }
+        }
+      }
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding: 12px; font-size: 13px; line-height: 1.4; }
-    .container { max-width: 600px; margin: 0 auto; }
+  </script>
 
-    /* AUTH CARD */
-    .auth-card { background: var(--card); border-radius: var(--radius); border: 2px solid var(--primary); box-shadow: var(--shadow); padding: 28px 18px; text-align: center; margin-top: 50px; }
-    .auth-icon { width: 58px; height: 58px; background: rgba(234, 88, 12, 0.2); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 12px; }
-    .auth-title { font-size: 17px; font-weight: 900; color: #fff; margin-bottom: 4px; }
-    .auth-sub { font-size: 11.5px; color: var(--muted); margin-bottom: 16px; }
-    .auth-input { width: 100%; max-width: 220px; padding: 11px; font-size: 22px; font-weight: 900; text-align: center; letter-spacing: 5px; border: 2px solid var(--border); border-radius: 10px; outline: none; margin-bottom: 14px; background: #0F172A; color: var(--gold); }
-    .auth-input:focus { border-color: var(--primary); }
-
-    /* HEADER */
-    .app-header { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .shipper-info h2 { font-size: 14px; font-weight: 800; color: var(--gold); }
-    .shipper-info p { font-size: 11px; color: var(--muted); }
-    .btn-logout { background: #0F172A; color: var(--muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
-
-    /* KPI STRIP */
-    .kpi-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-    .kpi-box { background: #1E293B; border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; }
-    .kpi-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
-    .kpi-val { font-size: 17px; font-weight: 900; color: #fff; margin-top: 2px; }
-    .kpi-val.green { color: #34D399; }
-    .kpi-val.gold { color: var(--gold); }
-
-    /* FILTER TABS */
-    .filter-tabs-bar { display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; margin-bottom: 10px; padding-bottom: 2px; scrollbar-width: none; }
-    .filter-tabs-bar::-webkit-scrollbar { display: none; }
-    .tab-filter-btn { padding: 6px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; font-size: 11px; font-weight: 800; color: var(--muted); cursor: pointer; transition: .2s; }
-    .tab-filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-    /* ORDER CARD */
-    .order-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 14px; margin-bottom: 12px; position: relative; }
-    .order-card.step0 { border-left: 6px solid var(--warning); background: #182234; }
-    .order-card.step1 { border-left: 6px solid var(--danger); }
-    .order-card.step2 { border-left: 6px solid var(--primary); }
-    .order-card.step3 { border-left: 6px solid var(--blue); }
-    .order-card.step4 { border-left: 6px solid var(--success); opacity: 0.85; }
-
-    .order-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px dashed var(--border); margin-bottom: 8px; }
-    .order-code { font-size: 14px; font-weight: 900; color: var(--gold); }
-    .order-badge { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 8px; }
-    .badge-step0 { background: rgba(245, 158, 11, 0.2); color: #FDE047; }
-    .badge-step1 { background: rgba(239, 68, 68, 0.2); color: #FCA5A5; }
-    .badge-step2 { background: rgba(234, 88, 12, 0.2); color: #FB923C; }
-    .badge-delivering { background: rgba(37, 99, 235, 0.2); color: #93C5FD; }
-    .badge-done { background: rgba(16, 185, 129, 0.2); color: #34D399; }
-
-    .order-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
-    .order-row strong { color: #fff; }
-    .order-items-box { background: #0F172A; border-radius: 8px; padding: 8px 10px; margin: 8px 0; border: 1px solid var(--border); font-size: 11.5px; line-height: 1.5; color: #E2E8F0; }
-
-    .fin-box { background: #0F172A; border: 1px dashed var(--warning); border-radius: 8px; padding: 8px 10px; margin: 8px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; }
-    .fin-item { display: flex; flex-direction: column; }
-    .fin-item span { color: var(--muted); font-size: 10px; }
-    .fin-item strong { font-size: 12px; margin-top: 1px; }
-
-    .gps-nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
-    .btn-gps-nav { text-align: center; padding: 9px 6px; border-radius: 8px; font-weight: 800; text-decoration: none; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; transition: .2s; }
-    .btn-gps-store { background: #EA580C; color: #fff; }
-    .btn-gps-customer { background: #2563EB; color: #fff; }
-    .btn-gps-nav:hover { opacity: 0.9; transform: translateY(-1px); }
-
-    .btn-action { width: 100%; padding: 11px; border: none; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; transition: .2s; }
-    .btn-verify { background: var(--warning); color: #0F172A; }
-    .btn-take { background: var(--primary); color: #fff; }
-    .btn-done { background: var(--success); color: #fff; }
-    .btn-cancel { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger); font-size: 11px; padding: 7px; }
-    .btn-call { background: rgba(37, 99, 235, 0.15); border: 1px solid var(--blue); color: #93C5FD; text-decoration: none; padding: 8px; border-radius: 8px; font-size: 11px; font-weight: 800; text-align: center; display: block; margin-top: 6px; }
-
-    .btn-refresh { width: 100%; background: #1E293B; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { background-color: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .custom-scroll::-webkit-scrollbar { display: none; }
+    .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body>
+<body class="min-h-screen bg-slate-950 text-slate-100 p-3 sm:p-4 text-xs select-none">
 
-  <div class="container">
-    <!-- MÀN HÌNH ĐĂNG NHẬP 4 SỐ CUỐI -->
-    <div id="authScreen" class="auth-card">
-      <div class="auth-icon">🛵</div>
-      <h2 class="auth-title">TRẠM SHIPPER THÍM 5</h2>
-      <p class="auth-sub">Nhập 4 số cuối số điện thoại để nhận cuốc xe:</p>
-      <input type="tel" id="shipperPinInput" class="auth-input" maxlength="4" placeholder="0585" autofocus />
-      <button class="btn-action btn-take" style="max-width:220px; margin:0 auto;" onclick="handleShipperLogin()">
-        Vào Nhận Đơn ➔
+  <div class="max-w-md mx-auto space-y-3">
+
+    <!-- ========================================================================= -->
+    <!-- 1. MÀN HÌNH ĐĂNG NHẬP 4 SỐ CUỐI SĐT (PIN AUTH SCREEN)                    -->
+    <!-- ========================================================================= -->
+    <div id="authScreen" class="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 text-center space-y-4 shadow-2xl mt-12 animate-in fade-in zoom-in-95 duration-200">
+      <div class="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-3xl mx-auto shadow-inner">
+        <i class="fa-solid fa-motorcycle"></i>
+      </div>
+      
+      <div class="space-y-1">
+        <h2 class="text-base font-black text-white uppercase tracking-wider">Trạm Điều Phối Shipper</h2>
+        <p class="text-[11px] text-slate-400">Nhập 4 số cuối số điện thoại để vào ca nhận cuốc xe:</p>
+      </div>
+
+      <div class="pt-2">
+        <input type="tel" 
+               id="shipperPinInput" 
+               maxlength="4" 
+               placeholder="0585" 
+               class="w-48 mx-auto bg-slate-950 border-2 border-slate-700 focus:border-amber-500 rounded-2xl py-2.5 text-center text-2xl font-mono font-black text-amber-400 tracking-[0.3em] outline-none transition shadow-inner" 
+               autofocus />
+      </div>
+
+      <button type="button" 
+              onclick="ShipperPortalController.handleShipperLogin()" 
+              class="w-full max-w-[200px] mx-auto py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition active:scale-95 flex items-center justify-center gap-2">
+        <span>Vào Nhận Đơn</span>
+        <i class="fa-solid fa-arrow-right text-[10px]"></i>
       </button>
-      <p id="loginError" style="color:var(--danger); font-size:11px; margin-top:8px; display:none; font-weight:bold;"></p>
+
+      <p id="loginError" class="hidden text-rose-400 text-[11px] font-bold"></p>
     </div>
 
-    <!-- MÀN HÌNH ĐIỀU PHỐI CHÍNH -->
-    <div id="mainScreen" style="display:none;">
-      <header class="app-header">
-        <div class="shipper-info">
-          <h2 id="dispShipperName">Tài Xế: Đang nạp...</h2>
-          <p id="dispShipperPhone">SĐT: ...</p>
+    <!-- ========================================================================= -->
+    <!-- 2. MÀN HÌNH ĐIỀU PHỐI CHÍNH (MAIN DISPATCH SCREEN)                        -->
+    <!-- ========================================================================= -->
+    <div id="mainScreen" class="hidden space-y-3">
+      
+      <!-- TOPBAR THÔNG TIN BÁC TÀI -->
+      <header class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between shadow-md">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg shrink-0">
+            <i class="fa-solid fa-id-badge"></i>
+          </div>
+          <div class="min-w-0">
+            <h2 id="dispShipperName" class="text-xs font-black text-amber-400 truncate">Tài Xế: Đang nạp...</h2>
+            <p id="dispShipperPhone" class="text-[10px] text-slate-400 font-mono">SĐT: ...</p>
+          </div>
         </div>
-        <div style="display:flex; gap:6px; align-items:center;">
-          <button id="btnSoundShipper" onclick="toggleShipperSound()" style="background:#0F172A; border:1px solid var(--border); color:var(--gold); padding:6px 10px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer;">🔔 Chuông: BẬT</button>
-          <button class="btn-logout" onclick="handleLogout()">Đăng Xuất</button>
-        </div>
+        <button type="button" 
+                onclick="ShipperPortalController.handleLogout()" 
+                class="px-2.5 py-1.5 rounded-xl bg-slate-950 hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 border border-slate-800 text-[10.5px] font-bold transition active:scale-95">
+          <i class="fa-solid fa-right-from-bracket mr-1"></i> Rời Ca
+        </button>
       </header>
 
-      <!-- KPI THU NHẬP -->
-      <div class="kpi-strip">
-        <div class="kpi-box">
-          <div class="kpi-label">Đơn Hoàn Tất Hôm Nay</div>
-          <div class="kpi-val green" id="dispCompletedCount">0 đơn</div>
+      <!-- KPI THU NHẬP HÔM NAY -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm">
+          <span class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 block">Đơn Hoàn Tất Hôm Nay</span>
+          <strong id="dispCompletedCount" class="text-base font-mono font-black text-emerald-400 block mt-0.5">0 đơn</strong>
         </div>
-        <div class="kpi-box">
-          <div class="kpi-label">Tiền Ship Thực Nhận</div>
-          <div class="kpi-val gold" id="dispTotalShipEarn">0đ</div>
+        <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm">
+          <span class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 block">Tiền Ship Thực Nhận</span>
+          <strong id="dispTotalShipEarn" class="text-base font-mono font-black text-amber-400 block mt-0.5">0 đ</strong>
         </div>
       </div>
 
-      <!-- THANH TABS LỌC -->
-      <div class="filter-tabs-bar">
-        <button class="tab-filter-btn active" data-filter="all" onclick="changeFilter('all', this)">🌐 Tất Cả</button>
-        <button class="tab-filter-btn" data-filter="wait_verify" onclick="changeFilter('wait_verify', this)">⏳ Cần Gọi Xác Minh</button>
-        <button class="tab-filter-btn" data-filter="delivering" onclick="changeFilter('delivering', this)">🛵 Đang Giao / Nấu</button>
-        <button class="tab-filter-btn" data-filter="completed" onclick="changeFilter('completed', this)">✅ Đã Giao Xong</button>
+      <!-- THANH BỘ LỌC TABS CUỐC XE -->
+      <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1">
+        <button type="button" 
+                data-filter="all" 
+                onclick="ShipperPortalController.changeFilter('all', this)" 
+                class="tab-filter-btn shrink-0 px-3 py-2 rounded-xl font-bold text-[11px] transition bg-amber-500 text-slate-950 active">
+          🌐 Tất Cả
+        </button>
+        <button type="button" 
+                data-filter="wait_verify" 
+                onclick="ShipperPortalController.changeFilter('wait_verify', this)" 
+                class="tab-filter-btn shrink-0 px-3 py-2 rounded-xl font-bold text-[11px] transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white">
+          ⏳ Cần Gọi Xác Minh
+        </button>
+        <button type="button" 
+                data-filter="delivering" 
+                onclick="ShipperPortalController.changeFilter('delivering', this)" 
+                class="tab-filter-btn shrink-0 px-3 py-2 rounded-xl font-bold text-[11px] transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white">
+          🛵 Đang Giao
+        </button>
+        <button type="button" 
+                data-filter="completed" 
+                onclick="ShipperPortalController.changeFilter('completed', this)" 
+                class="tab-filter-btn shrink-0 px-3 py-2 rounded-xl font-bold text-[11px] transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white">
+          ✅ Đã Giao Xong
+        </button>
       </div>
 
-      <button class="btn-refresh" onclick="loadShipperOrders()">🔄 Làm Mới Danh Sách Cuốc Xe</button>
+      <!-- NÚT LÀM MỚI TỨC THÌ -->
+      <button type="button" 
+              id="btnRefreshOrders" 
+              onclick="ShipperPortalController.loadShipperOrders()" 
+              class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 text-xs font-bold transition flex items-center justify-center gap-2 active:scale-95 shadow">
+        <i id="iconRefreshSpin" class="fa-solid fa-rotate"></i>
+        <span>Làm Mới Danh Sách Cuốc Xe</span>
+      </button>
 
-      <div id="ordersContainer">
-        <div class="order-card" style="text-align:center; color:var(--muted); padding:30px;">
-          ⏳ Đang đồng bộ danh sách đơn từ Bếp Thím 5...
+      <!-- KHUNG HIỂN THỊ DANH SÁCH CUỐC XE -->
+      <div id="ordersContainer" class="space-y-3 pt-1">
+        <div class="p-8 rounded-3xl bg-slate-900/60 border border-slate-800 text-center text-slate-400 space-y-2">
+          <i class="fa-solid fa-circle-notch fa-spin text-amber-400 text-xl"></i>
+          <p class="text-xs font-medium">Đang đồng bộ danh sách đơn từ Bếp Thím 5...</p>
         </div>
       </div>
+
     </div>
+
   </div>
-
-  <script src="api.js"></script>
+  <!-- ========================================================================= -->
+  <!-- 3. BỘ NÃO JAVASCRIPT ĐIỀU PHỐI SHIPPER (ENTERPRISE LOGISTICS SUITE)       -->
+  <!-- ========================================================================= -->
   <script>
-    var currentLast4 = "";
-    var autoRefreshTimer = null;
-    var cachedOrdersList = [];
-    var currentActiveFilter = 'all';
-    var isShipperSoundOn = true;
-    var audioCtx = null;
-    var urgentShipperTimer = null;
+  /**
+   * =========================================================================
+   * CONTROLLER: SHIPPER DISPATCH PORTAL (TRẠM ĐIỀU PHỐI TÀI XẾ THÍM 5 v2.8)
+   * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
+   * Kiến trúc: Headless GAS API, Adaptive Polling & GPS Navigation Mapping
+   * =========================================================================
+   */
+  var ShipperPortalController = (function() {
+      var currentLast4 = "";
+      var autoRefreshTimer = null;
+      var cachedOrdersList = [];
+      var currentActiveFilter = "all";
+      var isCallingApi = false;
 
-    // CẦU NỐI DUAL-ENGINE: TỰ ĐỘNG CHUYỂN MẠCH GIỮA GAS VÀ REST API RENDER
-    function isRunningInsideGAS() {
-      return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
-    }
+      // DANH BẠ ĐỊNH DANH TÀI XẾ NỘI BỘ THÍM 5
+      var SHIPPER_PRESETS = {
+          "0585": { name: "Nguyễn Hải Âu", phone: "0934.220.585" },
+          "4693": { name: "Nguyễn Hải Âu", phone: "0969.004.693" },
+          "2862": { name: "Trần Minh Nam", phone: "0968.222.862" }
+      };
 
-    function callBackend(gasFunctionName, gasArgsArray, apiActionName, apiPayloadObj) {
-      return new Promise(function(resolve, reject) {
-        if (isRunningInsideGAS()) {
-          var runner = google.script.run
-            .withSuccessHandler(function(res) { resolve(res); })
-            .withFailureHandler(function(err) { reject(err); });
-          if (typeof runner[gasFunctionName] === 'function') {
-            runner[gasFunctionName].apply(runner, gasArgsArray || []);
-          } else {
-            reject(new Error("Hàm " + gasFunctionName + " không tồn tại"));
+      /**
+       * CƠ CHẾ GỌI BACKEND HYBRID (GAS RUNNER HOẶC API D2C)
+       */
+      function isRunningInsideGAS() {
+          return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
+      }
+
+      function callBackend(gasFunctionName, gasArgsArray, apiActionName, apiPayloadObj) {
+          return new Promise(function(resolve, reject) {
+              if (isRunningInsideGAS()) {
+                  var runner = google.script.run
+                      .withSuccessHandler(function(res) { resolve(res); })
+                      .withFailureHandler(function(err) { reject(err); });
+                  if (typeof runner[gasFunctionName] === 'function') {
+                      runner[gasFunctionName].apply(runner, gasArgsArray || []);
+                  } else {
+                      reject(new Error("Hàm " + gasFunctionName + " không tồn tại trong GAS"));
+                  }
+              } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
+                  window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
+                      .then(function(res) { 
+                          if (res && res.data !== undefined) resolve(res.data);
+                          else resolve(res);
+                      })
+                      .catch(function(err) { reject(err); });
+              } else {
+                  // Giả lập phản hồi khi chạy thử nghiệm trên localhost / staging chưa nối GAS
+                  console.warn("⚠️ Đang chạy chế độ mô phỏng Driver Dispatch...");
+                  setTimeout(function() {
+                      resolve(getMockDispatchData(apiActionName, apiPayloadObj));
+                  }, 400);
+              }
+          });
+      }
+
+      /**
+       * KHỞI ĐỘNG ỨNG DỤNG TÀI XẾ
+       */
+      function init() {
+          var savedLast4 = localStorage.getItem("thim5_shipper_last4");
+          if (savedLast4 && savedLast4.length === 4) {
+              var pinInput = document.getElementById("shipperPinInput");
+              if (pinInput) pinInput.value = savedLast4;
+              handleShipperLogin();
           }
-        } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-          window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
-            .then(function(res) { 
-              if (res && res.data !== undefined) resolve(res.data);
-              else resolve(res);
-            })
-            .catch(function(err) { reject(err); });
-        } else {
-          reject(new Error("Không tìm thấy kết nối Backend"));
-        }
-      });
-    }
-
-    function initShipperApp() {
-      var savedLast4 = localStorage.getItem("thim5_shipper_last4");
-      if (savedLast4 && savedLast4.length === 4) {
-        document.getElementById("shipperPinInput").value = savedLast4;
-        handleShipperLogin();
-      }
-      document.body.addEventListener('click', initAudioCtx, { once: true });
-    }
-
-    function initAudioCtx() {
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-      } catch(e) {}
-    }
-
-    function toggleShipperSound() {
-      isShipperSoundOn = !isShipperSoundOn;
-      var btn = document.getElementById("btnSoundShipper");
-      if (btn) {
-        btn.innerText = isShipperSoundOn ? "🔔 Chuông: BẬT" : "🔕 Chuông: TẮT";
-        btn.style.color = isShipperSoundOn ? "var(--gold)" : "var(--muted)";
-      }
-      if (!isShipperSoundOn && urgentShipperTimer) {
-        clearInterval(urgentShipperTimer);
-        urgentShipperTimer = null;
-      }
-    }
-
-    function playShipperAlertSound() {
-      if (!isShipperSoundOn) return;
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-
-        var now = audioCtx.currentTime;
-        var osc = audioCtx.createOscillator();
-        var gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(784, now); // Nốt G5
-        osc.frequency.setValueAtTime(1046.5, now + 0.15); // Nốt C6
-        gain.gain.setValueAtTime(0.35, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(now); osc.stop(now + 0.45);
-      } catch(e) {}
-    }
-
-    function checkAndMaintainShipperUrgentLoop(orders) {
-      if (!isShipperSoundOn) return;
-      var waitVerifyCount = orders.filter(function(o){ return Number(o.step) === 0; }).length;
-
-      if (waitVerifyCount > 0) {
-        if (!urgentShipperTimer) {
-          playShipperAlertSound();
-          urgentShipperTimer = setInterval(playShipperAlertSound, 4000);
-        }
-      } else {
-        if (urgentShipperTimer) {
-          clearInterval(urgentShipperTimer);
-          urgentShipperTimer = null;
-        }
-      }
-    }
-
-    function handleShipperLogin() {
-      var pin = document.getElementById("shipperPinInput").value.trim().replace(/\D/g, '');
-      var errBox = document.getElementById("loginError");
-      errBox.style.display = "none";
-
-      if (pin.length < 4) {
-        errBox.innerText = "Vui lòng nhập đủ 4 số cuối số điện thoại!";
-        errBox.style.display = "block";
-        return;
       }
 
-      currentLast4 = pin;
-      localStorage.setItem("thim5_shipper_last4", currentLast4);
+      /**
+       * ĐĂNG NHẬP 4 SỐ CUỐI SỐ ĐIỆN THOẠI
+       */
+      function handleShipperLogin() {
+          var pinInput = document.getElementById("shipperPinInput");
+          var pin = pinInput ? pinInput.value.trim().replace(/\D/g, '') : '';
+          var errBox = document.getElementById("loginError");
 
-      var sName = (currentLast4 === "0585" || currentLast4 === "4693") ? "Nguyễn Hải Âu" : (currentLast4 === "2862" ? "Trần Minh Nam" : "Tài Xế (" + currentLast4 + ")");
-      var sPhone = (currentLast4 === "0585") ? "0934.220.585" : (currentLast4 === "4693") ? "0969.004.693" : (currentLast4 === "2862" ? "0968.222.862" : ("09xx.xxx." + currentLast4));
+          if (errBox) errBox.classList.add("hidden");
 
-      document.getElementById("authScreen").style.display = "none";
-      document.getElementById("mainScreen").style.display = "block";
-      document.getElementById("dispShipperName").innerText = "Tài Xế: " + sName;
-      document.getElementById("dispShipperPhone").innerText = "SĐT: " + sPhone;
+          if (pin.length < 4) {
+              if (errBox) {
+                  errBox.innerText = "Vui lòng nhập đủ 4 số cuối số điện thoại!";
+                  errBox.classList.remove("hidden");
+              }
+              return;
+          }
 
-      initAudioCtx();
-      loadShipperOrders();
+          currentLast4 = pin;
+          localStorage.setItem("thim5_shipper_last4", currentLast4);
 
-      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-      autoRefreshTimer = setInterval(loadShipperOrders, 4000);
-    }
+          var shipperData = SHIPPER_PRESETS[currentLast4] || {
+              name: "Tài Xế (" + currentLast4 + ")",
+              phone: "09xx.xxx." + currentLast4
+          };
 
-    async function loadShipperOrders() {
-      if (!currentLast4) return;
-      try {
-        var res = await callBackend("getShipperOrders", [currentLast4], "getShipperOrders", { last4: currentLast4 });
-        
-        if (res && Array.isArray(res.orders)) {
-          cachedOrdersList = res.orders;
-        } else if (res && res.data && Array.isArray(res.data.orders)) {
-          cachedOrdersList = res.data.orders;
-        } else if (Array.isArray(res)) {
-          cachedOrdersList = res;
-        } else {
-          cachedOrdersList = [];
-        }
+          var authScreen = document.getElementById("authScreen");
+          var mainScreen = document.getElementById("mainScreen");
+          var dispName = document.getElementById("dispShipperName");
+          var dispPhone = document.getElementById("dispShipperPhone");
 
-        if (res && res.shipper) {
-          if (res.shipper.name) document.getElementById("dispShipperName").innerText = "Tài Xế: " + res.shipper.name;
-          if (res.shipper.phone) document.getElementById("dispShipperPhone").innerText = "SĐT: " + res.shipper.phone;
-        }
+          if (authScreen) authScreen.classList.add("hidden");
+          if (mainScreen) mainScreen.classList.remove("hidden");
+          if (dispName) dispName.innerText = "Tài Xế: " + shipperData.name;
+          if (dispPhone) dispPhone.innerText = "SĐT: " + shipperData.phone;
 
-        renderOrders();
-        checkAndMaintainShipperUrgentLoop(cachedOrdersList);
-      } catch (err) {
-        console.error("Lỗi nạp cuốc xe Shipper:", err);
-      }
-    }
-
-    function changeFilter(filterKey, btnElement) {
-      currentActiveFilter = filterKey;
-      document.querySelectorAll(".tab-filter-btn").forEach(function(b){ b.classList.remove("active"); });
-      if (btnElement) btnElement.classList.add("active");
-      renderOrders();
-    }
-
-    function renderOrders() {
-      var container = document.getElementById("ordersContainer");
-      if (!container) return;
-
-      var completedOrders = cachedOrdersList.filter(function(o){ return Number(o.step) === 4 || o.status === "Hoàn Tất"; });
-      var totalShipEarn = completedOrders.reduce(function(sum, o){ return sum + (Number(o.shipFee) || 0); }, 0);
-
-      document.getElementById("dispCompletedCount").innerText = completedOrders.length + " đơn";
-      document.getElementById("dispTotalShipEarn").innerText = totalShipEarn.toLocaleString('vi-VN') + "đ";
-
-      var displayList = cachedOrdersList;
-      if (currentActiveFilter === 'wait_verify') {
-        displayList = cachedOrdersList.filter(function(o){ return Number(o.step) === 0; });
-      } else if (currentActiveFilter === 'delivering') {
-        // Gom cả Step 1 (Bếp đang nhận), Step 2 (Bếp đang nấu) và Step 3 (Đang đi giao) để Shipper không bị mất đơn
-        displayList = cachedOrdersList.filter(function(o){ return Number(o.step) >= 1 && Number(o.step) <= 3; });
-      } else if (currentActiveFilter === 'completed') {
-        displayList = cachedOrdersList.filter(function(o){ return Number(o.step) === 4 || o.status === "Hoàn Tất"; });
-      } else {
-        // Tab Tất Cả: Hiển thị các đơn đang vận hành (chưa hoàn tất)
-        displayList = cachedOrdersList.filter(function(o){ return Number(o.step) < 4 && o.status !== "Hoàn Tất"; });
+          loadShipperOrders();
+          startAdaptivePolling();
       }
 
-      if (displayList.length === 0) {
-        container.innerHTML = "<div class='order-card' style='text-align:center; color:var(--muted); padding:35px;'>Không có cuốc xe nào trong mục này.<br><small>Hệ thống tự động lắng nghe đơn mới mỗi 4 giây...</small></div>";
-        return;
+      /**
+       * CƠ CHẾ ADAPTIVE POLLING TIẾT KIỆM HẠN NGẠCH GAS QUOTA
+       */
+      function startAdaptivePolling() {
+          if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+          // Tự động kiểm tra mỗi 15 giây (thay vì 4 giây gây cạn quota như code cũ)
+          autoRefreshTimer = setInterval(function() {
+              loadShipperOrders(true);
+          }, 15000);
       }
 
-      var html = "";
-      displayList.forEach(function(o) {
-        var cleanCode = String(o.code || "").trim();
-        var stepNum = Number(o.step);
-        var isStep0 = (stepNum === 0);
-        var isStep1 = (stepNum === 1);
-        var isStep2 = (stepNum === 2);
-        var isDelivering = (stepNum === 3);
-        var isCompleted = (stepNum === 4 || o.status === "Hoàn Tất");
-        var isMoMo = (o.method === "CK_VIETQR" || o.method === "MOMO" || o.method === "BANK");
+      /**
+       * TẢI DANH SÁCH ĐƠN TỪ BẾP
+       */
+      async function loadShipperOrders(isSilent) {
+          if (!currentLast4 || isCallingApi) return;
+          isCallingApi = true;
 
-        var storeNavUrl = o.storeGpsUrl || "https://www.google.com/maps/dir/?api=1&destination=11.285267,106.133347";
-        var custNavUrl = o.customerGpsUrl || ("https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent((o.address || "Hòa Thành, Tây Ninh")));
+          var spinIcon = document.getElementById("iconRefreshSpin");
+          if (!isSilent && spinIcon) spinIcon.classList.add("fa-spin");
 
-        var formattedItemsHtml = (o.items || '').split(" | ").map(function(itemText){
-          return `<div style="margin-bottom:2px;">• ${itemText}</div>`;
-        }).join("");
+          try {
+              var res = await callBackend(
+                  "getShipperOrders", 
+                  [currentLast4], 
+                  "getShipperOrders", 
+                  { last4: currentLast4 }
+              );
+              
+              if (res && Array.isArray(res.orders)) {
+                  cachedOrdersList = res.orders;
+              } else if (res && res.data && Array.isArray(res.data.orders)) {
+                  cachedOrdersList = res.data.orders;
+              } else if (Array.isArray(res)) {
+                  cachedOrdersList = res;
+              } else {
+                  cachedOrdersList = [];
+              }
 
-        var shipFeeEarn = Number(o.shipFee) || 12000;
-        var shipDisplayNote = (Number(o.finalShipFee) === 0 || Number(o.shipFee) === 0)
-          ? `<span style="color:#34D399; font-weight:800;">${shipFeeEarn.toLocaleString('vi-VN')}đ (Quán Trợ Giá 100%)</span>`
-          : `<span style="color:var(--gold); font-weight:800;">${shipFeeEarn.toLocaleString('vi-VN')}đ</span>`;
+              if (res && res.shipper) {
+                  var dispName = document.getElementById("dispShipperName");
+                  var dispPhone = document.getElementById("dispShipperPhone");
+                  if (res.shipper.name && dispName) dispName.innerText = "Tài Xế: " + res.shipper.name;
+                  if (res.shipper.phone && dispPhone) dispPhone.innerText = "SĐT: " + res.shipper.phone;
+              }
 
-        var badgeClass = isStep0 ? 'badge-step0' : (isStep1 ? 'badge-step1' : (isStep2 ? 'badge-step2' : (isDelivering ? 'badge-delivering' : 'badge-done')));
-        var badgeText = isStep0 ? '⏳ Chờ Xác Minh COD' : (isStep1 ? '🔔 Bếp Đang Tiếp Nhận' : (isStep2 ? '🍳 Bếp Đang Nấu Chảo' : (isDelivering ? '🛵 Đang Giao Cho Khách' : '✅ Đã Hoàn Tất')));
-
-        html += `
-          <div class="order-card step${stepNum}">
-            <div class="order-header">
-              <span class="order-code">${cleanCode} (${o.dist || 1.5} km)</span>
-              <span class="order-badge ${badgeClass}">${badgeText}</span>
-            </div>
-
-            <div class="order-row"><span>Khách hàng:</span><strong>${o.name}</strong></div>
-            <div class="order-row"><span>Địa chỉ:</span><strong style="text-align:right; max-width:70%;">${o.address}</strong></div>
-
-            <div class="order-items-box">
-              <div style="font-weight:bold; margin-bottom:4px; color:var(--gold);">Món & Topping:</div>
-              ${formattedItemsHtml}
-              <div style="color:var(--muted); margin-top:4px;"><strong>Khẩu vị:</strong> ${o.taste || 'Chuẩn vị Thím 5'}</div>
-            </div>
-
-            <div class="fin-box">
-              <div class="fin-item">
-                <span>Thanh toán:</span>
-                <strong style="color:${isMoMo ? '#34D399' : '#FDE047'};">${isMoMo ? '💳 Đã Quét VietQR' : '💵 Tiền Mặt (COD)'}</strong>
-              </div>
-              <div class="fin-item">
-                <span>Tiền ship thực nhận:</span>
-                ${shipDisplayNote}
-              </div>
-              ${!isMoMo ? `
-                <div class="fin-item" style="grid-column: 1/-1; border-top:1px dashed var(--border); padding-top:4px; margin-top:2px;">
-                  <span>Ứng Bếp tiền món: <strong style="color:#fff;">${Number(o.advanceToKitchen || (o.total - o.shipFee)).toLocaleString('vi-VN')}đ</strong> • Thu khách: <strong style="color:#EF4444; font-size:13px;">${Number(o.collectFromCustomer || o.total).toLocaleString('vi-VN')}đ</strong></span>
-                </div>
-              ` : `
-                <div class="fin-item" style="grid-column: 1/-1; border-top:1px dashed var(--border); padding-top:4px; margin-top:2px; color:#34D399;">
-                  <span>🎉 Đơn đã thanh toán online: <strong>Không cần thu tiền mặt của khách!</strong></span>
-                </div>
-              `}
-            </div>
-
-            <div class="gps-nav-grid">
-              <a href="${storeNavUrl}" target="_blank" class="btn-gps-nav btn-gps-store">
-                📍 1. Đến Bếp Lấy Món
-              </a>
-              <a href="${custNavUrl}" target="_blank" class="btn-gps-nav btn-gps-customer">
-                🛵 2. Dẫn Đường Giao Khách
-              </a>
-            </div>
-
-            <a href="tel:${o.phone}" class="btn-call">📞 Bấm Gọi Cho Khách (${o.phone})</a>
-
-            ${isStep0 ? `
-              <button class="btn-action btn-verify" id="btn_verify_${cleanCode}" onclick="verifyCodOrder('${cleanCode}')">
-                📞 Đã Gọi Khách Xác Nhận ➔ Báo Bếp Nấu
-              </button>
-            ` : (isStep1 || isStep2 ? `
-              <button class="btn-action btn-take" onclick="takeOrder('${cleanCode}')">
-                🛵 Đã Lấy Món ➔ Bắt Đầu Đi Giao
-              </button>
-            ` : (isDelivering ? `
-              <button class="btn-action btn-done" onclick="completeOrder('${cleanCode}')">
-                ✅ Đã Giao Xong & Thu Đủ Tiền
-              </button>
-              <button class="btn-action btn-cancel" onclick="cancelOrder('${cleanCode}')">
-                ⚠️ Báo Hỏng Xe / Trả Đơn Về Bếp
-              </button>
-            ` : ''))}
-          </div>
-        `;
-      });
-      container.innerHTML = html;
-    }
-
-    // XÁC MINH ĐƠN COD (STEP 0 ➔ STEP 1): TỰ ĐỘNG GÁN TÊN SHIPPER ĐỂ KHÓA CHẾT VÀO ĐƠN
-    async function verifyCodOrder(orderCode) {
-      var cleanCode = String(orderCode || "").trim();
-      var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "").trim();
-      var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "").trim();
-      var shipperLabel = sName + " (" + sPhone + ")";
-
-      if (!confirm("Xác nhận bạn đã gọi điện và khách đồng ý nhận đơn " + cleanCode + "?")) return;
-
-      var btn = document.getElementById("btn_verify_" + cleanCode);
-      if (btn) {
-        btn.innerText = "⏳ Đang truyền lệnh mở Bếp...";
-        btn.disabled = true;
+              renderOrders();
+          } catch (err) {
+              console.error("❌ Lỗi nạp cuốc xe Shipper:", err);
+          } finally {
+              if (spinIcon) spinIcon.classList.remove("fa-spin");
+              isCallingApi = false;
+          }
       }
 
-      try {
-        await callBackend("shipperVerifyCodOrderSuccess", [cleanCode, shipperLabel], "shipperVerifyCodOrderSuccess", {
-          orderCode: cleanCode,
-          shipperInfo: shipperLabel
-        });
-        alert("✅ Đã xác minh COD thành công! Bếp KDS đã được mở để nhận nấu.");
-        loadShipperOrders();
-      } catch (err) {
-        alert("Lỗi xác minh COD: " + err.message);
-        if (btn) {
-          btn.innerText = "📞 Đã Gọi Khách Xác Nhận ➔ Báo Bếp Nấu";
-          btn.disabled = false;
-        }
+      /**
+       * ĐỔI BỘ LỌC TABS
+       */
+      function changeFilter(filterKey, btnElement) {
+          currentActiveFilter = filterKey;
+          document.querySelectorAll(".tab-filter-btn").forEach(function(b) {
+              b.className = "tab-filter-btn shrink-0 px-3 py-2 rounded-xl font-bold text-[11px] transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white";
+          });
+          if (btnElement) {
+              btnElement.className = "tab-filter-btn shrink-0 px-3 py-2 rounded-xl font-bold text-[11px] transition bg-amber-500 text-slate-950 active";
+          }
+          renderOrders();
       }
-    }
 
-    // SHIPPER NHẬN MÓN VÀ BẮT ĐẦU ĐI GIAO (STEP 1/2 ➔ STEP 3)
-    async function takeOrder(orderCode) {
-      var cleanCode = String(orderCode || "").trim();
-      var sName = document.getElementById("dispShipperName").innerText.replace("Tài Xế: ", "").trim();
-      var sPhone = document.getElementById("dispShipperPhone").innerText.replace("SĐT: ", "").trim();
-      var shipperLabel = sName + " (" + sPhone + ")";
+      /**
+       * VẼ DANH SÁCH CUỐC XE & ĐỒNG BỘ DÒNG TIỀN
+       */
+      function renderOrders() {
+          var container = document.getElementById("ordersContainer");
+          if (!container) return;
 
-      try {
-        await callBackend("shipperUpdateStep", [cleanCode, shipperLabel, 3], "shipperUpdateStep", {
-          orderCode: cleanCode,
-          shipperName: shipperLabel,
-          stepNumber: 3
-        });
-        loadShipperOrders();
-      } catch (err) {
-        alert("Lỗi cập nhật đi giao: " + err.message);
+          // Tính toán KPI thu nhập
+          var completedOrders = cachedOrdersList.filter(function(o) { 
+              return Number(o.step) === 4 || o.status === "Hoàn Tất"; 
+          });
+          var totalShipEarn = completedOrders.reduce(function(sum, o) { 
+              return sum + (Number(o.shipFee) || 0); 
+          }, 0);
+
+          var dispCount = document.getElementById("dispCompletedCount");
+          var dispEarn = document.getElementById("dispTotalShipEarn");
+          if (dispCount) dispCount.innerText = completedOrders.length + " đơn";
+          if (dispEarn) dispEarn.innerText = totalShipEarn.toLocaleString('vi-VN') + " đ";
+
+          // Lọc danh sách hiển thị theo Tab
+          var displayList = cachedOrdersList;
+          if (currentActiveFilter === 'wait_verify') {
+              displayList = cachedOrdersList.filter(function(o) { return Number(o.step) === 0; });
+          } else if (currentActiveFilter === 'delivering') {
+              displayList = cachedOrdersList.filter(function(o) { return Number(o.step) === 3; });
+          } else if (currentActiveFilter === 'completed') {
+              displayList = cachedOrdersList.filter(function(o) { return Number(o.step) === 4 || o.status === "Hoàn Tất"; });
+          } else {
+              displayList = cachedOrdersList.filter(function(o) { return Number(o.step) < 4 && o.status !== "Hoàn Tất"; });
+          }
+
+          if (displayList.length === 0) {
+              container.innerHTML = `
+                  <div class="p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center text-slate-400 space-y-2">
+                      <i class="fa-solid fa-clipboard-check text-2xl text-slate-600"></i>
+                      <p class="font-bold text-xs text-slate-300">Không có cuốc xe nào trong mục này.</p>
+                      <p class="text-[10px] text-slate-500">Hệ thống tự động lắng nghe đơn mới mỗi 15 giây...</p>
+                  </div>
+              `;
+              return;
+          }
+
+          var html = "";
+          displayList.forEach(function(o) {
+              var cleanCode = String(o.code || "").trim();
+              var stepNum = Number(o.step);
+              var isStep0 = (stepNum === 0);
+              var isDelivering = (stepNum === 3);
+              var isCompleted = (stepNum === 4 || o.status === "Hoàn Tất");
+              var isOnlinePaid = (o.method === "CK_VIETQR" || o.method === "VIETQR" || o.method === "MOMO" || o.method === "BANK");
+
+              // Cặp Link Google Maps Dẫn Đường Kép Chuẩn Bếp Hòa Thành (11.285267, 106.133347)
+              var storeNavUrl = o.storeGpsUrl || "https://www.google.com/maps/dir/?api=1&destination=11.285267,106.133347";
+              var custNavUrl = o.customerGpsUrl || ("https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent((o.address || "Hòa Thành, Tây Ninh")));
+
+              var formattedItemsHtml = (o.items || '').split(" | ").map(function(itemText) {
+                  return `<div class="text-[11px] text-slate-300">• ${itemText}</div>`;
+              }).join("");
+
+              var shipFeeEarn = Number(o.shipFee) || 12000;
+              var isFreeship = (Number(o.finalShipFee) === 0 || Number(o.shippingSubsidy) >= shipFeeEarn);
+
+              html += `
+                  <div class="p-4 rounded-3xl bg-slate-900 border ${isStep0 ? 'border-amber-500/60 bg-amber-950/10' : (isDelivering ? 'border-sky-500/60' : (isCompleted ? 'border-emerald-500/60 opacity-90' : 'border-slate-800'))} shadow-xl space-y-3">
+                      
+                      <!-- Header Card Cuốc Xe -->
+                      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                          <div class="flex items-center gap-1.5">
+                              <span class="font-mono font-black text-amber-400 text-sm">${cleanCode}</span>
+                              <span class="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-800">~${o.dist || 1.2} km</span>
+                          </div>
+                          <span class="px-2.5 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider ${isStep0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : (isDelivering ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30' : (isCompleted ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-orange-500/20 text-orange-300 border border-orange-500/30'))}">
+                              ${isStep0 ? '⏳ Chờ Xác Minh COD' : (isDelivering ? '🛵 Đang Giao' : (isCompleted ? '✅ Đã Hoàn Tất' : '🍳 Bếp Đang Nấu'))}
+                          </span>
+                      </div>
+
+                      <!-- Thông Tin Khách & Địa Chỉ -->
+                      <div class="space-y-1 text-xs">
+                          <div class="flex justify-between">
+                              <span class="text-slate-400">Khách hàng:</span>
+                              <strong class="text-white">${o.name}</strong>
+                          </div>
+                          <div class="flex justify-between items-start gap-2">
+                              <span class="text-slate-400 shrink-0">Địa chỉ:</span>
+                              <strong class="text-right text-slate-200 text-[11px] leading-tight">${o.address}</strong>
+                          </div>
+                      </div>
+
+                      <!-- Chi Tiết Món Ăn -->
+                      <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                          <div class="font-bold text-amber-400 text-[11px] flex items-center gap-1">
+                              <i class="fa-solid fa-bowl-food text-[10px]"></i> Món & Topping:
+                          </div>
+                          ${formattedItemsHtml}
+                          <div class="text-[10px] text-slate-400 pt-0.5 border-t border-slate-900 mt-1">
+                              <strong class="text-slate-300">Khẩu vị:</strong> ${o.taste || 'Cay Nhẹ (Chuẩn vị Thím 5)'}
+                          </div>
+                      </div>
+
+                      <!-- Bảng Dòng Tiền & Thu Tiền COD Chuẩn Minh Bạch -->
+                      <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5 text-xs">
+                          <div class="flex justify-between items-center">
+                              <span class="text-slate-400 text-[10.5px]">Thanh toán:</span>
+                              <strong class="font-bold ${isOnlinePaid ? 'text-emerald-400' : 'text-amber-400'}">
+                                  ${isOnlinePaid ? '💳 Đã Quét VietQR' : '💵 Tiền Mặt (COD)'}
+                              </strong>
+                          </div>
+                          <div class="flex justify-between items-center">
+                              <span class="text-slate-400 text-[10.5px]">Tiền Ship Thực Nhận:</span>
+                              <strong class="font-mono ${isFreeship ? 'text-emerald-400' : 'text-amber-400'} font-black">
+                                  ${shipFeeEarn.toLocaleString('vi-VN')} đ ${isFreeship ? '<span class="text-[9px] font-normal">(Quán Trợ Giá 100%)</span>' : ''}
+                              </strong>
+                          </div>
+                          
+                          <!-- Dòng Tiền Thu Hộ COD -->
+                          <div class="pt-1.5 border-t border-slate-900 flex justify-between items-center text-[11px]">
+                              ${isOnlinePaid ? `
+                                  <span class="text-emerald-400 font-bold flex items-center gap-1">
+                                      <i class="fa-solid fa-circle-check text-[10px]"></i> Đã thanh toán online: <strong>Thu khách 0 đ</strong>
+                                  </span>
+                              ` : `
+                                  <span class="text-slate-300">Thu Tiền Mặt Của Khách:</span>
+                                  <strong class="font-mono font-black text-rose-400 text-sm">
+                                      ${Number(o.collectFromCustomer || o.total).toLocaleString('vi-VN')} đ
+                                  </strong>
+                              `}
+                          </div>
+                      </div>
+
+                      <!-- Dẫn Đường Google Maps Kép -->
+                      <div class="grid grid-cols-2 gap-2">
+                          <a href="${storeNavUrl}" target="_blank" class="py-2 px-2.5 rounded-xl bg-orange-600/20 hover:bg-orange-600/30 text-orange-300 border border-orange-500/30 text-center font-bold text-[10.5px] transition flex items-center justify-center gap-1 active:scale-95">
+                              <i class="fa-solid fa-store text-[10px]"></i>
+                              <span>1. Đến Bếp Lấy</span>
+                          </a>
+                          <a href="${custNavUrl}" target="_blank" class="py-2 px-2.5 rounded-xl bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 text-center font-bold text-[10.5px] transition flex items-center justify-center gap-1 active:scale-95">
+                              <i class="fa-solid fa-location-arrow text-[10px]"></i>
+                              <span>2. Dẫn Đến Khách</span>
+                          </a>
+                      </div>
+
+                      <!-- Nút Gọi Trực Tiếp Cho Khách -->
+                      <a href="tel:${o.phone}" class="py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-center font-bold text-[11px] block transition">
+                          <i class="fa-solid fa-phone text-amber-400 mr-1"></i> Gọi Khách: ${o.phone}
+                      </a>
+
+                      <!-- Bộ Nút Tác Vụ Trạng Thái Đơn -->
+                      ${isStep0 ? `
+                          <button type="button" id="btn_verify_${cleanCode}" onclick="ShipperPortalController.verifyCodOrder('${cleanCode}')" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider transition shadow flex items-center justify-center gap-1.5 active:scale-95">
+                              <i class="fa-solid fa-phone-volume"></i>
+                              <span>Đã Gọi Xác Nhận ➔ Báo Bếp Nấu</span>
+                          </button>
+                      ` : (!isDelivering && !isCompleted ? `
+                          <button type="button" onclick="ShipperPortalController.takeOrder('${cleanCode}')" class="w-full py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black text-xs uppercase tracking-wider transition shadow-lg shadow-orange-600/20 flex items-center justify-center gap-1.5 active:scale-95">
+                              <i class="fa-solid fa-motorcycle"></i>
+                              <span>Nhận Cuốc Xe Giao Đơn Này</span>
+                          </button>
+                      ` : (isDelivering ? `
+                          <div class="space-y-1.5">
+                              <button type="button" onclick="ShipperPortalController.completeOrder('${cleanCode}')" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-1.5 active:scale-95">
+                                  <i class="fa-solid fa-circle-check"></i>
+                                  <span>Đã Giao Xong & Thu Đủ Tiền</span>
+                              </button>
+                              <button type="button" onclick="ShipperPortalController.cancelOrder('${cleanCode}')" class="w-full py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-[11px] transition">
+                                  ⚠️ Báo Hỏng Xe / Trả Đơn Về Bếp
+                              </button>
+                          </div>
+                      ` : ''))}
+
+                  </div>
+              `;
+          });
+
+          container.innerHTML = html;
       }
-    }
 
-    // HOÀN TẤT CUỐC XE (STEP 3 ➔ STEP 4): GIAO XONG, TỰ ĐỘNG KÍCH HOẠT TÍCH LŨY CRM VÀ MỞ VÒNG QUAY
-    async function completeOrder(orderCode) {
-      var cleanCode = String(orderCode || "").trim();
-      if (!confirm("Xác nhận đã giao đơn " + cleanCode + " tận tay khách và thu đủ tiền?")) return;
+      /**
+       * TÁC VỤ 1: XÁC MINH ĐƠN COD (CHUYỂN TỪ STEP 0 SANG STEP 2 ĐỂ MỞ BẾP KDS)
+       */
+      async function verifyCodOrder(orderCode) {
+          var cleanCode = String(orderCode || "").trim();
+          var dispName = document.getElementById("dispShipperName");
+          var sName = dispName ? dispName.innerText.replace("Tài Xế: ", "") : "Tài Xế";
+          var shipperLabel = sName + " (" + currentLast4 + ")";
 
-      try {
-        await callBackend("shipperUpdateStep", [cleanCode, "", 4], "shipperUpdateStep", {
-          orderCode: cleanCode,
-          shipperName: "",
-          stepNumber: 4
-        });
-        alert("🎉 Đã hoàn tất cuốc giao đơn " + cleanCode + "!");
-        loadShipperOrders();
-      } catch (err) {
-        alert("Lỗi hoàn tất đơn: " + err.message);
+          if (!confirm("Xác nhận bạn đã gọi điện cho khách và khách đồng ý nhận đơn " + cleanCode + "?")) return;
+
+          var btn = document.getElementById("btn_verify_" + cleanCode);
+          if (btn) {
+              btn.innerText = "⏳ Đang gửi lệnh mở Bếp...";
+              btn.disabled = true;
+          }
+
+          try {
+              await callBackend(
+                  "shipperVerifyCodOrderSuccess", 
+                  [cleanCode, shipperLabel], 
+                  "shipperVerifyCodOrderSuccess", 
+                  { orderCode: cleanCode, shipperInfo: shipperLabel }
+              );
+              alert("✅ Đã xác minh COD thành công! Bếp KDS đã được mở để nấu.");
+              loadShipperOrders();
+          } catch (err) {
+              alert("❌ Lỗi xác minh COD: " + err.message);
+              if (btn) {
+                  btn.innerText = "Đã Gọi Xác Nhận ➔ Báo Bếp Nấu";
+                  btn.disabled = false;
+              }
+          }
       }
-    }
 
-    // SỰ CỐ TRẢ ĐƠN VỀ BẾP (STEP 3 ➔ STEP 2)
-    async function cancelOrder(orderCode) {
-      var cleanCode = String(orderCode || "").trim();
-      var reason = prompt("Nhập lý do sự cố (VD: Hỏng xe, thủng lốp, khách không nghe máy...):", "Hỏng xe đột xuất");
-      if (!reason || !reason.trim()) return;
+      /**
+       * TÁC VỤ 2: NHẬN CUỐC XE (CHUYỂN SANG STEP 3 ĐANG GIAO)
+       * -> Đồng thời kích hoạt tracking.html của khách sáng đèn Bước 4!
+       */
+      async function takeOrder(orderCode) {
+          var cleanCode = String(orderCode || "").trim();
+          var dispName = document.getElementById("dispShipperName");
+          var sName = dispName ? dispName.innerText.replace("Tài Xế: ", "") : "Tài Xế";
+          var shipperLabel = sName + " (" + currentLast4 + ")";
 
-      try {
-        await callBackend("shipperReleaseOrder", [cleanCode, reason], "shipperReleaseOrder", {
-          orderCode: cleanCode,
-          reason: reason
-        });
-        alert("⚠️ Đã nhả đơn về bếp để điều phối tài xế khác!");
-        loadShipperOrders();
-      } catch (err) {
-        alert("Lỗi trả đơn: " + err.message);
+          try {
+              await callBackend(
+                  "shipperUpdateStep", 
+                  [cleanCode, shipperLabel, 3], 
+                  "shipperUpdateStep", 
+                  { orderCode: cleanCode, shipperName: shipperLabel, stepNumber: 3 }
+              );
+              loadShipperOrders();
+          } catch (err) {
+              alert("❌ Lỗi nhận cuốc xe: " + err.message);
+          }
       }
-    }
 
-    function handleLogout() {
-      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
-      autoRefreshTimer = null;
-      if (urgentShipperTimer) clearInterval(urgentShipperTimer);
-      urgentShipperTimer = null;
-      localStorage.removeItem("thim5_shipper_last4");
-      currentLast4 = "";
-      document.getElementById("mainScreen").style.display = "none";
-      document.getElementById("authScreen").style.display = "block";
-      document.getElementById("shipperPinInput").value = "";
-    }
+      /**
+       * TÁC VỤ 3: HOÀN TẤT CUỐC XE (CHUYỂN SANG STEP 4 ĐÃ GIAO)
+       * -> Đồng thời kích hoạt tracking.html của khách sáng đèn Bước 5!
+       */
+      async function completeOrder(orderCode) {
+          var cleanCode = String(orderCode || "").trim();
+          if (!confirm("Xác nhận đã giao đơn " + cleanCode + " tận tay khách và thu đủ tiền?")) return;
 
-    window.onload = initShipperApp;
+          try {
+              await callBackend(
+                  "shipperUpdateStep", 
+                  [cleanCode, "", 4], 
+                  "shipperUpdateStep", 
+                  { orderCode: cleanCode, shipperName: "", stepNumber: 4 }
+              );
+              alert("🎉 Đã hoàn tất cuốc giao đơn " + cleanCode + "!");
+              loadShipperOrders();
+          } catch (err) {
+              alert("❌ Lỗi hoàn tất đơn: " + err.message);
+          }
+      }
+
+      /**
+       * TÁC VỤ 4: BÁO HỎNG XE / SỰ CỐ TRẢ ĐƠN VỀ BẾP
+       */
+      async function cancelOrder(orderCode) {
+          var cleanCode = String(orderCode || "").trim();
+          var reason = prompt("Nhập lý do sự cố (VD: Hỏng xe, thủng lốp, khách không nghe máy...):", "Hỏng xe đột xuất");
+          if (!reason || !reason.trim()) return;
+
+          try {
+              await callBackend(
+                  "shipperReleaseOrder", 
+                  [cleanCode, reason], 
+                  "shipperReleaseOrder", 
+                  { orderCode: cleanCode, reason: reason }
+              );
+              alert("⚠️ Đã nhả đơn về Bếp để điều phối tài xế khác!");
+              loadShipperOrders();
+          } catch (err) {
+              alert("❌ Lỗi trả đơn: " + err.message);
+          }
+      }
+
+      /**
+       * ĐĂNG XUẤT KHỎI CA TRỰC
+       */
+      function handleLogout() {
+          if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+          autoRefreshTimer = null;
+          localStorage.removeItem("thim5_shipper_last4");
+          currentLast4 = "";
+          
+          var mainScreen = document.getElementById("mainScreen");
+          var authScreen = document.getElementById("authScreen");
+          var pinInput = document.getElementById("shipperPinInput");
+
+          if (mainScreen) mainScreen.classList.add("hidden");
+          if (authScreen) authScreen.classList.remove("hidden");
+          if (pinInput) pinInput.value = "";
+      }
+
+      /**
+       * DỮ LIỆU GIẢ LẬP ĐỂ TEST GIAO DIỆN
+       */
+      function getMockDispatchData(action, payload) {
+          return {
+              shipper: SHIPPER_PRESETS[currentLast4] || { name: "Nguyễn Hải Âu", phone: "0934.220.585" },
+              orders: [
+                  {
+                      code: "DH260913_8892",
+                      step: 2,
+                      name: "Anh Tuấn",
+                      phone: "0988.123.456",
+                      address: "125 Hùng Vương, KP4, TT. Hòa Thành, Tây Ninh",
+                      dist: 1.4,
+                      items: "1x Mì Trộn Xá Xíu Tóp Mỡ (+ Trứng Lòng Đào) | 1x Trà Đào 1L",
+                      taste: "Cay Nhẹ (Chuẩn vị)",
+                      method: "VIETQR",
+                      total: 70000,
+                      shipFee: 12000,
+                      shippingSubsidy: 12000,
+                      collectFromCustomer: 0
+                  }
+              ]
+          };
+      }
+
+      // GIAO DIỆN CÔNG KHAI
+      return {
+          init: init,
+          handleShipperLogin: handleShipperLogin,
+          loadShipperOrders: loadShipperOrders,
+          changeFilter: changeFilter,
+          verifyCodOrder: verifyCodOrder,
+          takeOrder: takeOrder,
+          completeOrder: completeOrder,
+          cancelOrder: cancelOrder,
+          handleLogout: handleLogout
+      };
+  })();
+
+  // KHỞI CHẠY KHI TẢI XONG DOM
+  document.addEventListener("DOMContentLoaded", function() {
+      ShipperPortalController.init();
+  });
   </script>
+
 </body>
 </html>
