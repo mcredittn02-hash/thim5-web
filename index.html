@@ -1637,6 +1637,10 @@
         /**
          * TÍNH TOÁN BIỂU PHÍ SHIP VÀ HIỂN THỊ CỰ LY THÔNG MINH (< 300m, mét, km)
          */
+        /**
+         * TÍNH TOÁN BIỂU PHÍ SHIP VÀ KHÓA TRẦN TRỢ GIÁ SHIP BẰNG ĐÚNG PHÍ SHIP
+         * Triệt tiêu hoàn toàn cảm giác bị hụt 3k của khách hàng khi trợ giá > phí ship
+         */
         function recalculateShippingFee() {
             var dist = (appState.calculatedDistanceKm !== undefined && appState.calculatedDistanceKm !== null) 
                        ? appState.calculatedDistanceKm 
@@ -1650,7 +1654,7 @@
                 fee += Math.round(extraKm * STORE_BASE_CONFIG.shipExtraFeePerKm);
             }
 
-            // Tính tổng tiền món ăn trong giỏ
+            // Tính tổng tiền món ăn trong giỏ hàng
             var subtotal = 0;
             appState.cartItems.forEach(function(i) {
                 if (!i.isGift) {
@@ -1658,34 +1662,35 @@
                 }
             });
 
-            // Áp dụng Bậc thang trợ giá ship (100k giảm 15k, 150k giảm 25k)
-            var subsidy = 0;
+            // 1. TÍNH MỨC TRỢ GIÁ THEO BẬC THANG AOV (100k -> 15k, 150k -> 25k)
+            var rawSubsidy = 0;
             if (subtotal >= STORE_BASE_CONFIG.subsidyTier2Min) {
-                subsidy = STORE_BASE_CONFIG.subsidyTier2Amount;
+                rawSubsidy = STORE_BASE_CONFIG.subsidyTier2Amount;
             } else if (subtotal >= STORE_BASE_CONFIG.subsidyTier1Min) {
-                subsidy = STORE_BASE_CONFIG.subsidyTier1Amount;
+                rawSubsidy = STORE_BASE_CONFIG.subsidyTier1Amount;
             }
 
-            var actualShip = Math.max(0, fee - subsidy);
-            appState.shippingFee = fee;
-            appState.shippingSubsidy = subsidy;
+            // 2. KHÓA TRẦN TOÁN HỌC: TRỢ GIÁ TỐI ĐA CHỈ BẰNG ĐÚNG PHÍ SHIP
+            // Nếu trợ giá 15k mà ship chỉ có 12k -> Gán trợ giá = 12k (Freeship 100%)
+            var appliedSubsidy = Math.min(fee, rawSubsidy);
+            var actualShip = Math.max(0, fee - appliedSubsidy);
 
-            // ĐỊNH DẠNG HIỂN THỊ KHOẢNG CÁCH THÔNG MINH CHO NGƯỜI DÙNG
+            appState.shippingFee = fee;
+            appState.shippingSubsidy = appliedSubsidy; // Lưu vào State đúng số tiền khấu trừ thực tế
+
+            // 3. ĐỊNH DẠNG HIỂN THỊ KHOẢNG CÁCH THÔNG MINH CHO KHÁCH
             var txtDist = document.getElementById("txt-calc-distance");
             var txtFee = document.getElementById("txt-calc-shipping-fee");
             var tagSubsidy = document.getElementById("txt-calc-subsidy-tag");
 
             if (txtDist) {
                 if (dist < 0.3) {
-                    // Dưới 300 mét (Đang ngồi tại quán hoặc sát vách)
                     var meters = Math.max(5, Math.round(dist * 1000));
                     txtDist.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-location-dot"></i> Tại quán (~${meters}m)</span>`;
                 } else if (dist < 1.0) {
-                    // Dưới 1 km: Hiển thị theo đơn vị mét
                     var meters = Math.round(dist * 1000);
                     txtDist.innerText = `Cự ly: ~${meters}m`;
                 } else {
-                    // Từ 1 km trở lên: Hiển thị 1 chữ số thập phân
                     txtDist.innerText = `Cự ly: ~${dist.toFixed(1)} km`;
                 }
             }
@@ -1695,9 +1700,13 @@
             }
 
             if (tagSubsidy) {
-                if (subsidy > 0) {
+                if (appliedSubsidy > 0) {
                     tagSubsidy.classList.remove("hidden");
-                    tagSubsidy.innerText = `(Trợ giá -${subsidy.toLocaleString("vi-VN")}đ)`;
+                    if (actualShip === 0) {
+                        tagSubsidy.innerText = `(Freeship -${appliedSubsidy.toLocaleString("vi-VN")}đ)`;
+                    } else {
+                        tagSubsidy.innerText = `(Trợ giá -${appliedSubsidy.toLocaleString("vi-VN")}đ)`;
+                    }
                 } else {
                     tagSubsidy.classList.add("hidden");
                 }
@@ -1707,13 +1716,21 @@
             updateCheckoutSummary();
         }
 
-                function updateCheckoutSummary() {
+        /**
+         * CẬP NHẬT TỔNG KẾT ĐƠN HÀNG CHECKOUT & KHÓA TIỀN MÃ VIETQR CHUẨN XÁC
+         */
+        function updateCheckoutSummary() {
             var subtotal = 0;
-            appState.cartItems.forEach(function(i) { subtotal += (i.price * i.quantity); });
+            appState.cartItems.forEach(function(i) {
+                if (!i.isGift) {
+                    subtotal += (i.price * i.quantity);
+                }
+            });
 
             var fee = appState.shippingFee;
-            var sub = appState.shippingSubsidy;
-            var finalTotal = subtotal + Math.max(0, fee - sub);
+            var sub = appState.shippingSubsidy; // Đã được khóa trần = Math.min(fee, rawSubsidy)
+            var actualShip = Math.max(0, fee - sub);
+            var finalTotal = subtotal + actualShip;
 
             var elSub = document.getElementById("chk-summary-subtotal");
             var elFee = document.getElementById("chk-summary-shipping-fee");
@@ -1722,15 +1739,28 @@
 
             if (elSub) elSub.innerText = subtotal.toLocaleString("vi-VN") + " đ";
             if (elFee) elFee.innerText = fee.toLocaleString("vi-VN") + " đ";
-            if (elSubTag) elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ";
+
+            // Hiển thị dòng Trợ Giá Cước Giao Hàng chuẩn toán học (bằng đúng phí ship nếu được miễn phí)
+            if (elSubTag) {
+                if (sub > 0) {
+                    if (actualShip === 0) {
+                        elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ (Freeship)";
+                    } else {
+                        elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ";
+                    }
+                } else {
+                    elSubTag.innerText = "-0 đ";
+                }
+            }
+
             if (elFinal) elFinal.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
 
+            // Tạo mã VietQR động khóa cứng số tiền chuẩn xác
             if (appState.selectedPaymentMethod === "VIETQR") {
                 renderDynamicVietQr(finalTotal);
             }
         }
-
-        function renderDynamicVietQr(amount) {
+                function renderDynamicVietQr(amount) {
             var memoCode = "T5_" + Date.now().toString().slice(-6);
             var bankBin = STORE_BASE_CONFIG.bankBin;
             var bankAcc = STORE_BASE_CONFIG.bankAccount;
