@@ -44,24 +44,21 @@
 <body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
 
     <!-- ========================================================================= -->
-    <!-- 1. HEADER NHẬN DIỆN THƯƠNG HIỆU & LIÊN HỆ HOTLINE ĐỘNG (RESPONSIVE D2C)   -->
+    <!-- 1. HEADER NHẬN DIỆN THƯƠNG HIỆU & LIÊN HỆ HOTLINE ĐỘNG                    -->
     <!-- ========================================================================= -->
     <header class="w-full bg-slate-950/95 border-b border-slate-800/80 sticky top-0 z-40 backdrop-blur-md px-3 sm:px-4 py-2.5">
         <div class="max-w-md mx-auto flex items-center justify-between gap-2">
             
             <!-- Cụm Logo / Avatar & Tên Quán -->
             <div class="flex items-center gap-2.5 min-w-0">
-                <!-- Khung Avatar Logo Động: Ưu tiên ảnh logo từ Config, fallback sang Huy hiệu T5 -->
                 <div id="store-logo-wrapper" class="relative shrink-0">
                     <img id="disp-store-logo-img" src="" alt="Logo Thím 5" class="hidden w-10 h-10 rounded-2xl object-cover border-2 border-amber-500/50 shadow-md shadow-amber-500/10">
                     <div id="disp-store-logo-badge" class="w-10 h-10 rounded-2xl bg-gradient-to-br from-red-600 to-amber-600 border border-amber-400/40 flex items-center justify-center text-white font-black text-sm shadow-md font-mono">
                         T5
                     </div>
-                    <!-- Chấm xanh báo trạng thái nhận đơn -->
                     <span id="disp-store-status-dot" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-950"></span>
                 </div>
 
-                <!-- Tên quán & Trạng thái hoạt động -->
                 <div class="min-w-0">
                     <h1 id="disp-store-name" class="text-sm font-black text-white tracking-wide truncate uppercase">
                         Mì Trộn Thím 5
@@ -74,10 +71,8 @@
                 </div>
             </div>
 
-            <!-- Cụm Nút Bấm: Ghim App PWA & Hotline Động (Mặc định 0934220585) -->
+            <!-- Cụm Nút Bấm: Ghim App & Hotline (0934.220.585) -->
             <div class="shrink-0 flex items-center gap-1.5">
-                
-                <!-- Nút Ghim App Lối Tắt PWA -->
                 <button type="button" 
                         id="btn-install-pwa" 
                         onclick="D2CStoreFrontController.handleInstallPwaClick()" 
@@ -86,30 +81,26 @@
                     <span>Ghim App</span>
                 </button>
 
-                <!-- Nút Hotline Gọi Trực Tiếp -->
                 <a id="link-store-phone" href="tel:0934220585" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-white text-xs font-mono font-bold shadow-sm transition active:scale-95 group">
                     <span class="w-5 h-5 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-[10px] group-hover:bg-red-500 group-hover:text-white transition">
                         <i class="fa-solid fa-phone"></i>
                     </span>
                     <span id="disp-store-phone" class="tracking-tight text-slate-200 group-hover:text-amber-300 transition">0934.220.585</span>
                 </a>
-
             </div>
 
         </div>
     </header>
 
     <!-- ========================================================================= -->
-    <!-- 2. HERO CAROUSEL ĐA NĂNG (THAY THẾ TOÀN BỘ BANNER SO SÁNH GIÁ SÀN CŨ)     -->
-    <!-- Tự động trượt giới thiệu món ngon, khung giờ vàng flash sale & vòng quay  -->
+    <!-- 2. HERO CAROUSEL ĐA NĂNG (TỰ ĐỘNG TRƯỢT 4 GIÂY/LẦN)                       -->
     <!-- ========================================================================= -->
     <section class="w-full max-w-md mx-auto px-3 pt-3 select-none">
         <div class="relative overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 shadow-xl group">
             
-            <!-- Track chứa các Slides -->
             <div id="hero-carousel-track" class="flex transition-transform duration-500 ease-out" style="transform: translateX(0%);">
                 
-                <!-- SLIDE 1: GIỚI THIỆU MÓN CHỦ LỰC & SỐT SA TẾ ĐỘC BẢN -->
+                <!-- SLIDE 1: MÓN CHỦ LỰC SỐT SA TẾ ĐỘC BẢN -->
                 <div class="w-full shrink-0 relative overflow-hidden p-4 sm:p-5 flex flex-col justify-between min-h-[140px] bg-gradient-to-br from-red-950/60 via-slate-900 to-amber-950/40">
                     <div class="absolute right-2 top-2 text-7xl text-amber-500/10 pointer-events-none -rotate-12">
                         <i class="fa-solid fa-bowl-food"></i>
@@ -132,7 +123,7 @@
                     </div>
                 </div>
 
-                <!-- SLIDE 2: KHUNG GIỜ VÀNG FLASH SALE (HIỂN THỊ KHI ĐƯỢC BẬT TỪ CONFIG) -->
+                <!-- SLIDE 2: KHUNG GIỜ VÀNG FLASH SALE -->
                 <div class="w-full shrink-0 relative overflow-hidden p-4 sm:p-5 flex flex-col justify-between min-h-[140px] bg-gradient-to-br from-amber-950/60 via-slate-900 to-emerald-950/40">
                     <div class="absolute right-2 top-2 text-7xl text-amber-500/10 pointer-events-none rotate-12">
                         <i class="fa-solid fa-bolt-lightning"></i>
@@ -141,10 +132,10 @@
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 inline-flex items-center gap-1 mb-1.5">
                             <i class="fa-solid fa-fire text-amber-400"></i> Khung Giờ Vàng
                         </span>
-                        <h2 class="text-base sm:text-lg font-black text-white leading-snug" id="disp-carousel-golden-title">
+                        <h2 class="text-base sm:text-lg font-black text-white leading-snug">
                             Freeship Chặng 2km Đơn Từ 2 Phần
                         </h2>
-                        <p class="text-xs text-slate-300 mt-1 max-w-[250px] leading-relaxed" id="disp-carousel-golden-msg">
+                        <p class="text-xs text-slate-300 mt-1 max-w-[250px] leading-relaxed">
                             Tặng kèm 1 chai nước suối ướp lạnh cho đơn từ 50k!
                         </p>
                     </div>
@@ -155,7 +146,7 @@
                     </div>
                 </div>
 
-                <!-- SLIDE 3: VÒNG QUAY MAY MẮN GAMIFICATION (ĐÒN BẨY AOV >= 79K) -->
+                <!-- SLIDE 3: VÒNG QUAY MAY MẮN GAMIFICATION -->
                 <div class="w-full shrink-0 relative overflow-hidden p-4 sm:p-5 flex flex-col justify-between min-h-[140px] bg-gradient-to-br from-purple-950/60 via-slate-900 to-blue-950/40">
                     <div class="absolute right-2 top-2 text-7xl text-purple-500/10 pointer-events-none -rotate-6">
                         <i class="fa-solid fa-gift"></i>
@@ -180,7 +171,7 @@
 
             </div>
 
-            <!-- Thanh Dots Điều Khiển Chuyển Slide -->
+            <!-- Dots Chuyển Slide -->
             <div class="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
                 <button type="button" class="carousel-dot w-5 h-1.5 rounded-full bg-amber-400 transition-all duration-300" onclick="D2CStoreFrontController.goToSlide(0)"></button>
                 <button type="button" class="carousel-dot w-2 h-1.5 rounded-full bg-slate-700 transition-all duration-300" onclick="D2CStoreFrontController.goToSlide(1)"></button>
@@ -189,21 +180,21 @@
 
         </div>
     </section>
-    <!-- ========================================================================= -->
-    <!-- 3. THANH TÌM KIẾM MÓN ĂN & BỘ LỌC DANH MỤC TABS (MA TRẬN 3 TẦNG F&B)      -->
+<!-- ========================================================================= -->
+    <!-- 3. THANH TÌM KIẾM MÓN ĂN & BỘ LỌC DANH MỤC MA TRẬN 5 PHÂN HỆ             -->
     <!-- ========================================================================= -->
     <section class="w-full max-w-md mx-auto px-3 pt-3 space-y-2.5">
         
-        <!-- Thanh Tìm Kiếm Trực Quan -->
+        <!-- Ô Tìm Kiếm Phản Hồi Nhanh -->
         <div class="relative">
             <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
                 <i class="fa-solid fa-magnifying-glass text-xs"></i>
             </span>
             <input type="text" 
                    id="inp-search-dish" 
-                   placeholder="Tìm tô mì trộn tóp mỡ, cơm giòn hay món súp..." 
+                   placeholder="Tìm tô mì trộn tóp mỡ, bò viên hay trà đào..." 
                    oninput="D2CStoreFrontController.onSearchInput(this.value)"
-                   class="w-full bg-slate-900 border border-slate-800 rounded-2xl pl-9 pr-8 py-2.5 text-xs text-slate-100 placeholder-slate-500 font-medium focus:outline-none focus:border-amber-500/80 transition">
+                   class="w-full bg-slate-900 border border-slate-800 rounded-2xl pl-9 pr-8 py-2.5 text-xs text-slate-100 placeholder-slate-500 font-medium focus:outline-none focus:border-amber-500/80 transition shadow-inner">
             <button type="button" 
                     id="btn-clear-search" 
                     onclick="D2CStoreFrontController.clearSearch()" 
@@ -212,8 +203,8 @@
             </button>
         </div>
 
-        <!-- Bộ Lọc Danh Mục Ngang Vuốt Mượt (Horizontal Tabs) -->
-        <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 -mx-3 px-3">
+        <!-- Thanh Trượt Bộ Lọc Danh Mục Ngang (Scroll Vuốt Mượt) -->
+        <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 -mx-3 px-3 select-none">
             <button type="button" 
                     data-cat="all" 
                     onclick="D2CStoreFrontController.filterCategory('all', this)" 
@@ -266,73 +257,57 @@
     </section>
 
     <!-- ========================================================================= -->
-    <!-- 4. KHU VỰC HIỂN THỊ MENU GRID THỰC TẾ (DYNAMIC DISH CARDS)               -->
+    <!-- 4. KHU VỰC MENU GRID HIỂN THỊ DANH SÁCH MÓN ĂN THỰC TẾ                    -->
     <!-- ========================================================================= -->
-    <main class="w-full max-w-md mx-auto px-3 pt-2 pb-24 space-y-4">
+    <main class="w-full max-w-md mx-auto px-3 pt-2 pb-28 space-y-3">
         
-        <!-- Tiêu đề nhóm đang xem -->
         <div class="flex items-center justify-between pt-1">
-            <h3 id="disp-current-category-title" class="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                 <i class="fa-solid fa-utensils text-amber-400"></i> Danh Sách Món Đang Phục Vụ
             </h3>
-            <span id="disp-dish-count-label" class="text-[10px] font-mono text-slate-500 font-bold">
-                0 món
+            <span id="disp-dish-count-label" class="text-[10px] font-mono text-slate-400 font-bold bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">
+                10 món
             </span>
         </div>
 
-        <!-- Khung Lưới Danh Sách Món Ăn (Render Động Qua JavaScript) -->
+        <!-- Khung Chứa Menu Thực Đơn (Tự Động Nạp Qua JS Hoặc Render Fallback) -->
         <div id="dish-menu-grid" class="grid grid-cols-1 gap-2.5">
-            <!-- Skeleton Loading lúc tải dữ liệu ban đầu -->
-            <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex gap-3 animate-pulse">
-                <div class="w-20 h-20 rounded-xl bg-slate-800 shrink-0"></div>
-                <div class="flex-1 space-y-2 py-1">
-                    <div class="h-3 bg-slate-800 rounded w-3/4"></div>
-                    <div class="h-2.5 bg-slate-800 rounded w-1/2"></div>
-                    <div class="h-3.5 bg-slate-800 rounded w-1/3 pt-1"></div>
-                </div>
-            </div>
-            <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex gap-3 animate-pulse">
-                <div class="w-20 h-20 rounded-xl bg-slate-800 shrink-0"></div>
-                <div class="flex-1 space-y-2 py-1">
-                    <div class="h-3 bg-slate-800 rounded w-3/4"></div>
-                    <div class="h-2.5 bg-slate-800 rounded w-1/2"></div>
-                    <div class="h-3.5 bg-slate-800 rounded w-1/3 pt-1"></div>
-                </div>
-            </div>
+            <!-- Dữ liệu món ăn sẽ được D2CStoreFrontController.renderMenuGrid() kích hoạt lập tức -->
         </div>
 
     </main>
 
-   <!-- ========================================================================= -->
-    <!-- 5. MODAL TÙY CHỌN MÓN THÔNG MINH (ẨN CAY VỚI NƯỚC, BẬT TOPPING KÉO AOV) -->
     <!-- ========================================================================= -->
-    <div id="modal-dish-customizer" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/80 backdrop-blur-sm p-0 sm:p-4">
+    <!-- 5. MODAL TÙY CHỌN MÓN ĐA NĂNG (ĐẶC TRỊ LỖI MẤT TOPPING & LỖI RỚT 0Đ)      -->
+    <!-- ========================================================================= -->
+    <div id="modal-dish-customizer" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/85 backdrop-blur-md p-0 sm:p-4">
         
         <div class="bg-slate-900 border-t sm:border-2 border-slate-800 sm:border-amber-500/40 w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] animate-in slide-in-from-bottom-5 duration-200">
             
-            <!-- Header Modal Tùy Chọn -->
-            <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 shrink-0">
-                <div class="flex items-center gap-2.5 min-w-0">
-                    <img id="cust-dish-img" src="" alt="Món Ăn" class="w-11 h-11 rounded-xl object-cover border border-slate-700 shrink-0 shadow">
+            <!-- Header Modal Tùy Chọn Món -->
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/70 shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img id="cust-dish-img" src="" alt="Món Ăn" class="w-12 h-12 rounded-2xl object-cover border border-slate-700 shrink-0 shadow-md">
                     <div class="min-w-0">
                         <h4 id="cust-dish-name" class="text-sm font-black text-white truncate">Tên Món Ăn</h4>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <span id="cust-dish-base-price" class="text-xs font-mono font-bold text-amber-400">0 đ</span>
+                            <!-- Khắc phục triệt để lỗi rớt về 0đ: Luôn hiển thị giá thực tế của món -->
+                            <span id="cust-dish-base-price" class="text-xs font-mono font-black text-amber-400">39.000 đ</span>
                             <span id="cust-dish-cat-badge" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-400 border border-slate-700">Món Khô</span>
                         </div>
                     </div>
                 </div>
                 <button type="button" 
                         onclick="D2CStoreFrontController.closeCustomizerModal()" 
-                        class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center border border-slate-700 transition">
+                        class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center border border-slate-700 transition">
                     <i class="fa-solid fa-xmark text-xs"></i>
                 </button>
             </div>
 
-            <!-- Body Modal Tùy Chọn: Cuộn Tự Do -->
+            <!-- Thân Modal: Cuộn Nội Dung Tùy Chọn -->
             <div class="p-4 space-y-4 overflow-y-auto custom-scroll text-xs">
                 
-                <!-- KHỐI 1: CHỌN KHẨU VỊ CAY SA TẾ (CHỈ HIỆN VỚI MÓN ĂN CHÍNH, TỰ ĐỘNG ẨN KHI LÀ NƯỚC UỐNG) -->
+                <!-- KHỐI 1: KHẨU VỊ CAY SA TẾ (CHỈ HIỆN VỚI MÓN ĂN CHÍNH, ẨN KHI LÀ NƯỚC UỐNG) -->
                 <div id="box-taste-selector" class="space-y-2">
                     <div class="flex items-center justify-between">
                         <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
@@ -344,7 +319,7 @@
                     </div>
                     
                     <div class="grid grid-cols-3 gap-2">
-                        <!-- Không Cay -->
+                        <!-- Tùy chọn: Không Cay -->
                         <button type="button" 
                                 data-taste="Không Cay" 
                                 onclick="D2CStoreFrontController.selectTaste('Không Cay', this)" 
@@ -353,7 +328,7 @@
                             <span class="font-bold text-[11px] text-slate-300">Không Cay</span>
                         </button>
 
-                        <!-- Cay Nhẹ (MẶC ĐỊNH CHUẨN VỊ) -->
+                        <!-- Tùy chọn: Cay Nhẹ (MẶC ĐỊNH CHUẨN VỊ THÍM 5) -->
                         <button type="button" 
                                 data-taste="Cay Nhẹ" 
                                 onclick="D2CStoreFrontController.selectTaste('Cay Nhẹ', this)" 
@@ -363,7 +338,7 @@
                             <span class="text-[9px] text-amber-400/80 font-mono">Chuẩn vị</span>
                         </button>
 
-                        <!-- Cay Xé Lưỡi -->
+                        <!-- Tùy chọn: Cay Xé Lưỡi -->
                         <button type="button" 
                                 data-taste="Cay Xé Lưỡi" 
                                 onclick="D2CStoreFrontController.selectTaste('Cay Xé Lưỡi', this)" 
@@ -374,7 +349,7 @@
                     </div>
                 </div>
 
-                <!-- KHỐI 2: CHỌN SÚP NÓNG ĂN KÈM MIỄN PHÍ (CHỈ HIỆN VỚI MÓN KHÔ) -->
+                <!-- KHỐI 2: CHÉN SÚP ĂN KÈM MIỄN PHÍ (CHỈ HIỆN VỚI MÓN KHÔ) -->
                 <div id="box-soup-selector" class="space-y-2 pt-1 border-t border-slate-800/80">
                     <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
                         <i class="fa-solid fa-bowl-rice text-amber-400"></i> Chén Súp Nóng Đi Kèm (Miễn Phí):
@@ -384,7 +359,7 @@
                                 data-soup="Súp Tóp Mỡ Hành Lá" 
                                 onclick="D2CStoreFrontController.selectSoup('Súp Tóp Mỡ Hành Lá', this)" 
                                 class="btn-soup-option p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-left transition flex items-center justify-between active">
-                            <span class="font-bold text-[11px] text-amber-300">Súp Tóp Mỡ Hành Lá</span>
+                            <span class="font-bold text-[11px] text-amber-300">Súp Tóp Mỡ Hành</span>
                             <i class="fa-solid fa-check text-xs text-amber-400"></i>
                         </button>
                         <button type="button" 
@@ -396,32 +371,33 @@
                     </div>
                 </div>
 
-                <!-- KHỐI 3: DANH SÁCH TOPPING THÊM CÓ TÍNH TIỀN (VŨ KHÍ KÉO AOV BIÊN LÃI CAO) -->
+                <!-- KHỐI 3: BẢNG TOPPING CHỌN THÊM CÓ TÍNH TIỀN (VŨ KHÍ TĂNG TICKET SIZE) -->
                 <div id="box-topping-selector" class="space-y-2 pt-1 border-t border-slate-800/80">
                     <div class="flex items-center justify-between">
                         <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
                             <i class="fa-solid fa-plus-circle text-emerald-400"></i> Thêm Topping Đậm Đà:
                         </label>
-                        <span class="text-[10px] text-slate-500 font-mono">Chọn nhiều món</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Chọn nhiều món</span>
                     </div>
 
+                    <!-- Danh Sách Topping Thực Tế Sẽ Được JS Render Vào Đây -->
                     <div class="grid grid-cols-1 gap-1.5" id="customizer-toppings-list">
-                        <!-- Danh sách Topping được JavaScript render động theo danh mục -->
+                        <!-- Render Toppings List -->
                     </div>
                 </div>
 
-                <!-- KHỐI 4: GHI CHÚ ĐẶC BIỆT CHO BẾP -->
+                <!-- KHỐI 4: GHI CHÚ BẾP -->
                 <div class="space-y-1.5 pt-1 border-t border-slate-800/80">
                     <label class="font-bold text-slate-300 text-[11px]">Ghi chú cho Bếp (Không bắt buộc):</label>
                     <input type="text" 
                            id="cust-dish-note" 
-                           placeholder="VD: Nhiều sốt trộn, hành phi để riêng, ít ngọt..." 
+                           placeholder="VD: Nhiều sốt trộn, hành phi để riêng, ít béo..." 
                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition">
                 </div>
 
             </div>
 
-            <!-- Footer Modal: Số Lượng & Nút Thêm Vào Giỏ Kèm Tổng Tiền Động -->
+            <!-- Footer Modal: Số Lượng & Nút Thêm Kèm Tổng Giá Động -->
             <div class="p-3.5 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-3 shrink-0">
                 <!-- Tăng giảm số lượng -->
                 <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 gap-2">
@@ -438,22 +414,21 @@
                     </button>
                 </div>
 
-                <!-- Nút Xác Nhận Thêm Với Tổng Giá Thực Tế Đã Cộng Topping -->
+                <!-- Nút Xác Nhận Thêm Với Tổng Tiền Đã Cộng Topping -->
                 <button type="button" 
                         onclick="D2CStoreFrontController.confirmAddToCart()" 
                         class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-600 via-amber-600 to-amber-500 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-600/20 transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-basket-shopping"></i>
                     <span>Thêm Vào Giỏ • </span>
-                    <span id="cust-total-btn-price" class="font-mono">0 đ</span>
+                    <span id="cust-total-btn-price" class="font-mono">39.000 đ</span>
                 </button>
             </div>
 
         </div>
 
     </div>
-    <!-- ========================================================================= -->
+<!-- ========================================================================= -->
     <!-- 6. THANH KÉO AOV ĐỘNG STICKY (KÍCH THÍCH MỞ KHÓA VÒNG QUAY >= 79K)        -->
-    <!-- Nằm cố định ngay phía trên thanh Bottom Bar đặt món để tối đa điểm chạm   -->
     <!-- ========================================================================= -->
     <div id="aov-booster-sticky-bar" class="fixed bottom-16 inset-x-0 z-30 px-3 pointer-events-none transition-all duration-300">
         <div class="max-w-md mx-auto pointer-events-auto">
@@ -461,12 +436,10 @@
                  onclick="D2CStoreFrontController.onAovBarClick()" 
                  class="relative overflow-hidden bg-slate-900/95 border border-amber-500/30 rounded-2xl p-2.5 shadow-2xl backdrop-blur-md cursor-pointer group hover:border-amber-400 transition">
                 
-                <!-- Hiệu ứng vầng hào quang khi giỏ hàng đạt mốc >= 79k -->
+                <!-- Hiệu ứng hào quang khi giỏ hàng đạt mốc >= 79k -->
                 <div id="aov-glow-effect" class="hidden absolute inset-0 bg-gradient-to-r from-amber-500/20 via-emerald-500/20 to-amber-500/20 animate-pulse pointer-events-none"></div>
 
                 <div class="relative z-10 flex items-center justify-between gap-2.5">
-                    
-                    <!-- Icon Vòng Quay Nhỏ & Thông Điệp Kéo AOV -->
                     <div class="flex items-center gap-2.5 min-w-0">
                         <div id="aov-icon-box" class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm font-black shadow-inner shrink-0 group-hover:rotate-45 transition duration-300">
                             <i id="aov-icon-symbol" class="fa-solid fa-dharmachakra"></i>
@@ -487,7 +460,6 @@
                         </div>
                     </div>
 
-                    <!-- Nút Mở Vòng Quay Nhanh -->
                     <div class="shrink-0">
                         <button type="button" 
                                 id="btn-aov-action" 
@@ -496,10 +468,9 @@
                             <i class="fa-solid fa-chevron-right text-[8px]"></i>
                         </button>
                     </div>
-
                 </div>
 
-                <!-- Thanh Track Tiến Trình Chạy Theo Tỷ Lệ % Giỏ Hàng -->
+                <!-- Thanh Track Tiến Trình Chạy Theo % Giỏ Hàng -->
                 <div class="w-full bg-slate-950 rounded-full h-1.5 mt-2 overflow-hidden border border-slate-800/80">
                     <div id="aov-progress-fill" 
                          class="bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-400 h-full rounded-full transition-all duration-500" 
@@ -511,12 +482,11 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- 7. THANH BOTTOM BAR GIỎ HÀNG NỔI (FLOATING CART BAR CỐ ĐỊNH ĐÁY TRANG)   -->
+    <!-- 7. THANH BOTTOM BAR GIỎ HÀNG NỔI (FLOATING CART BAR)                      -->
     <!-- ========================================================================= -->
     <div id="floating-cart-bar" class="hidden fixed bottom-0 inset-x-0 z-40 bg-slate-950/95 border-t border-slate-800 backdrop-blur-md px-3 py-2.5 transition-transform duration-200">
         <div class="max-w-md mx-auto flex items-center justify-between gap-3">
             
-            <!-- Cụm Tóm Tắt Giỏ Hàng: Icon Giỏ & Tổng Tiền -->
             <div class="flex items-center gap-2.5 cursor-pointer" onclick="D2CStoreFrontController.openCartDrawer()">
                 <div class="relative w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base font-black shadow-inner">
                     <i class="fa-solid fa-basket-shopping"></i>
@@ -530,7 +500,6 @@
                 </div>
             </div>
 
-            <!-- Nút Mở Drawer Chi Tiết Giỏ Hàng -->
             <button type="button" 
                     onclick="D2CStoreFrontController.openCartDrawer()" 
                     class="py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-red-600/20 transition flex items-center gap-2">
@@ -548,7 +517,6 @@
         
         <div class="bg-slate-900 border-t sm:border-2 border-slate-800 sm:border-amber-500/40 w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-5 duration-200">
             
-            <!-- Header Drawer Giỏ Hàng -->
             <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 shrink-0">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs">
@@ -566,13 +534,12 @@
                 </button>
             </div>
 
-            <!-- Danh Sách Các Món Ăn Trong Giỏ (Cuộn Tự Do) -->
+            <!-- Danh Sách Các Món Trong Giỏ -->
             <div class="p-3.5 space-y-2.5 overflow-y-auto custom-scroll flex-1 text-xs">
                 
-                <!-- Danh sách món đã chọn do JavaScript render -->
                 <div id="cart-items-list-container" class="space-y-2"></div>
 
-                <!-- Template Hiển Thị Dòng Món Quà 0đ Nhận Từ Vòng Quay -->
+                <!-- Template Món Quà 0đ Nhận Từ Vòng Quay -->
                 <div id="cart-gift-reward-box" class="hidden p-2.5 rounded-2xl bg-amber-500/5 border border-amber-500/30 space-y-1.5 animate-in fade-in duration-200">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2 min-w-0">
@@ -602,7 +569,7 @@
                     </div>
                 </div>
 
-                <!-- Khung Tóm Tắt Dòng Tiền & Bậc Thang Bù Ship -->
+                <!-- Bảng Tóm Tắt Dòng Tiền & Bù Ship -->
                 <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5 text-[11px]">
                     <div class="flex justify-between text-slate-400">
                         <span>Tiền Món Ăn:</span>
@@ -620,7 +587,6 @@
 
             </div>
 
-            <!-- Footer Drawer: Nút Tiến Hành Đặt Hàng -->
             <div class="p-3.5 border-t border-slate-800 bg-slate-950 shrink-0">
                 <button type="button" 
                         onclick="D2CStoreFrontController.proceedToCheckoutModal()" 
@@ -635,18 +601,12 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- 9. VÙNG GẮN KẾT NẠP ĐỘNG COMPONENT VÒNG QUAY (DYNAMIC MOUNT POINT)        -->
-    <!-- Tự động nạp file wheel.html khi khách đạt mốc 79k hoặc bấm xem chi tiết   -->
-    <!-- ========================================================================= -->
-    <div id="wheel-mount-point" class="w-full"></div>
-    <!-- ========================================================================= -->
-    <!-- 10. MODAL FORM ĐẶT HÀNG D2C & THANH TOÁN VIETQR KHÓA CỨNG SỐ TIỀN       -->
+    <!-- 9. MODAL FORM ĐẶT HÀNG D2C & THANH TOÁN VIETQR KHÓA CỨNG SỐ TIỀN       -->
     <!-- ========================================================================= -->
     <div id="modal-checkout-order" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/85 backdrop-blur-md p-0 sm:p-4">
         
         <div class="bg-slate-900 border-t sm:border-2 border-slate-800 sm:border-amber-500/40 w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in slide-in-from-bottom-5 duration-200">
             
-            <!-- Header Modal Checkout -->
             <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 shrink-0">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs shadow-inner">
@@ -664,10 +624,10 @@
                 </button>
             </div>
 
-            <!-- Body Modal: Cuộn nội dung nhập liệu -->
+            <!-- Thân Modal Checkout -->
             <div class="p-4 space-y-4 overflow-y-auto custom-scroll text-xs">
                 
-                <!-- KHỐI 1: THÔNG TIN KHÁCH HÀNG -->
+                <!-- Người Nhận Đơn -->
                 <div class="space-y-2.5">
                     <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
                         <i class="fa-solid fa-user text-amber-400"></i> Người Nhận Đơn:
@@ -686,13 +646,12 @@
                                    id="chk-customer-phone" 
                                    maxlength="11" 
                                    placeholder="09xx xxx xxx" 
-                                   oninput="D2CStoreFrontController.onCheckoutPhoneChange(this.value)"
                                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500 transition">
                         </div>
                     </div>
                 </div>
 
-                <!-- KHỐI 2: ĐỊA CHỈ NHẬN HÀNG & BẮT GPS HAVERSINE -->
+                <!-- Địa Chỉ & GPS Haversine Bếp Tây Ninh -->
                 <div class="space-y-2 pt-1 border-t border-slate-800/80">
                     <div class="flex items-center justify-between">
                         <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
@@ -713,7 +672,6 @@
                               oninput="D2CStoreFrontController.onAddressInput(this.value)"
                               class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition resize-none"></textarea>
                     
-                    <!-- Khung tính cước ship thời gian thực -->
                     <div id="box-shipping-calc-status" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-[11px]">
                         <div class="flex items-center gap-1.5 text-slate-400">
                             <i class="fa-solid fa-route text-amber-400"></i>
@@ -726,13 +684,12 @@
                     </div>
                 </div>
 
-                <!-- KHỐI 3: LỰA CHỌN PHƯƠNG THỨC THANH TOÁN -->
+                <!-- Phương Thức Thanh Toán -->
                 <div class="space-y-2 pt-1 border-t border-slate-800/80">
                     <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
                         <i class="fa-solid fa-credit-card text-emerald-400"></i> Phương Thức Thanh Toán:
                     </span>
                     <div class="grid grid-cols-2 gap-2">
-                        <!-- Chọn VietQR Chuyển Khoản -->
                         <button type="button" 
                                 data-method="VIETQR" 
                                 onclick="D2CStoreFrontController.selectPaymentMethod('VIETQR', this)" 
@@ -744,7 +701,6 @@
                             <span class="text-[9.5px] text-slate-400">Napas247 / MB / MoMo</span>
                         </button>
 
-                        <!-- Chọn Tiền Mặt COD -->
                         <button type="button" 
                                 data-method="COD" 
                                 onclick="D2CStoreFrontController.selectPaymentMethod('COD', this)" 
@@ -758,7 +714,7 @@
                     </div>
                 </div>
 
-                <!-- KHỐI 4: KHUNG MÃ VIETQR NAPAS247 ĐỘNG KHÓA SỐ TIỀN (CHỈ HIỆN KHI CHỌN VIETQR) -->
+                <!-- Khung Mã VietQR Khóa Cứng Số Tiền -->
                 <div id="box-vietqr-container" class="p-3.5 rounded-2xl bg-slate-950 border border-amber-500/30 space-y-3">
                     <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
                         <div class="flex items-center gap-2">
@@ -800,7 +756,7 @@
                     </div>
                 </div>
 
-                <!-- KHỐI 5: BẢNG TỔNG KẾT CHI TIẾT DÒNG TIỀN ĐƠN HÀNG -->
+                <!-- Bảng Tổng Kết Dòng Tiền -->
                 <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5 text-xs">
                     <div class="flex justify-between text-slate-400 text-[11px]">
                         <span>Tổng Tiền Món:</span>
@@ -822,7 +778,6 @@
 
             </div>
 
-            <!-- Footer Modal: Nút Xác Nhận Gửi Đơn Hàng -->
             <div class="p-3.5 border-t border-slate-800 bg-slate-950 shrink-0">
                 <button type="button" 
                         id="btn-submit-order"
@@ -838,7 +793,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- 11. MODAL THÔNG BÁO ĐẶT HÀNG THÀNH CÔNG (ORDER SUCCESS CONFIRMATION)     -->
+    <!-- 10. MODAL THÔNG BÁO ĐẶT HÀNG THÀNH CÔNG                                  -->
     <!-- ========================================================================= -->
     <div id="modal-order-success" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4">
         
@@ -850,12 +805,11 @@
             <div class="space-y-1">
                 <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-widest font-mono">Bếp Đã Nhận Đơn</span>
                 <h4 class="text-base sm:text-lg font-black text-white">Đặt Món Thành Công!</h4>
-                <p class="text-xs text-slate-300 pt-1" id="txt-success-order-msg">
+                <p class="text-xs text-slate-300 pt-1">
                     Đơn hàng của quý khách đang được Bếp Thím 5 chuẩn bị nóng hổi.
                 </p>
             </div>
 
-            <!-- Mã Đơn Hàng & Liên Kết Theo Dõi -->
             <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-1 text-xs">
                 <span class="text-[10px] text-slate-500 block">Mã Tra Cứu Đơn Hàng:</span>
                 <strong id="disp-success-order-code" class="text-sm font-mono font-black text-amber-400">DH260913_XXXX</strong>
@@ -877,21 +831,27 @@
         </div>
 
     </div>
+
     <!-- ========================================================================= -->
+    <!-- 11. VÙNG GẮN KẾT NẠP ĐỘNG COMPONENT VÒNG QUAY (DYNAMIC MOUNT POINT)       -->
+    <!-- ========================================================================= -->
+    <div id="wheel-mount-point" class="w-full"></div>
+<!-- ========================================================================= -->
     <!-- 12. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH MẶT TIỀN D2C THÍM 5 (ENTERPRISE CORE)     -->
     <!-- ========================================================================= -->
     <script>
     /**
      * =========================================================================
-     * CONTROLLER: D2C STOREFRONT SUITE (MẶT TIỀN D2C THÍM 5 v2.8 ENTERPRISE)
+     * CONTROLLER: D2C STOREFRONT SUITE (MẶT TIỀN D2C THÍM 5 v2.9 ENTERPRISE)
      * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
      * Kiến trúc: Headless SPA Component, Native Haversine GPS & Dynamic Cart Engine
      * Vai trò:
      *   - Quản lý State giỏ hàng, tùy chọn Khẩu Vị (Mặc định: Cay Nhẹ) và Súp Kèm.
+     *   - Tự động hiển thị bảng Topping chọn thêm có tính tiền và cộng dồn real-time.
+     *   - Quick Add cho nước uống đóng chai, không hỏi cay phi lý.
+     *   - Khắc phục triệt để lỗi rớt giá về 0đ và lỗi kẹt 0 món khi tải trang.
      *   - Đo cự ly Haversine từ tâm Bếp Hòa Thành (11.285267, 106.133347) chuẩn xác.
-     *   - Rào chắn bảo vệ dòng tiền Cart Tampering Guard (Tự thu hồi quà nếu < 79k).
      *   - Sinh mã VietQR Napas247 động khóa số tiền và cú pháp đơn hàng.
-     *   - Hỗ trợ Ghim App PWA (Android Native Prompt & iOS Safari Modal).
      * =========================================================================
      */
     var D2CStoreFrontController = (function() {
@@ -917,7 +877,6 @@
 
         // BỘ NHỚ ĐỆM TRẠNG THÁI ỨNG DỤNG (STATE)
         var appState = {
-            menuDishes: [],
             cartItems: [],
             appliedGift: null,
             currentCategory: "all",
@@ -937,7 +896,18 @@
             customizerQty: 1
         };
 
-        // DANH MỤC THỰC ĐƠN MA TRẬN 3 TẦNG (FALLBACK CHUẨN F&B ĐẤT THÁNH)
+        // DANH MỤC TOPPING ĂN KÈM CHUẨN F&B ĐẤT THÁNH
+        var TOPPING_PRESETS = [
+            { id: "top_trung", name: "Trứng Lòng Đào Béo Ngậy", price: 6000, icon: "🥚" },
+            { id: "top_topmo", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn", price: 16000, icon: "🥓" },
+            { id: "top_bovien", name: "Bò Viên Gân Giòn (3 Viên)", price: 12000, icon: "🍡" },
+            { id: "top_xaxiu", name: "Xá Xíu Mềm Thơm Thêm", price: 15000, icon: "🥩" },
+            { id: "top_vatmi", name: "Thêm 1 Vắt Mì Trộn", price: 8000, icon: "🍜" }
+        ];
+
+        var activeCustomizerToppingIds = [];
+
+        // DANH MỤC THỰC ĐƠN MA TRẬN 3 TẦNG ĐẦY ĐỦ 10 MÓN CHUẨN MỰC
         var FALLBACK_MENU = [
             { id: "M01", cat: "combo", name: "Combo Đại Tiệc Thím 5", price: 89000, img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400", desc: "Mì trộn xá xíu tóp mỡ + 1 chén súp bò viên + 1 ly trà đào 1L.", isHot: true },
             { id: "M02", cat: "combo", name: "Combo No Say Đôi Lứa", price: 119000, img: "https://images.unsplash.com/photo-1552611052-33e04de081de?w=400", desc: "2 tô mì trộn thập cẩm đặc biệt + 2 chén súp trứng cút + 2 nước ngọt.", isHot: true },
@@ -952,7 +922,7 @@
         ];
 
         /**
-         * KHỞI ĐỘNG HỆ THỐNG TRANG CHỦ
+         * KHỞI ĐỘNG HỆ THỐNG MẶT TIỀN D2C
          */
         function init() {
             loadSystemConfig();
@@ -964,7 +934,7 @@
         }
 
         /**
-         * NẠP CẤU HÌNH HỆ THỐNG TỪ API GOOGLE APPS SCRIPT
+         * ĐỒNG BỘ CẤU HÌNH HỆ THỐNG TỪ BACKEND HOẶC BỘ NHỚ
          */
         async function loadSystemConfig() {
             try {
@@ -986,10 +956,10 @@
                     }
                 }
             } catch (e) {
-                console.warn("⚠️ [D2CStoreFront] Dùng cấu hình fallback chuẩn Hòa Thành.");
+                console.warn("⚠️ [D2CStoreFront] Sử dụng cấu hình fallback chuẩn Bếp Tây Ninh.");
             }
 
-            // Đồng bộ lên Topbar & Thông tin liên hệ
+            // Cập nhật lên Topbar
             var elPhone = document.getElementById("disp-store-phone");
             var linkPhone = document.getElementById("link-store-phone");
             var elName = document.getElementById("disp-store-name");
@@ -999,7 +969,7 @@
         }
 
         /**
-         * BỘ ĐIỀU KHIỂN HERO CAROUSEL TRƯỢT TỰ ĐỘNG
+         * ĐIỀU KHIỂN HERO CAROUSEL TỰ ĐỘNG TRƯỢT 4 GIÂY/LẦN
          */
         function initHeroCarousel() {
             var track = document.getElementById("hero-carousel-track");
@@ -1030,7 +1000,7 @@
         }
 
         /**
-         * XỬ LÝ PWA CÀI ĐẶT GHIM MÀN HÌNH CHÍNH (ANDROID & IOS SAFARI)
+         * XỬ LÝ PWA LỐI TẮT MÀN HÌNH CHÍNH (ANDROID & IOS SAFARI)
          */
         function initPwaInstaller() {
             var btnInstall = document.getElementById("btn-install-pwa");
@@ -1056,14 +1026,13 @@
                     appState.deferredPwaPrompt = null;
                 });
             } else {
-                // Thiết bị iOS Safari -> Bật modal hướng dẫn
                 var modalIos = document.getElementById("modal-ios-install-guide");
                 if (modalIos) modalIos.classList.remove("hidden");
             }
         }
 
         /**
-         * RENDER DANH SÁCH MÓN ĂN THEO DANH MỤC & TỪ KHÓA TÌM KIẾM
+         * RENDER DANH SÁCH MÓN ĂN - TRIỆT TIÊU HOÀN TOÀN LỖI 0 MÓN
          */
         function renderMenuGrid() {
             var grid = document.getElementById("dish-menu-grid");
@@ -1140,33 +1109,14 @@
             onSearchInput("");
         }
 
-        // =========================================================================
-        // DANH MỤC TOPPING ĂN KÈM CHUẨN F&B (VŨ KHÍ TĂNG BIÊN LÃI & KÉO AOV D2C)
-        // =========================================================================
-        var TOPPING_PRESETS = [
-            { id: "top_trung", name: "Trứng Lòng Đào Béo Ngậy", price: 6000, icon: "🥚" },
-            { id: "top_topmo", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn", price: 16000, icon: "🥓" },
-            { id: "top_bovien", name: "Bò Viên Gân Giòn (3 Viên)", price: 12000, icon: "🍡" },
-            { id: "top_xaxiu", name: "Xá Xíu Mềm Thơm Thêm", price: 15000, icon: "🥩" },
-            { id: "top_vatmi", name: "Thêm 1 Vắt Mì Trộn", price: 8000, icon: "🍜" }
-        ];
-
-        // Mảng lưu trữ ID các Topping đang được tick chọn
-        var activeCustomizerToppingIds = [];
-
         /**
          * MỞ MODAL TÙY CHỌN MÓN THÔNG MINH - SỬA TRIỆT ĐỂ LỖI 0Đ VÀ MẤT TOPPING
-         * @param {string} dishId - Mã định danh món ăn
          */
         function openCustomizerModal(dishId) {
-            // Tìm món ăn trong thực đơn chuẩn
             var dish = FALLBACK_MENU.find(function(d) { return d.id === dishId; });
-            if (!dish) {
-                console.error("Không tìm thấy món có ID:", dishId);
-                return;
-            }
+            if (!dish) return;
 
-            // 1. RÀO CHẮN DANH MỤC: NẾU LÀ NƯỚC UỐNG ĐÓNG CHAI -> QUICK ADD (KHÔNG HỎI CAY, KHÔNG HIỆN MODAL)
+            // 1. NẾU LÀ NƯỚC UỐNG ĐÓNG CHAI -> QUICK ADD KHÔNG HỎI CAY
             if (dish.cat === "giai-khat" && dish.id === "M10") {
                 appState.cartItems.push({
                     id: dish.id + "_" + Date.now(),
@@ -1186,12 +1136,12 @@
                 return;
             }
 
-            // 2. KHỞI TẠO TRẠNG THÁI MỚI CHO MODAL TÙY CHỌN
+            // 2. KHỞI TẠO TRẠNG THÁI MỚI CHO MODAL TÙY CHỌN MÓN CHÍNH
             appState.currentCustomizingDish = dish;
             appState.customizerQty = 1;
-            appState.currentTaste = "Cay Nhẹ"; // Luôn khóa cứng mặc định là Cay Nhẹ chuẩn vị
+            appState.currentTaste = "Cay Nhẹ"; // Khóa cứng mặc định là Cay Nhẹ chuẩn vị
             appState.currentSoup = "Súp Tóp Mỡ Hành Lá";
-            activeCustomizerToppingIds = []; // Xóa trắng danh sách topping đã chọn trước đó
+            activeCustomizerToppingIds = [];
 
             var modal = document.getElementById("modal-dish-customizer");
             var elImg = document.getElementById("cust-dish-img");
@@ -1204,17 +1154,15 @@
             var boxTopping = document.getElementById("box-topping-selector");
             var noteEl = document.getElementById("cust-dish-note");
 
-            // BƠM DỮ LIỆU ĐẢM BẢO KHÔNG BỊ RỚT VỀ 0Đ
             var dishPriceNum = Number(dish.price) || 0;
-            if (elImg) elImg.src = dish.img || "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400";
+            if (elImg) elImg.src = dish.img;
             if (elName) elName.innerText = dish.name;
             if (elBasePrice) elBasePrice.innerText = dishPriceNum.toLocaleString("vi-VN") + " đ";
             if (elQty) elQty.innerText = "1";
             if (noteEl) noteEl.value = "";
 
-            // 3. ĐIỀU PHỐI ẨN/HIỆN CÁC PHÂN KHU TÙY THEO DANH MỤC MÓN
+            // 3. ĐIỀU PHỐI ẨN/HIỆN PHÂN KHU TÙY THEO DANH MỤC MÓN
             if (dish.cat === "giai-khat") {
-                // Nhóm Giải Khát (Trà Đào 1L): Ẩn cay, ẩn súp, ẩn topping
                 if (elCatBadge) elCatBadge.innerText = "Giải Khát (1L)";
                 if (boxTaste) boxTaste.classList.add("hidden");
                 if (boxSoup) boxSoup.classList.add("hidden");
@@ -1222,7 +1170,6 @@
                 appState.currentTaste = "Không Cay";
                 appState.currentSoup = "";
             } else if (dish.cat === "nuoc") {
-                // Nhóm Món Nước (Mì Súp Bò): Hiện cay, hiện topping, ẩn súp kèm
                 if (elCatBadge) elCatBadge.innerText = "Món Nước Súp";
                 if (boxTaste) boxTaste.classList.remove("hidden");
                 if (boxSoup) boxSoup.classList.add("hidden");
@@ -1231,14 +1178,13 @@
                 selectTaste("Cay Nhẹ");
                 renderCustomizerToppingsList();
             } else if (dish.cat === "an-kem") {
-                // Nhóm Ăn Kèm (Hũ Tóp Mỡ, Trứng Đào Lẻ): Ẩn súp, ẩn topping thêm
                 if (elCatBadge) elCatBadge.innerText = "Món Ăn Kèm";
                 if (boxTaste) boxTaste.classList.remove("hidden");
                 if (boxSoup) boxSoup.classList.add("hidden");
                 if (boxTopping) boxTopping.classList.add("hidden");
                 selectTaste("Cay Nhẹ");
             } else {
-                // Nhóm Mì Trộn Khô & Combo Đại Tiệc: MỞ TOÀN BỘ VÀ BẮT BUỘC RENDER TOPPING
+                // Mì Trộn Khô & Combo: Mở toàn bộ và kích hoạt vẽ Topping
                 if (elCatBadge) elCatBadge.innerText = (dish.cat === "combo") ? "Combo Đại Tiệc" : "Món Khô";
                 if (boxTaste) boxTaste.classList.remove("hidden");
                 if (boxSoup) boxSoup.classList.remove("hidden");
@@ -1246,24 +1192,25 @@
 
                 selectTaste("Cay Nhẹ");
                 selectSoup("Súp Tóp Mỡ Hành Lá");
-                renderCustomizerToppingsList(); // KÍCH HOẠT VẼ TOPPING NGAY LẬP TỨC
+                renderCustomizerToppingsList();
             }
 
-            // Tính lại tổng tiền hiển thị trên nút Thêm Vào Giỏ
             updateCustomizerPrice();
 
             if (modal) modal.classList.remove("hidden");
         }
 
+        function closeCustomizerModal() {
+            var modal = document.getElementById("modal-dish-customizer");
+            if (modal) modal.classList.add("hidden");
+        }
+
         /**
-         * VẼ DANH SÁCH 5 TOPPING VÀO THẺ CONTAINER (ĐẢM BẢO 100% HIỆN TRÊN MÀN HÌNH)
+         * VẼ BẢNG TOPPING CHỌN THÊM CÓ TÍNH TIỀN
          */
         function renderCustomizerToppingsList() {
             var container = document.getElementById("customizer-toppings-list");
-            if (!container) {
-                console.error("Không tìm thấy thẻ div ID: customizer-toppings-list");
-                return;
-            }
+            if (!container) return;
 
             container.innerHTML = TOPPING_PRESETS.map(function(top) {
                 var isChecked = activeCustomizerToppingIds.indexOf(top.id) !== -1;
@@ -1284,9 +1231,6 @@
             }).join("");
         }
 
-        /**
-         * XỬ LÝ KHI KHÁCH TICK HOẶC BỎ TICK TOPPING
-         */
         function toggleCustomizerTopping(topId, isChecked) {
             var idx = activeCustomizerToppingIds.indexOf(topId);
             if (isChecked && idx === -1) {
@@ -1299,9 +1243,39 @@
             updateCustomizerPrice();
         }
 
-        /**
-         * TÍNH TOÁN TỔNG GIÁ TIỀN ĐỘNG TRÊN NÚT BẤM = (GIÁ CƠ SỞ + TIỀN TOPPING) * SỐ LƯỢNG
-         */
+        function selectTaste(taste) {
+            appState.currentTaste = taste;
+            document.querySelectorAll(".btn-taste-option").forEach(function(b) {
+                var t = b.getAttribute("data-taste");
+                if (t === taste) {
+                    b.className = "btn-taste-option p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-center transition flex flex-col items-center gap-1 active";
+                } else {
+                    b.className = "btn-taste-option p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-center transition flex flex-col items-center gap-1";
+                }
+            });
+        }
+
+        function selectSoup(soup) {
+            appState.currentSoup = soup;
+            document.querySelectorAll(".btn-soup-option").forEach(function(b) {
+                var s = b.getAttribute("data-soup");
+                if (s === soup) {
+                    b.className = "btn-soup-option p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-left transition flex items-center justify-between active";
+                } else {
+                    b.className = "btn-soup-option p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-left transition flex items-center justify-between";
+                }
+            });
+        }
+
+        function adjustCustomizerQty(delta) {
+            var n = appState.customizerQty + delta;
+            if (n < 1) n = 1;
+            appState.customizerQty = n;
+            var elQty = document.getElementById("cust-dish-qty");
+            if (elQty) elQty.innerText = String(n);
+            updateCustomizerPrice();
+        }
+
         function updateCustomizerPrice() {
             if (!appState.currentCustomizingDish) return;
 
@@ -1324,9 +1298,6 @@
             }
         }
 
-        /**
-         * XÁC NHẬN BƠM MÓN VÀ TOPPING ĐÃ CHỌN VÀO GIỎ HÀNG THỰC TẾ
-         */
         function confirmAddToCart() {
             if (!appState.currentCustomizingDish) return;
 
@@ -1349,7 +1320,6 @@
 
             var finalUnitPrice = basePrice + toppingsTotalUnit;
 
-            // Đóng gói đối tượng giỏ hàng hoàn chỉnh
             var cartItem = {
                 id: appState.currentCustomizingDish.id + "_" + Date.now(),
                 dishId: appState.currentCustomizingDish.id,
@@ -1369,84 +1339,15 @@
             closeCustomizerModal();
             updateAovAndCartUI();
 
-            // Kích hoạt rung rinh nhẹ giỏ hàng để báo hiệu thành công
             var floatingBar = document.getElementById("floating-cart-bar");
             if (floatingBar) {
                 floatingBar.classList.add("scale-105");
                 setTimeout(function() { floatingBar.classList.remove("scale-105"); }, 200);
             }
-        }        /**
-         * TÍNH TOÁN TỔNG TIỀN ĐỘNG (GIÁ GỐC MÓN + TỔNG TIỀN TOPPING) * SỐ LƯỢNG
-         */
-        function updateCustomizerPrice() {
-            if (!appState.currentCustomizingDish) return;
-
-            var basePrice = appState.currentCustomizingDish.price;
-            var toppingsPrice = 0;
-
-            activeCustomizerToppings.forEach(function(top) {
-                toppingsPrice += top.price;
-            });
-
-            var unitPriceWithToppings = basePrice + toppingsPrice;
-            var grandTotal = unitPriceWithToppings * appState.customizerQty;
-
-            var elBtnPrice = document.getElementById("cust-total-btn-price");
-            if (elBtnPrice) {
-                elBtnPrice.innerText = grandTotal.toLocaleString("vi-VN") + " đ";
-            }
         }
 
         /**
-         * ĐÓNG GÓI MÓN ĂN VÀ TOPPING ĐƯỢC CHỌN VÀO GIỎ HÀNG THỰC TẾ
-         */
-        function confirmAddToCart() {
-            if (!appState.currentCustomizingDish) return;
-
-            var noteEl = document.getElementById("cust-dish-note");
-            var noteVal = noteEl ? noteEl.value.trim() : "";
-
-            // Tính đơn giá thực tế của từng suất (đã bao gồm Topping)
-            var toppingsTotalUnit = 0;
-            var toppingNamesList = [];
-
-            activeCustomizerToppings.forEach(function(top) {
-                toppingsTotalUnit += top.price;
-                toppingNamesList.push(top.name);
-            });
-
-            var finalUnitPrice = appState.currentCustomizingDish.price + toppingsTotalUnit;
-
-            // Tạo đối tượng món ăn chuẩn hóa đẩy vào giỏ
-            var cartItem = {
-                id: appState.currentCustomizingDish.id + "_" + Date.now(),
-                dishId: appState.currentCustomizingDish.id,
-                name: appState.currentCustomizingDish.name,
-                basePrice: appState.currentCustomizingDish.price,
-                price: finalUnitPrice,
-                quantity: appState.customizerQty,
-                taste: appState.currentTaste,
-                soup: (appState.currentCustomizingDish.cat === "kho" || appState.currentCustomizingDish.cat === "combo") ? appState.currentSoup : "",
-                note: noteVal,
-                toppings: activeCustomizerToppings.slice(), // Nhân bản mảng topping
-                toppingSummary: toppingNamesList.join(", "),
-                isGift: false
-            };
-
-            appState.cartItems.push(cartItem);
-            closeCustomizerModal();
-            updateAovAndCartUI();
-
-            // Hiển thị thông báo Toast nhanh cho khách
-            var toastMsg = "🍜 Đã thêm " + cartItem.quantity + "x " + cartItem.name;
-            if (toppingNamesList.length > 0) {
-                toastMsg += " (+ " + toppingNamesList.join(", ") + ")";
-            }
-            toastMsg += " vào giỏ hàng thành công!";
-            console.log("✅ [CartEngine]", toastMsg);
-        }
-        /**
-         * BỘ ĐIỀU PHỐI GIỎ HÀNG & RÀO CHẮN CART TAMPERING GUARD
+         * CẬP NHẬT GIỎ HÀNG & RÀO CHẮN CART TAMPERING GUARD
          */
         function updateAovAndCartUI() {
             var subtotal = 0;
@@ -1459,13 +1360,11 @@
                 }
             });
 
-            // RÀO CHẮN BẢO VỆ DÒNG TIỀN: NẾU TIỀN MÓN < 79K -> THU HỒI QUÀ 0Đ
             if (subtotal < STORE_BASE_CONFIG.minAovThreshold && appState.appliedGift) {
                 appState.appliedGift = null;
                 alert("⚠️ Đơn hàng chưa đạt mốc 79.000đ. Món quà tặng may mắn đã tạm thời được gỡ bỏ khỏi giỏ hàng!");
             }
 
-            // Cập nhật Bottom Bar Giỏ Hàng
             var floatingBar = document.getElementById("floating-cart-bar");
             var badgeQty = document.getElementById("badge-cart-total-qty");
             var dispSubtotal = document.getElementById("disp-bottom-cart-subtotal");
@@ -1478,7 +1377,6 @@
                 if (floatingBar) floatingBar.classList.add("hidden");
             }
 
-            // Cập nhật Thanh Tiến Trình AOV Sticky Bar
             var targetAov = STORE_BASE_CONFIG.minAovThreshold;
             var pct = Math.min(Math.round((subtotal / targetAov) * 100), 100);
             var fillBar = document.getElementById("aov-progress-fill");
@@ -1525,8 +1423,8 @@
                                 <div class="text-[10px] text-slate-400 space-x-2">
                                     <span class="text-amber-400 font-semibold">${item.taste}</span>
                                     ${item.soup ? `<span>• ${item.soup}</span>` : ''}
+                                    ${item.toppingSummary ? `<span class="text-emerald-400 block truncate">+ ${item.toppingSummary}</span>` : ''}
                                 </div>
-                                ${item.note ? `<div class="text-[9.5px] text-slate-500 italic truncate">Ghi chú: ${item.note}</div>` : ''}
                             </div>
                             <div class="flex items-center gap-2.5 shrink-0">
                                 <span class="font-mono font-bold text-xs text-amber-400">${(item.price * item.quantity).toLocaleString("vi-VN")} đ</span>
@@ -1541,7 +1439,6 @@
                 }).join("");
             }
 
-            // Hiển thị món quà tặng nếu có
             if (appState.appliedGift && giftBox) {
                 giftBox.classList.remove("hidden");
                 var nameEl = document.getElementById("disp-cart-gift-name");
@@ -1552,7 +1449,6 @@
                 giftBox.classList.add("hidden");
             }
 
-            // Tính toán Bậc thang trợ giá ship sơ bộ
             var subsidy = 0;
             if (subtotal >= STORE_BASE_CONFIG.subsidyTier2Min) subsidy = STORE_BASE_CONFIG.subsidyTier2Amount;
             else if (subtotal >= STORE_BASE_CONFIG.subsidyTier1Min) subsidy = STORE_BASE_CONFIG.subsidyTier1Amount;
@@ -1588,7 +1484,7 @@
         }
 
         /**
-         * NẠP VÒNG QUAY LAZY-LOAD & LẮNG NGHE SỰ KIỆN QUÀ TẶNG
+         * NẠP VÒNG QUAY LAZY LOAD TỪ WHEEL.HTML
          */
         function onAovBarClick() {
             openLuckyWheelModal();
@@ -1644,7 +1540,7 @@
         }
 
         /**
-         * THUẬT TOÁN HAVERSINE TÍNH KHOẢNG CÁCH TỪ TÂM BẾP TÂY NINH (CHUẨN XÁC)
+         * THUẬT TOÁN HAVERSINE ĐO KHOẢNG CÁCH TỪ BẾP TÂY NINH (11.285267, 106.133347)
          */
         function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
             var R = 6371; // Bán kính trái đất (km)
@@ -1676,7 +1572,6 @@
                     var uLng = pos.coords.longitude;
                     appState.customerLocation = { lat: uLat, lng: uLng };
 
-                    // Đo cự ly từ Bếp Hòa Thành (11.285267, 106.133347)
                     var dist = calculateHaversineDistance(
                         STORE_BASE_CONFIG.coords.lat, STORE_BASE_CONFIG.coords.lng,
                         uLat, uLng
@@ -1687,7 +1582,7 @@
 
                     var addrEl = document.getElementById("chk-customer-address");
                     if (addrEl && !addrEl.value.trim()) {
-                        addrEl.value = `Vị trí định vị GPS (${uLat.toFixed(5)}, ${uLng.toFixed(5)}) - Hòa Thành, Tây Ninh`;
+                        addrEl.value = `Định vị GPS (${uLat.toFixed(5)}, ${uLng.toFixed(5)}) - Hòa Thành, Tây Ninh`;
                     }
 
                     if (btn) {
@@ -1700,16 +1595,15 @@
                         btn.disabled = false;
                         btn.innerHTML = origText;
                     }
-                    alert("❌ Không thể lấy GPS: " + err.message + "\nVui lòng gõ địa chỉ nhận hàng.");
+                    alert("❌ Không thể lấy GPS: " + err.message + "\nVui lòng nhập địa chỉ giao hàng.");
                 },
                 { enableHighAccuracy: true, timeout: 8000 }
             );
         }
 
         function onAddressInput(val) {
-            // Nếu chưa bật GPS, giả định cự ly trung bình 1.8km nội thị Hòa Thành
             if (!appState.customerLocation) {
-                appState.calculatedDistanceKm = 1.8;
+                appState.calculatedDistanceKm = 1.8; // Giả định cự ly trung bình nội thị Hòa Thành
                 recalculateShippingFee();
             }
         }
@@ -1723,11 +1617,9 @@
                 fee += Math.round(extraKm * STORE_BASE_CONFIG.shipExtraFeePerKm);
             }
 
-            // Tính tổng tiền món
             var subtotal = 0;
             appState.cartItems.forEach(function(i) { subtotal += (i.price * i.quantity); });
 
-            // Áp Bậc thang trợ giá ship
             var subsidy = 0;
             if (subtotal >= STORE_BASE_CONFIG.subsidyTier2Min) subsidy = STORE_BASE_CONFIG.subsidyTier2Amount;
             else if (subtotal >= STORE_BASE_CONFIG.subsidyTier1Min) subsidy = STORE_BASE_CONFIG.subsidyTier1Amount;
@@ -1773,7 +1665,6 @@
             if (elSubTag) elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ";
             if (elFinal) elFinal.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
 
-            // Tạo mã VietQR động nếu đang chọn phương thức VIETQR
             if (appState.selectedPaymentMethod === "VIETQR") {
                 renderDynamicVietQr(finalTotal);
             }
@@ -1798,7 +1689,7 @@
             if (holderEl) holderEl.innerText = STORE_BASE_CONFIG.accountHolder;
         }
 
-        function selectPaymentMethod(method, btnEl) {
+        function selectPaymentMethod(method) {
             appState.selectedPaymentMethod = method;
             document.querySelectorAll(".btn-pay-method").forEach(function(b) {
                 var m = b.getAttribute("data-method");
@@ -1826,7 +1717,7 @@
 
         function proceedToCheckoutModal() {
             if (appState.cartItems.length === 0) {
-                alert("⚠️ Giỏ hàng của quý khách đang trống. Vui lòng chọn món trước!");
+                alert("⚠️ Giỏ hàng đang trống. Quý khách vui lòng chọn món trước!");
                 return;
             }
             closeCartDrawer();
@@ -1840,12 +1731,8 @@
             if (modal) modal.classList.add("hidden");
         }
 
-        function onCheckoutPhoneChange(val) {
-            // Tự động kiểm tra và đồng bộ số điện thoại
-        }
-
         /**
-         * XÁC NHẬN GỬI ĐƠN HÀNG VỀ MÁY CHỦ BẾP (ZERO-TRUST VALIDATION)
+         * GỬI ĐƠN HÀNG VỀ MÁY CHỦ BẾP
          */
         async function submitFinalOrder() {
             var nameEl = document.getElementById("chk-customer-name");
@@ -1907,7 +1794,6 @@
                 console.warn("⚠️ Truyền đơn về Bếp chế độ mô phỏng:", err);
             }
 
-            // Hoàn tất đặt đơn thành công
             if (btnSubmit) {
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = origText;
@@ -1919,7 +1805,7 @@
             if (codeEl) codeEl.innerText = orderCode;
             if (successModal) successModal.classList.remove("hidden");
 
-            // Reset giỏ hàng
+            // Reset giỏ hàng sau khi đặt thành công
             appState.cartItems = [];
             appState.appliedGift = null;
             updateAovAndCartUI();
@@ -1962,14 +1848,14 @@
             copyBankAcc: copyBankAcc,
             proceedToCheckoutModal: proceedToCheckoutModal,
             closeCheckoutModal: closeCheckoutModal,
-            onCheckoutPhoneChange: onCheckoutPhoneChange,
             submitFinalOrder: submitFinalOrder,
             viewLiveOrderTracking: viewLiveOrderTracking,
-            resetAndNewOrder: resetAndNewOrder
+            resetAndNewOrder: resetAndNewOrder,
+            toggleCustomizerTopping: toggleCustomizerTopping
         };
     })();
 
-    // KHỞI ĐỘNG KHI TẢI XONG TRANG
+    // KHỞI ĐỘNG KHI TOÀN BỘ DOM ĐÃ SẴN SÀNG
     document.addEventListener("DOMContentLoaded", function() {
         D2CStoreFrontController.init();
     });
