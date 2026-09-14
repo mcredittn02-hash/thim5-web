@@ -2,19 +2,45 @@
  * =========================================================================
  * MODULE: THÍM 5 & LONGHOAFOOD MASTER API ADAPTER (v2.9 ENTERPRISE)
  * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
- * Bản quyền: Bếp Thím 5 (Năm 2026)
- * Nhiệm vụ: Điểm tập trung duy nhất điều phối toàn bộ HTTP Request từ Client
- * về Backend CoreRouter.gs. Chống lỗi CORS, Auto-retry, Safe-timeout.
+ * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+ * Kiến trúc: Multi-Environment Auto-Detect, Safe Timeout, Zero-Drift Merge
  * =========================================================================
  */
 
 var Thim5API = (function() {
-  // ĐIỀN ĐÚNG ĐƯỜNG DẪN WEB APP GOOGLE APPS SCRIPT (/exec) CỦA ANH TẠI ĐÂY
-  var GAS_BASE_URL = "https://script.google.com/macros/s/AKfycbxT_YOUR_ACTUAL_EXEC_ID_HERE/exec";
+  /**
+   * CẤU HÌNH ĐƯỜNG DẪN MÔI TRƯỜNG TỰ ĐỘNG
+   * Anh chỉ cần điền đúng 2 URL Web App (/exec) của 2 dự án Apps Script tại đây:
+   */
+  var ENV_ENDPOINTS = {
+    // URL Web App của Sheet [STAGING] Thím 5 Master
+    STAGING: "https://script.google.com/macros/s/AKfycbwSTAGING_EXEC_ID_HERE/exec",
+
+    // URL Web App của Sheet [PRODUCTION] Thím 5 Chính Thức
+    PRODUCTION: "https://script.google.com/macros/s/AKfycbwPRODUCTION_EXEC_ID_HERE/exec"
+  };
 
   /**
-   * CẤU HÌNH ĐỘI TRỄ VÀ SỐ LẦN THỬ LẠI KHI MẠNG YẾU
+   * TỰ ĐỘNG XÁC ĐỊNH MÔI TRƯỜNG DỰA TRÊN DOMAIN HIỆN HÀNH
    */
+  function detectActiveEndpoint() {
+    var host = (window.location && window.location.hostname) ? window.location.hostname.toLowerCase() : "";
+    
+    // Nếu chạy trên localhost, file cục bộ, nhánh test Render hoặc test.anngonlonghoa
+    if (host === "localhost" || 
+        host === "127.0.0.1" || 
+        host.indexOf("test.") !== -1 || 
+        host.indexOf("staging") !== -1 || 
+        host.indexOf("onrender.com") !== -1) {
+      return ENV_ENDPOINTS.STAGING;
+    }
+    
+    // Mặc định trỏ về PRODUCTION khi chạy trên domain chính thức
+    return ENV_ENDPOINTS.PRODUCTION;
+  }
+
+  var activeGasUrl = detectActiveEndpoint();
+
   var CONFIG = {
     TIMEOUT_MS: 20000,
     MAX_RETRIES: 2
@@ -22,11 +48,11 @@ var Thim5API = (function() {
 
   /**
    * GỌI API MÁY CHỦ GOOGLE APPS SCRIPT (CoreRouter.gs)
-   * Sử dụng text/plain để vượt qua rào cản CORS preflight OPTIONS trên Google Apps Script
+   * Vượt rào cản CORS qua text/plain body
    * 
-   * @param {string} action - Tên hành động (khớp với router trong CoreRouter.gs)
-   * @param {Object} payload - Dữ liệu truyền kèm
-   * @returns {Promise<Object>} Phản hồi chuẩn hóa JSON từ Backend
+   * @param {string} action - Tên hành động router
+   * @param {Object} payload - Dữ liệu gửi lên
+   * @returns {Promise<Object>} Phản hồi JSON chuẩn hóa
    */
   async function callGAS(action, payload) {
     if (!action) {
@@ -47,7 +73,7 @@ var Thim5API = (function() {
       }, CONFIG.TIMEOUT_MS);
 
       try {
-        var response = await fetch(GAS_BASE_URL, {
+        var response = await fetch(activeGasUrl, {
           method: "POST",
           headers: {
             "Content-Type": "text/plain;charset=utf-8"
@@ -68,7 +94,7 @@ var Thim5API = (function() {
       } catch (err) {
         clearTimeout(timeoutId);
         var isAbort = (err.name === "AbortError");
-        console.warn("⚠️ [Thim5API] Lần thử " + attempt + " thất bại (" + (isAbort ? "Quá thời gian" : err.message) + ")");
+        console.warn("⚠️ [Thim5API] Lần thử " + attempt + " thất bại (" + (isAbort ? "Timeout 20s" : err.message) + ")");
 
         if (attempt > CONFIG.MAX_RETRIES) {
           return {
@@ -80,34 +106,27 @@ var Thim5API = (function() {
           };
         }
 
-        // Chờ 800ms trước khi thử lại
         await new Promise(function(resolve) { setTimeout(resolve, 800); });
       }
     }
   }
 
-  /**
-   * CẬP NHẬT ĐƯỜNG DẪN ENDPOINT ĐỘNG (NẾU CẦN ĐỔI BẰNG JAVASCRIPT)
-   */
   function setEndpoint(newUrl) {
     if (newUrl && typeof newUrl === "string") {
-      GAS_BASE_URL = newUrl.trim();
+      activeGasUrl = newUrl.trim();
     }
   }
 
-  /**
-   * LẤY ENDPOINT HIỆN HÀNH
-   */
   function getEndpoint() {
-    return GAS_BASE_URL;
+    return activeGasUrl;
   }
 
   return {
     callGAS: callGAS,
     setEndpoint: setEndpoint,
-    getEndpoint: getEndpoint
+    getEndpoint: getEndpoint,
+    ENV_ENDPOINTS: ENV_ENDPOINTS
   };
 })();
 
-// Gắn toàn cục vào Window
 window.Thim5API = Thim5API;
