@@ -14,10 +14,10 @@ var Thim5API = (function() {
    */
   var ENV_ENDPOINTS = {
     // URL Web App của Sheet [STAGING] Thím 5 Master
-    STAGING: "https://script.google.com/macros/s/AKfycbwSTAGING_EXEC_ID_HERE/exec",
+    STAGING: "https://script.google.com/macros/s/AKfycbx6ZrlsN-vodh5UwjPPbFin9rWyg6GRV4fVQJkcayMR5uScTsvheJUDniRCPKMhlFsO/exec",
 
     // URL Web App của Sheet [PRODUCTION] Thím 5 Chính Thức
-    PRODUCTION: "https://script.google.com/macros/s/AKfycbwPRODUCTION_EXEC_ID_HERE/exec"
+    PRODUCTION: "https://script.google.com/macros/s/AKfycbwZZoE51LGSlZbE85BH_sB2bzWwB_omtZaPFI_vevlAh56bs8CrpGTPMfdg2FfzadcY/exec"
   };
 
   /**
