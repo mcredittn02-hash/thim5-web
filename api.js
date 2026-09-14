@@ -3,30 +3,29 @@
  * MODULE: THÍM 5 & LONGHOAFOOD MASTER API ADAPTER (v2.9 ENTERPRISE)
  * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
  * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
- * Kiến trúc: Multi-Environment Auto-Detect, Safe Timeout, Zero-Drift Merge
  * =========================================================================
  */
 
 var Thim5API = (function() {
   /**
-   * CẤU HÌNH ĐƯỜNG DẪN MÔI TRƯỜNG TỰ ĐỘNG
-   * Anh chỉ cần điền đúng 2 URL Web App (/exec) của 2 dự án Apps Script tại đây:
+   * CẤU HÌNH ĐƯỜNG DẪN MÔI TRƯỜNG:
+   * Anh Hải Âu thay URL Web App Google Apps Script (/exec) thật vào đây:
    */
   var ENV_ENDPOINTS = {
-    // URL Web App của Sheet [STAGING] Thím 5 Master
+    // 1. Dán URL Web App của Sheet [STAGING] Thím 5 Master vào đây:
     STAGING: "https://script.google.com/macros/s/AKfycbx6ZrlsN-vodh5UwjPPbFin9rWyg6GRV4fVQJkcayMR5uScTsvheJUDniRCPKMhlFsO/exec",
 
-    // URL Web App của Sheet [PRODUCTION] Thím 5 Chính Thức
+    // 2. Dán URL Web App của Sheet [PRODUCTION] Thím 5 Chính Thức vào đây:
     PRODUCTION: "https://script.google.com/macros/s/AKfycbwZZoE51LGSlZbE85BH_sB2bzWwB_omtZaPFI_vevlAh56bs8CrpGTPMfdg2FfzadcY/exec"
   };
 
   /**
-   * TỰ ĐỘNG XÁC ĐỊNH MÔI TRƯỜNG DỰA TRÊN DOMAIN HIỆN HÀNH
+   * TỰ ĐỘNG NHẬN DIỆN MÔI TRƯỜNG DỰA TRÊN DOMAIN ĐANG CHẠY
    */
   function detectActiveEndpoint() {
     var host = (window.location && window.location.hostname) ? window.location.hostname.toLowerCase() : "";
     
-    // Nếu chạy trên localhost, file cục bộ, nhánh test Render hoặc test.anngonlonghoa
+    // Nếu chạy trên localhost, file nội bộ, staging hoặc domain test
     if (host === "localhost" || 
         host === "127.0.0.1" || 
         host.indexOf("test.") !== -1 || 
@@ -35,28 +34,33 @@ var Thim5API = (function() {
       return ENV_ENDPOINTS.STAGING;
     }
     
-    // Mặc định trỏ về PRODUCTION khi chạy trên domain chính thức
+    // Domain chính thức Production
     return ENV_ENDPOINTS.PRODUCTION;
   }
 
   var activeGasUrl = detectActiveEndpoint();
 
   var CONFIG = {
-    TIMEOUT_MS: 20000,
+    TIMEOUT_MS: 25000,
     MAX_RETRIES: 2
   };
 
   /**
    * GỌI API MÁY CHỦ GOOGLE APPS SCRIPT (CoreRouter.gs)
-   * Vượt rào cản CORS qua text/plain body
-   * 
-   * @param {string} action - Tên hành động router
-   * @param {Object} payload - Dữ liệu gửi lên
-   * @returns {Promise<Object>} Phản hồi JSON chuẩn hóa
+   * Sử dụng Content-Type text/plain để né hoàn toàn lỗi CORS Preflight
    */
   async function callGAS(action, payload) {
     if (!action) {
-      throw new Error("Thiếu tham số 'action' khi gọi Thim5API.callGAS!");
+      throw new Error("Thiếu tham số 'action' bắt buộc!");
+    }
+
+    // Chốt chặn kiểm tra URL cấu hình
+    if (activeGasUrl.indexOf("EXEC_ID_HERE") !== -1) {
+      return {
+        status: "error",
+        code: 400,
+        message: "Chưa cấu hình URL Web App Google Apps Script trong file api.js!"
+      };
     }
 
     var requestBody = {
@@ -85,7 +89,7 @@ var Thim5API = (function() {
         clearTimeout(timeoutId);
 
         if (!response.ok) {
-          throw new Error("Máy chủ phản hồi mã lỗi HTTP: " + response.status);
+          throw new Error("Máy chủ phản hồi mã HTTP: " + response.status);
         }
 
         var jsonResult = await response.json();
@@ -94,15 +98,15 @@ var Thim5API = (function() {
       } catch (err) {
         clearTimeout(timeoutId);
         var isAbort = (err.name === "AbortError");
-        console.warn("⚠️ [Thim5API] Lần thử " + attempt + " thất bại (" + (isAbort ? "Timeout 20s" : err.message) + ")");
+        console.warn("⚠️ [Thim5API] Lần thử " + attempt + " thất bại (" + (isAbort ? "Timeout 25s" : err.message) + ")");
 
         if (attempt > CONFIG.MAX_RETRIES) {
           return {
             status: "error",
             code: isAbort ? 408 : 500,
             message: isAbort 
-              ? "Kết nối máy chủ bị quá thời gian (Timeout 20s). Vui lòng kiểm tra lại mạng!" 
-              : "Lỗi kết nối máy chủ: " + err.message
+              ? "Kết nối quá thời gian (Timeout 25s). Vui lòng thử lại!" 
+              : "Lỗi kết nối máy chủ Google Apps Script: " + err.message + ". Hãy kiểm tra quyền 'Anyone' của bản Deploy Web App."
           };
         }
 
