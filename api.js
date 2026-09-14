@@ -1,100 +1,113 @@
 /**
  * =========================================================================
- * MODULE: THIM5 API MIDDLEWARE (CẦU NỐI FRONTEND & BACKEND)
- * Vai trò: Giao tiếp độc quyền với Google Apps Script (CoreRouter.gs).
- * Tính năng: Nhận diện môi trường, Hàng đợi (Queue) chống nghẽn 302, Auto-Retry.
+ * MODULE: THÍM 5 & LONGHOAFOOD MASTER API ADAPTER (v2.9 ENTERPRISE)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+ * Bản quyền: Bếp Thím 5 (Năm 2026)
+ * Nhiệm vụ: Điểm tập trung duy nhất điều phối toàn bộ HTTP Request từ Client
+ * về Backend CoreRouter.gs. Chống lỗi CORS, Auto-retry, Safe-timeout.
  * =========================================================================
  */
-const Thim5API = (function() {
-    // 1. NHẬN DIỆN MÔI TRƯỜNG DỰA TRÊN DOMAIN
-    const HOSTNAME = window.location.hostname;
-    const IS_STAGING = HOSTNAME.includes("test") || HOSTNAME.includes("localhost") || HOSTNAME.includes("127.0.0.1");
 
-    // 2. ĐỊNH TUYẾN URL (ROUTING GATEWAY)
-    const ENV_ENDPOINTS = {
-        PRODUCTION: "https://script.google.com/macros/s/AKfycb_PROD_URL_HERE/exec", 
-        STAGING: "https://script.google.com/macros/s/AKfycbx6ZrlsN-vodh5UwjPPbFin9rWyg6GRV4fVQJkcayMR5uScTsvheJUDniRCPKMhlFsO/exec"  
-    };
+var Thim5API = (function() {
+  // ĐIỀN ĐÚNG ĐƯỜNG DẪN WEB APP GOOGLE APPS SCRIPT (/exec) CỦA ANH TẠI ĐÂY
+  var GAS_BASE_URL = "https://script.google.com/macros/s/AKfycbxT_YOUR_ACTUAL_EXEC_ID_HERE/exec";
 
-    const ACTIVE_API_URL = IS_STAGING ? ENV_ENDPOINTS.STAGING : ENV_ENDPOINTS.PRODUCTION;
+  /**
+   * CẤU HÌNH ĐỘI TRỄ VÀ SỐ LẦN THỬ LẠI KHI MẠNG YẾU
+   */
+  var CONFIG = {
+    TIMEOUT_MS: 20000,
+    MAX_RETRIES: 2
+  };
 
-    if (IS_STAGING) {
-        console.warn("🔧 [Thim5API] HỆ THỐNG ĐANG CHẠY TRÊN MÔI TRƯỜNG TEST (STAGING).");
-        console.warn("🔗 End-point đang sử dụng:", ACTIVE_API_URL);
+  /**
+   * GỌI API MÁY CHỦ GOOGLE APPS SCRIPT (CoreRouter.gs)
+   * Sử dụng text/plain để vượt qua rào cản CORS preflight OPTIONS trên Google Apps Script
+   * 
+   * @param {string} action - Tên hành động (khớp với router trong CoreRouter.gs)
+   * @param {Object} payload - Dữ liệu truyền kèm
+   * @returns {Promise<Object>} Phản hồi chuẩn hóa JSON từ Backend
+   */
+  async function callGAS(action, payload) {
+    if (!action) {
+      throw new Error("Thiếu tham số 'action' khi gọi Thim5API.callGAS!");
     }
 
-    // 3. KHỞI TẠO HÀNG ĐỢI TUẦN TỰ (RATE-LIMITING QUEUE)
-    let requestQueue = Promise.resolve();
+    var requestBody = {
+      action: action,
+      data: payload || {}
+    };
 
-    /**
-     * HÀM GỬI HTTP POST NỘI BỘ
-     * Sử dụng Content-Type: text/plain để vượt qua bài kiểm tra CORS Preflight
-     */
-    async function sendRequest(action, params) {
-        const payload = {
-            action: action,
-            params: params || {}
-        };
+    var attempt = 0;
+    while (attempt <= CONFIG.MAX_RETRIES) {
+      attempt++;
+      var controller = new AbortController();
+      var timeoutId = setTimeout(function() {
+        controller.abort();
+      }, CONFIG.TIMEOUT_MS);
 
-        const response = await fetch(ACTIVE_API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8", 
-            },
-            body: JSON.stringify(payload)
+      try {
+        var response = await fetch(GAS_BASE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
+
         if (!response.ok) {
-            throw new Error("Lỗi kết nối máy chủ HTTP: " + response.status);
+          throw new Error("Máy chủ phản hồi mã lỗi HTTP: " + response.status);
         }
 
-        const result = await response.json();
-        
-        if (!result.success) {
-            throw new Error(result.message || "Lỗi xử lý từ máy chủ Backend.");
+        var jsonResult = await response.json();
+        return jsonResult;
+
+      } catch (err) {
+        clearTimeout(timeoutId);
+        var isAbort = (err.name === "AbortError");
+        console.warn("⚠️ [Thim5API] Lần thử " + attempt + " thất bại (" + (isAbort ? "Quá thời gian" : err.message) + ")");
+
+        if (attempt > CONFIG.MAX_RETRIES) {
+          return {
+            status: "error",
+            code: isAbort ? 408 : 500,
+            message: isAbort 
+              ? "Kết nối máy chủ bị quá thời gian (Timeout 20s). Vui lòng kiểm tra lại mạng!" 
+              : "Lỗi kết nối máy chủ: " + err.message
+          };
         }
 
-        return result.data;
+        // Chờ 800ms trước khi thử lại
+        await new Promise(function(resolve) { setTimeout(resolve, 800); });
+      }
     }
+  }
 
-    // 4. MỞ RỘNG CỔNG GIAO TIẾP CHO TOÀN BỘ VIEW TRÊN FRONTEND
-    return {
-        /**
-         * Hàm gọi API trung tâm với cơ chế thử lại tự động (Exponential Backoff)
-         * @param {string} action - Tên Action đã khai báo trong API_ROUTES
-         * @param {Object} params - Dữ liệu tham số gửi kèm
-         * @param {number} maxRetries - Số lần thử lại tối đa khi mạng rớt
-         */
-        callGAS: function(action, params = {}, maxRetries = 2) {
-            return new Promise((resolve, reject) => {
-                requestQueue = requestQueue.then(async () => {
-                    let lastError = null;
-                    
-                    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-                        try {
-                            const data = await sendRequest(action, params);
-                            resolve(data);
-                            break;
-                        } catch (error) {
-                            lastError = error;
-                            console.warn("[Thim5API] Lỗi gọi " + action + " (Lần " + (attempt + 1) + "/" + (maxRetries + 1) + "): " + error.message);
-                            
-                            if (attempt < maxRetries) {
-                                await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
-                            } else {
-                                reject(lastError);
-                            }
-                        }
-                    }
-                    
-                    // Giãn cách 150ms giữa các request để bảo vệ quota Google Sheets
-                    await new Promise(r => setTimeout(r, 150));
-                });
-            });
-        },
-        
-        isStaging: function() {
-            return IS_STAGING;
-        }
-    };
+  /**
+   * CẬP NHẬT ĐƯỜNG DẪN ENDPOINT ĐỘNG (NẾU CẦN ĐỔI BẰNG JAVASCRIPT)
+   */
+  function setEndpoint(newUrl) {
+    if (newUrl && typeof newUrl === "string") {
+      GAS_BASE_URL = newUrl.trim();
+    }
+  }
+
+  /**
+   * LẤY ENDPOINT HIỆN HÀNH
+   */
+  function getEndpoint() {
+    return GAS_BASE_URL;
+  }
+
+  return {
+    callGAS: callGAS,
+    setEndpoint: setEndpoint,
+    getEndpoint: getEndpoint
+  };
 })();
+
+// Gắn toàn cục vào Window
+window.Thim5API = Thim5API;
