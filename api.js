@@ -1,88 +1,136 @@
 /**
  * =========================================================================
- * FILE: api.js - BẢN BỌC THÉP CHỐNG LỖI 302 REDIRECT & HTML UNEXPECTED TOKEN
- * HỆ THỐNG: Mì Trộn & Cơm Trộn Thím 5 Master
+ * MODULE: THÍM 5 & LONGHOAFOOD MASTER API ADAPTER (v2.9 ENTERPRISE)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+ * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
  * =========================================================================
  */
-const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbwZZoE51LGSlZbE85BH_sB2bzWwB_omtZaPFI_vevlAh56bs8CrpGTPMfdg2FfzadcY/exec"
-};
 
-let requestQueue = Promise.resolve();
+var Thim5API = (function() {
+  /**
+   * CẤU HÌNH ĐƯỜNG DẪN MÔI TRƯỜNG:
+   * Anh Hải Âu thay URL Web App Google Apps Script (/exec) thật vào đây:
+   */
+  var ENV_ENDPOINTS = {
+    // 1. Dán URL Web App của Sheet [STAGING] Thím 5 Master vào đây:
+    STAGING: "https://script.google.com/macros/s/AKfycbx6ZrlsN-vodh5UwjPPbFin9rWyg6GRV4fVQJkcayMR5uScTsvheJUDniRCPKMhlFsO/exec",
 
-const Thim5API = {
-  async callGAS(action, params = {}) {
-    return new Promise((resolve, reject) => {
-      requestQueue = requestQueue.then(async () => {
-        try {
-          const res = await Thim5API.executeWithRetry(action, params, 2);
-          resolve(res);
-        } catch (err) {
-          reject(err);
-        }
-        await new Promise(r => setTimeout(r, 100));
-      });
-    });
-  },
+    // 2. Dán URL Web App của Sheet [PRODUCTION] Thím 5 Chính Thức vào đây:
+    PRODUCTION: "https://script.google.com/macros/s/AKfycbwZZoE51LGSlZbE85BH_sB2bzWwB_omtZaPFI_vevlAh56bs8CrpGTPMfdg2FfzadcY/exec"
+  };
 
-  async executeWithRetry(action, params, maxRetries = 2) {
-    let lastError = null;
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        return await Thim5API.sendRequest(action, params);
-      } catch (err) {
-        lastError = err;
-        console.warn(`[Thim5API] Lỗi gọi '${action}' (Lần ${attempt + 1}):`, err.message);
-        if (attempt < maxRetries) {
-          await new Promise(r => setTimeout(r, 300 * (attempt + 1)));
-        }
-      }
-    }
-    throw lastError;
-  },
-
-  async sendRequest(action, params = {}) {
-    // Ép mọi hành động cập nhật trạng thái, đơn hàng, cấu hình đều đi qua POST có đính kèm action rõ ràng trên URL
-    const isWriteAction = true; // Luôn dùng POST cho mọi thao tác gọi từ trang quản trị để tránh cache và lỗi 302
-
-    const postUrl = CONFIG.API_URL + "?action=" + encodeURIComponent(action) + "&method=api&_t=" + Date.now();
-    const formData = new URLSearchParams();
-    formData.append("action", action);
-    formData.append("method", "api");
-    formData.append("payload", typeof params === "string" ? params : JSON.stringify(params || {}));
-
-    // Phẳng hóa toàn bộ tham số để doPost(e) bắt được cả qua e.parameter lẫn postData
-    if (params && typeof params === "object") {
-      for (const k in params) {
-        if (params[k] !== undefined && params[k] !== null && typeof params[k] !== "object") {
-          formData.append(k, params[k]);
-        }
-      }
-    }
-
-    const response = await fetch(postUrl, {
-      method: "POST",
-      mode: "cors",
-      redirect: "follow",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-      },
-      body: formData.toString()
-    });
-
-    const textRes = await response.text();
+  /**
+   * TỰ ĐỘNG NHẬN DIỆN MÔI TRƯỜNG DỰA TRÊN DOMAIN ĐANG CHẠY
+   */
+  function detectActiveEndpoint() {
+    var host = (window.location && window.location.hostname) ? window.location.hostname.toLowerCase() : "";
     
-    // Kiểm tra gắt gao: Nếu Google Apps Script trả về HTML (bắt đầu bằng < hoặc <!DOCTYPE) -> Báo lỗi ngay lập tức
-    if (!textRes || textRes.trim().startsWith("<") || textRes.includes("<!DOCTYPE")) {
-      throw new Error("GAS trả về HTML thay vì JSON. Kiểm tra lại quyền Deploy 'Anyone' hoặc tên Action: " + action);
+    // Nếu chạy trên localhost, file nội bộ, staging hoặc domain test
+    if (host === "localhost" || 
+        host === "127.0.0.1" || 
+        host.indexOf("test.") !== -1 || 
+        host.indexOf("staging") !== -1 || 
+        host.indexOf("onrender.com") !== -1) {
+      return ENV_ENDPOINTS.STAGING;
+    }
+    
+    // Domain chính thức Production
+    return ENV_ENDPOINTS.PRODUCTION;
+  }
+
+  var activeGasUrl = detectActiveEndpoint();
+
+  var CONFIG = {
+    TIMEOUT_MS: 25000,
+    MAX_RETRIES: 2
+  };
+
+  /**
+   * GỌI API MÁY CHỦ GOOGLE APPS SCRIPT (CoreRouter.gs)
+   * Sử dụng Content-Type text/plain để né hoàn toàn lỗi CORS Preflight
+   */
+  async function callGAS(action, payload) {
+    if (!action) {
+      throw new Error("Thiếu tham số 'action' bắt buộc!");
     }
 
-    try {
-      return JSON.parse(textRes);
-    } catch (e) {
-      throw new Error("Phản hồi không phải JSON hợp lệ: " + textRes.substring(0, 100));
+    // Chốt chặn kiểm tra URL cấu hình
+    if (activeGasUrl.indexOf("EXEC_ID_HERE") !== -1) {
+      return {
+        status: "error",
+        code: 400,
+        message: "Chưa cấu hình URL Web App Google Apps Script trong file api.js!"
+      };
+    }
+
+    var requestBody = {
+      action: action,
+      data: payload || {}
+    };
+
+    var attempt = 0;
+    while (attempt <= CONFIG.MAX_RETRIES) {
+      attempt++;
+      var controller = new AbortController();
+      var timeoutId = setTimeout(function() {
+        controller.abort();
+      }, CONFIG.TIMEOUT_MS);
+
+      try {
+        var response = await fetch(activeGasUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error("Máy chủ phản hồi mã HTTP: " + response.status);
+        }
+
+        var jsonResult = await response.json();
+        return jsonResult;
+
+      } catch (err) {
+        clearTimeout(timeoutId);
+        var isAbort = (err.name === "AbortError");
+        console.warn("⚠️ [Thim5API] Lần thử " + attempt + " thất bại (" + (isAbort ? "Timeout 25s" : err.message) + ")");
+
+        if (attempt > CONFIG.MAX_RETRIES) {
+          return {
+            status: "error",
+            code: isAbort ? 408 : 500,
+            message: isAbort 
+              ? "Kết nối quá thời gian (Timeout 25s). Vui lòng thử lại!" 
+              : "Lỗi kết nối máy chủ Google Apps Script: " + err.message + ". Hãy kiểm tra quyền 'Anyone' của bản Deploy Web App."
+          };
+        }
+
+        await new Promise(function(resolve) { setTimeout(resolve, 800); });
+      }
     }
   }
-};
+
+  function setEndpoint(newUrl) {
+    if (newUrl && typeof newUrl === "string") {
+      activeGasUrl = newUrl.trim();
+    }
+  }
+
+  function getEndpoint() {
+    return activeGasUrl;
+  }
+
+  return {
+    callGAS: callGAS,
+    setEndpoint: setEndpoint,
+    getEndpoint: getEndpoint,
+    ENV_ENDPOINTS: ENV_ENDPOINTS
+  };
+})();
 
 window.Thim5API = Thim5API;

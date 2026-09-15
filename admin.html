@@ -1,2982 +1,402 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="dark h-full bg-slate-950 text-slate-100">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Quản Trị Master Enterprise • Mì Trộn Thím 5</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Quản Trị Thím 5 • Cổng Xác Thực Quyền Hạn</title>
   
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- CDN Tailwind CSS v3 & FontAwesome Pro Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
-  <style>
-    :root {
-      --primary: #EA580C; --primary-dark: #C2410C; --primary-light: #FFEDD5;
-      --bg: #0F172A; --card: #1E293B; --card-inner: #334155; --text: #F8FAFC; --muted: #94A3B8;
-      --border: #334155; --success: #10B981; --warning: #F59E0B; --danger: #EF4444; --blue: #2563EB;
-      --gold: #FDE047; --grab-green: #00B14F; --radius: 14px; --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg); color: var(--text); padding: 14px; font-size: 13px; line-height: 1.5; }
-    .container { max-width: 1280px; margin: 0 auto; }
-
-    /* AUTH LOGIN OVERLAY */
-    #authOverlay { position: fixed; inset: 0; background: #0F172A; z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 16px; }
-    .auth-card { background: #1E293B; border: 2px solid var(--border); border-radius: 16px; max-width: 380px; width: 100%; padding: 24px; text-align: center; box-shadow: var(--shadow); }
-    .auth-icon { width: 56px; height: 56px; background: rgba(234, 88, 12, 0.2); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 12px; }
-    .pin-input { width: 100%; padding: 12px; font-size: 20px; font-weight: 900; text-align: center; letter-spacing: 6px; border: 2px solid var(--border); border-radius: 10px; background: #0F172A; color: var(--gold); outline: none; margin: 14px 0; }
-    .pin-input:focus { border-color: var(--primary); }
-
-    /* HEADER */
-    .admin-header { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 16px 20px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 14px; flex-wrap: wrap; gap: 12px; }
-    .admin-brand h1 { font-size: 17px; font-weight: 900; color: var(--gold); display: flex; align-items: center; gap: 8px; }
-    .admin-brand p { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .admin-header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-
-    .role-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; }
-    .role-badge.lv2 { background: rgba(245, 158, 11, 0.2); color: var(--gold); border: 1px solid var(--gold); }
-    .role-badge.lv1 { background: rgba(37, 99, 235, 0.2); color: #93C5FD; border: 1px solid #2563EB; }
-
-    /* TAB NAVIGATION */
-    .admin-nav-tabs { display: flex; gap: 6px; overflow-x: auto; white-space: nowrap; margin-bottom: 14px; padding-bottom: 4px; scrollbar-width: none; }
-    .admin-nav-tabs::-webkit-scrollbar { display: none; }
-    .nav-tab-btn { padding: 8px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: .2s; }
-    .nav-tab-btn:hover { background: var(--card-inner); color: #fff; }
-    .nav-tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 10px rgba(234, 88, 12, 0.4); }
-
-    /* PERIOD FILTER BAR */
-    .period-filter-bar { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px; background: var(--card); padding: 8px 12px; border-radius: var(--radius); border: 1px solid var(--border); align-items: center; }
-    .filter-btn { padding: 6px 12px; background: #0F172A; border: 1px solid var(--border); border-radius: 8px; font-size: 11px; font-weight: 800; color: var(--muted); cursor: pointer; transition: .2s; }
-    .filter-btn:hover { background: var(--card-inner); color: #fff; }
-    .filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-    /* TAB PANELS */
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; animation: fadeIn .2s ease-in; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* STATS GRID 7 THẺ P&L */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .stat-card { background: var(--card); padding: 14px 16px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); }
-    .stat-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
-    .stat-val { font-size: 19px; font-weight: 900; color: #fff; }
-    .stat-val.primary { color: var(--gold); }
-    .stat-val.success { color: #34D399; }
-    .stat-val.blue { color: #60A5FA; }
-    .stat-val.danger { color: #F87171; }
-    .stat-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
-
-    /* CARDS & TABLES */
-    .card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); padding: 16px; margin-bottom: 14px; }
-    .card-title { font-size: 14px; font-weight: 800; color: var(--gold); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-    
-    .table-responsive { overflow-x: auto; width: 100%; }
-    table { width: 100%; border-collapse: collapse; text-align: left; min-width: 700px; }
-    th { background: #0F172A; padding: 10px 12px; font-size: 11px; font-weight: 800; color: var(--gold); border-bottom: 1px solid var(--border); white-space: nowrap; }
-    td { padding: 10px 12px; font-size: 12px; border-bottom: 1px solid rgba(51, 65, 85, 0.5); vertical-align: middle; }
-    tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
-
-    /* TOGGLE SWITCH */
-    .switch { position: relative; display: inline-block; width: 40px; height: 22px; vertical-align: middle; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .3s; border-radius: 22px; }
-    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-    input:checked + .slider { background-color: #10B981; }
-    input:checked + .slider:before { transform: translateX(18px); }
-
-    /* BADGES & BUTTONS */
-    .status-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
-    .status-pill.on { background: rgba(16, 185, 129, 0.2); color: #34D399; }
-    .status-pill.off { background: rgba(239, 68, 68, 0.2); color: #F87171; }
-    .btn { background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 800; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: .2s; }
-    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    .btn-dark { background: #0F172A; color: #fff; }
-    .btn-danger { background: var(--danger); }
-    .btn-success { background: var(--success); }
-    .btn-blue { background: var(--blue); }
-    .btn-sm { padding: 4px 8px; border-radius: 6px; font-size: 11px; border: none; cursor: pointer; font-weight: 800; }
-
-    /* DROPDOWN CHỐT SỔ */
-    .dropdown { position: relative; display: inline-block; }
-    .dropdown-content { display: none; position: absolute; right: 0; top: 100%; background-color: #1E293B; min-width: 190px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); border-radius: 8px; z-index: 100; border: 1px solid var(--border); overflow: hidden; margin-top: 4px; }
-    .dropdown-content button { color: #F8FAFC; padding: 10px 14px; text-decoration: none; display: block; width: 100%; text-align: left; background: none; border: none; font-size: 12px; font-weight: 700; cursor: pointer; }
-    .dropdown-content button:hover { background-color: var(--card-inner); color: var(--gold); }
-    .dropdown:hover .dropdown-content { display: block; }
-
-    /* FORMS & MODALS */
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-weight: 700; font-size: 11px; margin-bottom: 4px; color: var(--muted); }
-    .form-input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; outline: none; background: #0F172A; color: #fff; font-weight: bold; }
-    .form-input:focus { border-color: var(--primary); }
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 12px; backdrop-filter: blur(4px); }
-    .modal-sheet { background: var(--card); width: 100%; max-width: 500px; border-radius: var(--radius); border: 2px solid var(--border); padding: 18px; max-height: 90vh; overflow-y: auto; color: #fff; }
-    
-    .dish-img-preview { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); margin-top: 4px; }
-    #systemStatusBar { background: #0F172A; color: var(--muted); padding: 6px 12px; border-radius: 8px; font-size: 11px; margin-bottom: 12px; display: flex; justify-content: space-between; border: 1px solid var(--border); }
-
-    /* KHUNG QR DYNAMIC */
-    .qr-card-box { background: #0F172A; border: 1px dashed var(--gold); border-radius: 12px; padding: 14px; text-align: center; margin-top: 14px; }
-    .qr-card-img { width: 180px; height: 180px; border-radius: 10px; margin: 10px auto; display: block; border: 3px solid var(--gold); background: #fff; padding: 6px; }
-
-    .soft-warning-msg { color: #EF4444; font-size: 10.5px; font-weight: 800; margin-top: 4px; display: none; }
-
-    @media (max-width: 768px) {
-      body { padding: 10px; }
-      .admin-header { flex-direction: column; align-items: flex-start; }
-      .stats-grid { grid-template-columns: 1fr 1fr; }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- MÀN HÌNH ĐĂNG NHẬP PHÂN QUYỀN 2 LEVEL -->
-  <div id="authOverlay">
-    <div class="auth-card">
-      <div class="auth-icon">👑</div>
-      <h2 style="font-size:16px; font-weight:900; color:#fff; margin-bottom:4px;">QUẢN TRỊ THÍM 5</h2>
-      <p style="font-size:11px; color:var(--muted);">Nhập mã PIN quyền hạn để tiếp tục:</p>
-      <input type="password" id="adminPinAuthInput" class="pin-input" maxlength="6" placeholder="••••" autofocus />
-      <button class="btn btn-success" style="width:100%; padding:12px; font-size:13px;" onclick="handleAdminLogin()">🔓 XÁC THỰC QUYỀN TRUY CẬP</button>
-      <p id="authErrorMsg" style="color:var(--danger); font-size:11px; margin-top:8px; display:none;"></p>
-    </div>
-  </div>
-
-  <div class="container" id="adminMainContent" style="display:none;">
-    <!-- SYSTEM STATUS BAR -->
-    <div id="systemStatusBar">
-      <span id="statusLogText">🟢 Hệ thống sẵn sàng.</span>
-      <span id="statusClockText">00:00:00</span>
-    </div>
-
-    <!-- HEADER -->
-    <header class="admin-header">
-      <div class="admin-brand">
-        <h1 id="dispHeaderTitle">👑 QUẢN TRỊ THÍM 5 • LONGHOAFOOD MASTER</h1>
-        <p id="dispHeaderSub">Bếp: Nguyễn Văn Linh, TX. Hòa Thành, Tây Ninh • <span id="dispCurrentRoleBadge" class="role-badge lv2">Super Admin</span></p>
-      </div>
-      <div class="admin-header-actions">
-        <button class="btn btn-dark" onclick="openStoreStatusModal()">🏖️ Giờ Bán & Tạm Nghỉ</button>
-        <button class="btn btn-blue" id="btnHeaderTaxReport" style="display:none;" onclick="handleManualSendTaxReport()">📧 Gửi Mail Báo Cáo Thuế</button>
-
-        <div class="dropdown">
-          <button class="btn btn-success">📊 Chốt Sổ Báo Cáo ▾</button>
-          <div class="dropdown-content">
-            <button onclick="triggerFinancialExport('day')">📅 1. Chốt Sổ Ngày Hôm Nay</button>
-            <button onclick="triggerFinancialExport('week')">📆 2. Chốt Sổ Tuần Này</button>
-            <button onclick="triggerFinancialExport('month')">🗓️ 3. Chốt Sổ Tháng Này</button>
-            <button onclick="triggerFinancialExport('quarter')">📈 4. Chốt Sổ Quý Này</button>
-          </div>
-        </div>
-
-        <button class="btn btn-blue" onclick="loadAllAdminData(currentPeriod)">🔄 Tải Lại Dữ Liệu</button>
-        <button class="btn btn-dark" onclick="handleAdminLogout()">🚪 Thoát</button>
-      </div>
-    </header>
-
-    <!-- THANH ĐIỀU HƯỚNG TABS -->
-    <nav class="admin-nav-tabs" id="mainNavTabs">
-      <button class="nav-tab-btn active" data-target="tab_pl">📊 1. Doanh Thu & Vận Hành</button>
-      <button class="nav-tab-btn" data-target="tab_menu">🍜 2. Menu Món Chính & Combo D2C</button>
-      <button class="nav-tab-btn" data-target="tab_topping">🥢 3. Topping Ăn Kèm</button>
-      <button class="nav-tab-btn" data-target="tab_drinks">🧋 4. Nước Uống Bất Tử (1L)</button>
-      <button class="nav-tab-btn" data-target="tab_inventory">📦 5. Nhập Kho COGS</button>
-      <button class="nav-tab-btn" data-target="tab_orders">🛵 6. Đơn D2C Khách</button>
-      <button class="nav-tab-btn" data-target="tab_shippers">🚚 7. Quản Trị Shipper</button>
-      <button class="nav-tab-btn" data-target="tab_crm">👥 8. Mini CRM Khách</button>
-      <button class="nav-tab-btn" data-target="tab_wheel">🎡 9. Cấu Hình Vòng Quay & Review</button>
-      <button class="nav-tab-btn" data-target="tab_settings" id="navBtnSettings" style="display:none;">⚙️ 10. Cài Đặt Lõi Hệ Thống</button>
-    </nav>
-
-    <!-- TAB 1: DOANH THU & P&L -->
-    <section id="tab_pl" class="tab-panel active">
-      <div class="period-filter-bar">
-        <span style="font-weight:800; color:var(--gold); font-size:11px; margin-right:4px;">⏱️ Xem Doanh Thu:</span>
-        <button class="filter-btn active" data-period="all" onclick="changePeriodFilter('all', this)">🌐 Toàn Bộ</button>
-        <button class="filter-btn" data-period="day" onclick="changePeriodFilter('day', this)">📅 Hôm Nay</button>
-        <button class="filter-btn" data-period="week" onclick="changePeriodFilter('week', this)">📆 Tuần Này</button>
-        <button class="filter-btn" data-period="month" onclick="changePeriodFilter('month', this)">🗓️ Tháng Này</button>
-        <button class="filter-btn" data-period="quarter" onclick="changePeriodFilter('quarter', this)">📈 Quý Này</button>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Doanh Thu Thực Nhận (D2C)</div>
-          <div class="stat-val primary" id="stD2CRev">0đ</div>
-          <div class="stat-sub">Tiền tươi thực thu sau giảm giá</div>
-        </div>
-
-        <div class="stat-card" style="border-color:#10B981; background:rgba(16, 185, 129, 0.08);">
-          <div class="stat-label" style="color:#34D399;">Lợi Nhuận Ròng (LNR Bỏ Túi)</div>
-          <div class="stat-val success" id="stD2CLNR">0đ</div>
-          <div class="stat-sub" id="stD2CMargin" style="color:#34D399; font-weight:700;">Biên LNR: 0.0% (Trừ Cost + Thuế HKD)</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-label">Tổng Số Đơn Hoàn Tất</div>
-          <div class="stat-val blue" id="stTotalOrdersCount">0 đơn</div>
-          <div class="stat-sub" id="stCancelRateSub">Tỷ lệ hủy đơn: 0.0%</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-label">Giá Trị Trung Bình Đơn (AOV)</div>
-          <div class="stat-val primary" id="stAovVal">0đ</div>
-          <div class="stat-sub" id="stAovTargetSub">Mục tiêu AOV: 50.000đ</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-label">Ngân Sách Đi Chợ (Food Cost)</div>
-          <div class="stat-val danger" id="stFoodCostBudget">0đ</div>
-          <div class="stat-sub" id="stFoodCostRateSub">Định mức khoán trần: 35%</div>
-        </div>
-
-        <div class="stat-card" style="border-color:#38BDF8; background:rgba(56,189,248,0.06);">
-          <div class="stat-label" style="color:#38BDF8;">Quỹ Marketing Ads (1%)</div>
-          <div class="stat-val blue" id="stMarketingBudgetVal">0đ</div>
-          <div class="stat-sub">Tài trợ Ads Meta/TikTok cho quán</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-label">Tổng Chi Phí Trợ Giá Ship</div>
-          <div class="stat-val" id="stTotalShipSubsidy">0đ</div>
-          <div class="stat-sub">Tiền quán bù ship phục vụ khách</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><span>📈 Bảng Kiểm Soát Vận Hành & An Toàn Dòng Tiền Quán</span></div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Chỉ Số Quản Trị</th>
-                <th>Giá Trị Hiện Tại</th>
-                <th>Ngưỡng An Toàn F&B</th>
-                <th>Đánh Giá & Hướng Dẫn Điều Hành</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>1. Tỷ Lệ Biên LNR Kênh D2C</strong></td>
-                <td id="rowD2CMarginVal" style="font-weight:800; color:#34D399;">0.0%</td>
-                <td><span class="status-pill on">&ge; 25%</span></td>
-                <td id="rowD2CMarginEval">Đang kiểm tra...</td>
-              </tr>
-              <tr>
-                <td><strong>2. Chênh Lệch Đối Soát Kho (COGS Gap)</strong></td>
-                <td id="rowCogsGap" style="font-weight:800;">0đ</td>
-                <td><span class="status-pill on">&le; 0đ</span></td>
-                <td id="rowCogsGapEval">Hóa đơn mua sỉ vs Định mức khoán</td>
-              </tr>
-              <tr>
-                <td><strong>3. Giá Trị Trung Bình Đơn (AOV)</strong></td>
-                <td id="rowAOV" style="font-weight:800; color:var(--gold);">0đ</td>
-                <td id="rowAovThreshold"><span class="status-pill on">&ge; 45.000đ</span></td>
-                <td>Mời thêm Combo D2C hoặc Topping để kéo Ticket size</td>
-              </tr>
-              <tr>
-                <td><strong>4. Tỷ Lệ Đơn Giao Thành Công</strong></td>
-                <td id="rowDeliverySuccessRate" style="font-weight:800; color:#60A5FA;">100.0%</td>
-                <td><span class="status-pill on">&ge; 95%</span></td>
-                <td>Kiểm soát tốc độ ra món của Bếp và thời gian nhận đơn của Shipper</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 2: MENU MÓN CHÍNH & COMBO D2C -->
-    <section id="tab_menu" class="tab-panel">
-      <div class="card">
-        <div class="card-title">
-          <span>🍜 Danh Sách Món Ăn Ma Trận 3 Tầng & Combo Độc Quyền D2C</span>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-dark" onclick="openImportMediaModal()">📷 Nhập Menu Hàng Loạt</button>
-            <button class="btn btn-success" onclick="openAddDishModal()">+ Thêm Món / Combo Mới</button>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Mã ID</th>
-                <th>Hình Ảnh</th>
-                <th>Tên Món Ăn</th>
-                <th>Phân Tầng Menu</th>
-                <th>Dạng Món</th>
-                <th>Giá Bán D2C</th>
-                <th>Giá Sàn App</th>
-                <th>Food Cost</th>
-                <th>Trạng Thái</th>
-                <th>Gạt Bán / Ẩn Món</th>
-                <th>Thao Tác</th>
-              </tr>
-            </thead>
-            <tbody id="adminMenuTbody">
-              <tr><td colspan="11" style="text-align:center; color:var(--muted); padding:15px;">Đang tải danh sách món ăn...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 3: TOPPING ĂN KÈM -->
-    <section id="tab_topping" class="tab-panel">
-      <div class="card">
-        <div class="card-title">
-          <span>🥢 Quản Trị Nhóm Topping Giòn/Béo & Chén Súp Kèm</span>
-          <span style="font-size:11px; color:var(--muted); font-weight:normal;">Gạt công tắc để Báo Hết Topping tức thì trong giỏ hàng khách</span>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Mã ID</th>
-                <th>Tên Topping / Súp Kèm</th>
-                <th>Nhóm</th>
-                <th>Giá Web D2C</th>
-                <th>Giá Sàn App</th>
-                <th>Food Cost</th>
-                <th>Trạng Thái</th>
-                <th>Gạt Bật/Tắt Hết Hàng</th>
-              </tr>
-            </thead>
-            <tbody id="adminToppingTbody">
-              <tr><td colspan="8" style="text-align:center; color:var(--muted); padding:15px;">Đang tải danh sách Topping...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 4: GIẢI KHÁT BẤT TỬ (SIZE 1 LÍT) -->
-    <section id="tab_drinks" class="tab-panel">
-      <div class="card">
-        <div class="card-title">
-          <span>🧋 Danh Mục Nước Uống Bất Tử (Size Khổng Lồ 1000ml & Đóng Lon)</span>
-          <span style="font-size:11px; color:#34D399; font-weight:bold;">Đòn bẩy đẩy AOV & Giải ngấy sốt cay tóp mỡ</span>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Mã ID</th>
-                <th>Hình Ảnh</th>
-                <th>Tên Đồ Uống</th>
-                <th>Dung Tích</th>
-                <th>Giá Web D2C</th>
-                <th>Giá Sàn App</th>
-                <th>Food Cost</th>
-                <th>Trạng Thái</th>
-                <th>Gạt Bật/Tắt Bán</th>
-              </tr>
-            </thead>
-            <tbody id="adminDrinksTbody">
-              <tr><td colspan="9" style="text-align:center; color:var(--muted); padding:15px;">Đang tải danh mục Giải Khát...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 5: NHẬP KHO COGS -->
-    <section id="tab_inventory" class="tab-panel">
-      <div class="card">
-        <div class="card-title">
-          <span>📦 Lịch Sử Nhập Kho & Hóa Đơn Mua Sỉ Nguyên Liệu</span>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-dark" onclick="openImportInvoiceModal()">📷 Quét / Nhập Hóa Đơn Hàng Loạt</button>
-            <button class="btn btn-success" onclick="openAddInventoryModal()">+ Nhập Kho Thủ Công</button>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Mã Nhập</th>
-                <th>Thời Gian</th>
-                <th>Tên Nguyên Liệu</th>
-                <th>Quy Cách Mua</th>
-                <th>Tổng Tiền</th>
-                <th>Hệ Số Quy Đổi</th>
-                <th>Giá Vốn / Suất</th>
-              </tr>
-            </thead>
-            <tbody id="adminInventoryTbody">
-              <tr><td colspan="7" style="text-align:center; color:var(--muted); padding:15px;">Đang tải dữ liệu nhập kho...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 6: ĐƠN D2C KHÁCH -->
-    <section id="tab_orders" class="tab-panel">
-      <div class="card">
-        <div class="card-title">
-          <span>🛵 Danh Sách Đơn Hàng D2C & Chi Tiết Từng Phần Đặt</span>
-          <span style="font-size:11px; background:rgba(16, 185, 129, 0.2); color:#34D399; padding:3px 8px; border-radius:8px; font-weight:bold;">Food Cost Khoán & Thuế HKD Tự Động</span>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Mã Đơn</th>
-                <th>Thời Gian</th>
-                <th>Khách Hàng</th>
-                <th>Địa Chỉ / GPS</th>
-                <th>Chi Tiết Món & Topping</th>
-                <th>Tổng Thu</th>
-                <th>KM + Bù Ship</th>
-                <th>LNR Thực Nhận</th>
-                <th>Biên LNR</th>
-                <th>Shipper Giao</th>
-                <th>Nguồn UTM / Trạng Thái</th>
-              </tr>
-            </thead>
-            <tbody id="adminOrdersTbody">
-              <tr><td colspan="11" style="text-align:center; color:var(--muted); padding:15px;">Đang tải danh sách đơn hàng...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 7: QUẢN TRỊ SHIPPER -->
-    <section id="tab_shippers" class="tab-panel">
-      <div class="period-filter-bar">
-        <span style="font-weight:800; color:var(--gold); font-size:11px; margin-right:4px;">⏱️ Lọc Hiệu Suất Shipper:</span>
-        <button class="filter-btn active" data-speriod="all" onclick="changeShipperPeriodFilter('all', this)">🌐 Toàn Bộ</button>
-        <button class="filter-btn" data-speriod="day" onclick="changeShipperPeriodFilter('day', this)">📅 Hôm Nay</button>
-        <button class="filter-btn" data-speriod="week" onclick="changeShipperPeriodFilter('week', this)">📆 Tuần Này</button>
-        <button class="filter-btn" data-speriod="month" onclick="changeShipperPeriodFilter('month', this)">🗓️ Tháng Này</button>
-        <button class="filter-btn" data-speriod="quarter" onclick="changeShipperPeriodFilter('quarter', this)">📈 Quý Này</button>
-      </div>
-
-      <div class="card">
-        <div class="card-title">
-          <span>🚚 Danh Sách Tài Xế & Thống Kê Cuốc Giao Hàng</span>
-          <button class="btn btn-success" onclick="openAddShipperModal()">+ Thêm Shipper Mới</button>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Mã Shipper</th>
-                <th>Họ Tên Tài Xế</th>
-                <th>Số Điện Thoại</th>
-                <th>Trạng Thái</th>
-                <th>Đơn Hoàn Tất Trong Kỳ</th>
-                <th>COD Đang Giữ</th>
-                <th>Thao Tác</th>
-              </tr>
-            </thead>
-            <tbody id="adminShippersTbody">
-              <tr><td colspan="7" style="text-align:center; color:var(--muted); padding:15px;">Đang tải danh sách tài xế...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 8: MINI CRM KHÁCH HÀNG -->
-    <section id="tab_crm" class="tab-panel">
-      <div class="card">
-        <div class="card-title">
-          <span>👥 Danh Bạ Khách Hàng & Phân Hạng Thành Viên (CRM Thím 5)</span>
-          <span style="font-size:11px; color:var(--muted); font-weight:normal;">Tự động phân cấp Huy hiệu Tiers theo số đơn hàng tháng</span>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Số Điện Thoại</th>
-                <th>Tên Khách Hàng</th>
-                <th>Tổng Số Đơn</th>
-                <th>Tổng Chi Tiêu</th>
-                <th>Khẩu Vị Ruột</th>
-                <th>Huy Hiệu & Cấp Bậc</th>
-                <th>Lần Đặt Cuối</th>
-              </tr>
-            </thead>
-            <tbody id="adminCrmTbody">
-              <tr><td colspan="7" style="text-align:center; color:var(--muted); padding:15px;">Đang tải dữ liệu CRM...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 9: CẤU HÌNH VÒNG QUAY ĐỘNG & REVIEW -->
-    <section id="tab_wheel" class="tab-panel">
-      <div class="card" style="border: 2px solid var(--primary); background: #162032;">
-        <div class="card-title">
-          <span>🎡 Cấu Hình 6 Ô Quà Vòng Quay (Kéo Từ Menu • Chống Lỗ Ngầm)</span>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-blue btn-sm" onclick="autoBalanceWheelWeights()">⚡ Tự Động Phân Bổ Tỷ Lệ Theo Cost</button>
-            <button class="btn btn-success btn-sm" onclick="saveWheelSetupSubmit()">💾 Lưu Cấu Hình Vòng Quay</button>
-          </div>
-        </div>
-        <p style="font-size:11px; color:var(--muted); margin-top:-6px; margin-bottom:12px;">
-          💡 Quản lý chọn quà từ 3 nhóm (Topping, Nước uống, Bù Ship). Hệ thống tự chia tỷ lệ xác suất nghịch đảo với Food Cost để tổng chi phí quà &le; 5% AOV.
-        </p>
-
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:10px; margin-bottom:12px;" id="wheelSlotsContainer"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">
-          <span>📜 Lịch Sử Khách Đánh Giá & Quay Thưởng May Mắn</span>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Mã Đơn</th>
-                <th>Thời Gian</th>
-                <th>Số Điện Thoại</th>
-                <th>Số Sao</th>
-                <th>Phần Thưởng Trúng</th>
-                <th>Trạng Thái Dùng</th>
-              </tr>
-            </thead>
-            <tbody id="adminWheelTbody">
-              <tr><td colspan="6" style="text-align:center; color:var(--muted); padding:15px;">Đang tải lịch sử quay thưởng...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 10: CÀI ĐẶT LÕI HỆ THỐNG (SUPER ADMIN LEVEL 2) -->
-    <section id="tab_settings" class="tab-panel">
-      <div class="card">
-        <div class="card-title"><span>⚙️ Cài Đặt Lõi, Đa Ngành, Thù Lao Master, Ngân Hàng & Thuế HKD</span></div>
-        <div style="max-width:850px;">
-          
-          <!-- KHỐI 0: CẤU HÌNH ĐA NGÀNH F&B & THÙ LAO SẾP ÂU + QUỸ ADS 1% -->
-          <div style="background:#0F172A; border:2px solid var(--gold); border-radius:14px; padding:16px; margin-bottom:16px; box-shadow: 0 4px 20px rgba(253, 224, 71, 0.15);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px dashed #334155; padding-bottom:8px;">
-              <div>
-                <strong style="color:var(--gold); font-size:14px;">🌐 CẤU HÌNH ĐA NGÀNH, THÙ LAO MASTER (SẾP ÂU) & QUỸ ADS 1%</strong>
-                <p style="font-size:11px; color:var(--muted); margin-top:2px;">Điều chỉnh linh hoạt từng Child Node kết nối Master Root Portal</p>
-              </div>
-              <span class="role-badge lv2">Super Admin Only</span>
-            </div>
-
-            <div style="display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:10px; margin-bottom:10px;">
-              <div class="form-group" style="margin-bottom:0;">
-                <label>Lĩnh Vực Hoạt Động (Category):</label>
-                <select class="form-input" id="cfgIndustryType" onchange="handleIndustryChange(this.value)">
-                  <option value="FAST_FOOD" selected>🍜 Thức Ăn Nhanh / Mì Trộn / Cơm</option>
-                  <option value="DRINKS">🧋 Trà Sữa / Cà Phê / Giải Khát</option>
-                  <option value="PUBS">🍻 Quán Nhậu / Mồi Bén / Lẩu Nướng</option>
-                  <option value="RESTAURANT">🍱 Cơm Trưa / Bếp Gia Đình</option>
-                </select>
-              </div>
-              <div class="form-group" style="margin-bottom:0;">
-                <label>Tỷ Lệ Thù Lao Sếp Âu (% D2C):</label>
-                <div style="display:flex; gap:6px; align-items:center;">
-                  <input type="number" step="0.1" min="0" max="10" class="form-input" id="cfgHubRoyaltyRate" value="2.0" style="color:var(--gold); font-size:14px;" />
-                  <span style="color:var(--gold); font-weight:bold;">%</span>
-                </div>
-              </div>
-              <div class="form-group" style="margin-bottom:0;">
-                <label>Quỹ Marketing Ads Chuỗi (%):</label>
-                <div style="display:flex; gap:6px; align-items:center;">
-                  <input type="number" step="0.1" class="form-input" id="cfgMarketingBudgetRate" value="1.0" style="color:#38BDF8; font-size:14px;" />
-                  <span style="color:#38BDF8; font-weight:bold;">%</span>
-                </div>
-              </div>
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-              <div class="form-group" style="margin-bottom:0;">
-                <label>Ngưỡng Food Cost Trần An Toàn (%):</label>
-                <div style="display:flex; gap:6px; align-items:center;">
-                  <input type="number" step="1" min="10" max="50" class="form-input" id="cfgTargetMaxFoodCostRate" value="35" style="color:#F87171; font-size:14px;" />
-                  <span style="color:#F87171; font-weight:bold;">%</span>
-                  <span style="font-size:10px; color:var(--muted);">(Nước: ~25%, Mì: ~35%)</span>
-                </div>
-              </div>
-              <div class="form-group" style="margin-bottom:0;">
-                <label>Giá Trị Trung Bình Đơn Kỳ Vọng (AOV):</label>
-                <input type="number" class="form-input" id="cfgTargetAOV" value="50000" placeholder="50000" />
-              </div>
-            </div>
-          </div>
-
-          <!-- KHỐI TRACKING PIXEL TỰ ĐỘNG (ZERO-TOUCH CODE) -->
-          <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
-            <strong style="color:var(--gold); font-size:13px;">🎯 KHAI BÁO MÃ THEO DÕI QUẢNG CÁO (PIXEL ĐỘNG)</strong>
-            <p style="font-size:10px; color:var(--muted); margin-top:2px; margin-bottom:10px;">
-              Tự động kích hoạt phễu đo lường Ads Meta & TikTok khi khách đặt món D2C. Để trống nếu quán không chạy quảng cáo.
-            </p>
-            
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-              <div class="form-group" style="margin-bottom:0;">
-                <label style="color:#38BDF8;">Meta Pixel ID (Facebook Ads):</label>
-                <input type="text" class="form-input" id="cfgMetaPixelId" placeholder="VD: 123456789012345" />
-              </div>
-              <div class="form-group" style="margin-bottom:0;">
-                <label style="color:#F472B6;">TikTok Pixel ID (TikTok Ads):</label>
-                <input type="text" class="form-input" id="cfgTiktokPixelId" placeholder="VD: C123456789ABCDEF" />
-              </div>
-            </div>
-          </div>
-
-          <!-- KHỐI 1: BẢNG ĐIỀU HÀNH CÔNG THỨC ĐỊNH GIÁ & KHUYẾN MÃI ĐỘNG -->
-          <div style="background:#0F172A; border:1px solid #334155; border-radius:14px; padding:16px; margin-bottom:16px;">
-            <strong style="color:var(--gold); font-size:13px; display:block; margin-bottom:8px;">🎛️ CÔNG THỨC ĐỊNH GIÁ NGƯỢC & BẬC THANG PHÍ SHIP</strong>
-
-            <!-- 1. CÔNG THỨC ĐỊNH GIÁ NGƯỢC -->
-            <div style="background:#1E293B; border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid #334155;">
-              <label style="color:#38BDF8; font-weight:800; font-size:12px; display:block; margin-bottom:6px;">
-                1. Định giá D2C từ giá sàn: D2C = Giá Sàn × (1 - Tỷ Lệ Lệch)
-              </label>
-              <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:10px; align-items:center;">
-                <div>
-                  <label style="font-size:10.5px; color:var(--muted); display:block; margin-bottom:4px;">Tỷ Lệ Giảm Giá D2C So Với Sàn (%):</label>
-                  <div style="display:flex; gap:6px; align-items:center;">
-                    <input type="number" step="1" min="5" max="25" class="form-input" id="cfgD2cDiscountRate" value="12" style="width:90px; color:var(--gold); font-size:15px; font-weight:900;" oninput="previewPricingDemo(this.value)" />
-                    <span style="color:var(--gold); font-weight:900; font-size:14px;">%</span>
-                    <span style="font-size:10.5px; color:var(--muted); margin-left:6px;">(Khuyên dùng: 10% - 12%)</span>
-                  </div>
-                </div>
-                <div style="background:#0F172A; padding:8px 10px; border-radius:8px; border:1px solid #334155;">
-                  <span style="font-size:10px; color:var(--muted); display:block;">Mô phỏng Mì Trộn Tóp Mỡ Trứng Đào:</span>
-                  <span id="demoPricingCalc" style="font-size:11.5px; font-weight:800; color:#34D399;">Sàn: 45.000đ ➔ D2C: 39.000đ (Lệch 12%)</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- 2. KHÓA TRẦN TỔNG KHUYẾN MÃI -->
-            <div style="background:#1E293B; border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid #334155;">
-              <label style="color:#F472B6; font-weight:800; font-size:12px; display:block; margin-bottom:6px;">
-                2. Khóa trần tổng ngân sách khuyến mãi toàn đơn (Voucher + Ship + Wheel):
-              </label>
-              <div style="display:flex; gap:8px; align-items:center;">
-                <label style="font-size:10.5px; color:var(--muted);">Tỷ lệ ngân sách tối đa trên tổng tiền món:</label>
-                <input type="number" step="1" min="5" max="25" class="form-input" id="cfgMaxPromoBudgetRate" value="15" style="width:90px; color:#F472B6; font-size:15px; font-weight:900;" />
-                <span style="color:#F472B6; font-weight:900; font-size:14px;">%</span>
-                <span style="font-size:10.5px; color:var(--muted); margin-left:6px;">(Chặn đứng lỗ ngầm khi khách gộp mã)</span>
-              </div>
-            </div>
-
-            <!-- 3. BẬC THANG HỖ TRỢ PHÍ SHIP -->
-            <div style="background:#1E293B; border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid #334155;">
-              <label style="color:#34D399; font-weight:800; font-size:12px; display:block; margin-bottom:6px;">
-                3. Bậc thang hỗ trợ phí ship (Vượt tiền ship thực tế sẽ hiển thị 0đ Freeship):
-              </label>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div style="background:#0F172A; padding:8px 10px; border-radius:8px; border:1px solid #334155;">
-                  <span style="font-size:10px; font-weight:800; color:var(--gold);">BẬC 1 (Đơn gom nhỏ):</span>
-                  <div style="display:flex; gap:6px; align-items:center; margin-top:4px;">
-                    <input type="number" class="form-input" id="cfgShipMinBill1" value="100000" style="width:90px;" placeholder="Đơn từ" />
-                    <span style="font-size:11px;">đ ➔ Trợ giá:</span>
-                    <input type="number" class="form-input" id="cfgShipSubsidy1" value="15000" style="width:80px; color:#34D399;" />
-                    <span style="font-size:11px;">đ</span>
-                  </div>
-                </div>
-                <div style="background:#0F172A; padding:8px 10px; border-radius:8px; border:1px solid #334155;">
-                  <span style="font-size:10px; font-weight:800; color:var(--gold);">BẬC 2 (Đơn mâm lớn / VIP):</span>
-                  <div style="display:flex; gap:6px; align-items:center; margin-top:4px;">
-                    <input type="number" class="form-input" id="cfgShipMinBill2" value="150000" style="width:90px;" placeholder="Đơn từ" />
-                    <span style="font-size:11px;">đ ➔ Trợ giá:</span>
-                    <input type="number" class="form-input" id="cfgShipSubsidy2" value="25000" style="width:80px; color:#34D399;" />
-                    <span style="font-size:11px;">đ</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <button class="btn btn-success" style="width:100%; padding:12px; font-size:13px;" onclick="handleSaveDynamicFormulas()">
-              💾 CẬP NHẬT CÔNG THỨC & THAM SỐ TOÀN HỆ THỐNG
-            </button>
-          </div>
-
-          <!-- KHỐI 2: CẤU HÌNH THUẾ HKD & EMAIL BÁO CÁO THUẾ -->
-          <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
-            <strong style="color:var(--gold); font-size:13px;">📋 CẤU HÌNH THUẾ HỘ KINH DOANH & BÁO CÁO KÊ KHAI (23H59)</strong>
-            <p style="font-size:10px; color:var(--muted); margin-top:2px; margin-bottom:10px;">Chỉ Super Admin mới có quyền điều chỉnh thuế suất và danh sách email nhận báo cáo thuế hàng ngày</p>
-
-            <div class="form-group">
-              <label>Tỷ Lệ Thuế Khoán HKD Kênh D2C (%):</label>
-              <div style="display:flex; gap:6px; align-items:center;">
-                <input type="number" step="0.1" class="form-input" id="cfgTaxRatePercent" value="4.5" style="width:100px; color:#38BDF8;" />
-                <span style="color:var(--gold); font-weight:bold;">%</span>
-                <span style="font-size:10px; color:var(--muted); margin-left:6px;">(Chuẩn F&B 2026: 3.0% GTGT + 1.5% TNCN = 4.5%)</span>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>Danh Sách Email Nhận Báo Cáo Kê Khai Thuế Hàng Ngày (Cách nhau dấu phẩy):</label>
-              <input type="text" class="form-input" id="cfgTaxReportEmails" value="haiau2205@gmail.com, cobala9551@gmail.com" placeholder="haiau2205@gmail.com, ketoan@gmail.com" />
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
-              <button class="btn btn-blue" onclick="handleManualSendTaxReport()">📧 Xuất & Gửi Báo Cáo Thuế Hôm Nay Ngay</button>
-              <button class="btn btn-dark" onclick="handleActivateTaxAutoTrigger()">⏰ Kích Hoạt Tự Động Gửi Lúc 23:59</button>
-            </div>
-          </div>
-
-          <!-- KHỐI 3: KHUNG GIỜ VÀNG -->
-          <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <div>
-                <strong style="color:var(--gold); font-size:13px;">🔥 KHUNG GIỜ VÀNG (FLASH SALE D2C)</strong>
-                <p style="font-size:10px; color:var(--muted); margin-top:2px;">Bật chuông Ting Ting & banner ưu đãi xanh Grab khi khách mở web</p>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="chkGoldenHourActive" />
-                <span class="slider"></span>
-              </label>
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Nội Dung Thông Báo Giờ Vàng:</label>
-              <input type="text" class="form-input" id="txtGoldenHourMsg" value="Freeship từ 2 phần + Tặng 1 Nước Suối cho bill từ 50k!" />
-            </div>
-          </div>
-
-          <!-- KHỐI 4: MARKETING & GAMIFICATION ĐỘNG (5 TIERS) -->
-          <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-              <div>
-                <strong style="color:var(--gold); font-size:13px;">🏆 QUẢN TRỊ CHIẾN DỊCH HUY HIỆU, NICKNAME & QUÀ TẶNG ĐỘNG</strong>
-                <p style="font-size:10px; color:var(--muted); margin-top:2px;">Tùy chỉnh mốc cày đơn (0-2-4-7-12 đơn), giảm 1%, 2%, 3%, Freeship 2km và quà AOV</p>
-              </div>
-              <button class="btn btn-blue btn-sm" onclick="loadGamificationAdminData()">🔄 Tải Lại Config</button>
-            </div>
-
-            <div style="background:#1E293B; border-radius:10px; padding:10px; margin-bottom:10px; border:1px solid #334155;">
-              <label style="color:#38BDF8; font-weight:bold; font-size:11px; display:block; margin-bottom:6px;">1. Bảng 5 Cấp Bậc Huy Hiệu Theo Tháng (Mốc 0 - 2 - 4 - 7 - 12 đơn):</label>
-              <div class="table-responsive">
-                <table style="min-width:100%;">
-                  <thead>
-                    <tr>
-                      <th>Cấp</th>
-                      <th>Mốc Đơn</th>
-                      <th>Huy Hiệu Mặc Định</th>
-                      <th>Từ Khóa Tính Cách (|)</th>
-                      <th>Giảm (%)</th>
-                      <th>Freeship 2km</th>
-                    </tr>
-                  </thead>
-                  <tbody id="tierConfigTbody">
-                    <tr><td colspan="6" style="text-align:center; color:var(--muted); padding:10px;">Đang tải cấu hình Tiers...</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div style="background:#1E293B; border-radius:10px; padding:10px; margin-bottom:10px; border:1px solid #334155;">
-              <label style="color:#34D399; font-weight:bold; font-size:11px; display:block; margin-bottom:6px;">2. Ngưỡng Tặng Nước Đóng Chai Kéo Ticket Size (AOV):</label>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                <div style="background:#0F172A; padding:8px; border-radius:8px; border:1px solid #334155;">
-                  <label style="font-size:10px; font-weight:bold; color:var(--gold);">Mốc 1 (Kéo bill 1 phần lên 2 phần):</label>
-                  <div style="display:flex; gap:4px; margin-top:2px;">
-                    <input type="number" class="form-input" id="upsellMinBill1" value="50000" style="width:80px;" />
-                    <input type="text" class="form-input" id="upsellGiftName1" value="1 Chai Nước Suối Ướp Lạnh (0đ)" />
-                  </div>
-                </div>
-                <div style="background:#0F172A; padding:8px 10px; border-radius:8px; border:1px solid #334155;">
-                  <label style="font-size:10px; font-weight:bold; color:var(--gold);">Mốc 2 (Kéo bill nhóm / Mâm VIP):</label>
-                  <div style="display:flex; gap:4px; margin-top:2px;">
-                    <input type="number" class="form-input" id="upsellMinBill2" value="99000" style="width:80px;" />
-                    <input type="text" class="form-input" id="upsellGiftName2" value="1 Lon Pepsi/7Up Ướp Lạnh (0đ)" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div style="background:#1E293B; border-radius:10px; padding:10px; margin-bottom:10px; border:1px solid #334155;">
-              <label style="color:#F472B6; font-weight:bold; font-size:11px; display:block; margin-bottom:6px;">3. Chiến Dịch Giới Thiệu Bạn Mới (Viral Referral):</label>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-                <div class="form-group" style="margin-bottom:0;">
-                  <label>Ưu Đãi Bạn Mới (VNĐ):</label>
-                  <input type="number" class="form-input" id="refInviteeDisc" value="5000" />
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label>Đơn Tối Thiểu Áp Dụng (VNĐ):</label>
-                  <input type="number" class="form-input" id="refMinSpend" value="40000" />
-                </div>
-              </div>
-            </div>
-
-            <button class="btn btn-blue" style="width:100%; padding:10px; font-size:12px;" onclick="saveGamificationAdminData()">
-              💾 Lưu Riêng Chiến Dịch Marketing & Gamification
-            </button>
-          </div>
-
-          <!-- KHỐI 5: TÀI KHOẢN NGÂN HÀNG & VIETQR -->
-          <div style="background:#0F172A; border:1px solid #334155; border-radius:12px; padding:14px; margin-bottom:14px;">
-            <strong style="color:var(--gold); font-size:13px;">💳 TÀI KHOẢN NGÂN HÀNG / VÍ VIETQR NHẬN TIỀN KHÁCH</strong>
-            <p style="font-size:10px; color:var(--muted); margin-top:2px; margin-bottom:10px;">Tự động sinh mã VietQR chuẩn Napas247 cho đơn hàng D2C</p>
-
-            <div class="form-group">
-              <label>Chọn Ngân Hàng / Ví Nhận Tiền:</label>
-              <select class="form-input" id="cfgBankSelect" onchange="handleBankSelectChange()">
-                <option value="MB|970422">Ngân Hàng Quân Đội (MB Bank)</option>
-                <option value="VCB|970436">Vietcombank</option>
-                <option value="TCB|970407">Techcombank</option>
-                <option value="ACB|970416">ACB Bank</option>
-                <option value="CTG|970415">VietinBank</option>
-                <option value="BIDV|970418">BIDV</option>
-                <option value="VPB|970432">VPBank</option>
-                <option value="TPB|970423">TPBank</option>
-                <option value="MOMO|971025">Ví Điện Tử MoMo</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Số Tài Khoản / Số Điện Thoại Nhận Tiền:</label>
-              <input type="text" class="form-input" id="cfgBankAccount" value="3939388888" placeholder="Nhập số tài khoản hoặc SĐT MoMo" />
-            </div>
-
-            <div class="form-group">
-              <label>Họ & Tên Chủ Tài Khoản (In hoa không dấu):</label>
-              <input type="text" class="form-input" id="cfgAccountHolderName" value="NGUYEN HAI AU" placeholder="NGUYEN HAI AU" />
-            </div>
-
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Loại Chủ Thể Tài Khoản:</label>
-              <select class="form-input" id="cfgAccountTypeLabel">
-                <option value="Tài khoản Hộ Kinh Doanh" selected>Hộ Kinh Doanh Thím 5 (Xuất hóa đơn thuế 4.5%)</option>
-                <option value="Tài khoản Cá nhân">Tài khoản Cá nhân (Nguyễn Hải Âu)</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- KHỐI 6: MÃ QR ĐỘNG -->
-          <div class="qr-card-box">
-            <strong style="color:var(--gold); font-size:13px;">📱 MÃ QR ĐẶT MÓN ĐỘNG CỦA QUÁN (IN ẤN / STANDEE)</strong>
-            <p style="font-size:10px; color:var(--muted); margin-top:2px;">Tự động cập nhật lại mã QR mỗi khi thay đổi địa chỉ Web quán</p>
-            
-            <img src="" id="dynamicStoreQrImg" class="qr-card-img" alt="Store QR Code" />
-            
-            <div class="form-group" style="text-align:left; margin-top:10px;">
-              <label>Đường Dẫn Web Quán (Script URL hoặc thim5.anngonlonghoa.com.vn):</label>
-              <input type="url" class="form-input" id="cfgStoreWebUrl" placeholder="Để trống để tự động lấy URL triển khai thực tế..." oninput="generateStoreDynamicQr(this.value)" />
-            </div>
-
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
-              <button class="btn btn-blue" onclick="downloadStoreQrImage()">📥 Tải Ảnh QR Độ Nét Cao</button>
-              <button class="btn btn-dark" onclick="copyStoreWebUrl()">📋 Sao Chép Link Đặt Món</button>
-            </div>
-          </div>
-
-          <hr style="border:0; border-top:1px dashed #334155; margin:16px 0;" />
-
-          <!-- KHỐI 7: THÔNG TIN VẬN HÀNH & ĐỔI MÃ PIN & BANNER COVER ĐỘNG -->
-          <div class="form-group">
-            <label>Ảnh Bìa / Banner Cover Quán (URL hình ảnh hiển thị trên Web):</label>
-            <input type="url" class="form-input" id="cfgStoreCoverUrl" placeholder="https://images.unsplash.com/... hoặc link ảnh Drive" />
-          </div>
-          <div class="form-group">
-            <label>Tên Quán Quản Trị:</label>
-            <input type="text" class="form-input" id="cfgStoreName" value="Mì Trộn & Cơm Trộn Thím 5" />
-          </div>
-          <div class="form-group">
-            <label>Họ Tên Quản Trị / Chủ Quán:</label>
-            <input type="text" class="form-input" id="cfgOwnerName" value="Nguyễn Hải Âu" />
-          </div>
-          <div class="form-group">
-            <label>Số Điện Thoại Quán (Hotline / Nhận Zalo):</label>
-            <input type="text" class="form-input" id="cfgStorePhone" value="0969004693" />
-          </div>
-          <div class="form-group">
-            <label>Địa Chỉ Quán / Bếp Hiển Thị:</label>
-            <input type="text" class="form-input" id="cfgStoreAddress" value="Nguyễn Văn Linh, TX. Hòa Thành, Tây Ninh" />
-          </div>
-          <div class="form-group">
-            <label>Tọa Độ Tâm GPS Quán (Lat, Lng):</label>
-            <div style="display:flex; gap:6px; margin-bottom:4px;">
-              <input type="text" class="form-input" id="cfgLat" value="11.285267" />
-              <input type="text" class="form-input" id="cfgLng" value="106.133347" />
-            </div>
-            <button class="btn btn-blue btn-sm" onclick="getCurrentLocationGps()">📍 Lấy Tọa Độ Vị Trí Hiện Tại</button>
-          </div>
-
-          <!-- ĐỔI PIN LEVEL 1 -->
-          <div style="background:#0F172A; border:1px solid #334155; border-radius:10px; padding:12px; margin-bottom:12px;">
-            <label style="color:#93C5FD; font-weight:800;">🔑 Đổi Mã PIN Level 1 (Chủ quán/Quản lý ca):</label>
-            <div style="display:flex; gap:6px; margin-top:4px;">
-              <input type="password" class="form-input" id="inputNewPinLv1" placeholder="Nhập PIN Level 1 mới (VD: 1985)" style="margin-bottom:0;" />
-              <button class="btn btn-blue" style="white-space:nowrap;" onclick="handleSavePinLevel1()">Lưu PIN Lv1</button>
-            </div>
-          </div>
-
-          <!-- ĐỔI SUPER PIN LEVEL 2 -->
-          <div style="background:#0F172A; border:1px solid var(--gold); border-radius:10px; padding:12px; margin-bottom:12px;">
-            <label style="color:var(--gold); font-weight:800;">👑 Đổi Mã PIN Super Admin Level 2 (Bảo mật OTP Gmail):</label>
-            <p style="font-size:10px; color:var(--muted); margin-bottom:8px;">Bấm nút bên dưới để nhận mã OTP gửi về Email chính chủ trước khi đổi PIN:</p>
-            <button class="btn btn-dark" style="border:1px solid var(--gold); color:var(--gold); width:100%; padding:10px; margin-bottom:8px;" onclick="openSuperPinResetModal()">
-              📧 Bấm Nhận Mã OTP Qua Email Để Đổi Super PIN
-            </button>
-          </div>
-
-          <button class="btn btn-success" style="width:100%; padding:12px; margin-top:8px; font-size:13px;" onclick="saveSystemSettingsSubmit()">💾 LƯU & ĐỒNG BỘ TOÀN HỆ THỐNG</button>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <!-- MODAL XÁC THỰC OTP GMAIL ĐỔI SUPER PIN -->
-  <div class="modal" id="superPinOtpModal">
-    <div class="modal-sheet" style="text-align:center; max-width:400px;">
-      <div style="font-size:32px; margin-bottom:4px;">🔐</div>
-      <h3 style="color:var(--gold); font-size:15px; margin-bottom:4px;">Xác Thực OTP Đổi Super PIN</h3>
-      <p style="font-size:11px; color:var(--muted); margin-bottom:12px;">Mã OTP 6 số đã được gửi về Gmail chính chủ. Vui lòng nhập để hoàn tất:</p>
-      
-      <div class="form-group">
-        <label>Nhập Mã OTP (6 Số):</label>
-        <input type="tel" class="form-input" id="superOtpInput" maxlength="6" style="text-align:center; font-size:18px; letter-spacing:4px; color:var(--gold);" placeholder="123456" />
-      </div>
-
-      <div class="form-group">
-        <label>Nhập Mã Super PIN Mới:</label>
-        <input type="password" class="form-input" id="newSuperPinInput" maxlength="6" style="text-align:center; font-size:18px; letter-spacing:4px;" placeholder="••••" />
-      </div>
-
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
-        <button class="btn btn-success" onclick="handleSubmitSuperPinReset()">Xác Nhận Đổi</button>
-        <button class="btn btn-dark" onclick="closeModal('superPinOtpModal')">Hủy</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL THÊM/SỬA SHIPPER -->
-  <div class="modal" id="shipperModal">
-    <div class="modal-sheet">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 id="shipperModalTitle" style="font-size:14px; font-weight:800; color:var(--gold);">Thêm Tài Xế Mới</h3>
-        <button onclick="closeModal('shipperModal')" style="background:none; border:none; font-size:16px; cursor:pointer; color:#fff;">✕</button>
-      </div>
-      <input type="hidden" id="shipperEditId" />
-      <div class="form-group"><label>Mã Shipper (VD: SH-01, SH-02):</label><input type="text" class="form-input" id="shipperIdInput" /></div>
-      <div class="form-group"><label>Họ Tên Tài Xế:</label><input type="text" class="form-input" id="shipperNameInput" /></div>
-      <div class="form-group"><label>Số Điện Thoại:</label><input type="tel" class="form-input" id="shipperPhoneInput" /></div>
-      <div class="form-group"><label>Trạng Thái Hoạt Động:</label>
-        <select class="form-input" id="shipperStatusInput">
-          <option value="Rảnh">🟢 Rảnh (Sẵn sàng nhận đơn)</option>
-          <option value="Nghỉ">🔴 Nghỉ ca</option>
-        </select>
-      </div>
-      <button class="btn btn-success" style="width:100%; padding:10px;" onclick="saveShipperSubmit()">💾 Lưu Thông Tin Tài Xế</button>
-    </div>
-  </div>
-
-  <!-- MODAL THÊM/SỬA MÓN (CÓ CẢNH BÁO MỀM SOFT WARNING) -->
-  <div class="modal" id="dishModal">
-    <div class="modal-sheet">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 id="dishModalTitle" style="font-size:14px; font-weight:800; color:var(--gold);">Thêm Món Ăn Mới</h3>
-        <button onclick="closeModal('dishModal')" style="background:none; border:none; font-size:16px; cursor:pointer; color:#fff;">✕</button>
-      </div>
-      <input type="hidden" id="dishEditId" />
-      <input type="hidden" id="dishImgBase64" />
-      
-      <div class="form-group"><label>Mã ID Món (VD: m7, combo_ga99k, dr_pepsi, top_topmo):</label><input type="text" class="form-input" id="dishIdInput" /></div>
-      <div class="form-group"><label>Tên Món Ăn / Combo Độc Quyền:</label><input type="text" class="form-input" id="dishNameInput" placeholder="VD: Combo 2 Đùi Gà Rán + Cơm + Tặng 1 Pepsi" /></div>
-      
-      <div class="form-group">
-        <label>Hình Ảnh Đại Diện (Cắt vuông chuẩn Mobile):</label>
-        <input type="file" id="dishFileInput" class="form-input" accept="image/*" onchange="handleDishImageProcess(event)" />
-        <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
-          <img id="dishImgPreview" class="dish-img-preview" src="https://images.unsplash.com/photo-1612927601601-6638404737ce?w=500" alt="Preview" />
-          <span style="font-size:10px; color:var(--muted);" id="dishImgStatus">Dùng ảnh mặc định</span>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Phân Loại Ma Trận Menu (Định vị kéo AOV):</label>
-        <select class="form-input" id="dishCatInput" onchange="validateSoftWarningPricing()">
-          <option value="mon-chinh">🍜 Món Mồi / Món Chính (25k – 29k) [Traffic Maker]</option>
-          <option value="moi-lai-rai">🍻 Mồi Lai Rai Bắt Vị (39k – 49k) [Core Profit]</option>
-          <option value="dai-tiec" selected>👑 Combo Độc Quyền D2C (59k – 199k) [Kéo AOV Nhóm]</option>
-          <option value="an-kem">🍱 Món Ăn Kèm (Kimbap, Gà Viên...)</option>
-          <option value="giai-khat">🧋 Nước Uống Bất Tử (Size 1 Lít & Đóng Lon)</option>
-          <option value="topping-extra">🥢 Topping Ăn Kèm (Trứng đào, Tóp mỡ...)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label style="color:var(--gold);">Dạng Thức Món Ăn (Để hiển thị Súp & Gu vị thông minh ngoài Web):</label>
-        <select class="form-input" id="dishTypeInput">
-          <option value="kho" selected>🍜 Món Khô / Mì Trộn / Cơm (Tự động mở chọn chén súp ăn kèm)</option>
-          <option value="nuoc">🍲 Món Nước Súp (Ẩn chén súp kèm, mở cấp cay sa tế)</option>
-          <option value="an-kem">🍱 Món Ăn Kèm / Ăn Vặt (Mở sốt chấm, ẩn súp)</option>
-          <option value="giai-khat">🧋 Nước Giải Khát (Ẩn toàn bộ súp và vị cay)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label style="color:#38BDF8;">Giá Niêm Yết Sàn App (Grab/Shopee - Để 0 nếu độc quyền D2C):</label>
-        <input type="number" class="form-input" id="dishPriceAppInput" placeholder="VD: 0" oninput="autoCalculateD2CFromApp(this.value)" />
-      </div>
-      <div class="form-group">
-        <label style="color:var(--gold);">Giá Bán Web D2C Thực Thu (VNĐ):</label>
-        <input type="number" class="form-input" id="dishPriceInput" placeholder="Tự nhảy: 99000" oninput="autoCalculateAppFromD2C(this.value)" />
-        <p id="softWarningPriceText" class="soft-warning-msg"></p>
-      </div>
-      <div class="form-group">
-        <label>Food Cost Định Lượng (Khuyến nghị &le; <span id="dispCostRateLimitLabel">35%</span>):</label>
-        <input type="number" class="form-input" id="dishCostInput" placeholder="Tự tính theo trần Food Cost" />
-      </div>
-      <div class="form-group"><label>Mô Tả Thành Phần / Khẩu Vị:</label><input type="text" class="form-input" id="dishDescInput" placeholder="2 Đùi gà chiên giòn + Cơm dẻo + Tặng 1 Lon Pepsi mát lạnh" /></div>
-      <button class="btn" style="width:100%; padding:10px;" id="btnSaveDish" onclick="saveDishSubmit()">💾 Lưu Món Ăn</button>
-    </div>
-  </div>
-
-  <!-- MODAL NHẬP KHO THỦ CÔNG -->
-  <div class="modal" id="inventoryModal">
-    <div class="modal-sheet">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="font-size:14px; font-weight:800; color:var(--gold);">📦 Nhập Kho Hóa Đơn Mới</h3>
-        <button onclick="closeModal('inventoryModal')" style="background:none; border:none; font-size:16px; cursor:pointer; color:#fff;">✕</button>
-      </div>
-      <div class="form-group"><label>Tên Nguyên Liệu (Đùi gà, Tóp mỡ, Mì gói...):</label><input type="text" class="form-input" id="invNameInput" /></div>
-      <div class="form-group"><label>Quy Cách Mua Sỉ (Thùng 30 gói, Bọc 5kg...):</label><input type="text" class="form-input" id="invPackInput" /></div>
-      <div class="form-group"><label>Tổng Tiền Hóa Đơn (VNĐ):</label><input type="number" class="form-input" id="invTotalInput" /></div>
-      <div class="form-group"><label>Số Suất / Định Lượng Quy Đổi:</label><input type="number" class="form-input" id="invRatioInput" value="30" /></div>
-      <div class="form-group"><label>Đơn Vị Tính (suất, hũ, chai):</label><input type="text" class="form-input" id="invUnitInput" value="suất" /></div>
-      <button class="btn btn-success" style="width:100%; padding:10px;" onclick="saveInventorySubmit()">💾 Lưu Vào Sổ Kho COGS</button>
-    </div>
-  </div>
-
-  <!-- ========================================================================= -->
-  <!-- MODAL NHẬP LIỆU HÀNG LOẠT THÔNG MINH (BÓC TÁCH ẢNH, PDF, LINK & DÁN TEXT) -->
-  <!-- ========================================================================= -->
-  <div class="modal" id="importMediaModal">
-    <div class="modal-sheet" style="max-width: 860px; width: 95%;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #334155; padding-bottom:8px;">
-        <div>
-          <h3 id="importModalTitle" style="font-size:15px; font-weight:800; color:var(--gold);">📷 Quét & Bóc Tách Dữ Liệu F&B Thông Minh</h3>
-          <p style="font-size:10.5px; color:var(--muted); margin-top:2px;">Tự động nhận diện món, tách Topping, định mức Food Cost và chuẩn hóa giá D2C</p>
-        </div>
-        <button onclick="closeModal('importMediaModal')" style="background:none; border:none; font-size:18px; cursor:pointer; color:#fff;">✕</button>
-      </div>
-
-      <input type="hidden" id="currentImportType" value="MENU" />
-
-      <!-- THANH CHỌN NGUỒN NẠP -->
-      <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
-        <button class="btn btn-sm btn-blue" id="btnTabScanImg" onclick="switchImportMethod('IMG')">📷 1. Quét Ảnh Menu / Hóa Đơn</button>
-        <button class="btn btn-sm btn-dark" id="btnTabScanText" onclick="switchImportMethod('TEXT')">📋 2. Dán Text / Link Menu Đối Thủ</button>
-        <button class="btn btn-sm btn-dark" id="btnTabScanCsv" onclick="switchImportMethod('CSV')">📄 3. Tải File CSV / Excel</button>
-      </div>
-
-      <!-- KHỐI 1: TẢI ẢNH / HÓA ĐƠN HOẶC CHỤP TRỰC TIẾP -->
-      <div id="boxImportImg" style="background:#0F172A; border:1px dashed #38BDF8; border-radius:10px; padding:14px; margin-bottom:12px;">
-        <label style="color:#38BDF8; font-weight:800; display:block; margin-bottom:6px;">Chọn hoặc Chụp Ảnh Menu / Hóa Đơn Kho:</label>
-        <input type="file" id="scanImgFile" class="form-input" accept="image/*" onchange="handleImageFileSelected(event)" />
-        <p style="font-size:10px; color:var(--muted); margin-top:6px;">
-          💡 Hệ thống hỗ trợ ảnh chụp Menu quán nước, quán ăn, hóa đơn mua sỉ hoặc ảnh chụp màn hình Grab/Shopee.
-        </p>
-      </div>
-
-      <!-- KHỐI 2: DÁN TEXT HOẶC LINK CÀO MENU -->
-      <div id="boxImportText" style="display:none; background:#0F172A; border:1px dashed var(--gold); border-radius:10px; padding:14px; margin-bottom:12px;">
-        <label style="color:var(--gold); font-weight:800; display:block; margin-bottom:6px;">Dán Link ShopeeFood/Grab Hoặc Danh Sách Món:</label>
-        <textarea id="scanRawText" class="form-input" style="height:90px; font-size:11px; font-family:monospace;" placeholder="Dán danh sách món hoặc link: Mì Trộn Tóp Mỡ 39k, Trà Đào Cam Sả 25k, Trân Châu Trắng 5k..."></textarea>
-      </div>
-
-      <!-- KHỐI 3: FILE CSV MẪU -->
-      <div id="boxImportCsv" style="display:none; background:#0F172A; border:1px dashed #34D399; border-radius:10px; padding:14px; margin-bottom:12px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <label style="color:#34D399; font-weight:800;">Tải File CSV Chuẩn Hoá 7 Cột:</label>
-          <button class="btn btn-blue btn-sm" onclick="downloadMenuCsvTemplate()">📥 Tải File Mẫu (.CSV)</button>
-        </div>
-        <input type="file" id="scanCsvFile" class="form-input" accept=".csv,text/csv" onchange="handleCsvFileSelected(event)" />
-      </div>
-
-      <button class="btn btn-success" style="width:100%; padding:10px; font-size:12px; margin-bottom:12px;" onclick="runSmartAiParser()">
-        ⚡ Bắt Đầu Bóc Tách & Chuẩn Hóa Dữ Liệu
-      </button>
-
-      <!-- BẢNG XEM TRƯỚC VÀ CHỈNH SỬA (PREVIEW MATRIX) CHỐNG LỖI F&B -->
-      <div id="parsePreviewArea" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <strong style="color:#34D399; font-size:12px;">🔍 Bảng Dự Duyệt Dữ Liệu (<span id="parsedCountText">0 mục</span>):</strong>
-          <span style="font-size:10px; color:var(--muted);">Kiểm tra lại giá, phân tầng và điều chỉnh trực tiếp trước khi ghi sổ</span>
-        </div>
-
-        <div class="table-responsive" style="max-height: 250px; overflow-y:auto; border:1px solid #334155; border-radius:8px;">
-          <table>
-            <thead>
-              <tr style="position:sticky; top:0; z-index:10;">
-                <th style="width:30px;"><input type="checkbox" id="chkSelectAllParsed" checked onchange="toggleSelectAllParsed(this.checked)" /></th>
-                <th>Tên Mục</th>
-                <th>Phân Loại</th>
-                <th>Dạng Món</th>
-                <th>Giá Sàn</th>
-                <th>Giá D2C</th>
-                <th>Cost (35%)</th>
-                <th>Thao Tác</th>
-              </tr>
-            </thead>
-            <tbody id="parsedPreviewTbody"></tbody>
-          </table>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
-          <button class="btn btn-blue" id="btnConfirmStructuredImport" onclick="submitStructuredBatchToSheet()">
-            🚀 Xác Nhận Ghi Vào Hệ Thống
-          </button>
-          <button class="btn btn-dark" onclick="closeModal('importMediaModal')">Hủy Bỏ</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL BẬT/TẮT NGHỈ BÁN -->
-  <div class="modal" id="storeStatusModal">
-    <div class="modal-sheet">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="font-size:14px; font-weight:800; color:var(--gold);">🏖️ Cấu Hình Giờ Bán & Tạm Nghỉ</h3>
-        <button onclick="closeModal('storeStatusModal')" style="background:none; border:none; font-size:16px; cursor:pointer; color:#fff;">✕</button>
-      </div>
-      
-      <div style="background:#0F172A; border:1px solid #334155; border-radius:10px; padding:12px; margin-bottom:12px;">
-        <strong style="color:var(--gold); font-size:12px; display:block; margin-bottom:6px;">⏰ Khung Giờ Bếp Phục Vụ Hằng Ngày:</strong>
-        <p style="font-size:10.5px; color:var(--muted); margin-bottom:10px;">Ngoài khung giờ này, web sẽ tự động khóa giỏ hàng và hiện thông báo nghỉ ngơi.</p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-          <div class="form-group" style="margin-bottom:0;">
-            <label>Giờ Mở Cửa (0 - 23h):</label>
-            <input type="number" class="form-input" id="cfgAutoOpenHour" value="6" min="0" max="23" />
-          </div>
-          <div class="form-group" style="margin-bottom:0;">
-            <label>Giờ Đóng Cửa (0 - 23h):</label>
-            <input type="number" class="form-input" id="cfgAutoCloseHour" value="22" min="0" max="23" />
-          </div>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label style="display:flex; align-items:center; gap:8px; font-weight:800; cursor:pointer;">
-          <input type="checkbox" id="chkStoreClosed" style="width:18px; height:18px;" />
-          <span>Gạt Bật: TẠM NGHỈ BÁN ĐỘT XUẤT (Thủ công)</span>
-        </label>
-      </div>
-      <div class="form-group">
-        <label>Thông Báo Hiển Thị Khách Hàng (Khi tạm nghỉ):</label>
-        <textarea class="form-input" id="txtClosedMsg" style="height:60px;">Quán đang tạm nghỉ bảo trì. Hẹn gặp lại quý khách sớm nhất!</textarea>
-      </div>
-      <button class="btn btn-success" style="width:100%; padding:10px;" onclick="saveStoreStatusSubmit()">💾 Lưu Trạng Thái & Khung Giờ Quán</button>
-    </div>
-  </div>
-
+  <!-- Adapter API kết nối Backend Google Apps Script -->
   <script src="api.js"></script>
+
   <script>
-    var currentPeriod = 'all';
-    var currentShipperPeriod = 'all';
-    var activeAdminSession = { pin: "", level: 0, role: "" };
-    var activeGamificationCfg = null;
-    var cachedMasterMenuList = [];
-    var activeStoreConfigCache = null;
-    var parsedStagingItems = [];
-
-    var dynamicWheelSlots = [
-      { type: "LUCK", name: "May mắn lần sau", code: "LUCK", cost: 0, weight: 18, color: "#334155", textColor: "#94A3B8" },
-      { type: "DRINK", name: "1 Chai Nước Suối Ướp Lạnh", code: "FREESUOI", cost: 2000, weight: 32, color: "#10B981", textColor: "#FFFFFF" },
-      { type: "TOPPING", name: "1 Quả Trứng Lòng Đào", code: "FREETRUNG", cost: 2500, weight: 30, color: "#F59E0B", textColor: "#0F172A" },
-      { type: "VOUCHER", name: "Voucher Giảm 5.000đ (Bill từ 50k)", code: "GIAM5K", cost: 5000, weight: 12, color: "#EA580C", textColor: "#FFFFFF" },
-      { type: "DRINK", name: "1 Lon Pepsi Ướp Lạnh", code: "FREEPEPSI", cost: 8200, weight: 6, color: "#2563EB", textColor: "#FFFFFF" },
-      { type: "SHIP", name: "Hỗ Trợ Cước Ship 10.000đ", code: "FREESHIP10K", cost: 10000, weight: 2, color: "#C2410C", textColor: "#FFFFFF" }
-    ];
-
-    function isRunningInsideGAS() {
-      return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
-    }
-
-    function callBackend(gasFunctionName, gasArgsArray, apiActionName, apiPayloadObj) {
-      return new Promise(function(resolve, reject) {
-        if (isRunningInsideGAS()) {
-          var runner = google.script.run
-            .withSuccessHandler(function(res) { resolve(res); })
-            .withFailureHandler(function(err) { reject(err); });
-          if (typeof runner[gasFunctionName] === 'function') {
-            runner[gasFunctionName].apply(runner, gasArgsArray || []);
-          } else {
-            reject(new Error("Hàm " + gasFunctionName + " không tồn tại trong GAS"));
-          }
-        } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-          window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
-            .then(function(res) { 
-              if (res && res.data !== undefined) resolve(res.data);
-              else resolve(res);
-            })
-            .catch(function(err) { reject(err); });
-        } else {
-          reject(new Error("Không tìm thấy kết nối Backend (GAS / api.js)"));
-        }
-      });
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-      var savedPin = localStorage.getItem("thim5_admin_active_pin");
-      if (savedPin) {
-        document.getElementById("adminPinAuthInput").value = savedPin;
-        handleAdminLogin();
-      }
-
-      var navContainer = document.getElementById("mainNavTabs");
-      if (navContainer) {
-        navContainer.addEventListener("click", function(e) {
-          var btn = e.target.closest(".nav-tab-btn");
-          if (!btn) return;
-          var targetId = btn.getAttribute("data-target");
-          if (!targetId) return;
-
-          document.querySelectorAll(".nav-tab-btn").forEach(function(b){ b.classList.remove("active"); });
-          document.querySelectorAll(".tab-panel").forEach(function(p){ p.classList.remove("active"); });
-
-          btn.classList.add("active");
-          var targetPanel = document.getElementById(targetId);
-          if (targetPanel) targetPanel.classList.add("active");
-
-          if (targetId === "tab_crm") loadAdminCrmData();
-          else if (targetId === "tab_wheel") { renderWheelSlotsBuilder(); loadAdminWheelData(); }
-          else if (targetId === "tab_inventory") loadAdminInventoryData();
-          else if (targetId === "tab_menu") loadAdminMenuList();
-          else if (targetId === "tab_topping") loadAdminToppings();
-          else if (targetId === "tab_drinks") loadAdminDrinks();
-          else if (targetId === "tab_shippers") loadAdminShippersList(currentShipperPeriod);
-          else if (targetId === "tab_settings") { loadDynamicConfigToInputs(); loadGamificationAdminData(); }
-          else if (targetId === "tab_pl" || targetId === "tab_orders") loadAllAdminData(currentPeriod);
-        });
-      }
-    });
-
-    // 1. XÁC THỰC MÃ PIN QUẢN TRỊ
-    async function handleAdminLogin() {
-      var pin = document.getElementById("adminPinAuthInput").value.trim();
-      var err = document.getElementById("authErrorMsg");
-      err.style.display = "none";
-
-      if (!pin) { err.innerText = "Vui lòng nhập mã PIN!"; err.style.display = "block"; return; }
-
-      try {
-        var auth = await callBackend("verifyAdminRole", [pin], "verifyAdminRole", { pin: pin });
-        if (auth && (auth.status === "SUCCESS" || auth.level)) {
-          processAuthSuccess(auth, pin);
-        } else {
-          err.innerText = (auth && auth.message) ? auth.message : "Mã PIN không chính xác!";
-          err.style.display = "block";
-        }
-      } catch (ex) {
-        var fallbackAuth = { status: "SUCCESS", level: (pin === "2026" ? 2 : 1), role: (pin === "2026" ? "SUPER_ADMIN" : "MANAGER"), name: (pin === "2026" ? "Anh Hải Âu" : "Quản Lý Bếp") };
-        if (pin === "1985" || pin === "2026") {
-          processAuthSuccess(fallbackAuth, pin);
-        } else {
-          err.innerText = "Sai mã PIN (Mặc định: 1985 / 2026)";
-          err.style.display = "block";
-        }
-      }
-    }
-
-    function processAuthSuccess(auth, inputPin) {
-      var pin = inputPin || document.getElementById("adminPinAuthInput").value.trim();
-      activeAdminSession = { pin: pin, level: auth.level, role: auth.role };
-      localStorage.setItem("thim5_admin_active_pin", pin);
-      
-      document.getElementById("authOverlay").style.display = "none";
-      document.getElementById("adminMainContent").style.display = "block";
-      
-      var badge = document.getElementById("dispCurrentRoleBadge");
-      var navBtnSettings = document.getElementById("navBtnSettings");
-      var btnTaxReport = document.getElementById("btnHeaderTaxReport");
-
-      if (auth.level === 2) {
-        badge.className = "role-badge lv2";
-        badge.innerText = "👑 " + (auth.name || "Super Admin");
-        if (navBtnSettings) navBtnSettings.style.display = "inline-flex";
-        if (btnTaxReport) btnTaxReport.style.display = "inline-flex";
-      } else {
-        badge.className = "role-badge lv1";
-        badge.innerText = "👤 " + (auth.name || "Quản Lý Bếp");
-        if (navBtnSettings) navBtnSettings.style.display = "none";
-        if (btnTaxReport) btnTaxReport.style.display = "none";
-
-        var activeTab = document.querySelector(".nav-tab-btn.active");
-        if (activeTab && activeTab.getAttribute("data-target") === "tab_settings") {
-          document.querySelector("[data-target='tab_pl']").click();
-        }
-      }
-      initAdmin();
-    }
-
-    function handleAdminLogout() {
-      localStorage.removeItem("thim5_admin_active_pin");
-      activeAdminSession = { pin: "", level: 0, role: "" };
-      document.getElementById("adminMainContent").style.display = "none";
-      document.getElementById("authOverlay").style.display = "flex";
-      document.getElementById("adminPinAuthInput").value = "";
-    }
-
-    function setStatusLog(msg, isError) {
-      var log = document.getElementById("statusLogText");
-      if (log) {
-        log.innerText = (isError ? "🔴 " : "🟢 ") + msg;
-        log.style.color = isError ? "var(--danger)" : "#94A3B8";
-      }
-    }
-
-    function initAdmin() {
-      setInterval(function() {
-        var d = new Date();
-        var clock = document.getElementById("statusClockText");
-        if (clock) clock.innerText = d.toTimeString().split(' ')[0];
-      }, 1000);
-
-      loadDynamicConfigToInputs();
-      loadGamificationAdminData();
-      loadAllAdminData(currentPeriod);
-      loadAdminMenuList();
-      loadStoreStatus();
-      loadGoldenHourAdmin();
-      renderWheelSlotsBuilder();
-    }
-
-    // 2. DOANH THU & P&L
-    async function loadAllAdminData(period) {
-      period = period || 'all';
-      setStatusLog("Đang tính toán số liệu kỳ: " + period + "...", false);
-
-      try {
-        var res = await callBackend("getAdminReports", [period], "getSummary", { period: period });
-        var payload = (res && res.d2cRevenue !== undefined) ? res : (res && res.data ? res.data : null);
-        if (payload && payload.d2cRevenue !== undefined) {
-          renderAdminSummaryData(payload);
-        } else {
-          setStatusLog("Chưa có số liệu phát sinh trong kỳ.", false);
-        }
-      } catch (err) {
-        console.error("Lỗi P&L:", err);
-        setStatusLog("Lỗi nạp số liệu: " + err.message, true);
-      }
-    }
-
-    function renderAdminSummaryData(res) {
-      var d2c = Number(res.d2cRevenue) || 0;
-      var d2cLnr = Number(res.d2cNetProfit) || 0;
-      var cogsGap = Number(res.cogsGap) || 0;
-      var marketingAds = Number(res.marketingAdsBudget) || Math.round(d2c * 0.01);
-      var orders = res.recentOrders || [];
-
-      var completedCount = 0;
-      var cancelCount = 0;
-      orders.forEach(function(o) {
-        if (Number(o.step) === 4 || o.status === "Hoàn Tất") completedCount++;
-        else if (Number(o.step) === 5 || (o.status && o.status.indexOf("Hủy") !== -1)) cancelCount++;
-      });
-
-      var totalOrders = completedCount > 0 ? completedCount : orders.length;
-      var cancelRate = (orders.length > 0) ? ((cancelCount / orders.length) * 100).toFixed(1) : "0.0";
-      var aov = totalOrders > 0 ? Math.round(d2c / totalOrders) : 0;
-      var targetFoodCostRate = (activeStoreConfigCache && activeStoreConfigCache.targetMaxFoodCostRate) ? activeStoreConfigCache.targetMaxFoodCostRate : 0.35;
-      var foodCostBudget = Math.round(d2c * targetFoodCostRate);
-      var totalShipSubsidy = Number(res.d2cPromoTotal) || 0;
-
-      document.getElementById("stD2CRev").innerText = d2c.toLocaleString('vi-VN') + "đ";
-      document.getElementById("stD2CLNR").innerText = d2cLnr.toLocaleString('vi-VN') + "đ";
-      document.getElementById("stD2CMargin").innerText = "Biên LNR: " + (res.d2cMargin || "0.0%") + " (Trừ Cost + Thuế HKD)";
-      document.getElementById("stTotalOrdersCount").innerText = totalOrders + " đơn";
-      document.getElementById("stCancelRateSub").innerText = "Tỷ lệ hủy đơn: " + cancelRate + "%";
-      document.getElementById("stAovVal").innerText = aov.toLocaleString('vi-VN') + "đ";
-      document.getElementById("stFoodCostBudget").innerText = foodCostBudget.toLocaleString('vi-VN') + "đ";
-      document.getElementById("stMarketingBudgetVal").innerText = marketingAds.toLocaleString('vi-VN') + "đ";
-      document.getElementById("stTotalShipSubsidy").innerText = totalShipSubsidy.toLocaleString('vi-VN') + "đ";
-
-      var targetAovVal = (activeStoreConfigCache && activeStoreConfigCache.targetAOV) ? activeStoreConfigCache.targetAOV : 50000;
-      document.getElementById("stAovTargetSub").innerText = "Mục tiêu AOV: " + targetAovVal.toLocaleString('vi-VN') + "đ";
-      document.getElementById("stFoodCostRateSub").innerText = "Định mức khoán trần: " + Math.round(targetFoodCostRate * 100) + "%";
-
-      document.getElementById("rowD2CMarginVal").innerText = res.d2cMargin || "0.0%";
-      var marginNum = parseFloat(res.d2cMargin) || 0;
-      var marginEval = document.getElementById("rowD2CMarginEval");
-      if (marginNum >= 25.0) {
-        marginEval.innerHTML = "<span style='color:#34D399; font-weight:800;'>✅ Lợi Nhuận Khỏe (&ge; 25%)</span>";
-      } else {
-        marginEval.innerHTML = "<span style='color:var(--danger); font-weight:800;'>⚠️ Cảnh Báo: Rà lại Voucher/Ship</span>";
-      }
-
-      document.getElementById("rowCogsGap").innerText = (cogsGap > 0 ? "+" : "") + cogsGap.toLocaleString('vi-VN') + "đ";
-      var cogsEval = document.getElementById("rowCogsGapEval");
-      if (cogsGap <= 0) {
-        cogsEval.innerHTML = "<span style='color:#34D399; font-weight:800;'>✅ Kho Chuẩn (Tiền chợ &le; Khoán)</span>";
-      } else {
-        cogsEval.innerHTML = "<span style='color:var(--danger); font-weight:800;'>⚠️ Hao Hụt: Tiền chợ vượt định mức</span>";
-      }
-
-      document.getElementById("rowAOV").innerText = aov.toLocaleString('vi-VN') + "đ";
-      document.getElementById("rowAovThreshold").innerHTML = "<span class='status-pill on'>&ge; " + targetAovVal.toLocaleString('vi-VN') + "đ</span>";
-      var successRate = orders.length > 0 ? (((orders.length - cancelCount) / orders.length) * 100).toFixed(1) : "100.0";
-      document.getElementById("rowDeliverySuccessRate").innerText = successRate + "%";
-
-      renderOrdersTable(orders);
-      setStatusLog("Đã nạp số liệu (" + currentPeriod + ") thành công.", false);
-    }
-
-    function renderOrdersTable(orders) {
-      var tbody = document.getElementById("adminOrdersTbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
-      if (!orders || orders.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='11' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có đơn hàng D2C nào trong kỳ đã chọn</td></tr>";
-        return;
-      }
-      orders.forEach(function(o) {
-        var tr = document.createElement("tr");
-        var utmBadge = o.utmSource ? `<br><small style="color:#38BDF8; font-weight:800;">[Nguồn: ${o.utmSource}]</small>` : "";
-        tr.innerHTML = `
-          <td style="font-weight:800; color:var(--gold);">${o.code}</td>
-          <td style="color:var(--muted); font-size:11px;">${o.time}</td>
-          <td><strong>${o.name}</strong><br><small style="color:var(--muted);">${o.phone}</small></td>
-          <td style="max-width:160px; font-size:11px;">${o.address}</td>
-          <td style="max-width:200px; font-size:11px;">${(o.items||'').split(' | ').join('<br>')}<br><em style="color:var(--muted);">${o.taste||''}</em></td>
-          <td style="font-weight:800;">${Number(o.total||0).toLocaleString('vi-VN')}đ</td>
-          <td style="color:var(--danger); font-size:11px;">-${Number(o.promo||0).toLocaleString('vi-VN')}đ</td>
-          <td style="font-weight:800; color:#34D399;">+${Number(o.netProfit||0).toLocaleString('vi-VN')}đ</td>
-          <td style="font-weight:800; font-size:11px; text-align:center; color:#34D399;">${o.margin || '0.0%'}</td>
-          <td><span style="background:var(--card-inner); padding:2px 6px; border-radius:6px; font-size:10px;">${o.shipper || 'Chưa gán'}</span></td>
-          <td><span class="status-pill on">${o.status}</span>${utmBadge}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // 3. QUẢN TRỊ SHIPPER
-    async function loadAdminShippersList(period) {
-      period = period || 'all';
-      setStatusLog("Đang tải danh sách tài xế kỳ: " + period + "...", false);
-      var tbody = document.getElementById("adminShippersTbody");
-      if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải danh sách tài xế...</td></tr>";
-
-      try {
-        var res = await callBackend("getAdminShippersWithPerformance", [period], "getShippers", { period: period });
-        var list = (res && Array.isArray(res)) ? res : (res && res.shippers ? res.shippers : (res && res.data ? res.data : []));
-        renderShippersTableDirect(list);
-      } catch (err) {
-        console.error("Lỗi Shipper:", err);
-        if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--danger); padding:15px;'>Không thể kết nối máy chủ Shipper!</td></tr>";
-      }
-    }
-
-    function renderShippersTableDirect(list) {
-      var tbody = document.getElementById("adminShippersTbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
-      if (!list || list.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có dữ liệu tài xế trong kỳ này.</td></tr>";
-        return;
-      }
-      list.forEach(function(s) {
-        var tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td style="font-weight:800; color:var(--gold);">${s.id}</td>
-          <td style="font-weight:700;">${s.name}</td>
-          <td style="font-weight:700;">${s.phone}</td>
-          <td><span class="status-pill ${s.status === 'Rảnh' ? 'on' : 'off'}">${s.status}</span></td>
-          <td style="font-weight:800; color:#60A5FA; text-align:center;">${s.completedOrdersCount || 0} đơn</td>
-          <td style="font-weight:800; color:var(--danger);">${Number(s.codHolding || 0).toLocaleString('vi-VN')}đ</td>
-          <td style="white-space:nowrap;">
-            <button class="btn-sm" style="background:#0F172A; color:#fff;" onclick="openEditShipperModal('${s.id}', '${s.name}', '${s.phone}', '${s.status}')">✏️ Sửa</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-      setStatusLog("Đã nạp danh sách tài xế thành công.", false);
-    }
-
-    function openAddShipperModal() {
-      document.getElementById("shipperModalTitle").innerText = "Thêm Tài Xế Mới";
-      document.getElementById("shipperEditId").value = "";
-      document.getElementById("shipperIdInput").disabled = false;
-      document.getElementById("shipperIdInput").value = "SH-0" + (document.querySelectorAll("#adminShippersTbody tr").length + 1);
-      document.getElementById("shipperNameInput").value = "";
-      document.getElementById("shipperPhoneInput").value = "";
-      document.getElementById("shipperStatusInput").value = "Rảnh";
-      document.getElementById("shipperModal").style.display = "flex";
-    }
-
-    function openEditShipperModal(id, name, phone, status) {
-      document.getElementById("shipperModalTitle").innerText = "Chỉnh Sửa Tài Xế: " + name;
-      document.getElementById("shipperEditId").value = id;
-      document.getElementById("shipperIdInput").disabled = true;
-      document.getElementById("shipperIdInput").value = id;
-      document.getElementById("shipperNameInput").value = name;
-      document.getElementById("shipperPhoneInput").value = phone;
-      document.getElementById("shipperStatusInput").value = status || "Rảnh";
-      document.getElementById("shipperModal").style.display = "flex";
-    }
-
-    async function saveShipperSubmit() {
-      var id = document.getElementById("shipperIdInput").value.trim();
-      var name = document.getElementById("shipperNameInput").value.trim();
-      var phone = document.getElementById("shipperPhoneInput").value.trim();
-      var status = document.getElementById("shipperStatusInput").value;
-
-      if (!id || !name || !phone) { alert("Vui lòng điền đủ Mã, Tên và Số điện thoại tài xế!"); return; }
-
-      var payload = { id: id, name: name, phone: phone, status: status };
-      try {
-        var res = await callBackend("saveOrUpdateShipperServer", [payload], "saveShipper", payload);
-        alert((res && res.message) ? res.message : "Đã lưu tài xế thành công!");
-        closeModal("shipperModal");
-        loadAdminShippersList(currentShipperPeriod);
-      } catch (err) {
-        alert("Lỗi lưu tài xế: " + err.message);
-      }
-    }
-
-    // 4. MINI CRM KHÁCH HÀNG
-    async function loadAdminCrmData() {
-      var tbody = document.getElementById("adminCrmTbody");
-      if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải dữ liệu CRM...</td></tr>";
-
-      try {
-        var res = await callBackend("getAdminCrmData", [], "getCRM", { period: "all" });
-        var list = (res && Array.isArray(res)) ? res : (res && res.crm ? res.crm : (res && res.data ? res.data : []));
-        renderCrmTableDirect(list);
-      } catch (err) {
-        console.error("Lỗi CRM:", err);
-        if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--danger); padding:15px;'>Không thể nạp danh bạ khách hàng!</td></tr>";
-      }
-    }
-
-    function renderCrmTableDirect(list) {
-      var tbody = document.getElementById("adminCrmTbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
-      if (!list || list.length === 0) { 
-        tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có dữ liệu khách hàng</td></tr>"; 
-        return; 
-      }
-      list.forEach(function(c) {
-        var badgeBg = "rgba(234, 88, 12, 0.15)";
-        var badgeColor = "#FDE047";
-        var badgeBorder = "#EA580C";
-
-        if (String(c.reward).includes("Tri Kỷ")) {
-          badgeBg = "rgba(16, 185, 129, 0.2)"; badgeColor = "#34D399"; badgeBorder = "#10B981";
-        } else if (String(c.reward).includes("Chiến Thần")) {
-          badgeBg = "rgba(245, 158, 11, 0.2)"; badgeColor = "#FDE047"; badgeBorder = "#F59E0B";
-        } else if (String(c.reward).includes("Fen Cứng")) {
-          badgeBg = "rgba(59, 130, 246, 0.2)"; badgeColor = "#93C5FD"; badgeBorder = "#3B82F6";
-        }
-
-        var tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td style="font-weight:800; color:var(--gold);">${c.phone}</td>
-          <td style="font-weight:700;">${c.name}</td>
-          <td style="text-align:center;"><span class="status-pill on">${c.totalOrders} đơn</span></td>
-          <td style="font-weight:800;">${Number(c.totalSpent||0).toLocaleString('vi-VN')}đ</td>
-          <td style="color:var(--muted); font-size:11px;">${c.taste || 'Chuẩn vị'}</td>
-          <td><span style="background:${badgeBg}; border:1px solid ${badgeBorder}; color:${badgeColor}; font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:6px; white-space:nowrap;">${c.reward}</span></td>
-          <td style="color:var(--muted); font-size:11px;">${c.lastOrder || ''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-      setStatusLog("Đã nạp danh bạ CRM thành công.", false);
-    }
-
-    // 5. NHẬP KHO COGS
-    async function loadAdminInventoryData() {
-      var tbody = document.getElementById("adminInventoryTbody");
-      if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải dữ liệu nhập kho...</td></tr>";
-
-      try {
-        var res = await callBackend("getAdminInventoryData", [], "getCOGS", { period: currentPeriod });
-        var list = (res && Array.isArray(res)) ? res : (res && res.inventory ? res.inventory : (res && res.data ? res.data : []));
-        renderInventoryTableDirect(list);
-      } catch (err) {
-        console.error("Lỗi COGS:", err);
-        if (tbody) tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--danger); padding:15px;'>Không thể kết nối sổ kho COGS!</td></tr>";
-      }
-    }
-
-    function renderInventoryTableDirect(list) {
-      var tbody = document.getElementById("adminInventoryTbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
-      if (!list || list.length === 0) { tbody.innerHTML = "<tr><td colspan='7' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có hóa đơn kho nào trong kỳ.</td></tr>"; return; }
-      list.forEach(function(i) {
-        var tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td style="font-weight:800; color:var(--gold);">${i.code}</td>
-          <td style="color:var(--muted); font-size:11px;">${i.time}</td>
-          <td><strong>${i.name}</strong></td>
-          <td><span style="background:var(--card-inner); padding:2px 6px; border-radius:6px; font-size:10px;">${i.pack}</span></td>
-          <td style="font-weight:800; color:var(--danger);">${Number(i.totalCost||0).toLocaleString('vi-VN')}đ</td>
-          <td style="text-align:center;">${i.ratio} ${i.unit}</td>
-          <td style="font-weight:800; color:#34D399;">${Number(i.costPerUnit||0).toLocaleString('vi-VN')}đ/${i.unit}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-      setStatusLog("Đã nạp sổ kho COGS thành công.", false);
-    }
-
-    function openAddInventoryModal() {
-      document.getElementById("invNameInput").value = "";
-      document.getElementById("invPackInput").value = "";
-      document.getElementById("invTotalInput").value = "";
-      document.getElementById("invRatioInput").value = "30";
-      document.getElementById("inventoryModal").style.display = "flex";
-    }
-
-    async function saveInventorySubmit() {
-      var name = document.getElementById("invNameInput").value.trim();
-      var pack = document.getElementById("invPackInput").value.trim();
-      var total = Number(document.getElementById("invTotalInput").value) || 0;
-      var ratio = Number(document.getElementById("invRatioInput").value) || 1;
-      var unit = document.getElementById("invUnitInput").value.trim() || "suất";
-
-      if (!name || total <= 0) { alert("Vui lòng nhập Tên nguyên liệu và Tổng tiền!"); return; }
-
-      var payload = { name: name, pack: pack, totalCost: total, ratio: ratio, unit: unit, category: "Nguyên Liệu" };
-      try {
-        var res = await callBackend("saveInventoryItemServer", [payload], "saveInventory", payload);
-        alert((res && res.message) ? res.message : "Đã ghi nhận vào sổ kho COGS!");
-        closeModal("inventoryModal");
-        loadAdminInventoryData();
-        loadAllAdminData(currentPeriod);
-      } catch (err) {
-        alert("Lỗi lưu kho: " + err.message);
-      }
-    }
-
-    // 6. MENU MÓN CHÍNH & COMBO D2C
-    async function loadAdminMenuList() {
-      try {
-        var res = await callBackend("getAdminMenuList", [], "getMenu", {});
-        var list = [];
-        if (Array.isArray(res)) list = res;
-        else if (res && Array.isArray(res.data)) list = res.data;
-        else if (res && Array.isArray(res.menu)) list = res.menu;
-
-        cachedMasterMenuList = list;
-        renderMasterMenuTable(cachedMasterMenuList);
-        loadAdminDrinks();
-        loadAdminToppings();
-      } catch (err) {
-        console.error("Lỗi nạp Menu:", err);
-      }
-    }
-
-    function renderMasterMenuTable(list) {
-      var tbody = document.getElementById("adminMenuTbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
-      if (!list || list.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='11' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có món ăn nào trong danh mục Menu!</td></tr>";
-        return;
-      }
-      list.forEach(function(m) {
-        var isAvail = (m.available === true || String(m.available).toUpperCase() === "TRUE");
-        var isCombo = (m.category === "dai-tiec");
-        var tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td style="font-weight:700;">${m.id}</td>
-          <td><img src="${m.img}" style="width:36px; height:36px; border-radius:6px; object-fit:cover;" /></td>
-          <td style="font-weight:800; color:#fff;">${m.name}</td>
-          <td><span class="status-pill" style="background:${isCombo ? 'rgba(253, 224, 71, 0.2)' : 'rgba(234, 88, 12, 0.2)'}; color:${isCombo ? 'var(--gold)' : '#FB923C'}; font-weight:800;">${formatCategoryTag(m.category)}</span></td>
-          <td><span class="status-pill" style="background:#0F172A; color:var(--gold); border:1px solid #334155;">${formatDishTypeTag(m.dishType)}</span></td>
-          <td style="font-weight:900; color:var(--gold);">${Number(m.priceD2C||m.price).toLocaleString('vi-VN')}đ</td>
-          <td style="color:var(--muted);">${Number(m.priceApp||0).toLocaleString('vi-VN')}đ</td>
-          <td style="color:#F87171;">${Number(m.foodCost||0).toLocaleString('vi-VN')}đ</td>
-          <td><span class="status-pill ${isAvail ? 'on' : 'off'}">${isAvail ? '🟢 Đang Bán' : '🔴 Đã Ẩn Món'}</span></td>
-          <td>
-            <label class="switch">
-              <input type="checkbox" ${isAvail ? 'checked' : ''} onchange="toggleDishAvailability('${m.id}', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </td>
-          <td style="white-space:nowrap;">
-            <button class="btn-sm" style="background:#0F172A; color:#fff;" onclick="openEditDishModal('${m.id}', '${m.name}', '${m.category}', '${m.dishType||'kho'}', ${m.priceD2C||m.price}, ${m.priceApp||0}, ${m.foodCost||0}, '${m.desc||''}', '${m.img||''}')">✏️ Sửa</button>
-            <button class="btn-sm" style="background:#EF4444; color:#fff; margin-left:4px;" onclick="deleteDishServer('${m.id}', '${m.name}')">🗑️ Xóa</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function toggleDishAvailability(id, isChecked) {
-      await callBackend("toggleDishAvailabilityServer", [id, isChecked], "toggleDish", { id: id, status: isChecked });
-      loadAdminMenuList();
-    }
-
-    async function deleteDishServer(dishId, dishName) {
-      if (!confirm("Bạn có chắc chắn muốn xóa món: " + dishName + " (" + dishId + ") khỏi Menu?")) return;
-      try {
-        var res = await callBackend("deleteMenuItemServer", [dishId], "deleteMenuItemServer", { id: dishId });
-        if (res && res.status === "SUCCESS") {
-          alert("✅ Đã xóa món thành công!");
-          loadAdminMenuList();
-        } else {
-          alert("Lỗi: Không tìm thấy món để xóa");
-        }
-      } catch(e) {
-        alert("Lỗi xóa món: " + e.message);
-      }
-    }
-
-    function formatCategoryTag(cat) {
-      var catMap = { "mon-chinh": "🍜 Món Mồi", "moi-lai-rai": "🍻 Món Chủ Lực", "dai-tiec": "👑 Combo Độc Quyền D2C", "an-kem": "🍱 Món Ăn Kèm", "giai-khat": "🧋 Nước Uống 1L", "topping-extra": "🥢 Topping Ăn Kèm" };
-      return catMap[cat] || cat;
-    }
-
-    function formatDishTypeTag(type) {
-      var typeMap = { "kho": "🍜 Khô / Mì Trộn", "nuoc": "🍲 Món Nước Súp", "an-kem": "🍱 Ăn Kèm / Vặt", "giai-khat": "🧋 Nước Uống" };
-      return typeMap[type] || "🍜 Khô / Trộn";
-    }
-
-    async function loadAdminToppings() {
-      var tbody = document.getElementById("adminToppingTbody");
-      if (!tbody) return;
-      try {
-        var res = await callBackend("getAdminToppingList", [], "getToppings", {});
-        var list = [];
-        if (Array.isArray(res)) list = res;
-        else if (res && Array.isArray(res.data)) list = res.data;
-        else if (res && Array.isArray(res.toppings)) list = res.toppings;
-
-        renderToppingsTableDirect(list);
-      } catch (err) {
-        console.error("Lỗi Topping:", err);
-      }
-    }
-
-    function renderToppingsTableDirect(list) {
-      var tbody = document.getElementById("adminToppingTbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
-      if (!list || list.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='8' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có Topping nào trong danh mục!</td></tr>";
-        return;
-      }
-      list.forEach(function(t) {
-        var isAvail = (t.available === true || String(t.available).toUpperCase() === "TRUE");
-        var isSoup = (t.group === "soup" || (t.id && t.id.indexOf("soup_") === 0));
-        var tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td style="font-weight:700;">${t.id}</td>
-          <td style="font-weight:800; color:#fff;">${t.name}</td>
-          <td><span class="status-pill" style="background:${isSoup ? 'rgba(245, 158, 11, 0.2)' : 'rgba(56, 189, 248, 0.2)'}; color:${isSoup ? '#FDE047' : '#38BDF8'};">${isSoup ? '🍲 Súp Kèm' : '🥢 Topping'}</span></td>
-          <td style="font-weight:800; color:var(--gold);">${Number(t.price||t.priceD2C||0).toLocaleString('vi-VN')}đ</td>
-          <td style="color:var(--muted);">${Number(t.priceApp || Math.round((t.price||t.priceD2C||0)/0.88)).toLocaleString('vi-VN')}đ</td>
-          <td style="color:var(--muted);">${Number(t.foodCost || Math.round((t.price||t.priceD2C||0)*0.35)).toLocaleString('vi-VN')}đ</td>
-          <td><span class="status-pill ${isAvail ? 'on' : 'off'}">${isAvail ? '🟢 Còn Hàng' : '🔴 Hết Hàng'}</span></td>
-          <td>
-            <label class="switch">
-              <input type="checkbox" ${isAvail ? 'checked' : ''} onchange="toggleToppingAvailability('${t.id}', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function toggleToppingAvailability(id, isChecked) {
-      await callBackend("toggleToppingAvailabilityServer", [id, isChecked], "toggleTopping", { id: id, status: isChecked });
-      loadAdminToppings();
-    }
-
-    function loadAdminDrinks() {
-      var tbody = document.getElementById("adminDrinksTbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
-
-      var drinkItems = (cachedMasterMenuList || []).filter(function(m) {
-        return m.category === "giai-khat" || m.dishType === "giai-khat" || (m.id && m.id.indexOf("dr_") === 0);
-      });
-
-      if (drinkItems.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='9' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có món nước nào trong danh mục Giải Khát!</td></tr>";
-        return;
-      }
-
-      drinkItems.forEach(function(d) {
-        var isAvail = (d.available === true || String(d.available).toUpperCase() === "TRUE");
-        var tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td style="font-weight:700;">${d.id}</td>
-          <td><img src="${d.img}" style="width:36px; height:36px; border-radius:6px; object-fit:cover;" /></td>
-          <td style="font-weight:800; color:#fff;">${d.name}</td>
-          <td><span class="status-pill" style="background:rgba(56, 189, 248, 0.2); color:#38BDF8;">1000ml / Lon</span></td>
-          <td style="font-weight:800; color:var(--gold);">${Number(d.priceD2C||d.price||0).toLocaleString('vi-VN')}đ</td>
-          <td style="color:var(--muted);">${Number(d.priceApp||0).toLocaleString('vi-VN')}đ</td>
-          <td style="color:var(--muted);">${Number(d.foodCost||0).toLocaleString('vi-VN')}đ</td>
-          <td><span class="status-pill ${isAvail ? 'on' : 'off'}">${isAvail ? '🟢 Đang Bán' : '🔴 Hết Hàng'}</span></td>
-          <td>
-            <label class="switch">
-              <input type="checkbox" ${isAvail ? 'checked' : ''} onchange="toggleDishAvailability('${d.id}', this.checked)">
-              <span class="slider"></span>
-            </label>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function openAddDishModal() {
-      document.getElementById("dishModalTitle").innerText = "Thêm Món / Combo Độc Quyền D2C Mới";
-      document.getElementById("dishEditId").value = "";
-      document.getElementById("dishImgBase64").value = "";
-      document.getElementById("dishFileInput").value = "";
-      document.getElementById("dishImgPreview").src = "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=500";
-      document.getElementById("dishImgStatus").innerText = "Dùng ảnh mặc định";
-      document.getElementById("dishIdInput").disabled = false;
-      document.getElementById("dishIdInput").value = "combo_" + Math.floor(100 + Math.random() * 900);
-      document.getElementById("dishNameInput").value = "";
-      document.getElementById("dishCatInput").value = "dai-tiec";
-      document.getElementById("dishTypeInput").value = "kho";
-      document.getElementById("dishPriceInput").value = "";
-      document.getElementById("dishPriceAppInput").value = "0";
-      document.getElementById("dishCostInput").value = "";
-      document.getElementById("dishDescInput").value = "";
-      validateSoftWarningPricing();
-      document.getElementById("dishModal").style.display = "flex";
-    }
-
-    function openEditDishModal(id, name, cat, type, price, priceApp, cost, desc, img) {
-      document.getElementById("dishModalTitle").innerText = "Chỉnh Sửa: " + name;
-      document.getElementById("dishEditId").value = id;
-      document.getElementById("dishImgBase64").value = "";
-      document.getElementById("dishFileInput").value = "";
-      document.getElementById("dishImgPreview").src = img || "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=500";
-      document.getElementById("dishImgStatus").innerText = img ? "Ảnh hiện tại của món" : "Dùng ảnh mặc định";
-      document.getElementById("dishIdInput").value = id;
-      document.getElementById("dishIdInput").disabled = true;
-      document.getElementById("dishNameInput").value = name;
-      document.getElementById("dishCatInput").value = cat || "mon-chinh";
-      document.getElementById("dishTypeInput").value = type || "kho";
-      document.getElementById("dishPriceAppInput").value = priceApp;
-      document.getElementById("dishPriceInput").value = price;
-      document.getElementById("dishCostInput").value = cost;
-      document.getElementById("dishDescInput").value = desc;
-      validateSoftWarningPricing();
-      document.getElementById("dishModal").style.display = "flex";
-    }
-
-    function validateSoftWarningPricing() {
-      var cat = document.getElementById("dishCatInput").value;
-      var priceD2C = parseFloat(document.getElementById("dishPriceInput").value) || 0;
-      var warnEl = document.getElementById("softWarningPriceText");
-      if (!warnEl) return;
-
-      if (priceD2C <= 0) {
-        warnEl.style.display = "none";
-        return;
-      }
-
-      var rules = (activeStoreConfigCache && activeStoreConfigCache.softWarningRules) ? activeStoreConfigCache.softWarningRules : {
-        tier1_Traffic_Min: 22000, tier1_Traffic_Max: 33000,
-        tier2_Core_Min: 35000, tier2_Core_Max: 55000,
-        tier3_Ticket_Min: 50000
-      };
-
-      var msg = "";
-      if (cat === "mon-chinh") {
-        if (priceD2C < rules.tier1_Traffic_Min || priceD2C > rules.tier1_Traffic_Max) {
-          msg = "⚠️ Cảnh Báo Định Vị: Món mồi khuyến nghị từ 25k - 29k (Mức an toàn: " + (rules.tier1_Traffic_Min/1000) + "k - " + (rules.tier1_Traffic_Max/1000) + "k) để kéo khách mới.";
-        }
-      } else if (cat === "moi-lai-rai") {
-        if (priceD2C < rules.tier2_Core_Min || priceD2C > rules.tier2_Core_Max) {
-          msg = "⚠️ Cảnh Báo Biên Lợi Nhuận: Món chủ lực khuyến nghị từ 39k - 49k (Mức an toàn: " + (rules.tier2_Core_Min/1000) + "k - " + (rules.tier2_Core_Max/1000) + "k).";
-        }
-      } else if (cat === "dai-tiec") {
-        if (priceD2C < rules.tier3_Ticket_Min) {
-          msg = "💡 Combo Độc Quyền D2C nên định giá từ 59k - 149k để tối ưu hóa Ticket size nhóm.";
-        }
-      }
-
-      if (msg) {
-        warnEl.innerText = msg;
-        warnEl.style.display = "block";
-      } else {
-        warnEl.style.display = "none";
-      }
-    }
-
-    function autoCalculateD2CFromApp(appVal) {
-      var pApp = parseFloat(appVal) || 0;
-      var d2cRate = (activeStoreConfigCache && activeStoreConfigCache.d2cDiscountRate) ? activeStoreConfigCache.d2cDiscountRate : 0.12;
-      var targetRate = (activeStoreConfigCache && activeStoreConfigCache.targetMaxFoodCostRate) ? activeStoreConfigCache.targetMaxFoodCostRate : 0.35;
-      if (pApp > 0) {
-        var pD2C = Math.round((pApp * (1 - d2cRate)) / 1000) * 1000;
-        document.getElementById("dishPriceInput").value = pD2C;
-        var safeCost = Math.round(pD2C * targetRate);
-        document.getElementById("dishCostInput").value = safeCost;
-      }
-      validateSoftWarningPricing();
-    }
-
-    function autoCalculateAppFromD2C(d2cVal) {
-      validateSoftWarningPricing();
-    }
-
-    function handleDishImageProcess(event) {
-      var file = event.target.files[0];
-      if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var img = new Image();
-        img.onload = function() {
-          var canvas = document.createElement("canvas");
-          var ctx = canvas.getContext("2d");
-          canvas.width = 400; canvas.height = 400;
-          var minSide = Math.min(img.width, img.height);
-          var sx = (img.width - minSide) / 2;
-          var sy = (img.height - minSide) / 2;
-          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, 400, 400);
-          var compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
-          document.getElementById("dishImgPreview").src = compressedBase64;
-          document.getElementById("dishImgBase64").value = compressedBase64;
-          document.getElementById("dishImgStatus").innerText = "✅ Đã nén vuông 400x400px (" + Math.round(compressedBase64.length/1024) + " KB)";
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // HÀM LƯU MÓN ĐƯỢC BỌC AN TOÀN TRÁNH LỖI UPLOAD DRIVE KHÔNG TỒN TẠI
-    async function saveDishSubmit() {
-      var id = document.getElementById("dishIdInput").value.trim();
-      var name = document.getElementById("dishNameInput").value.trim();
-      var cat = document.getElementById("dishCatInput").value;
-      var type = document.getElementById("dishTypeInput").value;
-      var priceApp = Number(document.getElementById("dishPriceAppInput").value) || 0;
-      var price = Number(document.getElementById("dishPriceInput").value) || 0;
-
-      if (priceApp > 0 && price <= 0) {
-        var d2cRate = (activeStoreConfigCache && activeStoreConfigCache.d2cDiscountRate) ? activeStoreConfigCache.d2cDiscountRate : 0.12;
-        price = Math.round((priceApp * (1 - d2cRate)) / 1000) * 1000;
-      } else if (price > 0 && priceApp <= 0) {
-        var d2cRate2 = (activeStoreConfigCache && activeStoreConfigCache.d2cDiscountRate) ? activeStoreConfigCache.d2cDiscountRate : 0.12;
-        priceApp = Math.round((price / (1 - d2cRate2)) / 1000) * 1000;
-      }
-
-      var targetRate = (activeStoreConfigCache && activeStoreConfigCache.targetMaxFoodCostRate) ? activeStoreConfigCache.targetMaxFoodCostRate : 0.35;
-      var cost = Number(document.getElementById("dishCostInput").value) || Math.round(price * targetRate);
-      var desc = document.getElementById("dishDescInput").value.trim();
-      var base64Img = document.getElementById("dishImgBase64").value;
-      var currentPreviewSrc = document.getElementById("dishImgPreview").src;
-
-      if (!id || !name || price <= 0) { alert("Vui lòng điền đủ Mã ID, Tên và Giá món!"); return; }
-
-      var btn = document.getElementById("btnSaveDish");
-      btn.innerText = "⏳ Đang ghi dữ liệu...";
-      btn.disabled = true;
-
-      // Xử lý ảnh: ưu tiên ảnh mới chọn (base64) hoặc ảnh hiện tại
-      var finalImgUrl = (base64Img && base64Img.length > 50) ? base64Img : currentPreviewSrc;
-      var dishRecord = { 
-        id: id, 
-        name: name, 
-        category: cat, 
-        dishType: type, 
-        price: price, 
-        priceD2C: price, 
-        priceApp: priceApp, 
-        foodCost: cost, 
-        desc: desc, 
-        available: true, 
-        img: finalImgUrl 
-      };
-
-      try {
-        var res = await callBackend("saveOrUpdateMenuItem", [dishRecord], "saveMenuItem", dishRecord);
-        alert((res && res.message) ? res.message : "Đã lưu món thành công!");
-        btn.innerText = "💾 Lưu Món Ăn";
-        btn.disabled = false;
-        closeModal("dishModal");
-        loadAdminMenuList();
-      } catch (err) {
-        alert("Lỗi lưu món: " + err.message);
-        btn.innerText = "💾 Lưu Món Ăn";
-        btn.disabled = false;
-      }
-    }
-
-    // 7. VÒNG QUAY MAY MẮN
-    function renderWheelSlotsBuilder() {
-      var container = document.getElementById("wheelSlotsContainer");
-      if (!container) return;
-      container.innerHTML = "";
-
-      dynamicWheelSlots.forEach(function(slot, idx) {
-        var card = document.createElement("div");
-        card.style.background = "#0F172A";
-        card.style.border = "1px solid #334155";
-        card.style.borderRadius = "10px";
-        card.style.padding = "10px";
-
-        card.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <strong style="color:var(--gold); font-size:11px;">Ô Số ${idx + 1} (${slot.color})</strong>
-            <span style="font-size:10px; color:#34D399; font-weight:800;" id="wheelWeightText_${idx}">Tỷ lệ: ${slot.weight}%</span>
-          </div>
-
-          <div class="form-group" style="margin-bottom:6px;">
-            <label>Phân Loại Nhóm Quà:</label>
-            <select class="form-input" id="wheelType_${idx}" onchange="handleWheelTypeChange(${idx}, this.value)">
-              <option value="LUCK" ${slot.type === 'LUCK' ? 'selected' : ''}>May Mắn Lần Sau (Cost 0đ)</option>
-              <option value="TOPPING" ${slot.type === 'TOPPING' ? 'selected' : ''}>Topping Ăn Kèm (Kéo từ Menu)</option>
-              <option value="DRINK" ${slot.type === 'DRINK' ? 'selected' : ''}>Nước Giải Khát (Kéo từ Menu)</option>
-              <option value="VOUCHER" ${slot.type === 'VOUCHER' ? 'selected' : ''}>Voucher Giảm Tiền Bill Sau</option>
-              <option value="SHIP" ${slot.type === 'SHIP' ? 'selected' : ''}>Mã Hỗ Trợ Cước Ship</option>
-            </select>
-          </div>
-
-          <div class="form-group" style="margin-bottom:6px;">
-            <label>Tên Quà / Món Tặng:</label>
-            <input type="text" class="form-input" id="wheelName_${idx}" value="${slot.name}" />
-          </div>
-
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Mã Voucher Kích Hoạt:</label>
-              <input type="text" class="form-input" id="wheelCode_${idx}" value="${slot.code}" />
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Food Cost Thực Tế (VNĐ):</label>
-              <input type="number" class="form-input" id="wheelCost_${idx}" value="${slot.cost}" oninput="autoBalanceWheelWeights()" />
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function handleWheelTypeChange(slotIdx, typeVal) {
-      if (typeVal === "LUCK") {
-        document.getElementById("wheelName_" + slotIdx).value = "May mắn lần sau";
-        document.getElementById("wheelCode_" + slotIdx).value = "LUCK";
-        document.getElementById("wheelCost_" + slotIdx).value = 0;
-      } else if (typeVal === "TOPPING") {
-        document.getElementById("wheelName_" + slotIdx).value = "Tặng 1 Trứng Lòng Đào";
-        document.getElementById("wheelCode_" + slotIdx).value = "FREETRUNG";
-        document.getElementById("wheelCost_" + slotIdx).value = 2500;
-      } else if (typeVal === "DRINK") {
-        document.getElementById("wheelName_" + slotIdx).value = "Tặng 1 Chai Nước Suối";
-        document.getElementById("wheelCode_" + slotIdx).value = "FREESUOI";
-        document.getElementById("wheelCost_" + slotIdx).value = 2000;
-      } else if (typeVal === "VOUCHER") {
-        document.getElementById("wheelName_" + slotIdx).value = "Voucher Giảm 5.000đ (Bill từ 50k)";
-        document.getElementById("wheelCode_" + slotIdx).value = "GIAM5K";
-        document.getElementById("wheelCost_" + slotIdx).value = 5000;
-      } else if (typeVal === "SHIP") {
-        document.getElementById("wheelName_" + slotIdx).value = "Hỗ Trợ Cước Ship 10.000đ";
-        document.getElementById("wheelCode_" + slotIdx).value = "FREESHIP10K";
-        document.getElementById("wheelCost_" + slotIdx).value = 10000;
-      }
-      autoBalanceWheelWeights();
-    }
-
-    function autoBalanceWheelWeights() {
-      var costs = [];
-      for (var i = 0; i < dynamicWheelSlots.length; i++) {
-        var c = parseFloat(document.getElementById("wheelCost_" + i).value) || 0;
-        costs.push(c);
-      }
-
-      var luckWeight = 18;
-      var remainingPool = 100 - luckWeight;
-
-      var inverseScores = [];
-      for (var j = 0; j < costs.length; j++) {
-        var slotType = document.getElementById("wheelType_" + j).value;
-        if (slotType === "LUCK") {
-          inverseScores.push(0);
-        } else {
-          var effectiveCost = Math.max(1500, costs[j]);
-          inverseScores.push(1 / effectiveCost);
-        }
-      }
-
-      var totalInverse = inverseScores.reduce(function(a, b){ return a + b; }, 0);
-
-      for (var k = 0; k < dynamicWheelSlots.length; k++) {
-        var slotTypeK = document.getElementById("wheelType_" + k).value;
-        var finalW = 0;
-        if (slotTypeK === "LUCK") {
-          finalW = luckWeight;
-        } else {
-          finalW = Math.round((inverseScores[k] / totalInverse) * remainingPool);
-        }
-        dynamicWheelSlots[k].weight = finalW;
-        var wEl = document.getElementById("wheelWeightText_" + k);
-        if (wEl) wEl.innerText = "Tỷ lệ: " + finalW + "%";
-      }
-    }
-
-    async function saveWheelSetupSubmit() {
-      for (var i = 0; i < dynamicWheelSlots.length; i++) {
-        dynamicWheelSlots[i].type = document.getElementById("wheelType_" + i).value;
-        dynamicWheelSlots[i].name = document.getElementById("wheelName_" + i).value.trim();
-        dynamicWheelSlots[i].text = dynamicWheelSlots[i].name;
-        dynamicWheelSlots[i].code = document.getElementById("wheelCode_" + i).value.trim().toUpperCase();
-        dynamicWheelSlots[i].cost = parseFloat(document.getElementById("wheelCost_" + i).value) || 0;
-      }
-
-      setStatusLog("Đang lưu cấu hình Vòng Quay mới...", false);
-      try {
-        var res = await callBackend("saveWheelPrizesConfigServer", [dynamicWheelSlots], "saveWheelConfig", { payload: JSON.stringify(dynamicWheelSlots) });
-        alert((res && res.message) ? res.message : "Đã lưu cấu hình Vòng Quay thành công!");
-        setStatusLog("Đã lưu cấu hình Vòng Quay thành công!", false);
-      } catch (err) {
-        alert("Lỗi lưu Vòng quay: " + err.message);
-      }
-    }
-
-    async function loadAdminWheelData() {
-      var tbody = document.getElementById("adminWheelTbody");
-      if (!tbody) return;
-      tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; color:var(--muted); padding:15px;'>Đang tải lịch sử quay thưởng...</td></tr>";
-
-      try {
-        var res = await callBackend("getAdminWheelReviews", [], "getWheelReviews", {});
-        var list = (res && Array.isArray(res)) ? res : (res && res.reviews ? res.reviews : (res && res.data ? res.data : []));
-        renderWheelReviewsTableDirect(list);
-      } catch (err) {
-        tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có lượt quay nào.</td></tr>";
-      }
-    }
-
-    function renderWheelReviewsTableDirect(list) {
-      var tbody = document.getElementById("adminWheelTbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
-      if (!list || list.length === 0) { tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; color:var(--muted); padding:15px;'>Chưa có lượt quay nào</td></tr>"; return; }
-      list.forEach(function(w) {
-        var tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td style="font-weight:800; color:var(--gold);">${w.orderCode}</td>
-          <td style="color:var(--muted); font-size:11px;">${w.time}</td>
-          <td><strong>${w.phone}</strong></td>
-          <td style="color:#FDE047; font-weight:800;">${'★'.repeat(w.stars || 5)}</td>
-          <td><span style="background:rgba(16, 185, 129, 0.2); color:#34D399; font-weight:800; padding:3px 8px; border-radius:6px;">🎁 ${w.prize}</span></td>
-          <td><span class="status-pill ${w.status === 'Đã sử dụng' ? 'off' : 'on'}">${w.status}</span></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // 8. CẤU HÌNH HỆ THỐNG & ĐỊNH GIÁ NGƯỢC
-    function previewPricingDemo(rateVal) {
-      var r = (parseFloat(rateVal) || 12) / 100;
-      var demoApp = 45000;
-      var demoD2C = Math.round((demoApp * (1 - r)) / 1000) * 1000;
-      var el = document.getElementById("demoPricingCalc");
-      if (el) el.innerText = "Sàn: " + demoApp.toLocaleString('vi-VN') + "đ ➔ D2C: " + demoD2C.toLocaleString('vi-VN') + "đ (Lệch " + Math.round(r * 100) + "%)";
-    }
-
-    function handleIndustryChange(val) {
-      if (val === "DRINKS") {
-        document.getElementById("cfgTargetMaxFoodCostRate").value = 25;
-        document.getElementById("cfgTargetAOV").value = 35000;
-      } else if (val === "PUBS") {
-        document.getElementById("cfgTargetMaxFoodCostRate").value = 42;
-        document.getElementById("cfgTargetAOV").value = 200000;
-      } else {
-        document.getElementById("cfgTargetMaxFoodCostRate").value = 35;
-        document.getElementById("cfgTargetAOV").value = 50000;
-      }
-    }
-
-    async function loadDynamicConfigToInputs() {
-      try {
-        var res = await callBackend("getStoreConfigDynamic", [], "getConfig", {});
-        var cfg = (res && res.storeName !== undefined) ? res : (res && res.data ? res.data : null);
-        if (!cfg) return;
-        activeStoreConfigCache = cfg;
-
-        if (document.getElementById("cfgIndustryType")) document.getElementById("cfgIndustryType").value = cfg.industryType || "FAST_FOOD";
-        if (document.getElementById("cfgHubRoyaltyRate")) document.getElementById("cfgHubRoyaltyRate").value = ((cfg.hubRoyaltyRate !== undefined) ? Number(cfg.hubRoyaltyRate) : 0.02) * 100;
-        if (document.getElementById("cfgMarketingBudgetRate")) document.getElementById("cfgMarketingBudgetRate").value = ((cfg.marketingBudgetRate !== undefined) ? Number(cfg.marketingBudgetRate) : 0.01) * 100;
-        
-        var targetCostVal = ((cfg.targetMaxFoodCostRate !== undefined) ? Number(cfg.targetMaxFoodCostRate) : 0.35) * 100;
-        if (document.getElementById("cfgTargetMaxFoodCostRate")) document.getElementById("cfgTargetMaxFoodCostRate").value = Math.round(targetCostVal);
-        if (document.getElementById("dispCostRateLimitLabel")) document.getElementById("dispCostRateLimitLabel").innerText = Math.round(targetCostVal) + "%";
-        if (document.getElementById("cfgTargetAOV")) document.getElementById("cfgTargetAOV").value = cfg.targetAOV || 50000;
-
-        if (document.getElementById("cfgMetaPixelId")) document.getElementById("cfgMetaPixelId").value = cfg.metaPixelId || "";
-        if (document.getElementById("cfgTiktokPixelId")) document.getElementById("cfgTiktokPixelId").value = cfg.tiktokPixelId || "";
-
-        if (document.getElementById("cfgStoreCoverUrl")) document.getElementById("cfgStoreCoverUrl").value = cfg.storeCoverUrl || "";
-        if (document.getElementById("cfgStoreName")) document.getElementById("cfgStoreName").value = cfg.storeName || "";
-        if (document.getElementById("cfgOwnerName")) document.getElementById("cfgOwnerName").value = cfg.ownerName || "";
-        if (document.getElementById("cfgStorePhone")) document.getElementById("cfgStorePhone").value = cfg.phone || "";
-        if (document.getElementById("cfgStoreAddress")) document.getElementById("cfgStoreAddress").value = cfg.address || "";
-        if (document.getElementById("cfgLat")) document.getElementById("cfgLat").value = (cfg.centerCoords && cfg.centerCoords.lat) ? cfg.centerCoords.lat : "11.285267";
-        if (document.getElementById("cfgLng")) document.getElementById("cfgLng").value = (cfg.centerCoords && cfg.centerCoords.lng) ? cfg.centerCoords.lng : "106.133347";
-        
-        var currentBankAcc = cfg.bankAccount || cfg.momoAccount || "3939388888";
-        if (document.getElementById("cfgBankAccount")) document.getElementById("cfgBankAccount").value = currentBankAcc;
-        if (document.getElementById("cfgAccountHolderName")) document.getElementById("cfgAccountHolderName").value = cfg.accountHolderName || cfg.momoName || "NGUYEN HAI AU";
-        if (document.getElementById("cfgAccountTypeLabel")) document.getElementById("cfgAccountTypeLabel").value = cfg.accountTypeLabel || "Tài khoản Hộ Kinh Doanh";
-
-        if (cfg.bankCode && cfg.bankBin && document.getElementById("cfgBankSelect")) {
-          document.getElementById("cfgBankSelect").value = cfg.bankCode + "|" + cfg.bankBin;
-        }
-
-        var taxPercent = ((cfg.taxRateDefault !== undefined && cfg.taxRateDefault !== null) ? Number(cfg.taxRateDefault) : 0.045) * 100;
-        if (document.getElementById("cfgTaxRatePercent")) document.getElementById("cfgTaxRatePercent").value = taxPercent.toFixed(1);
-        if (document.getElementById("cfgTaxReportEmails")) document.getElementById("cfgTaxReportEmails").value = cfg.taxReportEmails || "haiau2205@gmail.com";
-
-        var d2cRatePercent = ((cfg.d2cDiscountRate !== undefined) ? Number(cfg.d2cDiscountRate) : 0.12) * 100;
-        var promoRatePercent = ((cfg.maxPromoBudgetRate !== undefined) ? Number(cfg.maxPromoBudgetRate) : 0.15) * 100;
-        if (document.getElementById("cfgD2cDiscountRate")) document.getElementById("cfgD2cDiscountRate").value = Math.round(d2cRatePercent);
-        if (document.getElementById("cfgMaxPromoBudgetRate")) document.getElementById("cfgMaxPromoBudgetRate").value = Math.round(promoRatePercent);
-
-        if (cfg.shippingRules) {
-          if (document.getElementById("cfgShipMinBill1")) document.getElementById("cfgShipMinBill1").value = cfg.shippingRules.subsidyTier1_MinBill || 100000;
-          if (document.getElementById("cfgShipSubsidy1")) document.getElementById("cfgShipSubsidy1").value = cfg.shippingRules.subsidyTier1_Amount || 15000;
-          if (document.getElementById("cfgShipMinBill2")) document.getElementById("cfgShipMinBill2").value = cfg.shippingRules.subsidyTier2_MinBill || 150000;
-          if (document.getElementById("cfgShipSubsidy2")) document.getElementById("cfgShipSubsidy2").value = cfg.shippingRules.subsidyTier2_Amount || 25000;
-        }
-        previewPricingDemo(d2cRatePercent);
-
-        var currentWebUrl = cfg.webAppUrl || window.location.href.split('?')[0];
-        if (document.getElementById("cfgStoreWebUrl")) document.getElementById("cfgStoreWebUrl").value = currentWebUrl;
-        generateStoreDynamicQr(currentWebUrl);
-
-        if (document.getElementById("dispHeaderTitle")) document.getElementById("dispHeaderTitle").innerText = "👑 QUẢN TRỊ • " + (cfg.storeName || "MÌ TRỘN THÍM 5");
-      } catch (err) {
-        console.error("Lỗi cấu hình hệ thống:", err);
-      }
-    }
-
-    async function handleSaveDynamicFormulas() {
-      if (activeAdminSession.level !== 2) {
-        alert("⛔ TỪ CHỐI: Chỉ Super Admin mới có quyền lưu công thức định giá!");
-        return;
-      }
-
-      var d2cRateVal = parseFloat(document.getElementById("cfgD2cDiscountRate").value) || 12;
-      var promoRateVal = parseFloat(document.getElementById("cfgMaxPromoBudgetRate").value) || 15;
-
-      var payload = {
-        d2cDiscountRate: (d2cRateVal / 100),
-        maxPromoBudgetRate: (promoRateVal / 100),
-        shippingRules: {
-          subsidyTier1_MinBill: Number(document.getElementById("cfgShipMinBill1").value) || 100000,
-          subsidyTier1_Amount: Number(document.getElementById("cfgShipSubsidy1").value) || 15000,
-          subsidyTier2_MinBill: Number(document.getElementById("cfgShipMinBill2").value) || 150000,
-          subsidyTier2_Amount: Number(document.getElementById("cfgShipSubsidy2").value) || 25000
-        }
-      };
-
-      setStatusLog("Đang lưu công thức và cập nhật Menu...", false);
-      try {
-        var res = await callBackend("updateDynamicPricingSettings", [payload, activeAdminSession.pin], "updatePricingSettings", { payload: JSON.stringify(payload), adminPin: activeAdminSession.pin });
-        alert((res && res.message) ? res.message : "Đã đồng bộ công thức mới thành công!");
-        setStatusLog("Đã đồng bộ công thức mới thành công!", false);
-        loadDynamicConfigToInputs();
-        loadAdminMenuList();
-      } catch (err) {
-        alert("Lỗi: " + err.message);
-        setStatusLog("Lỗi: " + err.message, true);
-      }
-    }
-
-    function handleBankSelectChange() {
-      var val = document.getElementById("cfgBankSelect").value;
-      if (val.indexOf("MOMO") !== -1) {
-        document.getElementById("cfgBankAccount").placeholder = "Nhập SĐT Ví MoMo (VD: 0934220585)";
-      } else {
-        document.getElementById("cfgBankAccount").placeholder = "Nhập Số tài khoản Ngân hàng (VD: 3939388888)";
-      }
-    }
-
-    function generateStoreDynamicQr(url) {
-      var targetUrl = url || window.location.href.split('?')[0];
-      var qrImg = document.getElementById("dynamicStoreQrImg");
-      if (qrImg && targetUrl) {
-        qrImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent(targetUrl) + "&margin=10";
-      }
-    }
-
-    function downloadStoreQrImage() {
-      var qrImg = document.getElementById("dynamicStoreQrImg");
-      if (!qrImg || !qrImg.src) return;
-      var a = document.createElement("a");
-      a.href = qrImg.src;
-      a.download = "QR_Thim5_HoaThanh.png";
-      a.target = "_blank";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      alert("📥 Đã tải ảnh mã QR Quán về máy!");
-    }
-
-    function copyStoreWebUrl() {
-      var urlInput = document.getElementById("cfgStoreWebUrl");
-      if (urlInput && urlInput.value) {
-        navigator.clipboard.writeText(urlInput.value).then(function(){ alert("📋 Đã sao chép link web quán:\n" + urlInput.value); });
-      }
-    }
-
-    async function loadGoldenHourAdmin() {
-      try {
-        var res = await callBackend("getGoldenHourStatus", [], "getGoldenHour", {});
-        var data = (res && res.isActive !== undefined) ? res : (res && res.data ? res.data : null);
-        if (data) {
-          document.getElementById("chkGoldenHourActive").checked = data.isActive;
-          document.getElementById("txtGoldenHourMsg").value = data.msg || "Freeship từ 2 phần + Tặng 1 Nước Suối cho bill từ 50k!";
-        }
-      } catch (e) {}
-    }
-
-    async function toggleGoldenHourDirect(isActive) {
-      var msg = document.getElementById("txtGoldenHourMsg").value.trim();
-      setStatusLog("Đang cập nhật trạng thái Giờ Vàng...", false);
-      try {
-        var res = await callBackend("updateGoldenHourStatus", [isActive, msg], "updateGoldenHour", { isActive: isActive, message: msg });
-        setStatusLog((res && res.message) ? res.message : "Đã cập nhật Giờ Vàng", false);
-      } catch (e) {
-        setStatusLog("Lỗi cập nhật Giờ Vàng", true);
-      }
-    }
-
-    async function handleManualSendTaxReport() {
-      var targetEmail = document.getElementById("cfgTaxReportEmails") ? document.getElementById("cfgTaxReportEmails").value.trim() : "haiau2205@gmail.com";
-      if (!targetEmail) { alert("Vui lòng nhập Email nhận báo cáo thuế!"); return; }
-
-      setStatusLog("Đang xuất bảng kê và gửi email báo cáo thuế...", false);
-      try {
-        var res = await callBackend("triggerManualTaxReportExport", [targetEmail], "sendTaxReport", { email: targetEmail });
-        alert((res && res.message) ? res.message : "Đã gửi báo cáo thuế thành công!");
-        setStatusLog("Đã gửi báo cáo thuế thành công.", false);
-      } catch (err) {
-        alert("Lỗi gửi báo cáo thuế: " + err.message);
-        setStatusLog("Lỗi gửi báo cáo thuế: " + err.message, true);
-      }
-    }
-
-    async function handleActivateTaxAutoTrigger() {
-      setStatusLog("Đang kích hoạt lịch gửi tự động 23:59...", false);
-      try {
-        var res = await callBackend("setupDailyTaxReportTrigger", [], "setupTaxTrigger", {});
-        alert("✅ " + ((res && res.message) ? res.message : "Đã kích hoạt hẹn giờ 23:59 thành công"));
-        setStatusLog("Đã kích hoạt hẹn giờ 23:59 thành công.", false);
-      } catch (err) {
-        alert("Lỗi kích hoạt hẹn giờ: " + err.message);
-      }
-    }
-
-    async function loadGamificationAdminData() {
-      try {
-        var res = await callBackend("getLoyaltyGamificationConfig", [], "getGamificationConfig", {});
-        var cfg = null;
-        if (res && res.tiers !== undefined) cfg = res;
-        else if (res && res.data && res.data.tiers !== undefined) cfg = res.data;
-        
-        if (!cfg || !cfg.tiers) {
-          cfg = {
-            monthlyReset: true,
-            tiers: [
-              { level: 0, minOrders: 0, discount: 0.00, freeship: false, defaultBadge: "🌱 Tấm Chiếu Mới", prefixPool: ["Bạn Mới"] },
-              { level: 1, minOrders: 2, discount: 0.01, freeship: false, defaultBadge: "🥢 Khách Gu Ruột", prefixPool: ["Bạn Thân"] },
-              { level: 2, minOrders: 4, discount: 0.02, freeship: false, defaultBadge: "💖 Fen Cứng Thím 5", prefixPool: ["Fen Cứng"] },
-              { level: 3, minOrders: 7, discount: 0.03, freeship: false, defaultBadge: "👑 Chiến Thần Mì Trộn", prefixPool: ["Chiến Thần"] },
-              { level: 4, minOrders: 12, discount: 0.03, freeship: true, defaultBadge: "💎 Tri Kỷ Đất Thánh", prefixPool: ["Tri Kỷ"] }
-            ],
-            drinkUpsell: [
-              { minBill: 50000, giftName: "1 Chai Nước Suối Ướp Lạnh (0đ)", cost: 2000 },
-              { minBill: 99000, giftName: "1 Lon Pepsi/7Up Ướp Lạnh (0đ)", cost: 8200 }
-            ],
-            referral: { enabled: true, inviteeDiscount: 5000, inviteeMinSpend: 40000 }
-          };
-        }
-        activeGamificationCfg = cfg;
-        renderTierConfigTable(cfg.tiers);
-        
-        if (cfg.drinkUpsell && cfg.drinkUpsell.length >= 2) {
-          if (document.getElementById("upsellMinBill1")) document.getElementById("upsellMinBill1").value = cfg.drinkUpsell[0].minBill;
-          if (document.getElementById("upsellGiftName1")) document.getElementById("upsellGiftName1").value = cfg.drinkUpsell[0].giftName;
-          if (document.getElementById("upsellMinBill2")) document.getElementById("upsellMinBill2").value = cfg.drinkUpsell[1].minBill;
-          if (document.getElementById("upsellGiftName2")) document.getElementById("upsellGiftName2").value = cfg.drinkUpsell[1].giftName;
-        }
-        
-        if (cfg.referral) {
-          if (document.getElementById("refInviteeDisc")) document.getElementById("refInviteeDisc").value = cfg.referral.inviteeDiscount;
-          if (document.getElementById("refMinSpend")) document.getElementById("refMinSpend").value = cfg.referral.inviteeMinSpend;
-        }
-      } catch (e) {
-        console.error("Lỗi nạp Gamification Config:", e);
-      }
-    }
-
-    function renderTierConfigTable(tiers) {
-      var tbody = document.getElementById("tierConfigTbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
-      
-      (tiers || []).forEach(function(t, idx) {
-        var tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td style="font-weight:bold; color:var(--gold);">Lv.${t.level}</td>
-          <td><input type="number" class="form-input" style="width:60px;" id="tierOrders_${idx}" value="${t.minOrders}" /></td>
-          <td><input type="text" class="form-input" id="tierBadge_${idx}" value="${t.defaultBadge}" /></td>
-          <td><input type="text" class="form-input" id="tierPool_${idx}" value="${(t.prefixPool || []).join(' | ')}" /></td>
-          <td><input type="number" step="0.01" class="form-input" style="width:65px;" id="tierDisc_${idx}" value="${(t.discount * 100).toFixed(1)}" />%</td>
-          <td style="text-align:center;">
-            <input type="checkbox" id="tierFreeship_${idx}" ${t.freeship ? 'checked' : ''} style="width:16px; height:16px;" />
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    async function saveGamificationAdminData() {
-      if (!activeGamificationCfg) return;
-      
-      for (var i = 0; i < activeGamificationCfg.tiers.length; i++) {
-        activeGamificationCfg.tiers[i].minOrders = parseInt(document.getElementById("tierOrders_" + i).value, 10) || 0;
-        activeGamificationCfg.tiers[i].defaultBadge = document.getElementById("tierBadge_" + i).value.trim();
-        activeGamificationCfg.tiers[i].prefixPool = document.getElementById("tierPool_" + i).value.split('|').map(function(s){ return s.trim(); }).filter(Boolean);
-        activeGamificationCfg.tiers[i].discount = (parseFloat(document.getElementById("tierDisc_" + i).value) || 0) / 100;
-        activeGamificationCfg.tiers[i].freeship = document.getElementById("tierFreeship_" + i).checked;
-      }
-
-      activeGamificationCfg.drinkUpsell[0].minBill = Number(document.getElementById("upsellMinBill1").value) || 50000;
-      activeGamificationCfg.drinkUpsell[0].giftName = document.getElementById("upsellGiftName1").value.trim();
-      activeGamificationCfg.drinkUpsell[1].minBill = Number(document.getElementById("upsellMinBill2").value) || 99000;
-      activeGamificationCfg.drinkUpsell[1].giftName = document.getElementById("upsellGiftName2").value.trim();
-
-      activeGamificationCfg.referral.inviteeDiscount = Number(document.getElementById("refInviteeDisc").value) || 5000;
-      activeGamificationCfg.referral.inviteeMinSpend = Number(document.getElementById("refMinSpend").value) || 40000;
-
-      setStatusLog("Đang lưu chiến dịch marketing...", false);
-      try {
-        var res = await callBackend("saveLoyaltyGamificationConfig", [activeGamificationCfg], "saveGamificationConfig", { payload: JSON.stringify(activeGamificationCfg) });
-        alert("🎉 " + ((res && res.message) ? res.message : "Chiến dịch marketing đã được kích hoạt!"));
-        setStatusLog("Chiến dịch marketing đã được kích hoạt!", false);
-      } catch (err) {
-        alert("Lỗi lưu chiến dịch: " + err.message);
-      }
-    }
-
-    function getCurrentLocationGps() {
-      if (!navigator.geolocation) { alert("Trình duyệt không hỗ trợ định vị GPS!"); return; }
-      setStatusLog("Đang lấy tọa độ GPS từ thiết bị...", false);
-      navigator.geolocation.getCurrentPosition(function(pos) {
-        document.getElementById("cfgLat").value = pos.coords.latitude.toFixed(6);
-        document.getElementById("cfgLng").value = pos.coords.longitude.toFixed(6);
-        setStatusLog("Đã lấy GPS thành công!", false);
-        alert("📍 Đã lấy tọa độ quán thành công:\nLat: " + pos.coords.latitude.toFixed(6) + "\nLng: " + pos.coords.longitude.toFixed(6));
-      }, function(err) {
-        alert("Không thể lấy GPS: " + err.message);
-      });
-    }
-
-    async function handleSavePinLevel1() {
-      var newPin = document.getElementById("inputNewPinLv1").value.trim();
-      if (!newPin || newPin.length < 4) { alert("Vui lòng nhập PIN Level 1 ít nhất 4 số!"); return; }
-      try {
-        var res = await callBackend("updateManagerPinLevel1", [newPin], "updatePinLv1", { pin: newPin });
-        alert("✅ " + ((res && res.message) ? res.message : "Đã đổi PIN Level 1 thành công!"));
-        document.getElementById("inputNewPinLv1").value = "";
-      } catch (err) {
-        alert("Lỗi đổi PIN: " + err.message);
-      }
-    }
-
-    async function openSuperPinResetModal() {
-      if (activeAdminSession.level !== 2) {
-        alert("⛔ TỪ CHỐI: Chỉ Super Admin mới có quyền đổi PIN Level 2!"); return;
-      }
-      if (confirm("Gửi mã xác thực OTP 6 số về Gmail chính chủ để đổi Super PIN?")) {
-        setStatusLog("Đang gửi OTP về Gmail...", false);
-        try {
-          var res = await callBackend("sendSuperPinResetOtp", [], "sendSuperPinOtp", {});
-          alert((res && res.message) ? res.message : "Đã gửi OTP về email!");
-          document.getElementById("superPinOtpModal").style.display = "flex";
-        } catch (err) {
-          alert("Lỗi gửi OTP: " + err.message);
-        }
-      }
-    }
-
-    async function handleSubmitSuperPinReset() {
-      var otp = document.getElementById("superOtpInput").value.trim();
-      var newPin = document.getElementById("newSuperPinInput").value.trim();
-      if (!otp || !newPin) { alert("Vui lòng nhập đủ mã OTP và Super PIN mới!"); return; }
-
-      try {
-        var res = await callBackend("verifyOtpAndSaveSuperPin", [otp, newPin], "verifyOtpAndSaveSuperPin", { otp: otp, newPin: newPin });
-        if (res && res.status === "SUCCESS") {
-          alert(res.message);
-          closeModal("superPinOtpModal");
-          localStorage.setItem("thim5_admin_active_pin", newPin);
-          activeAdminSession.pin = newPin;
-        } else {
-          alert("❌ " + ((res && res.message) ? res.message : "Xác thực OTP thất bại!"));
-        }
-      } catch (err) {
-        alert("Lỗi: " + err.message);
-      }
-    }
-
-    // ĐÃ FIX DỨT ĐIỂM: GOM CHUNG GIỜ VÀNG VÀO SAVE STORE CONFIG DYNAMIC, TRÁNH LỖI CALL RIÊNG HÀM
-    async function saveSystemSettingsSubmit() {
-      var bankParts = (document.getElementById("cfgBankSelect").value || "MB|970422").split("|");
-      var taxPercentInput = parseFloat(document.getElementById("cfgTaxRatePercent").value) || 4.5;
-      var royaltyInput = parseFloat(document.getElementById("cfgHubRoyaltyRate").value) || 2.0;
-      var marketingInput = parseFloat(document.getElementById("cfgMarketingBudgetRate").value) || 1.0;
-      var targetCostInput = parseFloat(document.getElementById("cfgTargetMaxFoodCostRate").value) || 35;
-      var isGolden = document.getElementById("chkGoldenHourActive").checked;
-      var goldenMsg = document.getElementById("txtGoldenHourMsg").value.trim();
-      
-      var newCfg = {
-        storeCoverUrl: document.getElementById("cfgStoreCoverUrl") ? document.getElementById("cfgStoreCoverUrl").value.trim() : "",
-        storeName: document.getElementById("cfgStoreName").value.trim(),
-        ownerName: document.getElementById("cfgOwnerName").value.trim(),
-        phone: document.getElementById("cfgStorePhone").value.trim(),
-        address: document.getElementById("cfgStoreAddress").value.trim(),
-        lat: document.getElementById("cfgLat").value.trim(),
-        lng: document.getElementById("cfgLng").value.trim(),
-        bankCode: bankParts[0],
-        bankBin: bankParts[1],
-        bankAccount: document.getElementById("cfgBankAccount").value.trim(),
-        momoAccount: document.getElementById("cfgBankAccount").value.trim(),
-        accountHolderName: document.getElementById("cfgAccountHolderName").value.trim().toUpperCase(),
-        momoName: document.getElementById("cfgAccountHolderName").value.trim().toUpperCase(),
-        accountTypeLabel: document.getElementById("cfgAccountTypeLabel").value,
-        webAppUrl: document.getElementById("cfgStoreWebUrl").value.trim(),
-        taxReportEmails: document.getElementById("cfgTaxReportEmails").value.trim(),
-        
-        industryType: document.getElementById("cfgIndustryType").value,
-        hubRoyaltyRate: (royaltyInput / 100),
-        marketingBudgetRate: (marketingInput / 100),
-        targetMaxFoodCostRate: (targetCostInput / 100),
-        targetAOV: parseInt(document.getElementById("cfgTargetAOV").value, 10) || 50000,
-        foodCostRateD2C: (targetCostInput / 100),
-        taxRateDefault: (taxPercentInput / 100),
-
-        metaPixelId: document.getElementById("cfgMetaPixelId") ? document.getElementById("cfgMetaPixelId").value.trim() : "",
-        tiktokPixelId: document.getElementById("cfgTiktokPixelId") ? document.getElementById("cfgTiktokPixelId").value.trim() : "",
-
-        autoOpenHour: parseInt(document.getElementById("cfgAutoOpenHour") ? document.getElementById("cfgAutoOpenHour").value : 6, 10),
-        autoCloseHour: parseInt(document.getElementById("cfgAutoCloseHour") ? document.getElementById("cfgAutoCloseHour").value : 22, 10)
-      };
-
-      if (!newCfg.storeName || !newCfg.phone || !newCfg.bankAccount) { 
-        alert("Vui lòng điền đủ Tên Quán, SĐT Hotline và Số Tài Khoản nhận tiền!"); return; 
-      }
-
-      setStatusLog("Đang lưu và đồng bộ toàn hệ thống...", false);
-      try {
-        // Đồng bộ Giờ vàng an toàn nếu hàm có sẵn trong GAS
-        try {
-          await callBackend("updateGoldenHourStatus", [isGolden, goldenMsg], "updateGoldenHour", { isActive: isGolden, message: goldenMsg });
-        } catch(ghErr) {
-          console.warn("Update Golden Hour riêng bị bỏ qua, tiếp tục lưu config chính:", ghErr);
-        }
-
-        var res = await callBackend("saveStoreConfigDynamic", [newCfg], "saveConfig", { payload: JSON.stringify(newCfg) });
-        alert("✅ " + ((res && res.message) ? res.message : "Đã đồng bộ cấu hình thành công!"));
-        loadDynamicConfigToInputs();
-        setStatusLog("Đã đồng bộ toàn hệ thống thành công!", false);
-      } catch (err) {
-        alert("Lỗi lưu cấu hình: " + err.message);
-        setStatusLog("Lỗi lưu cấu hình: " + err.message, true);
-      }
-    }
-
-    // =========================================================================
-    // SMART PARSER ENGINE: BÓC TÁCH MENU & KHO TỰ ĐỘNG TỪ ẢNH / LINK / TEXT
-    // =========================================================================
-    var parsedStagingItems = [];
-
-    function openImportMediaModal() {
-      document.getElementById("currentImportType").value = "MENU";
-      document.getElementById("importModalTitle").innerText = "🍜 Bóc Tách Menu & Topping Hàng Loạt";
-      resetImportModal();
-      document.getElementById("importMediaModal").style.display = "flex";
-    }
-
-    function openImportInvoiceModal() {
-      document.getElementById("currentImportType").value = "INVENTORY";
-      document.getElementById("importModalTitle").innerText = "📦 Quét Hóa Đơn & Nhập Kho COGS Tự Động";
-      resetImportModal();
-      document.getElementById("importMediaModal").style.display = "flex";
-    }
-
-    function resetImportModal() {
-      parsedStagingItems = [];
-      document.getElementById("parsePreviewArea").style.display = "none";
-      document.getElementById("scanRawText").value = "";
-      document.getElementById("scanImgFile").value = "";
-      document.getElementById("scanCsvFile").value = "";
-      switchImportMethod("IMG");
-    }
-
-    function switchImportMethod(method) {
-      document.getElementById("boxImportImg").style.display = method === "IMG" ? "block" : "none";
-      document.getElementById("boxImportText").style.display = method === "TEXT" ? "block" : "none";
-      document.getElementById("boxImportCsv").style.display = method === "CSV" ? "block" : "none";
-
-      document.getElementById("btnTabScanImg").className = "btn btn-sm " + (method === "IMG" ? "btn-blue" : "btn-dark");
-      document.getElementById("btnTabScanText").className = "btn btn-sm " + (method === "TEXT" ? "btn-blue" : "btn-dark");
-      document.getElementById("btnTabScanCsv").className = "btn btn-sm " + (method === "CSV" ? "btn-blue" : "btn-dark");
-    }
-
-    function handleImageFileSelected(event) {
-      var file = event.target.files[0];
-      if (!file) return;
-      setStatusLog("Đã chọn ảnh: " + file.name + ". Bấm 'Bắt đầu bóc tách' để xử lý...", false);
-    }
-
-    function handleCsvFileSelected(event) {
-      var file = event.target.files[0];
-      if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById("scanRawText").value = e.target.result;
-        switchImportMethod("TEXT");
-      };
-      reader.readAsText(file, "UTF-8");
-    }
-
-    async function runSmartAiParser() {
-      var type = document.getElementById("currentImportType").value;
-      var rawText = document.getElementById("scanRawText").value.trim();
-      var imgFile = document.getElementById("scanImgFile").files[0];
-
-      setStatusLog("Đang xử lý chuẩn hóa dữ liệu F&B...", false);
-
-      if (imgFile && !rawText) {
-        parsedStagingItems = [
-          { name: "Combo 2 Đùi Gà Rán + Cơm + Tặng 1 Pepsi", priceApp: 0, priceD2C: 99000, foodCost: 42000, category: "dai-tiec", dishType: "kho" },
-          { name: "Mì Trộn Tóp Mỡ Sa Tế Tỏi Giòn", priceApp: 45000, priceD2C: 39000, foodCost: 13500, category: "mon-chinh", dishType: "kho" },
-          { name: "Trà Đào Cam Sả Khổng Lồ 1L", priceApp: 29000, priceD2C: 25000, foodCost: 7500, category: "giai-khat", dishType: "giai-khat" },
-          { name: "Hũ Tóp Mỡ Sa Tế Tỏi Thêm", priceApp: 9000, priceD2C: 8000, foodCost: 2800, category: "topping-extra", dishType: "an-kem" },
-          { name: "Trứng Lòng Đào Béo Ngậy Thêm", priceApp: 7000, priceD2C: 6000, foodCost: 2500, category: "topping-extra", dishType: "an-kem" }
-        ];
-      } else if (rawText) {
-        parsedStagingItems = parseRawTextToStructuredItems(rawText, type);
-      } else {
-        alert("Vui lòng chọn ảnh, tải file CSV hoặc dán nội dung văn bản!");
-        return;
-      }
-
-      if (parsedStagingItems.length === 0) {
-        alert("Không tìm thấy mục nào hợp lệ để bóc tách!");
-        return;
-      }
-
-      renderParsedPreviewTable(parsedStagingItems, type);
-      document.getElementById("parsePreviewArea").style.display = "block";
-      document.getElementById("parsedCountText").innerText = parsedStagingItems.length + " mục";
-      setStatusLog("Đã chuẩn hóa " + parsedStagingItems.length + " mục. Vui lòng kiểm tra và duyệt!", false);
-    }
-
-    function parseRawTextToStructuredItems(text, type) {
-      var lines = text.split(/\r?\n/);
-      var results = [];
-
-      lines.forEach(function(line) {
-        line = line.trim();
-        if (!line || line.indexOf("---") === 0) return;
-
-        if (line.indexOf("|") !== -1) {
-          var p = line.split("|").map(function(s){ return s.trim(); });
-          if (type === "MENU" && p.length >= 2) {
-            var pApp = safeParseNumber(p[3]);
-            var pD2C = safeParseNumber(p[4]) || (pApp > 0 ? Math.round((pApp * 0.88)/1000)*1000 : safeParseNumber(p[1]));
-            if (!pApp && pD2C > 0) pApp = Math.round((pD2C / 0.88)/1000)*1000;
-            results.push({
-              name: p[0],
-              category: p[1] || detectCategoryByName(p[0]),
-              dishType: p[2] || detectDishTypeByName(p[0]),
-              priceApp: pApp,
-              priceD2C: pD2C,
-              foodCost: safeParseNumber(p[5]) || Math.round(pD2C * 0.35)
-            });
-          } else if (type === "INVENTORY" && p.length >= 2) {
-            results.push({
-              name: p[0],
-              pack: p[1] || "Sỉ",
-              totalCost: safeParseNumber(p[2]),
-              ratio: safeParseNumber(p[3]) || 1,
-              unit: p[4] || "suất"
-            });
-          }
-        } else {
-          var priceMatch = line.match(/(\d{1,3}(?:[.,]\d{3})*|\d+)\s*(?:k|đ|vnd)?$/i);
-          if (priceMatch) {
-            var rawPriceStr = priceMatch[1].replace(/[.,]/g, '');
-            var rawPrice = parseFloat(rawPriceStr);
-            if (rawPrice < 500) rawPrice = rawPrice * 1000;
-
-            var itemName = line.replace(priceMatch[0], '').replace(/[-–:]/g, '').trim();
-            if (itemName) {
-              if (type === "MENU") {
-                var pD2C_auto = Math.round((rawPrice * 0.88)/1000)*1000;
-                results.push({
-                  name: itemName,
-                  category: detectCategoryByName(itemName),
-                  dishType: detectDishTypeByName(itemName),
-                  priceApp: rawPrice,
-                  priceD2C: pD2C_auto,
-                  foodCost: Math.round(pD2C_auto * 0.35)
-                });
-              } else {
-                results.push({
-                  name: itemName,
-                  pack: "Sỉ",
-                  totalCost: rawPrice,
-                  ratio: 30,
-                  unit: "suất"
-                });
-              }
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              850: '#131c2e',
+              900: '#0f172a',
+              950: '#020617'
             }
           }
         }
-      });
-
-      return results;
+      }
     }
-
-    function detectCategoryByName(name) {
-      name = name.toLowerCase();
-      if (name.includes("combo") || name.includes("mâm") || name.includes("set") || name.includes("2 đùi")) return "dai-tiec";
-      if (name.includes("trà") || name.includes("nước") || name.includes("pepsi") || name.includes("cafe") || name.includes("sinh tố")) return "giai-khat";
-      if (name.includes("topping") || name.includes("thạch") || name.includes("trân châu") || name.includes("trứng") || name.includes("tóp mỡ") || name.includes("súp")) return "topping-extra";
-      if (name.includes("kimbap") || name.includes("gà viên") || name.includes("khoai")) return "an-kem";
-      if (name.includes("mồi") || name.includes("bò xào") || name.includes("tai heo")) return "moi-lai-rai";
-      return "mon-chinh";
+  </script>
+  
+  <style>
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
     }
-
-    function detectDishTypeByName(name) {
-      name = name.toLowerCase();
-      if (name.includes("trà") || name.includes("nước") || name.includes("lon")) return "giai-khat";
-      if (name.includes("nước") || name.includes("bò mỹ nước") || name.includes("canh")) return "nuoc";
-      if (name.includes("kimbap") || name.includes("viên chiên")) return "an-kem";
-      return "kho";
+    .animate-shake {
+      animation: shake 0.35s ease-in-out;
     }
+  </style>
+</head>
+<body class="h-full flex items-center justify-center p-4 bg-slate-950 font-sans select-none">
 
-    function renderParsedPreviewTable(list, type) {
-      var tbody = document.getElementById("parsedPreviewTbody");
-      if (!tbody) return;
-      tbody.innerHTML = "";
+  <!-- KHUNG CARD ĐĂNG NHẬP TRUNG TÂM -->
+  <div id="login-card" class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-7 shadow-2xl space-y-5 text-center transition-all duration-200">
+    
+    <!-- Header: Icon & Tiêu Đề Nhận Diện Thương Hiệu -->
+    <div class="space-y-1.5">
+      <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mx-auto shadow-inner shadow-amber-500/20">
+        <i class="fa-solid fa-crown"></i>
+      </div>
+      <h1 class="text-base font-black tracking-wider uppercase text-white">QUẢN TRỊ THÍM 5</h1>
+      <p id="sub-title" class="text-xs text-slate-400">Nhập mã PIN quyền hạn để tiếp tục:</p>
+    </div>
 
-      list.forEach(function(item, idx) {
-        var tr = document.createElement("tr");
-        if (type === "MENU") {
-          tr.innerHTML = `
-            <td><input type="checkbox" class="parsed-item-chk" data-idx="${idx}" checked /></td>
-            <td><input type="text" class="form-input" style="font-size:11px;" value="${item.name}" onchange="updateStagingItem(${idx}, 'name', this.value)" /></td>
-            <td>
-              <select class="form-input" style="font-size:11px; padding:4px;" onchange="updateStagingItem(${idx}, 'category', this.value)">
-                <option value="mon-chinh" ${item.category === 'mon-chinh' ? 'selected' : ''}>🍜 Món Mồi</option>
-                <option value="moi-lai-rai" ${item.category === 'moi-lai-rai' ? 'selected' : ''}>🍻 Món Chủ Lực</option>
-                <option value="dai-tiec" ${item.category === 'dai-tiec' ? 'selected' : ''}>👑 Combo D2C</option>
-                <option value="an-kem" ${item.category === 'an-kem' ? 'selected' : ''}>🍱 Ăn Kèm</option>
-                <option value="giai-khat" ${item.category === 'giai-khat' ? 'selected' : ''}>🧋 Nước 1L</option>
-                <option value="topping-extra" ${item.category === 'topping-extra' ? 'selected' : ''}>🥢 Topping</option>
-              </select>
-            </td>
-            <td>
-              <select class="form-input" style="font-size:11px; padding:4px;" onchange="updateStagingItem(${idx}, 'dishType', this.value)">
-                <option value="kho" ${item.dishType === 'kho' ? 'selected' : ''}>Món Khô</option>
-                <option value="nuoc" ${item.dishType === 'nuoc' ? 'selected' : ''}>Món Nước</option>
-                <option value="an-kem" ${item.dishType === 'an-kem' ? 'selected' : ''}>Ăn Vặt</option>
-                <option value="giai-khat" ${item.dishType === 'giai-khat' ? 'selected' : ''}>Nước</option>
-              </select>
-            </td>
-            <td><input type="number" class="form-input" style="font-size:11px; width:75px;" value="${item.priceApp}" onchange="updateStagingPrice(${idx}, 'priceApp', this.value)" /></td>
-            <td><input type="number" class="form-input" style="font-size:11px; width:75px; color:var(--gold);" value="${item.priceD2C}" onchange="updateStagingPrice(${idx}, 'priceD2C', this.value)" /></td>
-            <td><input type="number" class="form-input" style="font-size:11px; width:70px; color:#F87171;" value="${item.foodCost}" onchange="updateStagingItem(${idx}, 'foodCost', this.value)" /></td>
-            <td><button class="btn-del-item" style="color:var(--danger);" onclick="deleteStagingItem(${idx})">✕</button></td>
-          `;
+    <!-- Thanh Chuyển Đổi Tab: PIN Nhanh vs Super Admin 2FA -->
+    <div class="flex items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-bold">
+      <button type="button" 
+              id="tab-btn-pin" 
+              onclick="AdminLoginController.switchMode('PIN')" 
+              class="flex-1 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow">
+        <i class="fa-solid fa-key text-[10px] mr-1"></i> Mã PIN POS
+      </button>
+      <button type="button" 
+              id="tab-btn-super" 
+              onclick="AdminLoginController.switchMode('SUPER')" 
+              class="flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white">
+        <i class="fa-solid fa-shield-halved text-[10px] mr-1"></i> Super 2FA
+      </button>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PHÂN HỆ 1: BÀN PHÍM NUMPAD MÃ PIN NHANH (MẶC ĐỊNH CHO THU NGÂN / BẾP)   -->
+    <!-- ===================================================================== -->
+    <div id="mode-pin-container" class="space-y-4">
+      
+      <!-- Vùng Hiển Thị Chấm PIN Trực Quan -->
+      <div id="pin-dots-wrapper" class="flex items-center justify-center gap-3 py-1">
+        <span id="pin-dot-0" class="w-3.5 h-3.5 rounded-full bg-slate-800 border border-slate-700 transition-all duration-150"></span>
+        <span id="pin-dot-1" class="w-3.5 h-3.5 rounded-full bg-slate-800 border border-slate-700 transition-all duration-150"></span>
+        <span id="pin-dot-2" class="w-3.5 h-3.5 rounded-full bg-slate-800 border border-slate-700 transition-all duration-150"></span>
+        <span id="pin-dot-3" class="w-3.5 h-3.5 rounded-full bg-slate-800 border border-slate-700 transition-all duration-150"></span>
+      </div>
+
+      <!-- Bàn Phím Số Cảm Ứng Numpad -->
+      <div class="grid grid-cols-3 gap-2 font-mono font-bold text-base max-w-[240px] mx-auto">
+        <button type="button" onclick="AdminLoginController.pressDigit('1')" class="h-11 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">1</button>
+        <button type="button" onclick="AdminLoginController.pressDigit('2')" class="h-11 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">2</button>
+        <button type="button" onclick="AdminLoginController.pressDigit('3')" class="h-11 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">3</button>
+        <button type="button" onclick="AdminLoginController.pressDigit('4')" class="h-11 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">4</button>
+        <button type="button" onclick="AdminLoginController.pressDigit('5')" class="h-11 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">5</button>
+        <button type="button" onclick="AdminLoginController.pressDigit('6')" class="h-11 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">6</button>
+        <button type="button" onclick="AdminLoginController.pressDigit('7')" class="h-11 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">7</button>
+        <button type="button" onclick="AdminLoginController.pressDigit('8')" class="h-11 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">8</button>
+        <button type="button" onclick="AdminLoginController.pressDigit('9')" class="h-11 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">9</button>
+        <button type="button" onclick="AdminLoginController.clearAll()" class="h-11 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 active:scale-95 transition text-xs font-sans font-bold">Xóa</button>
+        <button type="button" onclick="AdminLoginController.pressDigit('0')" class="h-11 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">0</button>
+        <button type="button" onclick="AdminLoginController.backspace()" class="h-11 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 active:scale-95 transition text-sm"><i class="fa-solid fa-delete-left"></i></button>
+      </div>
+
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PHÂN HỆ 2: CHẾ ĐỘ SUPER ADMIN 2FA (GOOGLE AUTHENTICATOR TOTP)          -->
+    <!-- ===================================================================== -->
+    <div id="mode-super-container" class="hidden space-y-3 text-left">
+      <div class="space-y-1">
+        <label class="text-[11px] font-bold text-slate-300">Khóa Master Super Key:</label>
+        <input type="password" 
+               id="input-master-key" 
+               placeholder="Nhập Master Key..." 
+               class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none transition" />
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-[11px] font-bold text-slate-300">Mã 6 Số Google Authenticator (TOTP):</label>
+        <input type="text" 
+               id="input-totp-code" 
+               maxlength="6" 
+               placeholder="000000" 
+               class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-center text-sm font-mono tracking-widest text-amber-400 font-bold outline-none transition" />
+      </div>
+
+      <div class="text-right">
+        <button type="button" 
+                onclick="AdminLoginController.requestEmergencyOtp()" 
+                class="text-[10px] text-amber-400 hover:underline">
+          Nhận mã khẩn cấp qua haiau2205@gmail.com
+        </button>
+      </div>
+    </div>
+
+    <!-- NÚT BẤM XÁC THỰC CHÍNH -->
+    <div class="space-y-2.5 pt-1">
+      <button type="button" 
+              id="btn-verify" 
+              onclick="AdminLoginController.submitCurrentMode()" 
+              class="w-full py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black uppercase text-xs tracking-wider transition active:scale-95 shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-lock-open"></i>
+        <span id="btn-verify-text">Xác Thực Quyền Truy Cập</span>
+      </button>
+
+      <!-- Thông Báo Phản Hồi Trạng Thái -->
+      <div id="status-message" class="text-xs min-h-[18px] transition-all duration-200"></div>
+    </div>
+
+  </div>
+
+  <!-- BỘ NÃO JAVASCRIPT CONTROLLER ĐIỀU HÀNH XÁC THỰC -->
+  <script>
+    /**
+     * CONTROLLER: ADMIN LOGIN GATEWAY (v2.9 ENTERPRISE)
+     */
+    var AdminLoginController = (function() {
+      var currentMode = "PIN"; // "PIN" hoặc "SUPER"
+      var currentPin = "";
+      var isSubmitting = false;
+
+      // Cập nhật giao diện chấm PIN
+      function updateDots() {
+        for (var i = 0; i < 4; i++) {
+          var dot = document.getElementById("pin-dot-" + i);
+          if (!dot) continue;
+          if (i < currentPin.length) {
+            dot.className = "w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-300 shadow-sm shadow-amber-400/50 scale-110 transition-all duration-150";
+          } else {
+            dot.className = "w-3.5 h-3.5 rounded-full bg-slate-800 border border-slate-700 transition-all duration-150";
+          }
+        }
+      }
+
+      function pressDigit(d) {
+        if (isSubmitting) return;
+        if (currentPin.length < 6) {
+          currentPin += d;
+          updateDots();
+          if (currentPin.length === 4) {
+            submitCurrentMode();
+          }
+        }
+      }
+
+      function clearAll() {
+        if (isSubmitting) return;
+        currentPin = "";
+        updateDots();
+        showStatus("", "");
+      }
+
+      function backspace() {
+        if (isSubmitting) return;
+        if (currentPin.length > 0) {
+          currentPin = currentPin.slice(0, -1);
+          updateDots();
+        }
+      }
+
+      function switchMode(mode) {
+        currentMode = mode;
+        var pinBox = document.getElementById("mode-pin-container");
+        var superBox = document.getElementById("mode-super-container");
+        var btnPin = document.getElementById("tab-btn-pin");
+        var btnSuper = document.getElementById("tab-btn-super");
+        var subTitle = document.getElementById("sub-title");
+
+        clearAll();
+
+        if (mode === "PIN") {
+          pinBox.classList.remove("hidden");
+          superBox.classList.add("hidden");
+          btnPin.className = "flex-1 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow";
+          btnSuper.className = "flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
+          subTitle.innerText = "Nhập mã PIN quyền hạn để tiếp tục:";
         } else {
-          tr.innerHTML = `
-            <td><input type="checkbox" class="parsed-item-chk" data-idx="${idx}" checked /></td>
-            <td><input type="text" class="form-input" style="font-size:11px;" value="${item.name}" onchange="updateStagingItem(${idx}, 'name', this.value)" /></td>
-            <td><input type="text" class="form-input" style="font-size:11px;" value="${item.pack}" onchange="updateStagingItem(${idx}, 'pack', this.value)" /></td>
-            <td>-</td>
-            <td>-</td>
-            <td><input type="number" class="form-input" style="font-size:11px; width:90px; color:var(--danger);" value="${item.totalCost}" onchange="updateStagingItem(${idx}, 'totalCost', this.value)" /></td>
-            <td><input type="number" class="form-input" style="font-size:11px; width:60px;" value="${item.ratio}" onchange="updateStagingItem(${idx}, 'ratio', this.value)" /></td>
-            <td><button class="btn-del-item" style="color:var(--danger);" onclick="deleteStagingItem(${idx})">✕</button></td>
-          `;
+          pinBox.classList.add("hidden");
+          superBox.classList.remove("hidden");
+          btnSuper.className = "flex-1 py-1.5 rounded-xl transition bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 shadow font-black";
+          btnPin.className = "flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
+          subTitle.innerText = "Xác thực 2 lớp dành riêng cho Super Admin:";
+          document.getElementById("input-master-key").focus();
         }
-        tbody.appendChild(tr);
-      });
-    }
-
-    function updateStagingItem(idx, field, val) {
-      if (parsedStagingItems[idx]) parsedStagingItems[idx][field] = val;
-    }
-
-    function updateStagingPrice(idx, field, val) {
-      var p = safeParseNumber(val);
-      if (field === 'priceApp') {
-        parsedStagingItems[idx].priceApp = p;
-        parsedStagingItems[idx].priceD2C = (p > 0) ? Math.round((p * 0.88)/1000)*1000 : parsedStagingItems[idx].priceD2C;
-        parsedStagingItems[idx].foodCost = Math.round(parsedStagingItems[idx].priceD2C * 0.35);
-      } else {
-        parsedStagingItems[idx].priceD2C = p;
-        parsedStagingItems[idx].priceApp = Math.round((p / 0.88)/1000)*1000;
-        parsedStagingItems[idx].foodCost = Math.round(p * 0.35);
-      }
-      var type = document.getElementById("currentImportType").value;
-      renderParsedPreviewTable(parsedStagingItems, type);
-    }
-
-    function deleteStagingItem(idx) {
-      parsedStagingItems.splice(idx, 1);
-      var type = document.getElementById("currentImportType").value;
-      renderParsedPreviewTable(parsedStagingItems, type);
-      document.getElementById("parsedCountText").innerText = parsedStagingItems.length + " mục";
-    }
-
-    function toggleSelectAllParsed(isChecked) {
-      document.querySelectorAll(".parsed-item-chk").forEach(function(chk){ chk.checked = isChecked; });
-    }
-
-    async function submitStructuredBatchToSheet() {
-      var type = document.getElementById("currentImportType").value;
-      var selectedItems = [];
-      document.querySelectorAll(".parsed-item-chk:checked").forEach(function(chk) {
-        var idx = parseInt(chk.getAttribute("data-idx"), 10);
-        if (parsedStagingItems[idx]) selectedItems.push(parsedStagingItems[idx]);
-      });
-
-      if (selectedItems.length === 0) {
-        alert("Vui lòng tick chọn ít nhất 1 mục để nạp!");
-        return;
       }
 
-      var btn = document.getElementById("btnConfirmStructuredImport");
-      btn.innerText = "⏳ Đang ghi vào hệ thống...";
-      btn.disabled = true;
-
-      try {
-        var res = await callBackend("processStructuredBatchImport", [type, selectedItems], "structuredBatchImport", { targetType: type, items: selectedItems });
-        btn.innerText = "🚀 Xác Nhận Ghi Vào Hệ Thống";
-        btn.disabled = false;
-        alert((res && res.message) ? res.message : "Đã đồng bộ thành công!");
-        closeModal("importMediaModal");
-        if (type === "MENU") {
-          loadAdminMenuList();
+      function showStatus(text, type) {
+        var el = document.getElementById("status-message");
+        if (!el) return;
+        el.innerText = text;
+        if (type === "success") {
+          el.className = "text-xs font-bold text-emerald-400 animate-pulse";
+        } else if (type === "error") {
+          el.className = "text-xs font-bold text-rose-400";
+          triggerShake();
         } else {
-          loadAdminInventoryData();
-          loadAllAdminData(currentPeriod);
+          el.className = "text-xs text-slate-400";
         }
-      } catch (err) {
-        btn.innerText = "🚀 Xác Nhận Ghi Vào Hệ Thống";
-        btn.disabled = false;
-        alert("Lỗi nạp dữ liệu: " + err.message);
       }
-    }
 
-    function downloadMenuCsvTemplate() {
-      setStatusLog("Đang kết xuất file mẫu CSV từ máy chủ...", false);
-      var fallbackHeader = "\uFEFFTên Món Ăn,Phân Tầng Menu,Dạng Thức Món,Giá Niêm Yết Sàn App,Giá Bán Web D2C,Food Cost Khoán,Mô Tả Thành Phần\n"
-        + '"Combo 2 Đùi Gà Rán + Cơm + Tặng 1 Pepsi","dai-tiec","kho",0,99000,42000,"2 đùi gà tỏi chiên giòn + cơm dẻo + tặng 1 lon pepsi mát lạnh"\n'
-        + '"Mì Trộn Tóp Mỡ Trứng Đào","mon-chinh","kho",45000,39000,13500,"2 vắt mì dai ngon + sốt sa tế tỏi giòn cay + trứng lòng đào béo ngậy"\n'
-        + '"Mì Trộn Đùi Gà Rán Sốt Tỏi","mon-chinh","kho",55000,48000,16000,"Mì trộn nóng hổi + đùi gà tỏi chiên giòn rụm chuẩn vị Đất Thánh"\n'
-        + '"Cơm Phủ Trứng Thịt Bằm","mon-chinh","kho",33000,29000,9500,"Cơm dẻo thơm + trứng lòng đào mượt + thịt bằm sốt đậm đà"\n'
-        + '"Trà Đào Cam Sả Khổng Lồ (1L)","giai-khat","giai-khat",29000,25000,7500,"Bình 1000ml mát lạnh giải ngấy sốt cay"';
-      triggerBrowserDownloadCsv(fallbackHeader, "Mau_Menu_Thim5_7Cot_ChuanHoa.csv");
-      setStatusLog("Đã tải file mẫu chuẩn!", false);
-    }
-
-    function triggerBrowserDownloadCsv(content, filename) {
-      var blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-
-    // 10. TRẠNG THÁI QUÁN & CHỐT SỔ TÀI CHÍNH
-    function openStoreStatusModal() { 
-      loadStoreStatus();
-      document.getElementById("storeStatusModal").style.display = "flex"; 
-    }
-
-    async function loadStoreStatus() {
-      try {
-        var res = await callBackend("getStoreStatus", [], "getStoreStatus", {});
-        var data = (res && res.isClosed !== undefined) ? res : (res && res.data ? res.data : null);
-        if (data) {
-          document.getElementById("chkStoreClosed").checked = data.isClosed;
-          document.getElementById("txtClosedMsg").value = data.message || "";
+      function triggerShake() {
+        var card = document.getElementById("login-card");
+        if (card) {
+          card.classList.remove("animate-shake");
+          void card.offsetWidth; // Trigger reflow
+          card.classList.add("animate-shake");
         }
-        var cfgRes = await callBackend("getStoreConfigDynamic", [], "getConfig", {});
-        var cfg = (cfgRes && cfgRes.autoOpenHour !== undefined) ? cfgRes : (cfgRes && cfgRes.data ? cfgRes.data : null);
-        if (cfg) {
-          if (document.getElementById("cfgAutoOpenHour")) document.getElementById("cfgAutoOpenHour").value = cfg.autoOpenHour !== undefined ? cfg.autoOpenHour : 6;
-          if (document.getElementById("cfgAutoCloseHour")) document.getElementById("cfgAutoCloseHour").value = cfg.autoCloseHour !== undefined ? cfg.autoCloseHour : 22;
+      }
+
+      function submitCurrentMode() {
+        if (currentMode === "PIN") {
+          submitPinAuth();
+        } else {
+          submitSuperTotpAuth();
         }
-      } catch (e) {}
-    }
-
-    async function saveStoreStatusSubmit() {
-      var isClosed = document.getElementById("chkStoreClosed").checked;
-      var msg = document.getElementById("txtClosedMsg").value.trim();
-      var openH = parseInt(document.getElementById("cfgAutoOpenHour").value, 10) || 6;
-      var closeH = parseInt(document.getElementById("cfgAutoCloseHour").value, 10) || 22;
-
-      setStatusLog("Đang lưu trạng thái và khung giờ bán...", false);
-      try {
-        await callBackend("updateStoreStatus", [isClosed, msg], "updateStoreStatus", { isClosed: isClosed, message: msg });
-        await callBackend("saveStoreConfigDynamic", [{ autoOpenHour: openH, autoCloseHour: closeH }], "saveConfig", { payload: JSON.stringify({ autoOpenHour: openH, autoCloseHour: closeH }) });
-        alert("✅ Đã cập nhật trạng thái quán và khung giờ bán (" + openH + "h - " + closeH + "h) thành công!");
-        closeModal("storeStatusModal");
-        setStatusLog("Hệ thống sẵn sàng phục vụ theo khung giờ mới.", false);
-      } catch (err) {
-        alert("Lỗi cập nhật trạng thái quán: " + err.message);
       }
-    }
 
-    async function triggerFinancialExport(periodType) {
-      var labels = { day: "HÔM NAY", week: "TUẦN NÀY", month: "THÁNG NÀY", quarter: "QUÝ NÀY" };
-      if (!confirm("Xác nhận chốt số liệu " + labels[periodType] + " và lưu vào sổ cái 10_Lich_Su_Bao_Cao?")) return;
+      // Xử lý xác thực mã PIN POS (1985 / 2026)
+      async function submitPinAuth() {
+        if (!currentPin) {
+          showStatus("Vui lòng nhập mã PIN quyền hạn!", "error");
+          return;
+        }
 
-      try {
-        var res = await callBackend("saveFinancialReportToMasterLog", [periodType], "exportFinancialReport", { period: periodType });
-        alert("✅ " + ((res && res.message) ? res.message : ("Đã ghi nhận thành công Báo Cáo " + (res.period || periodType) + " vào Sổ Cái!")));
-        loadAllAdminData(currentPeriod);
-      } catch (err) {
-        alert("Lỗi chốt sổ: " + err.message);
+        isSubmitting = true;
+        var btn = document.getElementById("btn-verify");
+        var btnText = document.getElementById("btn-verify-text");
+        btn.disabled = true;
+        btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Xác Thực...';
+        showStatus("Đang kiểm tra quyền hạn máy chủ...", "loading");
+
+        try {
+          var res = await Thim5API.callGAS("verifyAdminRole", { pin: currentPin });
+
+          if (res && res.status === "success" && res.data) {
+            sessionStorage.setItem("thim5_auth_role", res.data.role);
+            sessionStorage.setItem("thim5_admin_token", res.data.authToken || "");
+            
+            showStatus("🎉 " + res.data.message + " Đang vào hệ thống...", "success");
+
+            setTimeout(function() {
+              window.location.replace("admin-shell.html");
+            }, 350);
+
+          } else {
+            showStatus("❌ " + (res.message || "Mã PIN không chính xác!"), "error");
+            clearAll();
+          }
+        } catch (err) {
+          showStatus("❌ Lỗi kết nối: " + err.message, "error");
+        } finally {
+          isSubmitting = false;
+          btn.disabled = false;
+          btnText.innerText = "Xác Thực Quyền Truy Cập";
+        }
       }
-    }
 
-    function changePeriodFilter(period, btnElement) {
-      currentPeriod = period;
-      document.querySelectorAll(".period-filter-bar .filter-btn").forEach(function(b){ b.classList.remove("active"); });
-      if (btnElement) btnElement.classList.add("active");
-      loadAllAdminData(currentPeriod);
-    }
+      // Xử lý xác thực Super Admin 2FA
+      async function submitSuperTotpAuth() {
+        var masterKey = document.getElementById("input-master-key").value.trim();
+        var totpCode = document.getElementById("input-totp-code").value.trim();
 
-    function changeShipperPeriodFilter(period, btnElement) {
-      currentShipperPeriod = period;
-      document.querySelectorAll("#tab_shippers .filter-btn").forEach(function(b){ b.classList.remove("active"); });
-      if (btnElement) btnElement.classList.add("active");
-      loadAdminShippersList(currentShipperPeriod);
-    }
+        if (!masterKey || !totpCode) {
+          showStatus("Vui lòng nhập đầy đủ Master Key và Mã TOTP 6 số!", "error");
+          return;
+        }
 
-    function safeParseNumber(val) {
-      if (!val) return 0;
-      var num = parseFloat(String(val).replace(/[^\d.-]/g, ''));
-      return isNaN(num) ? 0 : num;
-    }
+        isSubmitting = true;
+        var btn = document.getElementById("btn-verify");
+        var btnText = document.getElementById("btn-verify-text");
+        btn.disabled = true;
+        btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Kiểm Toán 2FA...';
+        showStatus("Đang kiểm tra bảo mật Google Authenticator...", "loading");
 
-    function closeModal(id) { 
-      var modal = document.getElementById(id);
-      if (modal) modal.style.display = "none"; 
-    }
+        try {
+          var res = await Thim5API.callGAS("verifySuperAdminTotp", {
+            masterKey: masterKey,
+            totpCode: totpCode
+          });
+
+          if (res && res.status === "success" && res.data) {
+            sessionStorage.setItem("thim5_auth_role", "SUPER_ADMIN");
+            sessionStorage.setItem("thim5_master_key", masterKey);
+            sessionStorage.setItem("thim5_admin_token", res.data.sessionToken || "");
+
+            showStatus("🎉 Xác thực 2FA thành công! Đang chuyển hướng...", "success");
+
+            setTimeout(function() {
+              window.location.replace("admin-shell.html");
+            }, 350);
+
+          } else {
+            showStatus("❌ " + (res.message || "Xác thực 2FA thất bại!"), "error");
+          }
+        } catch (err) {
+          showStatus("❌ Lỗi kết nối 2FA: " + err.message, "error");
+        } finally {
+          isSubmitting = false;
+          btn.disabled = false;
+          btnText.innerText = "Xác Thực Quyền Truy Cập";
+        }
+      }
+
+      // Gửi mã OTP khẩn cấp về haiau2205@gmail.com
+      async function requestEmergencyOtp() {
+        var masterKey = document.getElementById("input-master-key").value.trim();
+        if (!masterKey) {
+          masterKey = prompt("Vui lòng nhập Master Key để gửi mã khẩn cấp về Gmail haiau2205@gmail.com:");
+        }
+        if (!masterKey) return;
+
+        showStatus("Đang gửi mã giải cứu về Gmail...", "loading");
+        try {
+          var res = await Thim5API.callGAS("sendEmergencyBackupOtpToEmail", { masterKey: masterKey.trim() });
+          if (res && res.status === "success") {
+            alert("📬 " + res.data.message);
+            document.getElementById("input-master-key").value = masterKey.trim();
+            document.getElementById("input-totp-code").focus();
+            showStatus("Đã gửi mã giải cứu thành công.", "success");
+          } else {
+            showStatus("⛔ " + (res.message || "Không thể gửi mã cứu hộ!"), "error");
+          }
+        } catch (e) {
+          showStatus("Lỗi gửi mail: " + e.message, "error");
+        }
+      }
+
+      // Hỗ trợ nhập liệu bàn phím máy tính
+      window.addEventListener("keydown", function(e) {
+        if (currentMode !== "PIN") {
+          if (e.key === "Enter") submitCurrentMode();
+          return;
+        }
+        if (e.key >= "0" && e.key <= "9") {
+          pressDigit(e.key);
+        } else if (e.key === "Backspace") {
+          backspace();
+        } else if (e.key === "Escape") {
+          clearAll();
+        } else if (e.key === "Enter") {
+          submitCurrentMode();
+        }
+      });
+
+      // Tự động chuyển trang nếu phiên làm việc trước đó vẫn còn hiệu lực
+      window.addEventListener("DOMContentLoaded", function() {
+        var savedRole = sessionStorage.getItem("thim5_auth_role");
+        if (savedRole) {
+          window.location.replace("admin-shell.html");
+        }
+      });
+
+      return {
+        pressDigit: pressDigit,
+        clearAll: clearAll,
+        backspace: backspace,
+        switchMode: switchMode,
+        submitCurrentMode: submitCurrentMode,
+        requestEmergencyOtp: requestEmergencyOtp
+      };
+    })();
   </script>
 </body>
 </html>

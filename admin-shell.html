@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bếp Thím 5 • Control Plane OS (v2.9 Enterprise)</title>
+  
+  <!-- CDN Tailwind CSS v3 & FontAwesome Pro Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Cấu hình Tailwind Dark Theme Slate-950 Đồng Bộ Toàn Hệ Thống -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              850: '#131c2e',
+              900: '#0f172a',
+              950: '#020617'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Nạp Adapter Kết Nối Trung Tâm Headless SaaS -->
+  <script src="api.js"></script>
+
+  <style>
+    /* Thanh cuộn tinh chỉnh chuẩn UI Cao Cấp */
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #020617; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #334155; }
+    
+    /* Hiệu ứng nhịp tim kết nối (Heartbeat Pulse) */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+    }
+    .heartbeat-active {
+      animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col bg-slate-950 text-slate-100 font-sans overflow-hidden select-none">
+
+  <!-- ========================================================================= -->
+  <!-- 1. MODAL XÁC THỰC PHÂN TẦNG DỰ PHÒNG (NẾU MỞ TRỰC TIẾP ADMIN-SHELL.HTML)  -->
+  <!-- ========================================================================= -->
+  <div id="auth-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4">
+    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden p-6 space-y-5 animate-in zoom-in-95 duration-200 text-center">
+      
+      <!-- Biểu tượng Thương Hiệu Hoàng Gia -->
+      <div class="space-y-1.5">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mx-auto shadow-inner shadow-amber-500/20">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+        <h2 class="text-base font-black tracking-wider uppercase text-white">Xác Thực Quyền Truy Cập</h2>
+        <p class="text-xs text-slate-400">Chọn phương thức xác thực quyền hạn của bạn:</p>
+      </div>
+
+      <!-- Tab Chuyển Đổi: Mã PIN POS vs Super Admin 2FA -->
+      <div class="flex items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-bold">
+        <button type="button" 
+                id="tab-btn-pin" 
+                onclick="AdminShellController.switchAuthMode('PIN')" 
+                class="flex-1 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow">
+          <i class="fa-solid fa-key text-[10px] mr-1"></i> Quản Lý (PIN)
+        </button>
+        <button type="button" 
+                id="tab-btn-super" 
+                onclick="AdminShellController.switchAuthMode('SUPER')" 
+                class="flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white">
+          <i class="fa-solid fa-shield-halved text-[10px] mr-1"></i> Super Admin (2FA)
+        </button>
+      </div>
+
+      <!-- Khung 1: Bàn Phím Số Ảo Mã PIN Quản Lý (1985 / 2026) -->
+      <div id="auth-box-pin" class="space-y-4">
+        <input type="password" 
+               id="input-pos-pin" 
+               readonly 
+               maxlength="6" 
+               placeholder="••••" 
+               class="w-full bg-slate-950 border border-slate-800 rounded-2xl py-2.5 text-center font-mono text-xl font-black tracking-widest text-amber-400 outline-none select-none shadow-inner" />
+
+        <!-- Numpad Cảm Ứng -->
+        <div class="grid grid-cols-3 gap-2 font-mono font-bold text-base max-w-[240px] mx-auto">
+          <button type="button" onclick="AdminShellController.appendPinDigit('1')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">1</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('2')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">2</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('3')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">3</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('4')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">4</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('5')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">5</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('6')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">6</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('7')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">7</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('8')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">8</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('9')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">9</button>
+          <button type="button" onclick="AdminShellController.clearPinDigit()" class="h-10 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 active:scale-95 transition text-xs font-sans font-bold">Xóa</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('0')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">0</button>
+          <button type="button" onclick="AdminShellController.submitPinAuth()" class="h-10 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black active:scale-95 transition text-xs font-sans">Vào</button>
+        </div>
+      </div>
+
+      <!-- Khung 2: Super Admin 2FA (Master Key + Mã TOTP 30s Google Authenticator) -->
+      <div id="auth-box-super" class="hidden space-y-3 text-left">
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold text-slate-300">Khóa Master Super Key:</label>
+          <input type="password" 
+                 id="input-master-key" 
+                 placeholder="Nhập Master Key tối cao..." 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none transition" />
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold text-slate-300">Mã Google Authenticator (6 Số):</label>
+          <input type="text" 
+                 id="input-totp-code" 
+                 maxlength="6" 
+                 placeholder="000000" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-center text-sm font-mono tracking-widest text-amber-400 font-bold outline-none transition" />
+        </div>
+
+        <div class="text-right">
+          <button type="button" 
+                  onclick="AdminShellController.requestEmergencyBackupOtp()" 
+                  class="text-[10px] text-amber-400 hover:underline">
+            Mất điện thoại? Nhận mã khẩn cấp qua haiau2205@gmail.com
+          </button>
+        </div>
+
+        <button type="button" 
+                id="btn-super-auth-submit" 
+                onclick="AdminShellController.submitSuperAdminAuth()" 
+                class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black uppercase text-xs tracking-wider transition active:scale-95 shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-key"></i>
+          <span>Xác Thực Toàn Quyền Super Admin</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. THANH ĐIỀU HÀNH TỔNG (TOPBAR & SYSTEM HEARTBEAT LATENCY)                -->
+  <!-- ========================================================================= -->
+  <header class="h-14 bg-slate-900 border-b border-slate-800 px-3 sm:px-6 flex items-center justify-between shrink-0 z-30">
+    
+    <!-- Logo & Tên Hệ Điều Hành -->
+    <div class="flex items-center gap-3">
+      <button type="button" 
+              onclick="AdminShellController.toggleSidebar()" 
+              class="md:hidden p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white">
+        <i class="fa-solid fa-bars text-sm"></i>
+      </button>
+
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 font-black text-sm shadow-md shadow-amber-500/20">
+          5
+        </div>
+        <div>
+          <h1 class="text-xs sm:text-sm font-black tracking-wider uppercase text-white flex items-center gap-1.5">
+            <span>THÍM 5 • CONTROL PLANE</span>
+          </h1>
+          <p class="text-[9.5px] text-slate-400 font-medium hidden sm:block">LongHoaFood Master SaaS Enterprise</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cụm Nhịp Tim Kết Nối (System Heartbeat Monitor) & Phân Quyền -->
+    <div class="flex items-center gap-2 sm:gap-4 text-xs">
+      
+      <!-- Widget Giám Sát Nhịp Tim Máy Chủ Thực Tế -->
+      <div id="heartbeat-badge" class="px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2 font-mono text-[10.5px]">
+        <span id="heartbeat-indicator" class="w-2 h-2 rounded-full bg-slate-600"></span>
+        <span id="heartbeat-status" class="text-slate-400 hidden sm:inline">Checking...</span>
+        <span class="text-slate-700 hidden sm:inline">|</span>
+        <span id="heartbeat-latency" class="text-slate-400 font-medium">--ms</span>
+        <span class="text-slate-700">|</span>
+        <span id="system-version-tag" class="text-amber-400 font-bold">v2.9</span>
+      </div>
+
+      <!-- Badge Phân Quyền Tài Khoản Hiện Hành -->
+      <div id="user-role-badge" class="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5">
+        <i class="fa-solid fa-user-shield text-xs"></i>
+        <span id="user-role-text">KHÁCH</span>
+      </div>
+
+      <!-- Nút Đăng Xuất -->
+      <button type="button" 
+              onclick="AdminShellController.handleLogout()" 
+              title="Đăng xuất khỏi bảng điều khiển" 
+              class="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 transition">
+        <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+      </button>
+
+    </div>
+
+  </header>
+  <!-- ========================================================================= -->
+  <!-- 3. KHUNG BỐ CỤC CHÍNH WORKSPACE: SIDEBAR DRAWER & VIEWPORT TRUNG TÂM       -->
+  <!-- ========================================================================= -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- LỚP PHỦ NỀN KHI MỞ MENU TRÊN DI ĐỘNG (BACKDROP OVERLAY) -->
+    <div id="sidebar-backdrop" 
+         onclick="AdminShellController.toggleSidebar(false)" 
+         class="hidden fixed inset-0 z-30 bg-slate-950/80 backdrop-blur-sm md:hidden transition-opacity"></div>
+
+    <!-- SIDEBAR DRAWER ĐIỀU HƯỚNG PHÂN QUYỀN RBAC -->
+    <aside id="admin-sidebar" 
+           class="fixed inset-y-14 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-3 transform -translate-x-full md:translate-x-0 md:static md:inset-auto transition-transform duration-200 ease-in-out">
+      
+      <!-- Danh sách các Tab Chức Năng Điều Phối -->
+      <nav class="space-y-1.5 font-medium text-xs">
+        
+        <!-- Tab 1: Báo Cáo Tài Chính P&L (POS & Super Admin đều có quyền xem) -->
+        <button type="button" 
+                data-tab="pl" 
+                onclick="AdminShellController.switchMainTab('pl', this)" 
+                class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 active">
+          <i class="fa-solid fa-chart-pie w-4 text-center text-sm"></i>
+          <span class="truncate">Báo Cáo P&amp;L Dòng Tiền</span>
+        </button>
+
+        <!-- Tab 2: Quản Lý Thực Đơn & Bán Chéo (POS & Super Admin) -->
+        <button type="button" 
+                data-tab="menu" 
+                onclick="AdminShellController.switchMainTab('menu', this)" 
+                class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60">
+          <i class="fa-solid fa-utensils w-4 text-center text-sm"></i>
+          <span class="truncate">Thực Đơn &amp; Bán Chéo</span>
+        </button>
+
+        <!-- Tab 3: Mở Nhanh Trạm Bếp KDS -->
+        <a href="kitchen.html" 
+           target="_blank" 
+           class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-emerald-400 hover:bg-slate-800/60">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-fire-burner w-4 text-center text-sm text-emerald-400"></i>
+            <span class="truncate">Trạm Bếp KDS</span>
+          </div>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-70"></i>
+        </a>
+
+        <!-- Tab 4: Mở Nhanh Trạm Điều Phối Shipper -->
+        <a href="shipping.html" 
+           target="_blank" 
+           class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-sky-400 hover:bg-slate-800/60">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-motorcycle w-4 text-center text-sm text-sky-400"></i>
+            <span class="truncate">Trạm Điều Phối Ship</span>
+          </div>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-70"></i>
+        </a>
+
+        <!-- =================================================================== -->
+        <!-- KHỐI QUYỀN TỐI CAO: MẶC ĐỊNH BỊ KHÓA CHẶT (CHỈ MỞ CHO SUPER ADMIN)   -->
+        <!-- Quản lý ca (Lv1, Lv2) tuyệt đối không bao giờ nhìn thấy khối này    -->
+        <!-- =================================================================== -->
+        <div id="super-admin-nav-group" class="hidden space-y-1.5 pt-2 border-t border-slate-800/80">
+          <span class="px-3.5 text-[9.5px] font-mono uppercase tracking-widest text-rose-400 font-bold block mb-1">
+            Quyền Tối Cao
+          </span>
+
+          <!-- Tab 5: Cấu Hình Toàn Hệ Thống (Super Control Plane) -->
+          <button type="button" 
+                  id="sidebar-btn-control-plane" 
+                  data-tab="control-plane" 
+                  onclick="AdminShellController.switchMainTab('control-plane', this)" 
+                  class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-rose-400 hover:bg-rose-500/10 font-bold">
+            <i class="fa-solid fa-sliders w-4 text-center text-sm"></i>
+            <span class="truncate">Super Control Plane</span>
+          </button>
+        </div>
+
+      </nav>
+
+      <!-- Chân Sidebar: Thông Tin Bản Quyền & Phân Quyền Hiện Hành -->
+      <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-1 text-[10px] font-mono">
+        <div class="flex justify-between text-slate-400">
+          <span>Hệ thống:</span>
+          <span class="text-amber-400 font-bold">v2.9 Enterprise</span>
+        </div>
+        <div class="flex justify-between text-slate-400">
+          <span>Phân quyền:</span>
+          <span id="sidebar-role-indicator" class="text-slate-300 font-bold">POS_STAFF</span>
+        </div>
+        <div class="pt-1 text-[9px] text-slate-500 text-center">
+          &copy; 2026 LongHoaFood Master
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- KHUNG VIEWPORT TRUNG TÂM (CHỨA VIEW ĐỘNG HOẶC SUPER CONTROL PLANE) -->
+    <main class="flex-1 h-full overflow-y-auto custom-scroll bg-slate-950 p-2 sm:p-4">
+      
+      <!-- CỬA NẠP ĐỘNG MICRO-FRONTEND CHO CÁC COMPONENT (tab-pl.html, tab-menu.html) -->
+      <div id="dynamic-tab-outlet" class="w-full">
+        <div class="p-12 text-center text-slate-400 space-y-3">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
+          <p class="text-xs font-medium font-sans">Đang tải dữ liệu Báo Cáo P&amp;L Dòng Tiền...</p>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- TAB CẤU HÌNH TOÀN HỆ THỐNG: CHỈ HIỂN THỊ KHI ROLE === 'SUPER_ADMIN'   -->
+      <!-- ===================================================================== -->
+      <div id="super-control-plane-view" class="hidden space-y-4 max-w-5xl mx-auto pb-10 select-none text-xs">
+        
+        <!-- Banner Tiêu Đề Bảng Điều Khiển Cấu Hình -->
+        <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-md">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-orange-600 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-rose-600/20">
+              <i class="fa-solid fa-sliders"></i>
+            </div>
+            <div>
+              <h2 class="text-sm font-black text-white uppercase tracking-wider">Bảng Điều Khiển Super Admin Toàn Năng</h2>
+              <p class="text-[10.5px] text-slate-400">Điều chỉnh thông số vận hành chuỗi thời gian thực • Kiến trúc Zero-Code</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
+              Multi-tenant Engine
+            </span>
+          </div>
+        </div>
+
+        <!-- FORM CẤU HÌNH THAM SỐ ĐỘNG -->
+        <form id="form-system-config" onsubmit="AdminShellController.handleSaveSystemConfig(event)" class="space-y-4">
+          
+          <!-- ================================================================= -->
+          <!-- PHÂN HỆ 1: NHẬN DIỆN QUÁN & TỌA ĐỘ ĐỊNH VỊ GPS BẾP HÒA THÀNH      -->
+          <!-- ================================================================= -->
+          <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs">
+                  <i class="fa-solid fa-store"></i>
+                </span>
+                <h3 class="text-xs font-black text-white uppercase tracking-wider">1. Nhận Diện Quán &amp; Định Vị GPS Bếp</h3>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">Hiển thị Web &amp; Tính Cự Ly Giao</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <!-- Tên Quán -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Tên Thương Hiệu</label>
+                <input type="text" 
+                       id="cfg-store-name" 
+                       required 
+                       placeholder="Mì Trộn Xá Xíu Thím 5" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 outline-none transition font-medium" />
+              </div>
+
+              <!-- Slogan Quán -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Slogan Thương Hiệu</label>
+                <input type="text" 
+                       id="cfg-store-slogan" 
+                       placeholder="Hương vị Đất Thánh Hòa Thành" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 outline-none transition font-medium" />
+              </div>
+
+              <!-- Hotline CSKH -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Hotline CSKH / Đặt Đơn</label>
+                <input type="text" 
+                       id="cfg-store-hotline" 
+                       required 
+                       placeholder="0934.220.585" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-amber-400 font-mono font-bold placeholder-slate-600 outline-none transition" />
+              </div>
+
+              <!-- Biểu Tượng Icon -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Biểu Tượng (Emoji Icon)</label>
+                <input type="text" 
+                       id="cfg-store-icon" 
+                       placeholder="🍜" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-center text-lg outline-none transition" />
+              </div>
+            </div>
+
+            <!-- Tọa độ GPS & Nút cập nhật vị trí nhanh -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Vĩ Độ Bếp (Latitude)</label>
+                <input type="number" 
+                       step="any" 
+                       id="cfg-store-lat" 
+                       required 
+                       placeholder="11.285267" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 outline-none transition" />
+              </div>
+
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Kinh Độ Bếp (Longitude)</label>
+                <input type="number" 
+                       step="any" 
+                       id="cfg-store-lng" 
+                       required 
+                       placeholder="106.133347" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 outline-none transition" />
+              </div>
+
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Cập Nhật Định Vị Nhanh</label>
+                <button type="button" 
+                        onclick="AdminShellController.fetchCurrentBrowserGps()" 
+                        class="w-full py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-sky-400 border border-slate-800 font-bold transition flex items-center justify-center gap-1.5 active:scale-95 shadow">
+                  <i class="fa-solid fa-location-crosshairs text-xs"></i>
+                  <span>Lấy GPS Trình Duyệt</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-bold text-slate-300 text-[11px] block">Địa Chỉ Đặt Bếp Trung Tâm</label>
+              <input type="text" 
+                     id="cfg-store-address" 
+                     placeholder="125 Hùng Vương, KP4, TT. Hòa Thành, Tây Ninh" 
+                     class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 outline-none transition font-medium" />
+            </div>
+
+          </div>
+
+          <!-- ================================================================= -->
+          <!-- PHÂN HỆ 2: CỔNG THANH TOÁN BANK, VÍ MOMO & TEST VIETQR ĐỘNG      -->
+          <!-- ================================================================= -->
+          <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs">
+                  <i class="fa-solid fa-qrcode"></i>
+                </span>
+                <h3 class="text-xs font-black text-white uppercase tracking-wider">2. Cổng Thanh Toán, Ngân Hàng &amp; Mã VietQR</h3>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">Chuẩn Napas247 EMVCo</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              
+              <!-- Cột Cấu Hình Thông Tin Ngân Hàng & Ví MoMo -->
+              <div class="lg:col-span-2 space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <!-- Chọn Ngân Hàng -->
+                  <div class="space-y-1">
+                    <label class="font-bold text-slate-300 text-[11px] block">Ngân Hàng Nhận Tiền</label>
+                    <select id="cfg-payment-bank-bin" 
+                            onchange="AdminShellController.updateLiveQrPreview()" 
+                            class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none transition font-medium">
+                      <option value="970422">MBBank (Ngân Hàng Quân Đội - 970422)</option>
+                      <option value="970436">Vietcombank (970436)</option>
+                      <option value="970407">Techcombank (970407)</option>
+                      <option value="970415">VietinBank (970415)</option>
+                      <option value="970416">ACB (970416)</option>
+                      <option value="970432">VPBank (970432)</option>
+                    </select>
+                  </div>
+
+                  <!-- Số Tài Khoản Thụ Hưởng -->
+                  <div class="space-y-1">
+                    <label class="font-bold text-slate-300 text-[11px] block">Số Tài Khoản Thụ Hưởng <span class="text-rose-400">*</span></label>
+                    <input type="text" 
+                           id="cfg-payment-account-no" 
+                           required 
+                           placeholder="3939388888" 
+                           oninput="AdminShellController.updateLiveQrPreview()" 
+                           class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-emerald-400 outline-none transition" />
+                  </div>
+                </div>
+
+                <!-- Tên Chủ Tài Khoản Ngân Hàng -->
+                <div class="space-y-1">
+                  <label class="font-bold text-slate-300 text-[11px] block">Tên Chủ Tài Khoản (In hoa không dấu) <span class="text-rose-400">*</span></label>
+                  <input type="text" 
+                         id="cfg-payment-account-name" 
+                         required 
+                         placeholder="NGUYEN HAI AU" 
+                         oninput="this.value = this.value.toUpperCase(); AdminShellController.updateLiveQrPreview();" 
+                         class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none transition" />
+                </div>
+
+                <!-- Cấu hình Ví MoMo Nhận Tiền -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div class="space-y-1">
+                    <label class="font-bold text-slate-300 text-[11px] block">Số Điện Thoại Ví MoMo</label>
+                    <input type="text" 
+                           id="cfg-payment-momo-phone" 
+                           placeholder="0934220585" 
+                           class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 outline-none transition" />
+                  </div>
+
+                  <div class="space-y-1">
+                    <label class="font-bold text-slate-300 text-[11px] block">Tên Chủ Ví MoMo</label>
+                    <input type="text" 
+                           id="cfg-payment-momo-name" 
+                           placeholder="NGUYEN HAI AU" 
+                           oninput="this.value = this.value.toUpperCase()" 
+                           class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 outline-none transition" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cột Hiển Thị Trực Quan & Quét Thử Mã VietQR Động -->
+              <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col items-center justify-center text-center space-y-2">
+                <span class="text-[10.5px] font-bold text-slate-300 flex items-center gap-1.5">
+                  <i class="fa-solid fa-mobile-screen-button text-emerald-400"></i>
+                  <span>Mã VietQR Thử Nghiệm Trực Tiếp</span>
+                </span>
+                
+                <div class="w-36 h-36 bg-white rounded-xl p-1.5 flex items-center justify-center shadow-inner overflow-hidden">
+                  <img id="live-qr-preview-img" 
+                       src="https://img.vietqr.io/image/970422-3939388888-compact2.png?amount=10000&addInfo=TEST%20THIM%205" 
+                       alt="VietQR Preview" 
+                       class="w-full h-full object-contain" />
+                </div>
+
+                <p class="text-[9.5px] text-slate-400 leading-tight">
+                  Quét thử bằng app ngân hàng kiểm tra tiền nổ đúng két trước khi lưu!
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+          <!-- ================================================================= -->
+          <!-- PHÂN HỆ 3: BẢO MẬT PHÂN TẦNG & MÃ PIN ĐIỀU HÀNH                   -->
+          <!-- ================================================================= -->
+          <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-xs">
+                  <i class="fa-solid fa-key"></i>
+                </span>
+                <h3 class="text-xs font-black text-white uppercase tracking-wider">3. Bảo Mật Phân Tầng &amp; Mã PIN Vận Hành</h3>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">RBAC Security Control</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <!-- Đổi Master Key Super Admin -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Khóa Master Super Key Mới</label>
+                <input type="text" 
+                       id="cfg-sec-master-key" 
+                       placeholder="Để trống nếu không đổi..." 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-rose-500 rounded-xl px-3 py-2 text-xs font-mono text-rose-400 placeholder-slate-600 outline-none transition" />
+                <span class="text-[9.5px] text-slate-500 block">Quyền sinh sát tối cao toàn chuỗi.</span>
+              </div>
+
+              <!-- Đổi Mã PIN Admin Level 1 (Bếp KDS) -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Mã PIN Admin Lv1 (Trạm Bếp KDS) <span class="text-rose-400">*</span></label>
+                <input type="text" 
+                       id="cfg-sec-pin-lv1" 
+                       required 
+                       maxlength="6" 
+                       placeholder="1985" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 tracking-wider outline-none transition" />
+                <span class="text-[9.5px] text-slate-500 block">Mở khóa trạm Bếp nấu nướng.</span>
+              </div>
+
+              <!-- Đổi Mã PIN Admin Level 2 (Thu ngân/Điều phối) -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Mã PIN Admin Lv2 (Thu Ngân / Điều Phối) <span class="text-rose-400">*</span></label>
+                <input type="text" 
+                       id="cfg-sec-pin-lv2" 
+                       required 
+                       maxlength="6" 
+                       placeholder="2026" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-sky-400 tracking-wider outline-none transition" />
+                <span class="text-[9.5px] text-slate-500 block">Quyền quản lý ca &amp; điều xe.</span>
+              </div>
+            </div>
+
+            <!-- Nút Quét Lại Mã QR Cài Đặt Google Authenticator -->
+            <div class="pt-1 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/60">
+              <span class="text-[10px] text-slate-400">
+                Email nhận mã giải cứu khẩn cấp: <strong class="text-amber-400 font-mono">haiau2205@gmail.com</strong>
+              </span>
+              <button type="button" 
+                      onclick="AdminShellController.openTotpSetupModal()" 
+                      class="px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 font-bold text-[11px] transition flex items-center gap-1.5 shadow active:scale-95">
+                <i class="fa-solid fa-qrcode text-amber-400"></i>
+                <span>Xem Mã QR Cài Google Authenticator 2FA</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- ================================================================= -->
+          <!-- PHÂN HỆ 4: CHIẾT KHẤU SÀN MASTER & THUẾ KHOÁN HKD                -->
+          <!-- ================================================================= -->
+          <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xs">
+                  <i class="fa-solid fa-percent"></i>
+                </span>
+                <h3 class="text-xs font-black text-white uppercase tracking-wider">4. Tỷ Lệ Khấu Trừ Nền Tảng &amp; Thuế Khoán</h3>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">Hạch toán tự động vào P&amp;L</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Phí Master SaaS -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Phí Nền Tảng Master SaaS (Hệ số thập phân)</label>
+                <div class="relative">
+                  <input type="number" 
+                         step="0.001" 
+                         min="0" 
+                         max="0.3" 
+                         id="cfg-fin-master-fee" 
+                         required 
+                         placeholder="0.02" 
+                         class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl pl-3 pr-16 py-2 text-xs font-mono font-bold text-sky-400 outline-none transition" />
+                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400">0.02 = 2%</span>
+                </div>
+                <span class="text-[9.5px] text-slate-500 block">Doanh thu trích lại cho nền tảng quản trị chuỗi.</span>
+              </div>
+
+              <!-- Thuế Khoán HKD -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Tỷ Lệ Thuế Khoán Hộ Kinh Doanh (Hệ số thập phân)</label>
+                <div class="relative">
+                  <input type="number" 
+                         step="0.001" 
+                         min="0" 
+                         max="0.3" 
+                         id="cfg-fin-tax-hkd" 
+                         required 
+                         placeholder="0.045" 
+                         class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl pl-3 pr-20 py-2 text-xs font-mono font-bold text-sky-400 outline-none transition" />
+                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400">0.045 = 4.5%</span>
+                </div>
+                <span class="text-[9.5px] text-slate-500 block">Mức thuế GTGT và TNCN khoán theo quy định.</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ================================================================= -->
+          <!-- PHÂN HỆ 5: CHIẾN LƯỢC KHUYẾN MÃI AOV & TRỢ GIÁ FREESHIP          -->
+          <!-- ================================================================= -->
+          <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs">
+                  <i class="fa-solid fa-bullhorn"></i>
+                </span>
+                <h3 class="text-xs font-black text-white uppercase tracking-wider">5. Chiến Lược Khuyến Mãi &amp; Bơm Vé AOV</h3>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">Chốt chặn dòng tiền không bị âm</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <!-- Mốc Đơn Hưởng Freeship -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Mốc Đơn Tối Thiểu Hưởng Freeship (VNĐ)</label>
+                <input type="number" 
+                       step="1000" 
+                       min="0" 
+                       id="cfg-promo-freeship-min" 
+                       required 
+                       placeholder="79000" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 outline-none transition" />
+                <span class="text-[9.5px] text-slate-500 block">Kích khách mua thêm nước/topping để chạm mốc.</span>
+              </div>
+
+              <!-- Trần Trợ Giá Ship Quán Chịu -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Trần Trợ Giá Ship Tối Đa / Đơn (VNĐ)</label>
+                <input type="number" 
+                       step="1000" 
+                       min="0" 
+                       id="cfg-promo-max-subsidy" 
+                       required 
+                       placeholder="15000" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 outline-none transition" />
+                <span class="text-[9.5px] text-slate-500 block">Quán chỉ bù tối đa mức này, phần dư khách trả.</span>
+              </div>
+
+              <!-- Khóa Trần Khuyến Mãi Toàn Đơn -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Khóa Trần Khuyến Mãi Toàn Đơn</label>
+                <div class="relative">
+                  <input type="number" 
+                         step="0.01" 
+                         min="0" 
+                         max="0.5" 
+                         id="cfg-promo-max-rate" 
+                         required 
+                         placeholder="0.15" 
+                         class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl pl-3 pr-16 py-2 text-xs font-mono font-bold text-amber-400 outline-none transition" />
+                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400">0.15 = 15%</span>
+                </div>
+                <span class="text-[9.5px] text-slate-500 block">Tổng giảm giá + bù ship không vượt quá 15% gộp.</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ================================================================= -->
+          <!-- PHÂN HỆ 6: CƠ CHẾ THƯỞNG & HẠN MỨC CÔNG NỢ SHIPPER                -->
+          <!-- ================================================================= -->
+          <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs">
+                  <i class="fa-solid fa-motorcycle"></i>
+                </span>
+                <h3 class="text-xs font-black text-white uppercase tracking-wider">6. Cơ Chế Thưởng &amp; Hạn Mức Công NỢ Shipper</h3>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">Tiền trao cháo múc • Chống nợ xấu</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Hạn Mức Nợ Tạm Tối Đa -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Hạn Mức Nợ Tạm Bếp Tối Đa (VNĐ) <span class="text-rose-400">*</span></label>
+                <input type="number" 
+                       step="10000" 
+                       min="0" 
+                       id="cfg-dispatch-max-holding" 
+                       required 
+                       placeholder="300000" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-purple-400 outline-none transition" />
+                <span class="text-[9.5px] text-slate-500 block">Vượt quá 300.000đ hệ thống chặn không cho nhận thêm đơn mới.</span>
+              </div>
+
+              <!-- Thưởng Nóng Cuốc Cao Điểm -->
+              <div class="space-y-1">
+                <label class="font-bold text-slate-300 text-[11px] block">Tiền Thưởng Nóng Cuốc Giờ Cao Điểm (VNĐ/đơn)</label>
+                <input type="number" 
+                       step="500" 
+                       min="0" 
+                       id="cfg-dispatch-driver-bonus" 
+                       required 
+                       placeholder="2000" 
+                       class="w-full bg-slate-950 border border-slate-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-purple-400 outline-none transition" />
+                <span class="text-[9.5px] text-slate-500 block">Khích lệ tài xế chạy nhanh trong khung giờ mưa gió/trưa cao điểm.</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ================================================================= -->
+          <!-- CỤM NÚT LƯU CẤU HÌNH TRUNG TÂM                                    -->
+          <!-- ================================================================= -->
+          <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex flex-wrap items-center justify-between gap-3 sticky bottom-3 z-20 backdrop-blur-md bg-slate-900/90">
+            <div class="text-[11px] text-slate-400 flex items-center gap-2">
+              <i class="fa-solid fa-circle-check text-emerald-400"></i>
+              <span>Cập nhật có hiệu lực tức thì trên toàn bộ hệ thống client trong 0ms.</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button type="button" 
+                      onclick="AdminShellController.resetSystemConfigForm()" 
+                      class="px-4 py-2.5 rounded-2xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs font-bold transition">
+                Khôi Phục Ban Đầu
+              </button>
+
+              <button type="submit" 
+                      id="btn-save-system-config" 
+                      class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 text-xs font-black uppercase tracking-wider transition active:scale-95 shadow-lg shadow-orange-600/25 flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Lưu Toàn Bộ Cấu Hình Hệ Thống</span>
+              </button>
+            </div>
+          </div>
+
+        </form>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL XEM MÃ QR THIẾT LẬP GOOGLE AUTHENTICATOR (CHO SUPER ADMIN)          -->
+  <!-- ========================================================================= -->
+  <div id="modal-totp-setup" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4">
+    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden p-6 space-y-4 animate-in zoom-in-95 duration-200 text-center text-xs">
+      
+      <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base mx-auto">
+        <i class="fa-solid fa-qrcode"></i>
+      </div>
+
+      <div class="space-y-1">
+        <h3 class="text-sm font-black text-white uppercase tracking-wider">Cài Đặt Google Authenticator</h3>
+        <p class="text-[11px] text-slate-400">Quét mã bằng app trên điện thoại của anh Hải Âu</p>
+      </div>
+
+      <!-- Vùng hiển thị ảnh QR -->
+      <div class="w-48 h-48 bg-white rounded-2xl p-2 mx-auto flex items-center justify-center shadow-inner overflow-hidden">
+        <img id="totp-setup-qr-img" src="" alt="Google Authenticator QR" class="w-full h-full object-contain" />
+      </div>
+
+      <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[10.5px] font-mono text-slate-300">
+        Khóa dự phòng: <strong id="totp-setup-secret-txt" class="text-amber-400 select-all">JBSWY3DPEHPK3PXP</strong>
+      </div>
+
+      <button type="button" 
+              onclick="AdminShellController.closeTotpSetupModal()" 
+              class="w-full py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition text-xs">
+        Đã Quét Xong &amp; Đóng Lại
+      </button>
+
+    </div>
+  </div>
+  <!-- ========================================================================= -->
+  <!-- 4. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH TRUNG TÂM (ADMIN SHELL CONTROLLER)         -->
+  <!-- ========================================================================= -->
+  <script>
+    /**
+     * =========================================================================
+     * CONTROLLER: ADMIN SHELL OS & RBAC CONTROL PLANE (v2.9 ENTERPRISE)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+     * Kiến trúc: Bọc thép qua Thim5API, cách ly phân quyền Zero-Trust
+     * =========================================================================
+     */
+    var AdminShellController = (function() {
+      var currentRole = null; // 'POS_STAFF', 'KITCHEN_LEAD', hoặc 'SUPER_ADMIN'
+      var currentMasterKey = "";
+      var currentActiveTab = "pl";
+      var heartbeatInterval = null;
+
+      /**
+       * CHUYỂN ĐỔI CHẾ ĐỘ XÁC THỰC TRÊN AUTH MODAL
+       */
+      function switchAuthMode(mode) {
+        var boxPin = document.getElementById("auth-box-pin");
+        var boxSuper = document.getElementById("auth-box-super");
+        var btnPin = document.getElementById("tab-btn-pin");
+        var btnSuper = document.getElementById("tab-btn-super");
+
+        if (mode === "PIN") {
+          boxPin.classList.remove("hidden");
+          boxSuper.classList.add("hidden");
+          btnPin.className = "flex-1 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow font-bold";
+          btnSuper.className = "flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
+        } else {
+          boxPin.classList.add("hidden");
+          boxSuper.classList.remove("hidden");
+          btnSuper.className = "flex-1 py-1.5 rounded-xl transition bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 shadow font-black";
+          btnPin.className = "flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
+        }
+      }
+
+      /**
+       * THAO TÁC BÀN PHÍM SỐ ẢO (NUMPAD PIN)
+       */
+      function appendPinDigit(digit) {
+        var pinInput = document.getElementById("input-pos-pin");
+        if (pinInput && pinInput.value.length < 6) {
+          pinInput.value += digit;
+        }
+      }
+
+      function clearPinDigit() {
+        var pinInput = document.getElementById("input-pos-pin");
+        if (pinInput) pinInput.value = "";
+      }
+
+      /**
+       * XÁC THỰC MÃ PIN VẬN HÀNH (POS QUẢN LÝ / BẾP) QUA THIM5API
+       */
+      async function submitPinAuth() {
+        var pinInput = document.getElementById("input-pos-pin");
+        var pin = pinInput ? pinInput.value.trim() : "";
+
+        if (!pin) {
+          alert("Vui lòng nhập mã PIN quyền hạn!");
+          return;
+        }
+
+        try {
+          var res = await Thim5API.callGAS("verifyAdminRole", { pin: pin });
+
+          if (res && res.status === "success" && res.data) {
+            currentRole = res.data.role;
+            sessionStorage.setItem("thim5_auth_role", res.data.role);
+            sessionStorage.setItem("thim5_admin_token", res.data.authToken || "");
+
+            if (res.data.role === "SUPER_ADMIN") {
+              currentMasterKey = pin;
+              sessionStorage.setItem("thim5_master_key", pin);
+            }
+
+            unlockWorkspace();
+          } else {
+            alert("⛔ " + (res.message || "Mã PIN không chính xác! Vui lòng thử lại."));
+            clearPinDigit();
+          }
+        } catch (err) {
+          alert("❌ Lỗi kết nối máy chủ xác thực: " + err.message);
+        }
+      }
+
+      /**
+       * XÁC THỰC SUPER ADMIN 2FA (MASTER KEY + GOOGLE AUTHENTICATOR TOTP)
+       */
+      async function submitSuperAdminAuth() {
+        var keyInput = document.getElementById("input-master-key");
+        var totpInput = document.getElementById("input-totp-code");
+        var btn = document.getElementById("btn-super-auth-submit");
+
+        var masterKey = keyInput ? keyInput.value.trim() : "";
+        var totpCode = totpInput ? totpInput.value.trim() : "";
+
+        if (!masterKey || !totpCode) {
+          alert("Vui lòng nhập đầy đủ Master Key và Mã 6 số Google Authenticator!");
+          return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Kiểm Toán 2FA...';
+
+        try {
+          var res = await Thim5API.callGAS("verifySuperAdminTotp", {
+            masterKey: masterKey,
+            totpCode: totpCode
+          });
+
+          if (res && res.status === "success" && res.data) {
+            currentRole = "SUPER_ADMIN";
+            currentMasterKey = masterKey;
+            sessionStorage.setItem("thim5_auth_role", "SUPER_ADMIN");
+            sessionStorage.setItem("thim5_master_key", masterKey);
+            sessionStorage.setItem("thim5_admin_token", res.data.sessionToken || "");
+
+            unlockWorkspace();
+          } else {
+            alert("❌ " + (res.message || "Xác thực 2FA thất bại!"));
+          }
+        } catch (err) {
+          alert("❌ Lỗi kết nối máy chủ xác thực: " + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-key"></i> Xác Thực Toàn Quyền Super Admin';
+        }
+      }
+
+      /**
+       * YÊU CẦU MÃ GIẢI CỨU KHẨN CẤP QUA GMAIL haiau2205@gmail.com
+       */
+      async function requestEmergencyBackupOtp() {
+        var masterKey = prompt("Vui lòng nhập Master Key để nhận mã giải cứu khẩn cấp qua Gmail haiau2205@gmail.com:");
+        if (!masterKey) return;
+
+        try {
+          var res = await Thim5API.callGAS("sendEmergencyBackupOtpToEmail", { masterKey: masterKey.trim() });
+          if (res && res.status === "success") {
+            alert("📬 " + res.data.message);
+            document.getElementById("input-master-key").value = masterKey.trim();
+            document.getElementById("input-totp-code").focus();
+          } else {
+            alert("⛔ " + (res.message || "Không thể gửi mã giải cứu!"));
+          }
+        } catch (err) {
+          alert("Lỗi kết nối gửi mã: " + err.message);
+        }
+      }
+
+      /**
+       * MỞ KHÓA GIAO DIỆN CHÍNH & PHÂN QUYỀN RBAC KHẮT KHE
+       */
+      function unlockWorkspace() {
+        var overlay = document.getElementById("auth-modal-overlay");
+        var roleBadgeText = document.getElementById("user-role-text");
+        var roleBadgeBox = document.getElementById("user-role-badge");
+        var superNavGroup = document.getElementById("super-admin-nav-group");
+        var sidebarRoleIndicator = document.getElementById("sidebar-role-indicator");
+
+        if (overlay) overlay.classList.add("hidden");
+
+        if (currentRole === "SUPER_ADMIN") {
+          if (roleBadgeText) roleBadgeText.innerText = "SUPER ADMIN";
+          if (roleBadgeBox) roleBadgeBox.className = "px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center gap-1.5";
+          if (superNavGroup) superNavGroup.classList.remove("hidden");
+          if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "SUPER_ADMIN";
+          loadSystemConfigData();
+        } else {
+          var displayRole = (currentRole === "KITCHEN_LEAD") ? "TRƯỞNG CA BẾP" : "QUẢN LÝ CA (POS)";
+          if (roleBadgeText) roleBadgeText.innerText = displayRole;
+          if (roleBadgeBox) roleBadgeBox.className = "px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5";
+          
+          // Khóa cứng & ẩn hoàn toàn khối Super Admin với quyền nhân viên
+          if (superNavGroup) superNavGroup.classList.add("hidden");
+          if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = currentRole || "POS_STAFF";
+        }
+
+        switchMainTab("pl", document.querySelector('[data-tab="pl"]'));
+        runSystemHeartbeat();
+        if (!heartbeatInterval) heartbeatInterval = setInterval(runSystemHeartbeat, 30000);
+      }
+
+      /**
+       * ĐIỀU HƯỚNG TABS VÀ NẠP COMPONENT ĐỘNG (MICRO-FRONTEND LOADER)
+       */
+      async function switchMainTab(tabKey, btnElement) {
+        // Chốt chặn bảo mật RBAC: Cấm truy cập Control Plane nếu không phải Super Admin
+        if (tabKey === "control-plane" && currentRole !== "SUPER_ADMIN") {
+          alert("⛔ TỪ CHỐI TRUY CẬP (403): Phân hệ Super Control Plane chỉ dành riêng cho Super Admin xác thực 2FA!");
+          return;
+        }
+
+        currentActiveTab = tabKey;
+        toggleSidebar(false);
+
+        document.querySelectorAll(".sidebar-nav-btn").forEach(function(btn) {
+          btn.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60";
+        });
+
+        if (btnElement) {
+          if (tabKey === "control-plane") {
+            btnElement.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-rose-500 text-white font-bold shadow-md shadow-rose-500/20 active";
+          } else {
+            btnElement.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 active";
+          }
+        }
+
+        var outlet = document.getElementById("dynamic-tab-outlet");
+        var controlPlaneView = document.getElementById("super-control-plane-view");
+
+        if (tabKey === "control-plane") {
+          if (outlet) outlet.classList.add("hidden");
+          if (controlPlaneView) controlPlaneView.classList.remove("hidden");
+          return;
+        }
+
+        if (controlPlaneView) controlPlaneView.classList.add("hidden");
+        if (outlet) {
+          outlet.classList.remove("hidden");
+          outlet.innerHTML = `
+            <div class="p-12 text-center text-slate-400 space-y-3">
+              <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
+              <p class="text-xs font-medium font-sans">Đang tải phân hệ ${tabKey.toUpperCase()}...</p>
+            </div>
+          `;
+        }
+
+        var componentFile = (tabKey === "pl") ? "tab-pl.html" : "tab-menu.html";
+        try {
+          var response = await fetch(componentFile + "?v=" + Date.now());
+          if (!response.ok) throw new Error("Không thể tải component " + componentFile);
+          var htmlText = await response.text();
+          renderComponentWithScripts(outlet, htmlText);
+        } catch (err) {
+          if (outlet) {
+            outlet.innerHTML = `
+              <div class="p-8 text-center text-rose-400 space-y-2">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                <p class="text-xs font-bold">Lỗi nạp component: ${err.message}</p>
+                <button onclick="AdminShellController.switchMainTab('${tabKey}', null)" class="px-3 py-1.5 bg-slate-800 text-white rounded-xl text-xs font-bold">Thử lại</button>
+              </div>
+            `;
+          }
+        }
+      }
+
+      /**
+       * THỰC THI SCRIPT TRONG COMPONENT CON ĐẢM BẢO CHẠY 100%
+       */
+      function renderComponentWithScripts(container, html) {
+        if (!container) return;
+        container.innerHTML = html;
+        var scripts = container.querySelectorAll("script");
+        scripts.forEach(function(oldScript) {
+          var newScript = document.createElement("script");
+          Array.from(oldScript.attributes).forEach(function(attr) {
+            newScript.setAttribute(attr.name, attr.value);
+          });
+          newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+      }
+
+      /**
+       * ĐÓNG / MỞ SIDEBAR TRÊN THIẾT BỊ DI ĐỘNG
+       */
+      function toggleSidebar(forceState) {
+        var sidebar = document.getElementById("admin-sidebar");
+        var backdrop = document.getElementById("sidebar-backdrop");
+        if (!sidebar) return;
+
+        var isOpen = !sidebar.classList.contains("-translate-x-full");
+        var targetState = (forceState !== undefined) ? forceState : !isOpen;
+
+        if (targetState) {
+          sidebar.classList.remove("-translate-x-full");
+          if (backdrop) backdrop.classList.remove("hidden");
+        } else {
+          sidebar.classList.add("-translate-x-full");
+          if (backdrop) backdrop.classList.add("hidden");
+        }
+      }
+
+      /**
+       * ĐĂNG XUẤT RỜI CA LÀM VIỆC
+       */
+      function handleLogout() {
+        if (confirm("Xác nhận đăng xuất khỏi bảng điều khiển hệ thống?")) {
+          sessionStorage.clear();
+          location.reload();
+        }
+      }
+
+      /**
+       * GIÁM SÁT NHỊP TIM MÁY CHỦ THỰC TẾ QUA THIM5API (HEARTBEAT PING)
+       */
+      async function runSystemHeartbeat() {
+        var indicator = document.getElementById("heartbeat-indicator");
+        var latencyEl = document.getElementById("heartbeat-latency");
+        var statusEl = document.getElementById("heartbeat-status");
+
+        var endpoint = Thim5API.getEndpoint();
+        var startTime = performance.now();
+
+        try {
+          var res = await fetch(endpoint + "?action=ping&_t=" + Date.now(), { method: "GET" });
+          var latency = Math.round(performance.now() - startTime);
+
+          if (res.ok) {
+            if (indicator) indicator.className = "w-2 h-2 rounded-full bg-emerald-400 heartbeat-active";
+            if (statusEl) statusEl.innerText = "GAS Connected";
+            if (latencyEl) {
+              latencyEl.innerText = latency + "ms";
+              latencyEl.className = (latency <= 300) ? "text-emerald-400 font-medium" : "text-amber-400 font-medium";
+            }
+          } else {
+            throw new Error("HTTP " + res.status);
+          }
+        } catch (err) {
+          if (indicator) indicator.className = "w-2 h-2 rounded-full bg-rose-500";
+          if (statusEl) statusEl.innerText = "Reconnecting...";
+          if (latencyEl) {
+            latencyEl.innerText = "Offline";
+            latencyEl.className = "text-rose-400 font-medium";
+          }
+        }
+      }
+
+      /**
+       * NẠP DỮ LIỆU CẤU HÌNH TỪ BACKEND QUA THIM5API
+       */
+      async function loadSystemConfigData() {
+        try {
+          var res = await Thim5API.callGAS("getSystemDynamicConfig", { masterKey: currentMasterKey });
+          if (res && res.status === "success" && res.data) {
+            var c = res.data;
+            if (c.store) {
+              document.getElementById("cfg-store-name").value = c.store.name || "";
+              document.getElementById("cfg-store-slogan").value = c.store.slogan || "";
+              document.getElementById("cfg-store-hotline").value = c.store.hotline || "";
+              document.getElementById("cfg-store-icon").value = c.store.icon || "🍜";
+              document.getElementById("cfg-store-lat").value = c.store.latitude || "";
+              document.getElementById("cfg-store-lng").value = c.store.longitude || "";
+              document.getElementById("cfg-store-address").value = c.store.address || "";
+            }
+            if (c.payment) {
+              document.getElementById("cfg-payment-bank-bin").value = c.payment.bankBin || "970422";
+              document.getElementById("cfg-payment-account-no").value = c.payment.accountNo || "";
+              document.getElementById("cfg-payment-account-name").value = c.payment.accountName || "";
+              document.getElementById("cfg-payment-momo-phone").value = c.payment.momoPhone || "";
+              document.getElementById("cfg-payment-momo-name").value = c.payment.momoName || "";
+              updateLiveQrPreview();
+            }
+            if (c.security) {
+              document.getElementById("cfg-sec-pin-lv1").value = c.security.pinAdminLv1 || "1985";
+              document.getElementById("cfg-sec-pin-lv2").value = c.security.pinAdminLv2 || "2026";
+            }
+            if (c.finance) {
+              document.getElementById("cfg-fin-master-fee").value = c.finance.platformMasterFee || 0.02;
+              document.getElementById("cfg-fin-tax-hkd").value = c.finance.taxRateHkd || 0.045;
+            }
+            if (c.promotions) {
+              document.getElementById("cfg-promo-freeship-min").value = c.promotions.freeshipMinSubtotal || 79000;
+              document.getElementById("cfg-promo-max-subsidy").value = c.promotions.maxShippingSubsidy || 15000;
+              document.getElementById("cfg-promo-max-rate").value = c.promotions.maxPromotionRate || 0.15;
+            }
+            if (c.dispatch) {
+              document.getElementById("cfg-dispatch-max-holding").value = c.dispatch.maxCodHoldingPerShipper || 300000;
+              document.getElementById("cfg-dispatch-driver-bonus").value = c.dispatch.driverBonusPerOrder || 2000;
+            }
+          }
+        } catch (e) {
+          console.warn("⚠️ Không thể tải cấu hình tự động:", e);
+        }
+      }
+
+      /**
+       * CẬP NHẬT ẢNH MÃ VIETQR TRỰC TIẾP
+       */
+      function updateLiveQrPreview() {
+        var bankBin = document.getElementById("cfg-payment-bank-bin").value.trim();
+        var accNo = document.getElementById("cfg-payment-account-no").value.trim();
+        var img = document.getElementById("live-qr-preview-img");
+        if (img && bankBin && accNo) {
+          img.src = "https://img.vietqr.io/image/" + bankBin + "-" + accNo + "-compact2.png?amount=10000&addInfo=TEST%20THIM%205";
+        }
+      }
+
+      /**
+       * LẤY TỌA ĐỘ GPS HIỆN TẠI TỪ TRÌNH DUYỆT
+       */
+      function fetchCurrentBrowserGps() {
+        if (!navigator.geolocation) {
+          alert("Trình duyệt không hỗ trợ định vị GPS!");
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(function(pos) {
+          document.getElementById("cfg-store-lat").value = pos.coords.latitude.toFixed(6);
+          document.getElementById("cfg-store-lng").value = pos.coords.longitude.toFixed(6);
+          alert("📍 Đã cập nhật tọa độ GPS thành công!");
+        }, function(err) {
+          alert("Không thể lấy GPS: " + err.message);
+        });
+      }
+
+      /**
+       * LƯU TOÀN BỘ CẤU HÌNH SUPER ADMIN LÊN BACKEND QUA THIM5API
+       */
+      async function handleSaveSystemConfig(event) {
+        event.preventDefault();
+
+        // Chốt chặn bảo mật: Chỉ Super Admin mới được lưu
+        if (currentRole !== "SUPER_ADMIN") {
+          alert("⛔ Từ chối quyền lưu: Chỉ Super Admin mới có quyền cập nhật tham số hệ thống!");
+          return;
+        }
+
+        var btn = document.getElementById("btn-save-system-config");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu Cấu Hình Toàn Hệ Thống...';
+
+        var newMasterKey = document.getElementById("cfg-sec-master-key").value.trim();
+
+        var payload = {
+          masterKey: currentMasterKey,
+          store: {
+            name: document.getElementById("cfg-store-name").value.trim(),
+            slogan: document.getElementById("cfg-store-slogan").value.trim(),
+            hotline: document.getElementById("cfg-store-hotline").value.trim(),
+            icon: document.getElementById("cfg-store-icon").value.trim(),
+            latitude: Number(document.getElementById("cfg-store-lat").value),
+            longitude: Number(document.getElementById("cfg-store-lng").value),
+            address: document.getElementById("cfg-store-address").value.trim()
+          },
+          payment: {
+            bankBin: document.getElementById("cfg-payment-bank-bin").value.trim(),
+            accountNo: document.getElementById("cfg-payment-account-no").value.trim(),
+            accountName: document.getElementById("cfg-payment-account-name").value.trim(),
+            momoPhone: document.getElementById("cfg-payment-momo-phone").value.trim(),
+            momoName: document.getElementById("cfg-payment-momo-name").value.trim()
+          },
+          security: {
+            newMasterKey: newMasterKey || undefined,
+            pinAdminLv1: document.getElementById("cfg-sec-pin-lv1").value.trim(),
+            pinAdminLv2: document.getElementById("cfg-sec-pin-lv2").value.trim()
+          },
+          finance: {
+            platformMasterFee: Number(document.getElementById("cfg-fin-master-fee").value),
+            taxRateHkd: Number(document.getElementById("cfg-fin-tax-hkd").value)
+          },
+          promotions: {
+            freeshipMinSubtotal: Number(document.getElementById("cfg-promo-freeship-min").value),
+            maxShippingSubsidy: Number(document.getElementById("cfg-promo-max-subsidy").value),
+            maxPromotionRate: Number(document.getElementById("cfg-promo-max-rate").value)
+          },
+          dispatch: {
+            maxCodHoldingPerShipper: Number(document.getElementById("cfg-dispatch-max-holding").value),
+            driverBonusPerOrder: Number(document.getElementById("cfg-dispatch-driver-bonus").value)
+          }
+        };
+
+        try {
+          var res = await Thim5API.callGAS("saveSystemDynamicConfig", payload);
+          if (res && res.status === "success") {
+            alert("🎉 ĐÃ LƯU THÀNH CÔNG! Phiên bản cấu hình mới: " + res.data.version);
+            if (newMasterKey) {
+              currentMasterKey = newMasterKey;
+              sessionStorage.setItem("thim5_master_key", newMasterKey);
+              document.getElementById("cfg-sec-master-key").value = "";
+            }
+          } else {
+            alert("⛔ Lỗi lưu cấu hình: " + (res.message || "Không xác định"));
+          }
+        } catch (err) {
+          alert("Lỗi kết nối lưu cấu hình: " + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu Toàn Bộ Cấu Hình Hệ Thống';
+        }
+      }
+
+      /**
+       * MODAL CÀI ĐẶT LẠI GOOGLE AUTHENTICATOR
+       */
+      async function openTotpSetupModal() {
+        try {
+          var res = await Thim5API.callGAS("getTotpSetupQrData", { masterKey: currentMasterKey });
+          if (res && res.status === "success" && res.data) {
+            document.getElementById("totp-setup-qr-img").src = res.data.qrImageUrl;
+            document.getElementById("totp-setup-secret-txt").innerText = res.data.secretKey;
+            document.getElementById("modal-totp-setup").classList.remove("hidden");
+          } else {
+            alert("⛔ " + (res.message || "Không thể lấy mã QR!"));
+          }
+        } catch (e) {
+          alert("Lỗi kết nối QR: " + e.message);
+        }
+      }
+
+      function closeTotpSetupModal() {
+        document.getElementById("modal-totp-setup").classList.add("hidden");
+      }
+
+      function resetSystemConfigForm() {
+        if (confirm("Khôi phục lại dữ liệu cấu hình ban đầu?")) {
+          loadSystemConfigData();
+        }
+      }
+
+      // TỰ ĐỘNG KIỂM TRA PHIÊN KHI TẢI TRANG
+      window.addEventListener("DOMContentLoaded", function() {
+        var savedRole = sessionStorage.getItem("thim5_auth_role");
+        var savedKey = sessionStorage.getItem("thim5_master_key");
+
+        if (savedRole) {
+          currentRole = savedRole;
+          if (savedKey) currentMasterKey = savedKey;
+          unlockWorkspace();
+        }
+      });
+
+      return {
+        switchAuthMode: switchAuthMode,
+        appendPinDigit: appendPinDigit,
+        clearPinDigit: clearPinDigit,
+        submitPinAuth: submitPinAuth,
+        submitSuperAdminAuth: submitSuperAdminAuth,
+        requestEmergencyBackupOtp: requestEmergencyBackupOtp,
+        switchMainTab: switchMainTab,
+        toggleSidebar: toggleSidebar,
+        handleLogout: handleLogout,
+        fetchCurrentBrowserGps: fetchCurrentBrowserGps,
+        updateLiveQrPreview: updateLiveQrPreview,
+        handleSaveSystemConfig: handleSaveSystemConfig,
+        openTotpSetupModal: openTotpSetupModal,
+        closeTotpSetupModal: closeTotpSetupModal,
+        resetSystemConfigForm: resetSystemConfigForm
+      };
+    })();
+  </script>
+</body>
+</html>
