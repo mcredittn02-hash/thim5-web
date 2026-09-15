@@ -1,690 +1,1124 @@
-<!-- MODULE: MA TRẬN THỰC ĐƠN & ĐỊNH GIÁ ĐA KÊNH [MENU_MATRIX] -->
-<div class="max-w-7xl mx-auto space-y-6 pb-12">
+<!-- ========================================================================= -->
+<!-- PHÂN HỆ ĐIỀU HÀNH THỰC ĐƠN, BÁN CHÉO & OMNI-INGESTION (v2.9 ENTERPRISE)     -->
+<!-- ========================================================================= -->
+<div id="menu-management-container" class="space-y-4 max-w-7xl mx-auto pb-12 select-none text-xs">
 
-    <!-- 1. THANH CHỈ SỐ SỨC KHỎE MENU (FINANCIAL METRICS STRIP) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
-            <div>
-                <span class="text-xs text-slate-400 font-medium">Món Đang Phục Vụ</span>
-                <div class="text-2xl font-bold text-white mt-1" id="metric-active-items">0/0</div>
-                <span class="text-[10px] text-emerald-400 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>Sẵn sàng lên đơn</span>
-            </div>
-            <div class="w-11 h-11 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-lg">
-                <i class="fa-solid fa-utensils"></i>
-            </div>
+  <!-- 1. CỤM 4 THẺ KPI CHIẾN LƯỢC FOOD COST & DANH MỤC -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    
+    <!-- KPI 1: Tổng số món đang kích hoạt -->
+    <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
+      <div class="space-y-1">
+        <span class="text-[10.5px] font-medium text-slate-400">Trạng Thái Thực Đơn</span>
+        <div class="flex items-baseline gap-1.5">
+          <span id="kpi-active-items" class="text-xl font-black text-white font-mono">0</span>
+          <span id="kpi-total-items" class="text-xs text-slate-500 font-mono">/ 0 món</span>
         </div>
-
-        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
-            <div>
-                <span class="text-xs text-slate-400 font-medium">Food Cost Toàn Menu</span>
-                <div class="text-2xl font-bold text-amber-400 mt-1" id="metric-avg-fc">0.0%</div>
-                <span class="text-[10px] text-slate-400 font-medium" id="metric-fc-status">Mục tiêu: 35% - 40%</span>
-            </div>
-            <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-lg">
-                <i class="fa-solid fa-chart-pie"></i>
-            </div>
-        </div>
-
-        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
-            <div>
-                <span class="text-xs text-slate-400 font-medium">Tỷ Trọng Booster (Kéo AOV)</span>
-                <div class="text-2xl font-bold text-emerald-400 mt-1" id="metric-booster-ratio">0%</div>
-                <span class="text-[10px] text-emerald-400 font-medium">Đồ uống & Topping lãi cao</span>
-            </div>
-            <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg">
-                <i class="fa-solid fa-bolt"></i>
-            </div>
-        </div>
-
-        <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
-            <div>
-                <span class="text-xs text-slate-400 font-medium">Phí Khấu Trừ Sàn Áp Dụng</span>
-                <div class="text-2xl font-bold text-red-400 mt-1" id="metric-platform-fee">40.0%</div>
-                <span class="text-[10px] text-slate-400 font-medium">Đồng bộ từ [SYS_CONFIG]</span>
-            </div>
-            <div class="w-11 h-11 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 text-lg">
-                <i class="fa-solid fa-store-slash"></i>
-            </div>
-        </div>
+        <span class="text-[9.5px] text-emerald-400 font-bold flex items-center gap-1">
+          <i class="fa-solid fa-circle-check text-[8px]"></i> Sẵn sàng lên đơn
+        </span>
+      </div>
+      <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base">
+        <i class="fa-solid fa-utensils"></i>
+      </div>
     </div>
 
-    <!-- 2. THANH CÔNG CỤ ĐIỀU KHIỂN & BỘ LỌC (ACTION TOOLBAR) -->
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-lg">
-        <!-- Ô Tìm kiếm & Bộ Lọc Nhanh -->
-        <div class="flex flex-wrap items-center gap-2">
-            <div class="relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
-                <input type="text" id="menu-search-input" onkeyup="MenuController.applyFilters()" placeholder="Tìm theo tên hoặc mã món..." class="bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 w-56">
-            </div>
-            <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
-            <button onclick="MenuController.setCategoryFilter('ALL')" id="filter-cat-ALL" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white transition">Tất Cả</button>
-            <button onclick="MenuController.setCategoryFilter('TRAFFIC')" id="filter-cat-TRAFFIC" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400 hover:text-white transition">Món Mồi (Traffic)</button>
-            <button onclick="MenuController.setCategoryFilter('CORE')" id="filter-cat-CORE" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400 hover:text-white transition">Chủ Lực (Core)</button>
-            <button onclick="MenuController.setCategoryFilter('BOOSTER')" id="filter-cat-BOOSTER" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400 hover:text-white transition">Topping/Nước (Booster)</button>
-            <button onclick="MenuController.toggleStatusFilter()" id="filter-status-btn" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition">
-                <i class="fa-solid fa-eye mr-1"></i> Hiện: Tất Cả
-            </button>
+    <!-- KPI 2: Food Cost Trung Bình Toàn Quán -->
+    <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
+      <div class="space-y-1">
+        <span class="text-[10.5px] font-medium text-slate-400">Food Cost Trung Bình</span>
+        <div class="flex items-baseline gap-1">
+          <span id="kpi-avg-foodcost" class="text-xl font-black text-amber-400 font-mono">0.0%</span>
         </div>
-
-        <!-- Các Nút Thao Tác Nghiệp Vụ -->
-        <div class="flex items-center gap-2">
-            <button onclick="MenuController.triggerBestSellerSync()" id="btn-sync-bestseller" title="Quét dữ liệu đơn hàng 14 ngày để tự động dán nhãn Best Seller" class="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold hover:bg-amber-500/20 transition flex items-center gap-1.5">
-                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                <span>Chấm Điểm Best Seller</span>
-            </button>
-            <button onclick="MenuController.openEditModal(null)" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/30 transition flex items-center gap-1.5">
-                <i class="fa-solid fa-plus"></i>
-                <span>Thêm Món / Combo</span>
-            </button>
-        </div>
+        <span class="text-[9.5px] text-slate-500">Mục tiêu: 35% - 40%</span>
+      </div>
+      <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base">
+        <i class="fa-solid fa-chart-pie"></i>
+      </div>
     </div>
 
-    <!-- 3. BẢNG MA TRẬN DỮ LIỆU (DATA MATRIX TABLE) -->
-    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="border-b border-slate-800 bg-slate-950/60 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                        <th class="py-3.5 px-4">Món Ăn & Phân Loại</th>
-                        <th class="py-3.5 px-3">Danh Mục</th>
-                        <th class="py-3.5 px-3 text-right">Giá Vốn (COGS)</th>
-                        <th class="py-3.5 px-3 text-right">Lợi Nhuận (LNR)</th>
-                        <th class="py-3.5 px-3 text-right">Giá Bán D2C</th>
-                        <th class="py-3.5 px-3 text-right">Giá App Đề Xuất</th>
-                        <th class="py-3.5 px-3 text-center">Food Cost</th>
-                        <th class="py-3.5 px-4 text-center">Trạng Thái</th>
-                        <th class="py-3.5 px-4 text-center">Thao Tác</th>
-                    </tr>
-                </thead>
-                <tbody id="menu-table-body" class="divide-y divide-slate-800/60 text-xs">
-                    <!-- Dữ liệu món ăn sẽ được JavaScript render động tại đây -->
-                    <tr>
-                        <td colspan="9" class="py-12 text-center text-slate-400">
-                            <i class="fa-solid fa-circle-notch fa-spin text-red-500 text-lg mb-2"></i>
-                            <p>Đang truy xuất Ma Trận Thực Đơn từ máy chủ...</p>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- KPI 3: Tỷ Lệ Món Bán Chéo / Ticket Booster -->
+    <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
+      <div class="space-y-1">
+        <span class="text-[10.5px] font-medium text-slate-400">Đồ Uống &amp; Topping</span>
+        <div class="flex items-baseline gap-1">
+          <span id="kpi-booster-count" class="text-xl font-black text-emerald-400 font-mono">0</span>
+          <span class="text-xs text-slate-500 font-mono">món</span>
         </div>
+        <span class="text-[9.5px] text-emerald-400">Tối ưu kéo vé AOV &gt; 70k</span>
+      </div>
+      <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-base">
+        <i class="fa-solid fa-bolt"></i>
+      </div>
     </div>
 
-</div>
-
-<!-- 4. MODAL THÊM / CHỈNH SỬA MÓN ĂN & ĐỊNH LƯỢNG BOM -->
-<div id="modal-edit-item" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl p-6 space-y-5 my-8">
-        <!-- Modal Header -->
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <h4 class="font-bold text-base text-white flex items-center gap-2" id="modal-item-title">
-                <i class="fa-solid fa-pen-to-square text-red-500"></i> Cấu Hình Món Ăn
-            </h4>
-            <button onclick="MenuController.closeEditModal()" class="text-slate-400 hover:text-white p-1">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
+    <!-- KPI 4: Chốt chặn cảnh báo Margin Guard -->
+    <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
+      <div class="space-y-1">
+        <span class="text-[10.5px] font-medium text-slate-400">Trần Food Cost Cho Phép</span>
+        <div class="flex items-baseline gap-1">
+          <span class="text-xl font-black text-rose-400 font-mono">45.0%</span>
         </div>
-
-        <!-- Form Fields -->
-        <form id="form-edit-item" onsubmit="event.preventDefault()" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Mã Món (ID duy nhất)</label>
-                    <input type="text" id="modal-input-id" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono uppercase focus:outline-none focus:border-red-500" placeholder="VD: M001, CB01">
-                </div>
-                <div class="sm:col-span-2">
-                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Tên Món Áp Dụng</label>
-                    <input type="text" id="modal-input-name" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500" placeholder="Mì Trộn Bò Mỹ Sốt Cay...">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Loại Món</label>
-                    <select id="modal-input-type" onchange="MenuController.handleTypeChange()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500">
-                        <option value="SINGLE">Món Đơn (Single)</option>
-                        <option value="COMBO">Combo Đóng Gói (AOV Booster)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Phân Nhóm Chiến Lược</label>
-                    <select id="modal-input-category" onchange="MenuController.calculateLivePricing()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500">
-                        <option value="CORE">CORE (Chủ lực: FC <= 45%)</option>
-                        <option value="TRAFFIC">TRAFFIC (Mồi khách: FC <= 55%)</option>
-                        <option value="BOOSTER">BOOSTER (Nước/Topping: FC <= 20%)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Trạng Thái Bán</label>
-                    <select id="modal-input-status" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500">
-                        <option value="ON">ON (Đang Bán)</option>
-                        <option value="OFF">OFF (Tạm Hết Hàng)</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- BẢNG TÍNH TOÁN NỘI SUY GIÁ THỜI GIAN THỰC -->
-            <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
-                <div class="text-[11px] font-bold text-slate-300 flex items-center justify-between">
-                    <span><i class="fa-solid fa-calculator text-red-500 mr-1.5"></i>CỖ MÁY NỘI SUY ĐỊNH GIÁ ĐA KÊNH</span>
-                    <span id="modal-fc-badge" class="px-2 py-0.5 rounded text-[10px] font-bold">Food Cost: 0%</span>
-                </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Giá Vốn COGS (VNĐ)</label>
-                        <input type="number" id="modal-input-cogs" oninput="MenuController.calculateLivePricing()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-red-500" placeholder="18500">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Lợi Nhuận LNR (VNĐ)</label>
-                        <input type="number" id="modal-input-lnr" oninput="MenuController.calculateLivePricing()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-emerald-400 font-mono font-bold focus:outline-none focus:border-red-500" placeholder="21500">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Giá D2C Niêm Yết</label>
-                        <div id="modal-preview-d2c" class="h-8 flex items-center px-2.5 bg-slate-900/50 rounded-lg border border-slate-800 text-xs font-bold text-white font-mono">0 đ</div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Giá App Đề Xuất</label>
-                        <div id="modal-preview-app" class="h-8 flex items-center px-2.5 bg-slate-900/50 rounded-lg border border-slate-800 text-xs font-bold text-red-400 font-mono">0 đ</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ĐỊNH LƯỢNG NGUYÊN LIỆU BOM / MÓN CẤU THÀNH COMBO -->
-            <div>
-                <label class="block text-[11px] font-medium text-slate-400 mb-1" id="label-recipe-box">
-                    Định Lượng Nguyên Liệu Trọng Điểm (Recipe BOM - JSON)
-                </label>
-                <textarea id="modal-input-bom" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 font-mono focus:outline-none focus:border-red-500" placeholder='[{"matId":"NL_BO_01","qty":0.08,"unit":"Kg"},{"matId":"NL_MI_01","qty":1,"unit":"Gói"}]'></textarea>
-                <span class="text-[10px] text-slate-500">Quản lý tối đa 3-5 nguyên vật liệu chính để trừ kho tự động khi hoàn tất đơn.</span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Nhãn Tự Động / Độc Quyền</label>
-                    <input type="text" id="modal-input-tags" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500" placeholder="BEST_SELLER, D2C_EXCLUSIVE, NEW">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-medium text-slate-400 mb-1">Tùy Biến Vị (JSON Mảng)</label>
-                    <input type="text" id="modal-input-custom" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-red-500" placeholder='["Không cay", "Cay vừa", "Cay xé lưỡi"]'>
-                </div>
-            </div>
-            <div>
-                <label class="block text-[11px] font-medium text-slate-400 mb-1">URL Hình Ảnh Món</label>
-                <input type="text" id="modal-input-image" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-red-500" placeholder="https://cdn.anngonlonghoa.com.vn/images/mi-tron-bo.jpg">
-            </div>
-        </form>
-
-        <!-- Modal Actions -->
-        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-            <button onclick="MenuController.closeEditModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition">Hủy Bỏ</button>
-            <button onclick="MenuController.saveItem()" id="btn-save-item" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/30 transition flex items-center gap-2">
-                <i class="fa-solid fa-floppy-disk"></i> Lưu Thay Đổi
-            </button>
-        </div>
+        <span class="text-[9.5px] text-rose-400/80">Khóa trần bảo vệ dòng tiền</span>
+      </div>
+      <div class="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-base">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
     </div>
-</div>
-<script>
-/**
- * =========================================================================
- * CONTROLLER: MENU MATRIX CONTROLLER (ĐỊNH GIÁ ĐA KÊNH & BẢO MẬT F&B)
- * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
- * Tính năng:
- *   - Định giá đảo chiều từ Giá App sàn qua % Giảm D2C động.
- *   - Quản trị % Food Cost động (tự tính ngược Giá Vốn & Lợi Nhuận).
- *   - Privacy Shield: Che giấu số liệu tài chính nhạy cảm trước nhân viên.
- *   - Bật/Tắt trạng thái bán tức thì (1-Click Inline Toggle).
- * =========================================================================
- */
-const MenuController = (function() {
-    let rawMenuItems = [];
-    let platformFeeRate = 0.40; // Mặc định 40% nếu chưa tải được cấu hình
-    let activeCategory = "ALL";
-    let statusFilterMode = "ALL"; // ALL | ON | OFF
-    let isPrivacyMode = true; // Mặc định bật chế độ bảo mật số liệu
 
-    /**
-     * Khởi tạo và nạp dữ liệu Menu từ Google Sheets qua Middleware api.js
-     */
-    async function loadMenuData() {
-        const tableBody = document.getElementById("menu-table-body");
-        try {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="9" class="py-12 text-center text-slate-400">
-                        <i class="fa-solid fa-circle-notch fa-spin text-red-500 text-lg mb-2"></i>
-                        <p>Đang truy xuất Ma Trận Thực Đơn từ máy chủ...</p>
-                    </td>
-                </tr>
-            `;
+  </div>
 
-            // Gọi đồng thời cấu hình phí sàn và danh sách menu
-            const [sysConfig, menuData] = await Promise.all([
-                Thim5API.callGAS("getSysConfig").catch(() => ({})),
-                Thim5API.callGAS("getMenuMatrix").catch(() => [])
-            ]);
+  <!-- 2. THANH CÔNG CỤ TÌM KIẾM, BỘ LỌC PHÂN LOẠI & CỤM NÚT HÀNH ĐỘNG -->
+  <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex flex-wrap items-center justify-between gap-3">
+    
+    <!-- Bộ Lọc Tìm Kiếm & Tabs Phân Loại Món -->
+    <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+      
+      <!-- Ô Tìm Kiếm Món -->
+      <div class="relative min-w-[180px] sm:min-w-[220px]">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+        <input type="text" 
+               id="search-menu-input" 
+               oninput="TabMenuController.handleSearch(this.value)" 
+               placeholder="Tìm theo tên hoặc mã món..." 
+               class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-2xl pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition" />
+      </div>
 
-            if (sysConfig && sysConfig.PLATFORM_FEE_RATE) {
-                platformFeeRate = parseFloat(sysConfig.PLATFORM_FEE_RATE) || 0.40;
-            }
-            document.getElementById("metric-platform-fee").innerText = (platformFeeRate * 100).toFixed(1) + "%";
+      <!-- Lọc Theo Vai Trò Món (Menu Role) -->
+      <div class="flex items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 text-[11px] font-bold">
+        <button type="button" onclick="TabMenuController.filterRole('ALL', this)" class="menu-role-btn px-2.5 py-1 rounded-xl bg-amber-500 text-slate-950 shadow">Tất Cả</button>
+        <button type="button" onclick="TabMenuController.filterRole('TRAFFIC', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">Món Mồi</button>
+        <button type="button" onclick="TabMenuController.filterRole('CORE', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">Chủ Lực</button>
+        <button type="button" onclick="TabMenuController.filterRole('BOOSTER', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">Nước/Topping</button>
+      </div>
 
-            rawMenuItems = Array.isArray(menuData) ? menuData : [];
-            updateSummaryMetrics();
-            applyFilters();
+    </div>
 
-            console.log("✅ [MenuController] Đã nạp " + rawMenuItems.length + " món ăn.");
-        } catch (error) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="9" class="py-8 text-center text-red-400 text-xs">
-                        <i class="fa-solid fa-triangle-exclamation text-base mb-1"></i>
-                        <p>Lỗi tải Ma Trận Menu: ${error.message}</p>
-                    </td>
-                </tr>
-            `;
-        }
-    }
+    <!-- Cụm Nút Hành Động: Nạp Hàng Loạt & Thêm Món Mới -->
+    <div class="flex items-center gap-2">
+      
+      <!-- Nút 1: Nạp Thực Đơn Đa Kênh (Excel / AI OCR Gemini / Public Link) -->
+      <button type="button" 
+              onclick="TabMenuController.openOmniIngestionModal()" 
+              class="px-3.5 py-2 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-amber-500/40 text-amber-400 hover:text-amber-300 font-bold transition flex items-center gap-2 active:scale-95 shadow-sm">
+        <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+        <span>Nạp Đa Kênh (Excel / AI)</span>
+      </button>
 
-    /**
-     * Tính toán các chỉ số tài chính tổng quan trên Header Strip
-     */
-    function updateSummaryMetrics() {
-        const total = rawMenuItems.length;
-        const active = rawMenuItems.filter(i => i.status === "ON").length;
-        document.getElementById("metric-active-items").innerText = `${active}/${total}`;
+      <!-- Nút 2: Thêm Món / Combo Thủ Công -->
+      <button type="button" 
+              onclick="TabMenuController.openDishModal(null)" 
+              class="px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-600 hover:opacity-95 text-white font-black uppercase tracking-wider transition flex items-center gap-1.5 active:scale-95 shadow-lg shadow-rose-600/25">
+        <i class="fa-solid fa-plus text-xs"></i>
+        <span>Thêm Món / Combo</span>
+      </button>
 
-        if (total === 0) return;
+    </div>
 
-        // Tính Food Cost trung bình toàn menu
-        let totalFc = 0;
-        let boosterCount = 0;
-        rawMenuItems.forEach(item => {
-            totalFc += (item.foodCostPercent || 0);
-            if (item.category === "BOOSTER") boosterCount++;
-        });
+  </div>
 
-        const avgFc = (totalFc / total).toFixed(1);
-        const boosterRatio = Math.round((boosterCount / total) * 100);
-
-        document.getElementById("metric-avg-fc").innerText = avgFc + "%";
-        document.getElementById("metric-booster-ratio").innerText = boosterRatio + "%";
-
-        const fcStatusElem = document.getElementById("metric-fc-status");
-        if (avgFc > 45) {
-            fcStatusElem.innerText = "CẢNH BÁO: FC quá cao!";
-            fcStatusElem.className = "text-[10px] text-red-400 font-bold";
-        } else {
-            fcStatusElem.innerText = "Mục tiêu tối ưu: 35% - 40%";
-            fcStatusElem.className = "text-[10px] text-slate-400 font-medium";
-        }
-    }
-
-    /**
-     * Lọc danh sách món ăn thời gian thực tại Client (Zero-latency)
-     */
-    function applyFilters() {
-        const searchTxt = (document.getElementById("menu-search-input").value || "").toLowerCase().trim();
+  <!-- 3. BẢNG MA TRẬN THỰC ĐƠN & CHIẾN LƯỢC ĐỊNH GIÁ (DATA TABLE) -->
+  <div class="rounded-3xl bg-slate-900 border border-slate-800 shadow-md overflow-hidden">
+    <div class="overflow-x-auto custom-scroll">
+      <table class="w-full text-left border-collapse">
         
-        const filtered = rawMenuItems.filter(item => {
-            const matchName = (item.name || "").toLowerCase().includes(searchTxt) || (item.id || "").toLowerCase().includes(searchTxt);
-            const matchCat = (activeCategory === "ALL") || (item.category === activeCategory);
-            const matchStatus = (statusFilterMode === "ALL") || (item.status === statusFilterMode);
-            return matchName && matchCat && matchStatus;
+        <!-- Tiêu Đề Cột Chuẩn F&B -->
+        <thead>
+          <tr class="bg-slate-950/80 border-b border-slate-800 text-[10.5px] font-mono uppercase text-slate-400 tracking-wider">
+            <th class="py-3 px-3.5">Món Ăn &amp; Phân Loại</th>
+            <th class="py-3 px-3 text-center">Danh Mục</th>
+            <th class="py-3 px-3 text-right">Giá Vốn (COGS)</th>
+            <th class="py-3 px-3 text-right">Lợi Nhuận Gộp</th>
+            <th class="py-3 px-3 text-right text-amber-400">Giá Bán D2C</th>
+            <th class="py-3 px-3 text-right text-slate-400">Giá Bán App (+25%)</th>
+            <th class="py-3 px-3 text-center">Food Cost</th>
+            <th class="py-3 px-3 text-center">Trạng Thái Bếp</th>
+            <th class="py-3 px-3.5 text-center">Thao Tác</th>
+          </tr>
+        </thead>
+
+        <!-- Thân Bảng Dữ Liệu -->
+        <tbody id="menu-table-body" class="divide-y divide-slate-800/60 font-sans">
+          
+          <!-- Hàng Loading Mặc Định Khi Tải Trang -->
+          <tr id="menu-loading-row">
+            <td colspan="9" class="py-12 text-center text-slate-400 space-y-2">
+              <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
+              <p class="text-xs font-medium">Đang đồng bộ Ma Trận Thực Đơn từ cơ sở dữ liệu...</p>
+            </td>
+          </tr>
+
+          <!-- Hàng Thông Báo Khi Thực Đơn Rỗng -->
+          <tr id="menu-empty-row" class="hidden">
+            <td colspan="9" class="py-12 text-center text-slate-400 space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600 text-xl mx-auto">
+                <i class="fa-solid fa-bowl-food"></i>
+              </div>
+              <div class="space-y-1">
+                <p class="text-xs font-bold text-white">Chưa có món ăn nào trong danh mục!</p>
+                <p class="text-[11px] text-slate-500">Mời anh bấm nút bên dưới để thêm món đầu tiên hoặc nạp nhanh qua file Excel.</p>
+              </div>
+              <div class="flex items-center justify-center gap-2 pt-1">
+                <button type="button" onclick="TabMenuController.openOmniIngestionModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold transition text-xs">
+                  <i class="fa-solid fa-file-excel mr-1"></i> Nạp File Excel
+                </button>
+                <button type="button" onclick="TabMenuController.openDishModal(null)" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black transition text-xs">
+                  + Thêm Thủ Công
+                </button>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+
+</div>
+<!-- ========================================================================= -->
+  <!-- 4. MODAL 1: THÊM / CHỈNH SỬA MÓN ĂN ĐƠN LẺ & MARGIN GUARD REALTIME        -->
+  <!-- ========================================================================= -->
+  <div id="modal-single-dish" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
+    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200">
+      
+      <!-- Tiêu Đề Modal & Nút Đóng -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm">
+            <i class="fa-solid fa-utensils"></i>
+          </div>
+          <div>
+            <h3 id="modal-dish-title" class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Thêm Món Ăn Mới</h3>
+            <p class="text-[10px] text-slate-400">Kiểm toán giá vốn, tỷ suất lợi nhuận &amp; giá bán app</p>
+          </div>
+        </div>
+        <button type="button" onclick="TabMenuController.closeDishModal()" class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Form Nhập Thông Số Món Ăn -->
+      <form id="form-single-dish" onsubmit="TabMenuController.handleSaveDish(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="dish-is-edit" value="false" />
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- Mã Món -->
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Mã Món (Item Code) <span class="text-rose-400">*</span></label>
+            <input type="text" id="dish-code" required placeholder="MX_01" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 font-mono font-bold text-amber-400 uppercase outline-none transition" />
+          </div>
+
+          <!-- Tên Món Ăn -->
+          <div class="sm:col-span-2 space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Tên Món Ăn / Combo <span class="text-rose-400">*</span></label>
+            <input type="text" id="dish-name" required placeholder="Mì Trộn Xá Xíu Tóp Mỡ" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-medium outline-none transition" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- Danh Mục Món -->
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Danh Mục Phục Vụ</label>
+            <select id="dish-category" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
+              <option value="Mì Trộn">🍜 Mì Trộn Đặc Sản</option>
+              <option value="Combo Tiết Kiệm">🍱 Combo Tiết Kiệm</option>
+              <option value="Đồ Uống 1L">🥤 Đồ Uống Khổng Lồ 1L</option>
+              <option value="Topping Thêm">🥓 Topping &amp; Ăn Kèm</option>
+              <option value="Món Khác">🍲 Món Ăn Khác</option>
+            </select>
+          </div>
+
+          <!-- Vai Trò Món (Role Strategy) -->
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Vai Trò Món Chiến Lược</label>
+            <select id="dish-role" onchange="TabMenuController.calculateMarginGuard()" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
+              <option value="CORE">Chủ Lực (Core - FC 35-45%)</option>
+              <option value="TRAFFIC">Món Mồi (Traffic - FC 50-55%)</option>
+              <option value="BOOSTER">Bán Chéo (Booster - FC &lt; 20%)</option>
+            </select>
+          </div>
+
+          <!-- Đơn Vị Tính -->
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Đơn Vị Tính</label>
+            <input type="text" id="dish-unit" placeholder="Phần / Ly / Tô" value="Phần" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white outline-none transition font-medium" />
+          </div>
+        </div>
+
+        <!-- KHỐI MARGIN GUARD REALTIME TÍNH TOÁN GIÁ & FOOD COST -->
+        <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+            <span class="text-[10.5px] font-bold text-amber-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-calculator"></i>
+              <span>Cỗ Máy Kiểm Soát Biên Lợi Nhuận (Margin Guard)</span>
+            </span>
+            <span id="dish-margin-badge" class="px-2 py-0.5 rounded-lg text-[9.5px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              Food Cost An Toàn
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <!-- Giá Vốn COGS -->
+            <div class="space-y-1">
+              <label class="font-bold text-slate-400 text-[10px] block">Giá Vốn COGS (VNĐ) <span class="text-rose-400">*</span></label>
+              <input type="number" id="dish-cogs" required step="500" min="0" placeholder="15000" oninput="TabMenuController.calculateMarginGuard()" class="w-full bg-slate-900 border border-slate-800 focus:border-rose-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-rose-400 outline-none transition" />
+            </div>
+
+            <!-- Giá Bán D2C -->
+            <div class="space-y-1">
+              <label class="font-bold text-slate-400 text-[10px] block">Giá Bán D2C Web (VNĐ) <span class="text-amber-400">*</span></label>
+              <input type="number" id="dish-price" required step="1000" min="1000" placeholder="39000" oninput="TabMenuController.calculateMarginGuard()" class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-amber-400 outline-none transition" />
+            </div>
+
+            <!-- Lợi Nhuận Gộp (LNR) -->
+            <div class="space-y-1">
+              <label class="font-bold text-slate-400 text-[10px] block">Lợi Nhuận Gộp (LNR)</label>
+              <input type="text" id="dish-profit" readonly value="0 đ" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-2.5 py-1.5 font-mono font-bold text-emerald-400 outline-none select-none" />
+            </div>
+
+            <!-- Giá Bán App Đề Xuất (+25%) -->
+            <div class="space-y-1">
+              <label class="font-bold text-slate-400 text-[10px] block">Giá App (+25%)</label>
+              <input type="number" id="dish-app-price" step="1000" placeholder="49000" class="w-full bg-slate-900 border border-slate-800 focus:border-sky-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-sky-400 outline-none transition" />
+            </div>
+          </div>
+
+          <!-- Thanh Đo Tỷ Lệ Food Cost Trực Quan -->
+          <div class="space-y-1 pt-1">
+            <div class="flex justify-between text-[10px] font-mono">
+              <span class="text-slate-400">Tỷ lệ Food Cost: <strong id="dish-foodcost-percent" class="text-white">0.0%</strong></span>
+              <span id="dish-foodcost-advice" class="text-emerald-400">Biên lợi nhuận tối ưu</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+              <div id="dish-foodcost-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Link Ảnh & Mô Tả Món -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2 space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Đường Dẫn Ảnh Món Ăn (URL)</label>
+            <input type="url" id="dish-image" placeholder="https://images.unsplash.com/..." class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-mono text-[11px] outline-none transition" />
+          </div>
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Trạng Thái Kho Hàng</label>
+            <select id="dish-status" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
+              <option value="ACTIVE">🟢 Đang Bán (Sẵn Sàng)</option>
+              <option value="OUT_OF_STOCK">🔴 Tạm Hết Hàng</option>
+              <option value="HIDDEN">⚫ Ẩn Khỏi Menu</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Mô Tả Hương Vị &amp; Thành Phần</label>
+          <textarea id="dish-desc" rows="2" placeholder="Sợi mì trứng dai giòn, xá xíu thơm ngậy kèm súp tóp mỡ hành..." class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl p-2.5 text-white outline-none transition resize-none"></textarea>
+        </div>
+
+        <!-- Cụm Nút Hành Động Modal Single Dish -->
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+          <button type="button" onclick="TabMenuController.closeDishModal()" class="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold transition">
+            Hủy Bỏ
+          </button>
+          <button type="submit" id="btn-save-dish-submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black uppercase tracking-wider transition active:scale-95 shadow-lg shadow-orange-600/20 flex items-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Lưu Món Vào Thực Đơn</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 5. MODAL 2: NẠP THỰC ĐƠN ĐA KÊNH OMNI-INGESTION (EXCEL, AI OCR, LINK)     -->
+  <!-- ========================================================================= -->
+  <div id="modal-omni-ingestion" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
+    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200">
+      
+      <!-- Tiêu Đề Modal Omni-Ingestion -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 text-sm font-black shadow-md shadow-amber-500/20">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+          </div>
+          <div>
+            <h3 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Cỗ Máy Nạp Thực Đơn Đa Kênh (Omni-Ingestion)</h3>
+            <p class="text-[10px] text-slate-400">Nạp nhanh 30-50 món chỉ trong vài giây qua Excel, Ảnh chụp Menu hoặc Link</p>
+          </div>
+        </div>
+        <button type="button" onclick="TabMenuController.closeOmniIngestionModal()" class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <!-- 4 Tabs Chuyển Đổi Kênh Nạp Liệu -->
+      <div class="flex items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-bold">
+        <button type="button" id="tab-btn-ingest-excel" onclick="TabMenuController.switchIngestChannel('EXCEL')" class="flex-1 py-2 rounded-xl transition bg-amber-500 text-slate-950 font-black shadow">
+          <i class="fa-solid fa-file-excel mr-1 text-xs"></i> File Excel
+        </button>
+        <button type="button" id="tab-btn-ingest-ocr" onclick="TabMenuController.switchIngestChannel('OCR')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
+          <i class="fa-solid fa-wand-magic-sparkles mr-1 text-xs text-amber-400"></i> Quét Ảnh / PDF (AI)
+        </button>
+        <button type="button" id="tab-btn-ingest-link" onclick="TabMenuController.switchIngestChannel('LINK')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
+          <i class="fa-solid fa-link mr-1 text-xs text-sky-400"></i> Link Grab/Shopee
+        </button>
+        <button type="button" id="tab-btn-ingest-json" onclick="TabMenuController.switchIngestChannel('JSON')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
+          <i class="fa-solid fa-code mr-1 text-xs text-purple-400"></i> Dán JSON
+        </button>
+      </div>
+
+      <!-- VÙNG NỘI DUNG KÊNH 1: TẢI LÊN FILE EXCEL / CSV -->
+      <div id="ingest-box-excel" class="space-y-3">
+        <div class="p-4 rounded-2xl bg-slate-950 border-2 border-dashed border-slate-800 hover:border-amber-500/50 text-center space-y-2.5 transition">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base mx-auto">
+            <i class="fa-solid fa-file-arrow-up"></i>
+          </div>
+          <div class="space-y-0.5">
+            <p class="text-xs font-bold text-white">Chọn tệp bảng tính thực đơn (.xlsx, .xls, .csv)</p>
+            <p class="text-[10.5px] text-slate-500">Kéo thả file vào đây hoặc bấm để chọn tệp từ máy tính</p>
+          </div>
+          <input type="file" id="input-excel-file" accept=".xlsx, .xls, .csv" onchange="TabMenuController.handleExcelFileSelect(this)" class="hidden" />
+          <div class="flex items-center justify-center gap-2 pt-1">
+            <button type="button" onclick="document.getElementById('input-excel-file').click()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition active:scale-95 shadow">
+              <i class="fa-solid fa-folder-open mr-1"></i> Chọn Tệp Tin
+            </button>
+            <button type="button" onclick="TabMenuController.downloadExcelTemplate()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-bold text-xs transition">
+              <i class="fa-solid fa-download mr-1 text-emerald-400"></i> Tải File Mẫu Chuẩn
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VÙNG NỘI DUNG KÊNH 2: GEMINI AI OCR QUÉT ẢNH TỜ RƠI / MENU GIẤY -->
+      <div id="ingest-box-ocr" class="hidden space-y-3">
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5 text-center">
+          <div class="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-base mx-auto">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <div class="space-y-0.5">
+            <p class="text-xs font-bold text-white">Chụp ảnh menu giấy hoặc tải lên file PDF thực đơn</p>
+            <p class="text-[10.5px] text-slate-400">Canvas AI sẽ nén ảnh tự động và trích xuất bảng giá qua Gemini 2.0 Flash</p>
+          </div>
+          <input type="file" id="input-ocr-file" accept="image/*, application/pdf" onchange="TabMenuController.handleOcrImageSelect(this)" class="hidden" />
+          <button type="button" onclick="document.getElementById('input-ocr-file').click()" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold text-xs transition active:scale-95 shadow-md shadow-purple-600/20">
+            <i class="fa-solid fa-camera-retro mr-1.5"></i> Chụp / Chọn Ảnh Menu
+          </button>
+        </div>
+      </div>
+
+      <!-- VÙNG NỘI DUNG KÊNH 3: BÓC TÁCH TỪ PUBLIC LINK -->
+      <div id="ingest-box-link" class="hidden space-y-2.5">
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Dán Đường Link Quán (GrabFood / ShopeeFood / Website)</label>
+          <div class="flex gap-2">
+            <input type="url" id="input-public-url" placeholder="https://food.grab.com/vn/vi/restaurant/..." class="flex-1 bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition font-mono" />
+            <button type="button" onclick="TabMenuController.handleParseUrl()" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs transition active:scale-95 shadow">
+              Trích Xuất
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VÙNG NỘI DUNG KÊNH 4: DÁN JSON DỰ PHÒNG -->
+      <div id="ingest-box-json" class="hidden space-y-2">
+        <textarea id="input-raw-json" rows="4" placeholder='[{"itemCode":"MX_01","itemName":"Mì Trộn Xá Xíu","price":39000,"cogs":15000}]' class="w-full bg-slate-950 border border-slate-800 focus:border-purple-500 rounded-xl p-2.5 font-mono text-[11px] text-amber-400 outline-none transition"></textarea>
+        <button type="button" onclick="TabMenuController.handleParseJson()" class="px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition active:scale-95">
+          Kiểm Tra Cú Pháp JSON
+        </button>
+      </div>
+
+      <!-- BẢNG XEM TRƯỚC VÀ KIỂM DUYỆT HÀNG LOẠT TRƯỚC KHI LƯU (PREVIEW MATRIX) -->
+      <div id="ingest-preview-container" class="hidden space-y-2 pt-2 border-t border-slate-800">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-list-check"></i>
+            <span>Tìm thấy <strong id="preview-total-count" class="font-mono text-white">0</strong> món hợp lệ sẵn sàng nạp:</span>
+          </span>
+          <button type="button" onclick="TabMenuController.clearIngestPreview()" class="text-[10.5px] text-rose-400 hover:underline">
+            Xóa danh sách này
+          </button>
+        </div>
+
+        <div class="max-h-48 overflow-y-auto custom-scroll rounded-2xl bg-slate-950 border border-slate-800">
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-900 text-slate-400 uppercase font-mono text-[9.5px] sticky top-0">
+              <tr>
+                <th class="p-2">Mã</th>
+                <th class="p-2">Tên Món</th>
+                <th class="p-2">Danh Mục</th>
+                <th class="p-2 text-right">Giá Vốn</th>
+                <th class="p-2 text-right">Giá Bán</th>
+                <th class="p-2 text-center">Food Cost</th>
+              </tr>
+            </thead>
+            <tbody id="ingest-preview-tbody" class="divide-y divide-slate-800/60 font-mono">
+              <!-- Render động danh sách preview -->
+            </tbody>
+          </table>
+        </div>
+
+        <button type="button" id="btn-confirm-ingest-all" onclick="TabMenuController.submitBatchIngest()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-95 text-slate-950 font-black uppercase text-xs tracking-wider transition active:scale-95 shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Xác Nhận Nạp Tất Cả Vào Cơ Sở Dữ Liệu Thực Đơn</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+  <!-- ========================================================================= -->
+  <!-- 6. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH THỰC ĐƠN & BÁN CHÉO (TAB MENU CONTROLLER)   -->
+  <!-- ========================================================================= -->
+  <script>
+    /**
+     * =========================================================================
+     * CONTROLLER: TAB MENU & OMNI-INGESTION PIPELINE (v2.9 ENTERPRISE)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+     * Kiến trúc: Optimistic UI, Canvas Client-side Compression, Margin Guard
+     * =========================================================================
+     */
+    var TabMenuController = (function() {
+      var rawMenuList = [];
+      var filteredMenuList = [];
+      var currentRoleFilter = "ALL";
+      var searchKeyword = "";
+      var stagedIngestItems = [];
+
+      /**
+       * KHỞI CHẠY TẢI THỰC ĐƠN TỪ MÁY CHỦ QUA THIM5API
+       */
+      async function init() {
+        showTableLoading(true);
+        try {
+          var res = await Thim5API.callGAS("getAdminMenuCatalog", {});
+          if (res && res.status === "success" && Array.isArray(res.data)) {
+            rawMenuList = res.data;
+          } else {
+            rawMenuList = [];
+          }
+        } catch (err) {
+          console.error("Lỗi tải thực đơn:", err);
+          rawMenuList = [];
+        } finally {
+          showTableLoading(false);
+          applyFiltersAndRender();
+        }
+      }
+
+      function showTableLoading(isLoading) {
+        var loadingRow = document.getElementById("menu-loading-row");
+        var emptyRow = document.getElementById("menu-empty-row");
+        if (loadingRow) {
+          if (isLoading) {
+            loadingRow.classList.remove("hidden");
+            if (emptyRow) emptyRow.classList.add("hidden");
+          } else {
+            loadingRow.classList.add("hidden");
+          }
+        }
+      }
+
+      /**
+       * LỌC DỮ LIỆU & CẬP NHẬT GIAO DIỆN BẢNG MA TRẬN
+       */
+      function applyFiltersAndRender() {
+        filteredMenuList = rawMenuList.filter(function(item) {
+          var matchRole = (currentRoleFilter === "ALL") || (String(item.role || "CORE").toUpperCase() === currentRoleFilter);
+          var query = searchKeyword.toLowerCase();
+          var matchQuery = !query || 
+            String(item.name || "").toLowerCase().includes(query) || 
+            String(item.code || "").toLowerCase().includes(query) ||
+            String(item.category || "").toLowerCase().includes(query);
+          return matchRole && matchQuery;
         });
 
-        renderTable(filtered);
-    }
+        renderMenuTable(filteredMenuList);
+        updateKpiMetrics(rawMenuList);
+      }
 
-    /**
-     * Hiển thị bảng dữ liệu Ma Trận Thực Đơn kèm chế độ bảo mật số liệu
-     */
-    function renderTable(items) {
-        const tbody = document.getElementById("menu-table-body");
+      /**
+       * RENDER DỮ LIỆU HTML VÀO BẢNG CHÍNH
+       */
+      function renderMenuTable(items) {
+        var tbody = document.getElementById("menu-table-body");
+        var emptyRow = document.getElementById("menu-empty-row");
+        if (!tbody) return;
+
+        // Xóa các dòng cũ ngoại trừ dòng loading và empty
+        var oldRows = tbody.querySelectorAll(".menu-data-row");
+        oldRows.forEach(function(r) { r.remove(); });
+
         if (!items || items.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="9" class="py-8 text-center text-slate-500 text-xs">
-                        Không tìm thấy món ăn nào phù hợp với điều kiện lọc.
-                    </td>
-                </tr>
-            `;
-            return;
+          if (emptyRow) emptyRow.classList.remove("hidden");
+          return;
         }
 
-        const categoryBadges = {
-            "TRAFFIC": '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">Mồi (Traffic)</span>',
-            "CORE": '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">Chủ Lực (Core)</span>',
-            "BOOSTER": '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Topping/Nước</span>'
-        };
+        if (emptyRow) emptyRow.classList.add("hidden");
 
-        let html = "";
-        items.forEach(item => {
-            const isOnline = item.status === "ON";
-            const tags = (item.autoTags || "").split(",").map(t => t.trim()).filter(Boolean);
-            
-            // Render nhãn tự động
-            let tagBadges = "";
-            tags.forEach(t => {
-                if (t === "BEST_SELLER") tagBadges += '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-500/20 text-red-400 border border-red-500/40 ml-1">🔥 Bán Chạy</span>';
-                if (t === "D2C_EXCLUSIVE") tagBadges += '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40 ml-1">⭐ Độc Quyền</span>';
-                if (t === "NEW") tagBadges += '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40 ml-1">Mới</span>';
-            });
+        var htmlBuffer = "";
+        items.forEach(function(item) {
+          var price = Number(item.price) || 0;
+          var cogs = Number(item.cogs) || 0;
+          var profit = Math.max(0, price - cogs);
+          var appPrice = Number(item.appPrice) || Math.round((price * 1.25) / 1000) * 1000;
+          var foodCostRate = price > 0 ? (cogs / price) * 100 : 0;
 
-            // Xử lý bảo mật số liệu (Privacy Masking)
-            const displayCogs = isPrivacyMode ? '<span class="text-slate-600 font-mono">••••••</span>' : formatCurrency(item.cogs);
-            const displayLnr = isPrivacyMode ? '<span class="text-slate-600 font-mono">••••••</span>' : formatCurrency(item.lnr);
-            const displayFc = isPrivacyMode ? '<span class="text-slate-600 font-mono">••%</span>' : (item.foodCostPercent + "%");
+          // Cảnh báo màu sắc Food Cost theo Margin Guard
+          var fcColorClass = "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
+          if (foodCostRate > 45) {
+            fcColorClass = "text-rose-400 bg-rose-500/10 border-rose-500/30 animate-pulse";
+          } else if (foodCostRate > 40) {
+            fcColorClass = "text-amber-400 bg-amber-500/10 border-amber-500/30";
+          }
 
-            // Cảnh báo đỏ nếu Food Cost vi phạm trần danh mục
-            const fcWarningBadge = (!isPrivacyMode && item.fcWarning) 
-                ? '<i class="fa-solid fa-triangle-exclamation text-red-500 ml-1" title="Vượt trần Food Cost danh mục!"></i>' 
-                : '';
+          var isOutOfStock = (item.status === "OUT_OF_STOCK");
+          var statusBadge = isOutOfStock
+            ? '<button onclick="TabMenuController.toggleItemStock(\'' + item.code + '\', \'ACTIVE\')" class="px-2.5 py-1 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold transition">🔴 Hết Hàng</button>'
+            : '<button onclick="TabMenuController.toggleItemStock(\'' + item.code + '\', \'OUT_OF_STOCK\')" class="px-2.5 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold transition">🟢 Còn Bán</button>';
 
-            html += `
-                <tr class="hover:bg-slate-800/40 transition">
-                    <td class="py-3 px-4">
-                        <div class="font-bold text-slate-100 flex items-center">
-                            ${item.name}
-                            ${tagBadges}
-                        </div>
-                        <div class="text-[10px] text-slate-500 font-mono mt-0.5">${item.id} | ${item.itemType === "COMBO" ? "Combo Đóng Gói" : "Món Đơn"}</div>
-                    </td>
-                    <td class="py-3 px-3">${categoryBadges[item.category] || item.category}</td>
-                    <td class="py-3 px-3 text-right font-mono text-slate-300">${displayCogs}</td>
-                    <td class="py-3 px-3 text-right font-mono text-emerald-400 font-semibold">${displayLnr}</td>
-                    <td class="py-3 px-3 text-right font-mono text-white font-bold">${formatCurrency(item.priceD2C)}</td>
-                    <td class="py-3 px-3 text-right font-mono text-red-400 font-bold">${formatCurrency(item.priceApp)}</td>
-                    <td class="py-3 px-3 text-center font-mono text-slate-300">
-                        ${displayFc} ${fcWarningBadge}
-                    </td>
-                    <td class="py-3 px-4 text-center">
-                        <button onclick="MenuController.toggleStatus('${item.id}', '${item.status}')" class="px-2.5 py-1 rounded-full text-[10px] font-bold transition ${isOnline ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30' : 'bg-slate-800 text-slate-500 border border-slate-700 hover:bg-slate-700'}">
-                            <i class="fa-solid ${isOnline ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1"></i>${isOnline ? 'BẬT' : 'TẮT'}
-                        </button>
-                    </td>
-                    <td class="py-3 px-4 text-center">
-                        <button onclick="MenuController.openEditModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition">
-                            <i class="fa-solid fa-pen text-xs"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
+          var roleBadge = "";
+          var roleStr = String(item.role || "CORE").toUpperCase();
+          if (roleStr === "TRAFFIC") {
+            roleBadge = '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-amber-500/10 text-amber-400 border border-amber-500/30">Mồi</span>';
+          } else if (roleStr === "BOOSTER") {
+            roleBadge = '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Kéo Vé</span>';
+          }
+
+          var rowHtml = `
+            <tr class="menu-data-row hover:bg-slate-800/40 transition">
+              <td class="py-2.5 px-3.5 flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex-shrink-0">
+                  <img src="${item.image || 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=100'}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=100'" />
+                </div>
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-mono text-[10px] font-bold text-amber-400">${item.code}</span>
+                    ${roleBadge}
+                  </div>
+                  <h4 class="font-bold text-white text-xs leading-tight">${item.name}</h4>
+                </div>
+              </td>
+              <td class="py-2.5 px-3 text-center text-slate-300 font-medium">${item.category || 'Món Ăn'}</td>
+              <td class="py-2.5 px-3 text-right font-mono text-slate-400">${cogs.toLocaleString('vi-VN')} đ</td>
+              <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-400">+${profit.toLocaleString('vi-VN')} đ</td>
+              <td class="py-2.5 px-3 text-right font-mono font-black text-amber-400 text-xs">${price.toLocaleString('vi-VN')} đ</td>
+              <td class="py-2.5 px-3 text-right font-mono text-slate-400">${appPrice.toLocaleString('vi-VN')} đ</td>
+              <td class="py-2.5 px-3 text-center">
+                <span class="px-2 py-0.5 rounded-lg font-mono font-bold text-[10.5px] border ${fcColorClass}">
+                  ${foodCostRate.toFixed(1)}%
+                </span>
+              </td>
+              <td class="py-2.5 px-3 text-center">${statusBadge}</td>
+              <td class="py-2.5 px-3.5 text-center">
+                <div class="flex items-center justify-center gap-1">
+                  <button type="button" onclick="TabMenuController.openDishModal('${item.code}')" class="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition" title="Chỉnh sửa">
+                    <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+                  </button>
+                  <button type="button" onclick="TabMenuController.deleteDishItem('${item.code}')" class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition" title="Xóa món">
+                    <i class="fa-solid fa-trash text-[11px]"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+          htmlBuffer += rowHtml;
         });
 
-        tbody.innerHTML = html;
-    }
+        tbody.insertAdjacentHTML("beforeend", htmlBuffer);
+      }
 
-    /**
-     * Bật / Tắt trạng thái bán nhanh (1-Click Inline Toggle)
-     */
-    async function toggleStatus(id, currentStatus) {
-        const nextStatus = currentStatus === "ON" ? "OFF" : "ON";
-        // Cập nhật giao diện lập tức (Optimistic Update)
-        const target = rawMenuItems.find(i => i.id === id);
-        if (target) target.status = nextStatus;
-        applyFilters();
-        updateSummaryMetrics();
+      /**
+       * CẬP NHẬT CHỈ SỐ 4 THẺ KPI TRÊN CÙNG
+       */
+      function updateKpiMetrics(items) {
+        var total = items.length;
+        var activeCount = 0;
+        var boosterCount = 0;
+        var totalCogs = 0;
+        var totalPrice = 0;
+
+        items.forEach(function(i) {
+          if (i.status !== "OUT_OF_STOCK" && i.status !== "HIDDEN") activeCount++;
+          if (String(i.role).toUpperCase() === "BOOSTER") boosterCount++;
+          var p = Number(i.price) || 0;
+          var c = Number(i.cogs) || 0;
+          if (p > 0) {
+            totalPrice += p;
+            totalCogs += c;
+          }
+        });
+
+        var avgFc = totalPrice > 0 ? (totalCogs / totalPrice) * 100 : 0;
+
+        var elActive = document.getElementById("kpi-active-items");
+        var elTotal = document.getElementById("kpi-total-items");
+        var elFc = document.getElementById("kpi-avg-foodcost");
+        var elBooster = document.getElementById("kpi-booster-count");
+
+        if (elActive) elActive.innerText = activeCount;
+        if (elTotal) elTotal.innerText = "/ " + total + " món";
+        if (elFc) elFc.innerText = avgFc.toFixed(1) + "%";
+        if (elBooster) elBooster.innerText = boosterCount;
+      }
+
+      /**
+       * TÌM KIẾM & LỌC THEO VAI TRÒ MÓN
+       */
+      function handleSearch(val) {
+        searchKeyword = String(val || "").trim();
+        applyFiltersAndRender();
+      }
+
+      function filterRole(role, btnEl) {
+        currentRoleFilter = role;
+        document.querySelectorAll(".menu-role-btn").forEach(function(b) {
+          b.className = "menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition";
+        });
+        if (btnEl) btnEl.className = "menu-role-btn px-2.5 py-1 rounded-xl bg-amber-500 text-slate-950 font-bold shadow";
+        applyFiltersAndRender();
+      }
+
+      /**
+       * BẬT / TẮT HẾT HÀNG TỨC THÌ 0MS (OPTIMISTIC UI UPDATE)
+       */
+      async function toggleItemStock(code, newStatus) {
+        // Cập nhật mảng local ngay lập tức
+        var target = rawMenuList.find(function(x) { return x.code === code; });
+        if (!target) return;
+
+        var prevStatus = target.status;
+        target.status = newStatus;
+        applyFiltersAndRender();
 
         try {
-            await Thim5API.callGAS("toggleMenuItemStatus", { id: id, status: nextStatus });
-        } catch (error) {
-            alert("❌ Không thể cập nhật trạng thái món: " + error.message);
-            // Hoàn tác trạng thái nếu lỗi mạng
-            if (target) target.status = currentStatus;
-            applyFilters();
-            updateSummaryMetrics();
+          var res = await Thim5API.callGAS("toggleMenuItemStatus", { code: code, status: newStatus });
+          if (!res || res.status !== "success") {
+            throw new Error(res.message || "Lỗi cập nhật máy chủ");
+          }
+        } catch (e) {
+          alert("❌ Không thể đồng bộ trạng thái: " + e.message);
+          target.status = prevStatus; // Rollback nếu thất bại
+          applyFiltersAndRender();
         }
-    }
+      }
 
-    /**
-     * CỖ MÁY NỘI SUY ĐỊNH GIÁ ĐA CHIỀU THỜI GIAN THỰC
-     * Gọi khi người dùng nhập bất kỳ ô nào trong Modal Thêm/Sửa
-     */
-    function calculateLivePricing(triggerSource) {
-        const inputApp = document.getElementById("modal-input-app-price");
-        const inputDiscount = document.getElementById("modal-input-discount-rate");
-        const inputD2c = document.getElementById("modal-input-price-d2c");
-        const inputFcPercent = document.getElementById("modal-input-fc-percent");
-        const inputCogs = document.getElementById("modal-input-cogs");
-        const inputLnr = document.getElementById("modal-input-lnr");
-        const previewD2c = document.getElementById("modal-preview-d2c");
-        const previewApp = document.getElementById("modal-preview-app");
-        const fcBadge = document.getElementById("modal-fc-badge");
-        const catSelect = document.getElementById("modal-input-category");
+      /**
+       * XỬ LÝ MARGIN GUARD KHI NHẬP GIÁ VỐN / GIÁ BÁN
+       */
+      function calculateMarginGuard() {
+        var cogs = Number(document.getElementById("dish-cogs").value) || 0;
+        var price = Number(document.getElementById("dish-price").value) || 0;
+        var role = document.getElementById("dish-role").value;
 
-        let appPrice = parseFloat(inputApp.value) || 0;
-        let discountRate = parseFloat(inputDiscount.value) || 0; // VD: 10 nghĩa là 10%
-        let d2cPrice = parseFloat(inputD2c.value) || 0;
-        let fcRate = parseFloat(inputFcPercent.value) || 0; // VD: 35 nghĩa là 35%
-        let cogs = parseFloat(inputCogs.value) || 0;
-        let lnr = parseFloat(inputLnr.value) || 0;
+        var profit = Math.max(0, price - cogs);
+        var fcPercent = price > 0 ? (cogs / price) * 100 : 0;
+        var suggestedAppPrice = Math.round((price * 1.25) / 1000) * 1000;
 
-        // 1. NẾU NHẬP TỪ GIÁ APP HOẶC % GIẢM D2C -> TÍNH GIÁ D2C
-        if (triggerSource === "APP_FLOW" && appPrice > 0) {
-            d2cPrice = Math.round((appPrice * (1 - (discountRate / 100))) / 1000) * 1000;
-            inputD2c.value = d2cPrice;
-        }
+        document.getElementById("dish-profit").value = profit.toLocaleString("vi-VN") + " đ";
+        document.getElementById("dish-app-price").value = suggestedAppPrice;
 
-        // 2. NẾU NHẬP TỪ % FOOD COST ĐỘNG -> TÍNH NGƯỢC GIÁ VỐN & LỢI NHUẬN
-        if (triggerSource === "FC_FLOW" && d2cPrice > 0 && fcRate > 0) {
-            cogs = Math.round((d2cPrice * (fcRate / 100)));
-            lnr = d2cPrice - cogs;
-            inputCogs.value = cogs;
-            inputLnr.value = lnr;
-        }
+        var badge = document.getElementById("dish-margin-badge");
+        var percentTxt = document.getElementById("dish-foodcost-percent");
+        var adviceTxt = document.getElementById("dish-foodcost-advice");
+        var bar = document.getElementById("dish-foodcost-bar");
 
-        // 3. NẾU NHẬP TRỰC TIẾP COGS HOẶC LNR -> TÍNH TỔNG D2C VÀ % FC
-        if (triggerSource === "COST_FLOW") {
-            d2cPrice = cogs + lnr;
-            inputD2c.value = d2cPrice;
-            if (d2cPrice > 0) {
-                fcRate = Math.round((cogs / d2cPrice) * 1000) / 10;
-                inputFcPercent.value = fcRate;
-            }
-            // Tự tính giá App đề xuất theo tỷ lệ sàn hệ thống
-            if (platformFeeRate < 1) {
-                appPrice = Math.ceil((d2cPrice / (1 - platformFeeRate)) / 1000) * 1000;
-                inputApp.value = appPrice;
-            }
-        }
+        percentTxt.innerText = fcPercent.toFixed(1) + "%";
+        bar.style.width = Math.min(100, fcPercent) + "%";
 
-        // Cập nhật các ô xem trước
-        previewD2c.innerText = formatCurrency(d2cPrice);
-        previewApp.innerText = formatCurrency(appPrice);
-
-        // Kiểm soát trần Food Cost theo danh mục
-        const selectedCat = catSelect.value;
-        const limits = { "TRAFFIC": 55, "CORE": 45, "BOOSTER": 20 };
-        const maxLimit = limits[selectedCat] || 45;
-
-        fcBadge.innerText = `Food Cost: ${fcRate}% (Trần: ${maxLimit}%)`;
-        if (fcRate > maxLimit) {
-            fcBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse";
+        if (fcPercent > 45) {
+          badge.className = "px-2 py-0.5 rounded-lg text-[9.5px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30 animate-pulse";
+          badge.innerText = "Cảnh Báo Lỗ!";
+          adviceTxt.innerText = "Food cost quá cao! Cần giảm định lượng hoặc tăng giá bán.";
+          adviceTxt.className = "text-rose-400 font-bold";
+          bar.className = "h-full bg-rose-500 transition-all duration-300";
+        } else if (fcPercent > 40) {
+          badge.className = "px-2 py-0.5 rounded-lg text-[9.5px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30";
+          badge.innerText = "Tiệm Cận Ngưỡng";
+          adviceTxt.innerText = "Biên lợi nhuận mức trung bình khá.";
+          adviceTxt.className = "text-amber-400";
+          bar.className = "h-full bg-amber-500 transition-all duration-300";
         } else {
-            fcBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+          badge.className = "px-2 py-0.5 rounded-lg text-[9.5px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+          badge.innerText = "Biên Lãi Rất Tốt";
+          adviceTxt.innerText = "Biên lợi nhuận tối ưu, bảo vệ dòng tiền an toàn.";
+          adviceTxt.className = "text-emerald-400";
+          bar.className = "h-full bg-emerald-500 transition-all duration-300";
         }
-    }
+      }
 
-    /**
-     * Mở Modal thêm mới hoặc chỉnh sửa món ăn
-     */
-    function openEditModal(itemId) {
-        const modal = document.getElementById("modal-edit-item");
-        const title = document.getElementById("modal-item-title");
-        const form = document.getElementById("form-edit-item");
+      /**
+       * MODAL THÊM / SỬA MÓN ĐƠN LẺ
+       */
+      function openDishModal(editCode) {
+        var modal = document.getElementById("modal-single-dish");
+        var title = document.getElementById("modal-dish-title");
+        var isEditInput = document.getElementById("dish-is-edit");
 
-        if (itemId) {
-            const item = rawMenuItems.find(i => i.id === itemId);
-            if (!item) return;
-            title.innerHTML = `<i class="fa-solid fa-pen-to-square text-red-500"></i> Chỉnh Sửa Món: ${item.name}`;
-            document.getElementById("modal-input-id").value = item.id;
-            document.getElementById("modal-input-id").disabled = true; // Khóa ID khi sửa
-            document.getElementById("modal-input-name").value = item.name;
-            document.getElementById("modal-input-type").value = item.itemType || "SINGLE";
-            document.getElementById("modal-input-category").value = item.category || "CORE";
-            document.getElementById("modal-input-status").value = item.status || "ON";
-
-            // Nạp giá trị tài chính
-            document.getElementById("modal-input-app-price").value = item.priceApp || "";
-            document.getElementById("modal-input-discount-rate").value = item.priceApp > 0 ? Math.round((1 - (item.priceD2C / item.priceApp)) * 100) : 10;
-            document.getElementById("modal-input-price-d2c").value = item.priceD2C || "";
-            document.getElementById("modal-input-fc-percent").value = item.foodCostPercent || "";
-            document.getElementById("modal-input-cogs").value = item.cogs || "";
-            document.getElementById("modal-input-lnr").value = item.lnr || "";
-
-            document.getElementById("modal-input-bom").value = typeof item.recipeBom === "object" ? JSON.stringify(item.recipeBom) : (item.recipeBom || "");
-            document.getElementById("modal-input-tags").value = item.autoTags || "";
-            document.getElementById("modal-input-custom").value = typeof item.customOptions === "object" ? JSON.stringify(item.customOptions) : (item.customOptions || "");
-            document.getElementById("modal-input-image").value = item.imageUrl || "";
-
-            calculateLivePricing("COST_FLOW");
+        if (editCode) {
+          var item = rawMenuList.find(function(x) { return x.code === editCode; });
+          if (!item) return;
+          title.innerText = "Chỉnh Sửa Món: " + item.code;
+          isEditInput.value = "true";
+          document.getElementById("dish-code").value = item.code;
+          document.getElementById("dish-code").readOnly = true;
+          document.getElementById("dish-name").value = item.name || "";
+          document.getElementById("dish-category").value = item.category || "Mì Trộn";
+          document.getElementById("dish-role").value = item.role || "CORE";
+          document.getElementById("dish-unit").value = item.unit || "Phần";
+          document.getElementById("dish-cogs").value = item.cogs || "";
+          document.getElementById("dish-price").value = item.price || "";
+          document.getElementById("dish-app-price").value = item.appPrice || "";
+          document.getElementById("dish-image").value = item.image || "";
+          document.getElementById("dish-status").value = item.status || "ACTIVE";
+          document.getElementById("dish-desc").value = item.description || "";
         } else {
-            title.innerHTML = `<i class="fa-solid fa-plus text-red-500"></i> Thêm Món Mới Vào Menu`;
-            document.getElementById("modal-input-id").value = "M" + String(Date.now()).slice(-4);
-            document.getElementById("modal-input-id").disabled = false;
-            document.getElementById("modal-input-name").value = "";
-            document.getElementById("modal-input-type").value = "SINGLE";
-            document.getElementById("modal-input-category").value = "CORE";
-            document.getElementById("modal-input-status").value = "ON";
-
-            document.getElementById("modal-input-app-price").value = "";
-            document.getElementById("modal-input-discount-rate").value = "10";
-            document.getElementById("modal-input-price-d2c").value = "";
-            document.getElementById("modal-input-fc-percent").value = "38";
-            document.getElementById("modal-input-cogs").value = "";
-            document.getElementById("modal-input-lnr").value = "";
-
-            document.getElementById("modal-input-bom").value = "";
-            document.getElementById("modal-input-tags").value = "NEW";
-            document.getElementById("modal-input-custom").value = '["Không cay", "Cay vừa", "Cay xé lưỡi"]';
-            document.getElementById("modal-input-image").value = "";
-
-            calculateLivePricing("FC_FLOW");
+          title.innerText = "Thêm Món Ăn Mới";
+          isEditInput.value = "false";
+          document.getElementById("form-single-dish").reset();
+          document.getElementById("dish-code").readOnly = false;
+          document.getElementById("dish-code").value = "M_" + (rawMenuList.length + 1);
         }
 
+        calculateMarginGuard();
         modal.classList.remove("hidden");
-    }
+      }
 
-    function closeEditModal() {
-        document.getElementById("modal-edit-item").classList.add("hidden");
-    }
+      function closeDishModal() {
+        document.getElementById("modal-single-dish").classList.add("hidden");
+      }
 
-    /**
-     * Thu thập dữ liệu và gửi cập nhật lên Backend Google Apps Script
-     */
-    async function saveItem() {
-        const btnSave = document.getElementById("btn-save-item");
-        const id = document.getElementById("modal-input-id").value.trim();
-        const name = document.getElementById("modal-input-name").value.trim();
+      async function handleSaveDish(e) {
+        e.preventDefault();
+        var btn = document.getElementById("btn-save-dish-submit");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu Món...';
 
-        if (!id || !name) {
-            alert("⚠️ Vui lòng nhập đầy đủ Mã Món và Tên Món Ăn.");
-            return;
-        }
-
-        const payload = {
-            id: id,
-            name: name,
-            category: document.getElementById("modal-input-category").value,
-            itemType: document.getElementById("modal-input-type").value,
-            status: document.getElementById("modal-input-status").value,
-            priceApp: parseFloat(document.getElementById("modal-input-app-price").value) || 0,
-            priceD2C: parseFloat(document.getElementById("modal-input-price-d2c").value) || 0,
-            cogs: parseFloat(document.getElementById("modal-input-cogs").value) || 0,
-            lnr: parseFloat(document.getElementById("modal-input-lnr").value) || 0,
-            recipeBom: document.getElementById("modal-input-bom").value.trim(),
-            autoTags: document.getElementById("modal-input-tags").value.trim(),
-            customOptions: document.getElementById("modal-input-custom").value.trim(),
-            imageUrl: document.getElementById("modal-input-image").value.trim()
+        var payload = {
+          code: document.getElementById("dish-code").value.trim().toUpperCase(),
+          name: document.getElementById("dish-name").value.trim(),
+          category: document.getElementById("dish-category").value,
+          role: document.getElementById("dish-role").value,
+          unit: document.getElementById("dish-unit").value.trim() || "Phần",
+          cogs: Number(document.getElementById("dish-cogs").value) || 0,
+          price: Number(document.getElementById("dish-price").value) || 0,
+          appPrice: Number(document.getElementById("dish-app-price").value) || 0,
+          image: document.getElementById("dish-image").value.trim(),
+          status: document.getElementById("dish-status").value,
+          description: document.getElementById("dish-desc").value.trim()
         };
 
         try {
-            btnSave.disabled = true;
-            btnSave.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lưu...';
-
-            await Thim5API.callGAS("updateMenuItem", payload);
-            alert("✅ Đã cập nhật món thành công!");
-            closeEditModal();
-            loadMenuData(); // Nạp lại bảng dữ liệu
-        } catch (error) {
-            alert("❌ Lỗi khi lưu món ăn: " + error.message);
+          var res = await Thim5API.callGAS("saveOrUpdateMenuItem", payload);
+          if (res && res.status === "success") {
+            alert("🎉 " + res.data.message);
+            closeDishModal();
+            init(); // Tải lại danh sách
+          } else {
+            alert("⛔ Lỗi: " + (res.message || "Không thể lưu món!"));
+          }
+        } catch (err) {
+          alert("❌ Lỗi mạng: " + err.message);
         } finally {
-            btnSave.disabled = false;
-            btnSave.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu Thay Đổi';
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu Món Vào Thực Đơn';
         }
-    }
+      }
 
-    /**
-     * Bật / Tắt chế độ bảo mật số liệu tài chính nhạy cảm (Privacy Mode)
-     */
-    function togglePrivacyMode() {
-        isPrivacyMode = !isPrivacyMode;
-        applyFilters();
-    }
-
-    /**
-     * Kích hoạt cỗ máy phân tích lịch sử đơn hàng 14 ngày để tự động dán nhãn Best Seller
-     */
-    async function triggerBestSellerSync() {
-        const btn = document.getElementById("btn-sync-bestseller");
-        try {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang quét đơn...';
-            const res = await Thim5API.callGAS("recalculateBestSellers");
-            alert(`✅ Hoàn tất chấm điểm! Đã dán nhãn BEST_SELLER cho ${res.bestSellerCount || 0} món bán chạy.`);
-            loadMenuData();
-        } catch (error) {
-            alert("❌ Lỗi quét đơn hàng: " + error.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Chấm Điểm Best Seller</span>';
-        }
-    }
-
-    function setCategoryFilter(cat) {
-        activeCategory = cat;
-        ["ALL", "TRAFFIC", "CORE", "BOOSTER"].forEach(c => {
-            const btn = document.getElementById("filter-cat-" + c);
-            if (btn) {
-                btn.className = (c === cat) 
-                    ? "px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white transition"
-                    : "px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400 hover:text-white transition";
+      async function deleteDishItem(code) {
+        if (confirm("Anh có chắc muốn xóa vĩnh viễn món [" + code + "] khỏi thực đơn?")) {
+          try {
+            var res = await Thim5API.callGAS("deleteMenuItem", { itemCode: code });
+            if (res && res.status === "success") {
+              alert("🗑️ Đã xóa món thành công!");
+              init();
+            } else {
+              alert("⛔ Lỗi: " + (res.message || "Không thể xóa!"));
             }
+          } catch (err) {
+            alert("Lỗi kết nối: " + err.message);
+          }
+        }
+      }
+
+      /**
+       * MODAL OMNI-INGESTION ĐA KÊNH
+       */
+      function openOmniIngestionModal() {
+        document.getElementById("modal-omni-ingestion").classList.remove("hidden");
+        switchIngestChannel("EXCEL");
+      }
+
+      function closeOmniIngestionModal() {
+        document.getElementById("modal-omni-ingestion").classList.add("hidden");
+        clearIngestPreview();
+      }
+
+      function switchIngestChannel(channel) {
+        var channels = ["excel", "ocr", "link", "json"];
+        channels.forEach(function(c) {
+          document.getElementById("ingest-box-" + c).classList.add("hidden");
+          var btn = document.getElementById("tab-btn-ingest-" + c);
+          if (btn) btn.className = "flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white";
         });
-        applyFilters();
-    }
 
-    function toggleStatusFilter() {
-        const modes = ["ALL", "ON", "OFF"];
-        const nextIdx = (modes.indexOf(statusFilterMode) + 1) % modes.length;
-        statusFilterMode = modes[nextIdx];
-        const labels = { "ALL": "Hiện: Tất Cả", "ON": "Hiện: Đang Bán", "OFF": "Hiện: Tạm Hết" };
-        document.getElementById("filter-status-btn").innerHTML = `<i class="fa-solid fa-eye mr-1"></i> ${labels[statusFilterMode]}`;
-        applyFilters();
-    }
+        document.getElementById("ingest-box-" + channel.toLowerCase()).classList.remove("hidden");
+        var activeBtn = document.getElementById("tab-btn-ingest-" + channel.toLowerCase());
+        if (activeBtn) activeBtn.className = "flex-1 py-2 rounded-xl transition bg-amber-500 text-slate-950 font-black shadow";
+      }
 
-    function formatCurrency(num) {
-        return (Number(num) || 0).toLocaleString("vi-VN") + " đ";
-    }
+      function downloadExcelTemplate() {
+        window.open(Thim5API.getEndpoint() + "?action=getMenuExcelTemplateStructure", "_blank");
+      }
 
-    return {
-        loadMenuData: loadMenuData,
-        applyFilters: applyFilters,
-        setCategoryFilter: setCategoryFilter,
-        toggleStatusFilter: toggleStatusFilter,
-        toggleStatus: toggleStatus,
-        togglePrivacyMode: togglePrivacyMode,
-        calculateLivePricing: calculateLivePricing,
-        openEditModal: openEditModal,
-        closeEditModal: closeEditModal,
-        saveItem: saveItem,
-        triggerBestSellerSync: triggerBestSellerSync
-    };
-})();
+      /**
+       * ĐỌC FILE EXCEL / CSV TRÊN CLIENT
+       */
+      function handleExcelFileSelect(input) {
+        var file = input.files[0];
+        if (!file) return;
 
-/**
- * Hàm khởi tạo tiêu chuẩn được kích hoạt bởi Router trong admin-shell.html
- */
-function initTabMenu() {
-    MenuController.loadMenuData();
-}
-</script>
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var data = e.target.result;
+          parseCsvOrExcelBuffer(data, file.name);
+        };
+
+        if (file.name.endsWith(".csv")) {
+          reader.readAsText(file, "UTF-8");
+        } else {
+          reader.readAsDataURL(file); // Gửi Base64 cho backend nếu là .xlsx
+        }
+      }
+
+      function parseCsvOrExcelBuffer(bufferData, fileName) {
+        if (fileName.endsWith(".csv")) {
+          var lines = bufferData.split(/\r\n|\n/);
+          var items = [];
+          for (var i = 1; i < lines.length; i++) {
+            var line = lines[i].trim();
+            if (!line) continue;
+            var parts = line.split(",");
+            if (parts.length >= 4) {
+              items.push({
+                code: parts[0].trim().toUpperCase(),
+                name: parts[1].trim(),
+                category: parts[2].trim() || "Mì Trộn",
+                cogs: Number(parts[3]) || 0,
+                price: Number(parts[4]) || 0,
+                role: parts[5] ? parts[5].trim().toUpperCase() : "CORE"
+              });
+            }
+          }
+          displayIngestPreview(items);
+        } else {
+          // File .xlsx gửi qua IngestionEngine.gs bóc tách
+          sendBufferToBackendParser(bufferData);
+        }
+      }
+
+      async function sendBufferToBackendParser(base64Data) {
+        try {
+          var res = await Thim5API.callGAS("parseUploadedSpreadsheetBuffer", { base64Data: base64Data });
+          if (res && res.status === "success" && Array.isArray(res.data)) {
+            displayIngestPreview(res.data);
+          } else {
+            alert("⛔ Không thể đọc file Excel: " + (res.message || "Định dạng không khớp!"));
+          }
+        } catch (err) {
+          alert("Lỗi tải file: " + err.message);
+        }
+      }
+
+      /**
+       * CANVAS CLIENT-SIDE NÉN ẢNH & GỬI GEMINI OCR
+       */
+      function handleOcrImageSelect(input) {
+        var file = input.files[0];
+        if (!file) return;
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var img = new Image();
+          img.onload = function() {
+            var canvas = document.createElement("canvas");
+            var maxDim = 1200;
+            var w = img.width;
+            var h = img.height;
+
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+
+            canvas.width = w;
+            canvas.height = h;
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+
+            var compressedBase64 = canvas.toDataURL("image/jpeg", 0.75);
+            callGeminiOcrApi(compressedBase64);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      async function callGeminiOcrApi(base64Data) {
+        var btn = document.querySelector("#ingest-box-ocr button");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI Đang Quét Thực Đơn...';
+
+        try {
+          var res = await Thim5API.callGAS("processMenuOcrWithGemini", { imageBase64: base64Data });
+          if (res && res.status === "success" && Array.isArray(res.data)) {
+            displayIngestPreview(res.data);
+          } else {
+            alert("⛔ AI không trích xuất được món: " + (res.message || "Vui lòng chụp rõ hơn!"));
+          }
+        } catch (err) {
+          alert("Lỗi AI OCR: " + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-camera-retro mr-1.5"></i> Chụp / Chọn Ảnh Menu';
+        }
+      }
+
+      /**
+       * TRÍCH XUẤT TỪ PUBLIC LINK
+       */
+      async function handleParseUrl() {
+        var url = document.getElementById("input-public-url").value.trim();
+        if (!url) {
+          alert("Vui lòng dán link thực đơn!");
+          return;
+        }
+
+        try {
+          var res = await Thim5API.callGAS("extractMenuFromPublicUrl", { url: url });
+          if (res && res.status === "success" && Array.isArray(res.data)) {
+            displayIngestPreview(res.data);
+          } else {
+            alert("⛔ Không thể cào link: " + (res.message || "Trang web chặn quét!"));
+          }
+        } catch (e) {
+          alert("Lỗi cào URL: " + e.message);
+        }
+      }
+
+      function handleParseJson() {
+        var txt = document.getElementById("input-raw-json").value.trim();
+        if (!txt) return;
+        try {
+          var parsed = JSON.parse(txt);
+          if (Array.isArray(parsed)) {
+            displayIngestPreview(parsed);
+          } else {
+            alert("JSON phải là một danh sách mảng các món ăn!");
+          }
+        } catch (e) {
+          alert("Cú pháp JSON không hợp lệ: " + e.message);
+        }
+      }
+
+      /**
+       * HIỂN THỊ BẢNG XEM TRƯỚC HÀNG LOẠT TRƯỚC KHI NẠP
+       */
+      function displayIngestPreview(items) {
+        if (!items || items.length === 0) return;
+        stagedIngestItems = items;
+
+        var container = document.getElementById("ingest-preview-container");
+        var countEl = document.getElementById("preview-total-count");
+        var tbody = document.getElementById("ingest-preview-tbody");
+
+        countEl.innerText = items.length;
+        tbody.innerHTML = "";
+
+        items.forEach(function(m, idx) {
+          var cogs = Number(m.cogs) || 0;
+          var price = Number(m.price) || 0;
+          var fc = price > 0 ? ((cogs / price) * 100).toFixed(1) + "%" : "0%";
+
+          var tr = `
+            <tr class="hover:bg-slate-900">
+              <td class="p-2 text-amber-400 font-bold">${m.code || ('M_' + (idx + 1))}</td>
+              <td class="p-2 text-white font-medium">${m.name || 'Món mới'}</td>
+              <td class="p-2 text-slate-400">${m.category || 'Mì Trộn'}</td>
+              <td class="p-2 text-right text-slate-400">${cogs.toLocaleString('vi-VN')} đ</td>
+              <td class="p-2 text-right text-emerald-400 font-bold">${price.toLocaleString('vi-VN')} đ</td>
+              <td class="p-2 text-center text-amber-400">${fc}</td>
+            </tr>
+          `;
+          tbody.insertAdjacentHTML("beforeend", tr);
+        });
+
+        container.classList.remove("hidden");
+      }
+
+      function clearIngestPreview() {
+        stagedIngestItems = [];
+        document.getElementById("ingest-preview-container").classList.add("hidden");
+        document.getElementById("ingest-preview-tbody").innerHTML = "";
+      }
+
+      /**
+       * GỬI HÀNG LOẠT VÀO CƠ SỞ DỮ LIỆU THỰC ĐƠN
+       */
+      async function submitBatchIngest() {
+        if (!stagedIngestItems || stagedIngestItems.length === 0) return;
+
+        var btn = document.getElementById("btn-confirm-ingest-all");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Nạp ' + stagedIngestItems.length + ' Món...';
+
+        try {
+          var res = await Thim5API.callGAS("batchImportMenuItems", { items: stagedIngestItems });
+          if (res && res.status === "success") {
+            alert("🎉 " + res.data.message);
+            closeOmniIngestionModal();
+            init(); // Tải lại toàn bộ thực đơn
+          } else {
+            alert("⛔ Lỗi nạp hàng loạt: " + (res.message || "Không xác định"));
+          }
+        } catch (err) {
+          alert("Lỗi kết nối nạp hàng loạt: " + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Xác Nhận Nạp Tất Cả Vào Cơ Sở Dữ Liệu Thực Đơn';
+        }
+      }
+
+      // Tự động khởi chạy
+      init();
+
+      return {
+        init: init,
+        handleSearch: handleSearch,
+        filterRole: filterRole,
+        toggleItemStock: toggleItemStock,
+        calculateMarginGuard: calculateMarginGuard,
+        openDishModal: openDishModal,
+        closeDishModal: closeDishModal,
+        handleSaveDish: handleSaveDish,
+        deleteDishItem: deleteDishItem,
+        openOmniIngestionModal: openOmniIngestionModal,
+        closeOmniIngestionModal: closeOmniIngestionModal,
+        switchIngestChannel: switchIngestChannel,
+        downloadExcelTemplate: downloadExcelTemplate,
+        handleExcelFileSelect: handleExcelFileSelect,
+        handleOcrImageSelect: handleOcrImageSelect,
+        handleParseUrl: handleParseUrl,
+        handleParseJson: handleParseJson,
+        clearIngestPreview: clearIngestPreview,
+        submitBatchIngest: submitBatchIngest
+      };
+    })();
+  </script>
