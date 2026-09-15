@@ -247,16 +247,14 @@
           <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-70"></i>
         </a>
 
-        <!-- Tab 4: Mở Nhanh Trạm Điều Phối Shipper -->
-        <a href="shipping.html" 
-           target="_blank" 
-           class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-sky-400 hover:bg-slate-800/60">
-          <div class="flex items-center gap-3">
-            <i class="fa-solid fa-motorcycle w-4 text-center text-sm text-sky-400"></i>
-            <span class="truncate">Trạm Điều Phối Ship</span>
-          </div>
-          <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-70"></i>
-        </a>
+        <!-- Nút Trạm Điều Phối Ship (Đã chuyển thành SPA Module) -->
+        <button type="button" 
+                data-tab="shippers" 
+                onclick="AdminShellController.switchMainTab('shippers', this)" 
+                class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60">
+          <i class="fa-solid fa-motorcycle w-4 text-center text-sm text-sky-400"></i>
+          <span class="truncate">Trạm Điều Phối Ship</span>
+        </button>
 
         <!-- =================================================================== -->
         <!-- KHỐI QUYỀN TỐI CAO: MẶC ĐỊNH BỊ KHÓA CHẶT (CHỈ MỞ CHO SUPER ADMIN)   -->
@@ -1058,7 +1056,7 @@
           `;
         }
 
-        var componentFile = (tabKey === "pl") ? "tab-pl.html" : "tab-menu.html";
+        var componentFile = (tabKey === "pl") ? "tab-pl.html" : (tabKey === "menu" ? "tab-menu.html" : "tab-shippers.html");
         try {
           var response = await fetch(componentFile + "?v=" + Date.now());
           if (!response.ok) throw new Error("Không thể tải component " + componentFile);
