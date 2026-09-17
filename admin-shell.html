@@ -1036,67 +1036,76 @@
       /**
        * ĐIỀU HƯỚNG TABS VÀ NẠP COMPONENT ĐỘNG (MICRO-FRONTEND LOADER)
        */
-      async function switchMainTab(tabKey, btnElement) {
-        // Chốt chặn bảo mật RBAC: Cấm truy cập Control Plane nếu không phải Super Admin
-        if (tabKey === "control-plane" && currentRole !== "SUPER_ADMIN") {
-          alert("⛔ TỪ CHỐI TRUY CẬP (403): Phân hệ Super Control Plane chỉ dành riêng cho Super Admin xác thực 2FA!");
-          return;
+     /**
+     * ĐIỀU HƯỚNG TABS VÀ NẠP COMPONENT ĐỘNG (MICRO-FRONTEND LOADER)
+     * Bảo vệ đa tầng: RBAC Guard, Cache-Busting, Lookup Routing Map
+     */
+    async function switchMainTab(tabKey, btnElement) {
+      // 1. Chốt chặn bảo mật RBAC: Cấm truy cập Control Plane & Campaign nếu không phải Super Admin
+      var restrictedTabs = ["control-plane", "campaign"];
+      if (restrictedTabs.includes(tabKey) && currentRole !== "SUPER_ADMIN") {
+        alert("⛔ TỪ CHỐI TRUY CẬP (403): Phân hệ này chỉ dành riêng cho Super Admin đã xác thực bảo mật 2FA!");
+        return;
+      }
+
+      currentActiveTab = tabKey;
+      toggleSidebar(false);
+
+      // 2. Cập nhật trạng thái đèn sáng Active trên thanh Sidebar
+      var allNavBtns = document.querySelectorAll(".sidebar-nav-btn");
+      allNavBtns.forEach(function(btn) {
+        btn.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60";
+      });
+
+      if (btnElement) {
+        btnElement.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/20";
+      }
+
+      var outlet = document.getElementById("main-content-viewport");
+      if (outlet) {
+        outlet.innerHTML = `
+          <div class="py-24 text-center text-slate-500 space-y-3">
+            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-amber-400"></i>
+            <p class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Đang nạp phân hệ: ${tabKey.toUpperCase()}...</p>
+          </div>
+        `;
+      }
+
+      // 3. Bảng tra cứu định tuyến động (Lookup Component Map)
+      var tabComponentMap = {
+        "pl": "tab-pl.html",
+        "menu": "tab-menu.html",
+        "shippers": "tab-shippers.html",
+        "campaign": "tab-campaign.html",
+        "control-plane": "tab-control-plane.html"
+      };
+
+      var componentFile = tabComponentMap[tabKey] || "tab-pl.html";
+
+      // 4. Nạp Component động kèm tham số phá cache (?v=Date.now())
+      try {
+        var response = await fetch(componentFile + "?v=" + Date.now());
+        if (!response.ok) {
+          throw new Error("Không thể tải component [" + componentFile + "] - Mã lỗi: " + response.status);
         }
-
-        currentActiveTab = tabKey;
-        toggleSidebar(false);
-
-        document.querySelectorAll(".sidebar-nav-btn").forEach(function(btn) {
-          btn.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60";
-        });
-
-        if (btnElement) {
-          if (tabKey === "control-plane") {
-            btnElement.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-rose-500 text-white font-bold shadow-md shadow-rose-500/20 active";
-          } else {
-            btnElement.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 active";
-          }
-        }
-
-        var outlet = document.getElementById("dynamic-tab-outlet");
-        var controlPlaneView = document.getElementById("super-control-plane-view");
-
-        if (tabKey === "control-plane") {
-          if (outlet) outlet.classList.add("hidden");
-          if (controlPlaneView) controlPlaneView.classList.remove("hidden");
-          return;
-        }
-
-        if (controlPlaneView) controlPlaneView.classList.add("hidden");
+        var htmlText = await response.text();
+        renderComponentWithScripts(outlet, htmlText);
+      } catch (err) {
+        console.error("Lỗi nạp component:", err);
         if (outlet) {
-          outlet.classList.remove("hidden");
           outlet.innerHTML = `
-            <div class="p-12 text-center text-slate-400 space-y-3">
-              <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
-              <p class="text-xs font-medium font-sans">Đang tải phân hệ ${tabKey.toUpperCase()}...</p>
+            <div class="p-6 rounded-3xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-center space-y-2 max-w-md mx-auto my-12">
+              <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+              <h4 class="font-bold text-xs uppercase">Không thể tải phân hệ ${tabKey}</h4>
+              <p class="text-[11px] text-slate-400">${err.message}</p>
+              <button onclick="AdminShellController.switchMainTab('${tabKey}', null)" class="mt-2 px-3.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold transition">
+                Thử Tải Lại
+              </button>
             </div>
           `;
         }
-
-        var componentFile = (tabKey === "pl") ? "tab-pl.html" : (tabKey === "menu" ? "tab-menu.html" : "tab-shippers.html");
-        try {
-          var response = await fetch(componentFile + "?v=" + Date.now());
-          if (!response.ok) throw new Error("Không thể tải component " + componentFile);
-          var htmlText = await response.text();
-          renderComponentWithScripts(outlet, htmlText);
-        } catch (err) {
-          if (outlet) {
-            outlet.innerHTML = `
-              <div class="p-8 text-center text-rose-400 space-y-2">
-                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
-                <p class="text-xs font-bold">Lỗi nạp component: ${err.message}</p>
-                <button onclick="AdminShellController.switchMainTab('${tabKey}', null)" class="px-3 py-1.5 bg-slate-800 text-white rounded-xl text-xs font-bold">Thử lại</button>
-              </div>
-            `;
-          }
-        }
       }
-
+    }
       /**
        * THỰC THI SCRIPT TRONG COMPONENT CON ĐẢM BẢO CHẠY 100%
        */
