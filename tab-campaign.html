@@ -1,0 +1,288 @@
+<!-- ========================================================================= -->
+<!-- PHÂN HỆ QUẢN TRỊ CHIẾN DỊCH MARKETING & ĐỊNH VỊ GPS (GEO-FENCING)         -->
+<!-- ========================================================================= -->
+<div id="campaign-management-container" class="space-y-5 max-w-5xl mx-auto pb-12 select-none text-xs">
+
+  <!-- Tiêu đề trang -->
+  <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-lg shadow-lg shadow-purple-600/30">
+      <i class="fa-solid fa-satellite-dish"></i>
+    </div>
+    <div>
+      <h2 class="text-sm font-black text-white uppercase tracking-wider">Trung Tâm Chiến Dịch &amp; Khuyến Mãi</h2>
+      <p class="text-[10.5px] text-slate-400">Điều khiển các luồng Gamification và Khuyến mãi theo vị trí GPS (Geo-Fencing)</p>
+    </div>
+  </div>
+
+  <!-- BẢNG ĐIỀU KHIỂN CHIẾN DỊCH 1: GEO-FENCING BOOSTER (TẶNG QUÀ KHÁCH XA) -->
+  <div class="rounded-3xl bg-slate-900 border border-slate-800 shadow-xl overflow-hidden relative">
+    <!-- Overlay chỉ dành cho Super Admin -->
+    <div id="campaign-lock-overlay" class="absolute inset-0 z-10 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 transition-opacity">
+      <i class="fa-solid fa-lock text-3xl text-slate-500"></i>
+      <p class="text-xs font-bold text-slate-400">Khu vực này chỉ dành cho Super Admin (Quyền tối cao)</p>
+    </div>
+
+    <!-- Header Chiến Dịch -->
+    <div class="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-sm">
+          <i class="fa-solid fa-map-location-dot"></i>
+        </div>
+        <div>
+          <h3 class="text-xs font-black text-white uppercase">Chiến Dịch Geo-Fencing Booster (Khách Xa)</h3>
+          <p class="text-[10px] text-slate-400">Thu hút khách cách quán 3-5km bằng mồi câu Quà tặng 0đ</p>
+        </div>
+      </div>
+      <!-- Công tắc Bật/Tắt toàn bộ chiến dịch -->
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="cfg-geo-status" class="sr-only peer">
+        <div class="w-11 h-6 bg-slate-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+        <span class="ml-3 text-[11px] font-bold text-slate-300" id="geo-status-label">Đang Tắt</span>
+      </label>
+    </div>
+
+    <!-- Form Cấu Hình Chi Tiết -->
+    <form id="form-geo-campaign" onsubmit="TabCampaignController.handleSaveGeoConfig(event)" class="p-5 space-y-6">
+      
+      <!-- KHỐI 1: TỌA ĐỘ TÂM ĐIỂM (QUÁN) -->
+      <div class="space-y-3">
+        <h4 class="text-[11px] font-bold text-amber-400 border-b border-slate-800 pb-1.5"><i class="fa-solid fa-location-crosshairs mr-1"></i> Tọa Độ Quán (Tâm Vòng Tròn)</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="text-[10.5px] font-medium text-slate-400">Vĩ Độ (Latitude)</label>
+            <input type="number" step="any" id="cfg-shop-lat" required placeholder="11.28535" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-mono outline-none transition" />
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10.5px] font-medium text-slate-400">Kinh Độ (Longitude)</label>
+            <input type="number" step="any" id="cfg-shop-lng" required placeholder="106.13329" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-mono outline-none transition" />
+          </div>
+        </div>
+        <p class="text-[9.5px] text-slate-500">Mẹo: Lên Google Maps, chuột phải vào quán của anh chọn copy chuỗi số tọa độ dán vào đây.</p>
+      </div>
+
+      <!-- KHỐI 2: ĐIỀU KIỆN KÍCH HOẠT (BÁN KÍNH & AOV) -->
+      <div class="space-y-3">
+        <h4 class="text-[11px] font-bold text-sky-400 border-b border-slate-800 pb-1.5"><i class="fa-solid fa-ruler-combined mr-1"></i> Điều Kiện Kích Hoạt (Filters)</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="space-y-1">
+            <label class="text-[10.5px] font-medium text-slate-400">Bán Kính Tối Thiểu (km)</label>
+            <input type="number" step="0.1" id="cfg-geo-min-km" required placeholder="3.0" value="3.0" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-white font-mono outline-none transition" />
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10.5px] font-medium text-slate-400">Bán Kính Tối Đa (km)</label>
+            <input type="number" step="0.1" id="cfg-geo-max-km" required placeholder="5.0" value="5.0" class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-white font-mono outline-none transition" />
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10.5px] font-medium text-slate-400">Giá Trị Đơn Tối Thiểu (VNĐ)</label>
+            <input type="number" step="1000" id="cfg-geo-min-aov" required placeholder="89000" value="89000" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 font-bold text-emerald-400 font-mono outline-none transition" />
+            <span class="text-[9px] text-emerald-500 block pt-0.5">Margin Guard: Ép khách mua nhiều để bù tiền ship.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- KHỐI 3: PHẦN THƯỞNG (REWARD) -->
+      <div class="space-y-3">
+        <h4 class="text-[11px] font-bold text-rose-400 border-b border-slate-800 pb-1.5"><i class="fa-solid fa-gift mr-1"></i> Quà Tặng (Mồi Câu)</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="text-[10.5px] font-medium text-slate-400">Mã Món Quà (Item Code trong Thực Đơn)</label>
+            <input type="text" id="cfg-geo-reward-code" required placeholder="WATER_01" class="w-full bg-slate-950 border border-slate-800 focus:border-rose-500 rounded-xl px-3 py-2 text-amber-400 font-mono font-bold uppercase outline-none transition" />
+            <span class="text-[9.5px] text-slate-500 block pt-0.5">Món này sẽ tự nhảy vào giỏ hàng với giá 0đ nếu đạt chuẩn.</span>
+          </div>
+          <div class="space-y-1">
+            <label class="text-[10.5px] font-medium text-slate-400">Thông Điệp Popup Dụ Khách</label>
+            <input type="text" id="cfg-geo-message" required placeholder="Bạn đang cách quán hơn 3km, Thím 5 tặng bạn 1 Suối mát lạnh nhen!" class="w-full bg-slate-950 border border-slate-800 focus:border-rose-500 rounded-xl px-3 py-2 text-white outline-none transition" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Khối nút Lưu -->
+      <div class="pt-4 border-t border-slate-800 flex justify-end">
+        <button type="submit" id="btn-save-geo" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 text-white font-black uppercase tracking-wider transition active:scale-95 shadow-lg shadow-purple-600/30 flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Cập Nhật Lên Hệ Thống Mây</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+<!-- ========================================================================= -->
+  <!-- 2. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH CHIẾN DỊCH & MARKETING (CAMPAIGN CONTROLLER)-->
+  <!-- ========================================================================= -->
+  <script>
+    /**
+     * =========================================================================
+     * CONTROLLER: TAB CAMPAIGN & GEO-FENCING AOV BOOSTER (v2.9 ENTERPRISE)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+     * Kiến trúc: Headless Dynamic Config, RBAC Strict Guard
+     * =========================================================================
+     */
+    var TabCampaignController = (function() {
+      // Tọa độ vị trí mặc định của Bếp Thím 5 (Hòa Thành, Tây Ninh)
+      var DEFAULT_SHOP_LAT = 11.28535;
+      var DEFAULT_SHOP_LNG = 106.13329;
+
+      /**
+       * KHỞI CHẠY TẢI CẤU HÌNH VÀ KIỂM TRA PHÂN QUYỀN
+       */
+      async function init() {
+        checkSuperAdminAccess();
+        bindStatusToggleEvent();
+        await loadDynamicCampaignConfig();
+      }
+
+      /**
+       * KIỂM TOÁN PHÂN QUYỀN SUPER ADMIN
+       */
+      function checkSuperAdminAccess() {
+        var userRole = "";
+        try {
+          if (window.AdminShellController && typeof window.AdminShellController.getCurrentUserRole === "function") {
+            userRole = window.AdminShellController.getCurrentUserRole();
+          } else {
+            userRole = localStorage.getItem("THIM5_ADMIN_ROLE") || "";
+          }
+        } catch (e) {
+          userRole = "";
+        }
+
+        var overlay = document.getElementById("campaign-lock-overlay");
+        var form = document.getElementById("form-geo-campaign");
+        var toggle = document.getElementById("cfg-geo-status");
+
+        if (String(userRole).toUpperCase() === "SUPER_ADMIN") {
+          if (overlay) overlay.classList.add("hidden");
+          if (toggle) toggle.disabled = false;
+          enableFormFields(form, true);
+        } else {
+          if (overlay) overlay.classList.remove("hidden");
+          if (toggle) toggle.disabled = true;
+          enableFormFields(form, false);
+        }
+      }
+
+      function enableFormFields(formEl, isEnabled) {
+        if (!formEl) return;
+        var inputs = formEl.querySelectorAll("input, button, select, textarea");
+        inputs.forEach(function(el) {
+          el.disabled = !isEnabled;
+        });
+      }
+
+      /**
+       * ĐỒNG BỘ HIỂN THỊ CỦA NÚT TOGGLE BẬT/TẮT
+       */
+      function bindStatusToggleEvent() {
+        var toggle = document.getElementById("cfg-geo-status");
+        var label = document.getElementById("geo-status-label");
+        if (toggle && label) {
+          toggle.addEventListener("change", function() {
+            if (this.checked) {
+              label.innerText = "Đang Bật";
+              label.className = "ml-3 text-[11px] font-bold text-emerald-400";
+            } else {
+              label.innerText = "Đang Tắt";
+              label.className = "ml-3 text-[11px] font-bold text-slate-400";
+            }
+          });
+        }
+      }
+
+      /**
+       * GỌI API LẤY CẤU HÌNH DYNAMIC CONFIG TỪ GOOGLE APPS SCRIPT
+       */
+      async function loadDynamicCampaignConfig() {
+        try {
+          var res = await Thim5API.callGAS("getSystemDynamicConfig", {});
+          if (res && res.status === "success" && res.data) {
+            var cfg = res.data;
+
+            // 1. Trạng thái bật/tắt
+            var isActive = (String(cfg.GEO_CAMPAIGN_ACTIVE || "FALSE").toUpperCase() === "TRUE");
+            var toggle = document.getElementById("cfg-geo-status");
+            var label = document.getElementById("geo-status-label");
+            if (toggle) {
+              toggle.checked = isActive;
+              if (label) {
+                label.innerText = isActive ? "Đang Bật" : "Đang Tắt";
+                label.className = isActive ? "ml-3 text-[11px] font-bold text-emerald-400" : "ml-3 text-[11px] font-bold text-slate-400";
+              }
+            }
+
+            // 2. Tọa độ quán (Fallback tọa độ Tây Ninh nếu chưa có)
+            var latInput = document.getElementById("cfg-shop-lat");
+            var lngInput = document.getElementById("cfg-shop-lng");
+            if (latInput) latInput.value = cfg.SHOP_LAT !== undefined ? cfg.SHOP_LAT : DEFAULT_SHOP_LAT;
+            if (lngInput) lngInput.value = cfg.SHOP_LNG !== undefined ? cfg.SHOP_LNG : DEFAULT_SHOP_LNG;
+
+            // 3. Rào chắn bán kính và AOV
+            var minKmInput = document.getElementById("cfg-geo-min-km");
+            var maxKmInput = document.getElementById("cfg-geo-max-km");
+            var minAovInput = document.getElementById("cfg-geo-min-aov");
+            if (minKmInput) minKmInput.value = cfg.GEO_MIN_KM !== undefined ? cfg.GEO_MIN_KM : 3.0;
+            if (maxKmInput) maxKmInput.value = cfg.GEO_MAX_KM !== undefined ? cfg.GEO_MAX_KM : 5.0;
+            if (minAovInput) minAovInput.value = cfg.GEO_MIN_AOV !== undefined ? cfg.GEO_MIN_AOV : 89000;
+
+            // 4. Món quà tặng & Thông điệp
+            var rewardCodeInput = document.getElementById("cfg-geo-reward-code");
+            var rewardMsgInput = document.getElementById("cfg-geo-message");
+            if (rewardCodeInput) rewardCodeInput.value = cfg.GEO_REWARD_CODE || "WATER_01";
+            if (rewardMsgInput) rewardMsgInput.value = cfg.GEO_REWARD_MSG || "Bạn đang cách quán hơn 3km, Thím 5 tặng bạn 1 Nước Suối mát lạnh nhen!";
+          }
+        } catch (err) {
+          console.error("Lỗi khi tải cấu hình Geo-Campaign:", err);
+        }
+      }
+
+      /**
+       * LƯU CẤU HÌNH CHIẾN DỊCH LÊN SYS_CONFIG (GOOGLE APPS SCRIPT)
+       */
+      async function handleSaveGeoConfig(e) {
+        e.preventDefault();
+        var btn = document.getElementById("btn-save-geo");
+        var originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu Cấu Hình...';
+
+        var toggle = document.getElementById("cfg-geo-status");
+        var isGeoActive = toggle ? toggle.checked : false;
+
+        var payload = {
+          GEO_CAMPAIGN_ACTIVE: isGeoActive ? "TRUE" : "FALSE",
+          SHOP_LAT: Number(document.getElementById("cfg-shop-lat").value) || DEFAULT_SHOP_LAT,
+          SHOP_LNG: Number(document.getElementById("cfg-shop-lng").value) || DEFAULT_SHOP_LNG,
+          GEO_MIN_KM: Number(document.getElementById("cfg-geo-min-km").value) || 3.0,
+          GEO_MAX_KM: Number(document.getElementById("cfg-geo-max-km").value) || 5.0,
+          GEO_MIN_AOV: Number(document.getElementById("cfg-geo-min-aov").value) || 89000,
+          GEO_REWARD_CODE: document.getElementById("cfg-geo-reward-code").value.trim().toUpperCase(),
+          GEO_REWARD_MSG: document.getElementById("cfg-geo-message").value.trim()
+        };
+
+        try {
+          var res = await Thim5API.callGAS("saveSystemDynamicConfig", { config: payload });
+          if (res && res.status === "success") {
+            alert("🎉 Đã lưu cấu hình Chiến Dịch Geo-Fencing thành công! Các thiết lập đã áp dụng ngay cho Web D2C.");
+          } else {
+            alert("⛔ Lỗi lưu cấu hình: " + (res.message || "Không xác định"));
+          }
+        } catch (err) {
+          alert("❌ Lỗi kết nối mạng: " + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+        }
+      }
+
+      // Tự động khởi chạy Controller
+      init();
+
+      return {
+        init: init,
+        checkSuperAdminAccess: checkSuperAdminAccess,
+        handleSaveGeoConfig: handleSaveGeoConfig
+      };
+    })();
+  </script>
