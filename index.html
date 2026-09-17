@@ -1956,7 +1956,7 @@
         }
 
         /**
-         * GỬI ĐƠN HÀNG VỀ MÁY CHỦ BẾP
+         * GỬI ĐƠN HÀNG VỀ MÁY CHỦ BẾP (ZERO-SILENT-FAIL ARCHITECTURE)
          */
         async function submitFinalOrder() {
             var nameEl = document.getElementById("chk-customer-name");
@@ -1964,17 +1964,18 @@
             var addrEl = document.getElementById("chk-customer-address");
 
             var name = nameEl ? nameEl.value.trim() : "";
-            var phone = phoneEl ? phoneEl.value.trim() : "";
+            var phone = phoneEl ? phoneEl.value.trim().replace(/\D/g, '') : "";
             var addr = addrEl ? addrEl.value.trim() : "";
 
+            // 1. Kiểm tra tính hợp lệ của thông tin khách hàng
             if (!name) {
-                alert("⚠️ Quý khách vui lòng nhập Họ và Tên!");
+                alert("⚠️ Quý khách vui lòng nhập Họ và Tên người nhận!");
                 if (nameEl) nameEl.focus();
                 return;
             }
 
-            if (!phone || phone.length < 10) {
-                alert("⚠️ Quý khách vui lòng nhập Số Điện Thoại hợp lệ để Bếp gọi xác nhận!");
+            if (!phone || phone.length < 9) {
+                alert("⚠️ Quý khách vui lòng nhập Số Điện Thoại hợp lệ (từ 10 số) để Bếp và Shipper liên hệ!");
                 if (phoneEl) phoneEl.focus();
                 return;
             }
@@ -1985,24 +1986,49 @@
                 return;
             }
 
-            var subtotal = 0;
-            appState.cartItems.forEach(function(i) { subtotal += (i.price * i.quantity); });
-            var finalTotal = subtotal + Math.max(0, appState.shippingFee - appState.shippingSubsidy);
-            var orderCode = "DH" + new Date().toISOString().slice(2,10).replace(/-/g,"") + "_" + Math.floor(1000 + Math.random() * 9000);
+            if (appState.cartItems.length === 0) {
+                alert("⚠️ Giỏ hàng đang trống. Quý khách vui lòng chọn món trước khi đặt!");
+                return;
+            }
 
+            // 2. Tính toán tài chính đơn hàng phía Client
+            var subtotal = 0;
+            appState.cartItems.forEach(function(i) { 
+                if (!i.isGift) {
+                    subtotal += (i.price * i.quantity); 
+                }
+            });
+            var finalTotal = subtotal + Math.max(0, appState.shippingFee - appState.shippingSubsidy);
+            
+            // 3. Tạo mã đơn hàng chuẩn xác theo thời gian thực
+            var now = new Date();
+            var yearStr = String(now.getFullYear()).slice(-2);
+            var monthStr = String(now.getMonth() + 1).padStart(2, '0');
+            var dayStr = String(now.getDate()).padStart(2, '0');
+            var randSuffix = Math.floor(1000 + Math.random() * 9000);
+            var orderCode = "DH" + yearStr + monthStr + dayStr + "_" + randSuffix;
+
+            // 4. Đóng gói Payload chuẩn hóa gửi lên máy chủ
             var orderPayload = {
                 orderCode: orderCode,
-                customer: { name: name, phone: phone, address: addr, location: appState.customerLocation },
+                customer: { 
+                    name: name, 
+                    phone: phone, 
+                    address: addr, 
+                    location: appState.customerLocation 
+                },
                 items: appState.cartItems,
                 gift: appState.appliedGift,
                 subtotal: subtotal,
                 shippingFee: appState.shippingFee,
                 shippingSubsidy: appState.shippingSubsidy,
                 finalTotal: finalTotal,
-                paymentMethod: appState.selectedPaymentMethod,
-                timestamp: new Date().toISOString()
+                paymentMethod: appState.selectedPaymentMethod, // "COD" hoặc "VIETQR"
+                note: "",
+                timestamp: now.toISOString()
             };
 
+            // 5. Khóa nút submit chống khách bấm đúp (Double-Click Protection)
             var btnSubmit = document.getElementById("btn-submit-order");
             var origText = btnSubmit ? btnSubmit.innerHTML : "";
             if (btnSubmit) {
@@ -2010,31 +2036,66 @@
                 btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-base"></i> ĐANG TRUYỀN ĐƠN VỀ BẾP...';
             }
 
+            // 6. Truyền đơn về máy chủ Apps Script với cơ chế bắt lỗi minh bạch
             try {
-                if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
-                    await Thim5API.callGAS("createD2COrder", orderPayload);
+                if (typeof Thim5API === "undefined" || typeof Thim5API.callGAS !== "function") {
+                    throw new Error("Không tìm thấy bộ kết nối Thim5API (file api.js chưa được nạp đúng)!");
                 }
+
+                // Gọi API backend
+                var res = await Thim5API.callGAS("createD2COrder", orderPayload);
+
+                // Nếu Backend không phản hồi success thì lập tức chặn lại, ném lỗi
+                if (!res || (res.status !== "success" && res.code !== 200)) {
+                    var errorMsg = (res && res.message) ? res.message : "Máy chủ Bếp từ chối tiếp nhận đơn hàng!";
+                    throw new Error(errorMsg);
+                }
+
+                // Ghi nhận thông tin đơn hàng vào bộ nhớ Session để trang tracking đọc đúng thông tin mới
+                sessionStorage.setItem("thim5_last_order", JSON.stringify(orderPayload));
+
+                // Đóng modal thanh toán và mở modal đặt hàng thành công thật
+                closeCheckoutModal();
+                var successModal = document.getElementById("modal-order-success");
+                var codeEl = document.getElementById("disp-success-order-code");
+                if (codeEl) codeEl.innerText = orderCode;
+                if (successModal) successModal.classList.remove("hidden");
+
+                // Reset giỏ hàng sau khi đặt thành công
+                appState.cartItems = [];
+                appState.appliedGift = null;
+                updateAovAndCartUI();
+
             } catch (err) {
-                console.warn("⚠️ Truyền đơn về Bếp chế độ mô phỏng:", err);
+                console.error("❌ [D2C Submit Error] Thất bại khi gửi đơn:", err);
+                alert("⛔ KHÔNG THỂ TRUYỀN ĐƠN HÀNG VỀ MÁY CHỦ BẾP!\n\nChi tiết lỗi: " + err.message + "\n\n(Vui lòng kiểm tra lại kết nối mạng hoặc đường link Google Apps Script trong api.js)");
+            } finally {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = origText;
+                }
             }
-
-            if (btnSubmit) {
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = origText;
-            }
-
-            closeCheckoutModal();
-            var successModal = document.getElementById("modal-order-success");
-            var codeEl = document.getElementById("disp-success-order-code");
-            if (codeEl) codeEl.innerText = orderCode;
-            if (successModal) successModal.classList.remove("hidden");
-
-            // Reset giỏ hàng sau khi đặt thành công
-            appState.cartItems = [];
-            appState.appliedGift = null;
-            updateAovAndCartUI();
         }
 
+        /**
+         * CHUYỂN HƯỚNG SANG TRANG THEO DÕI ĐƠN HÀNG THỜI GIAN THỰC
+         */
+        function viewLiveOrderTracking() {
+            var codeEl = document.getElementById("disp-success-order-code");
+            var code = codeEl ? codeEl.innerText.trim() : "";
+            if (code) {
+                window.location.href = "tracking.html?order=" + encodeURIComponent(code);
+            }
+        }
+
+        /**
+         * ĐÓNG POPUP THÀNH CÔNG ĐỂ TIẾP TỤC ĐẶT THÊM MÓN MỚI
+         */
+        function resetAndNewOrder() {
+            var successModal = document.getElementById("modal-order-success");
+            if (successModal) successModal.classList.add("hidden");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
         function viewLiveOrderTracking() {
             var code = document.getElementById("disp-success-order-code").innerText;
             window.location.href = "tracking.html?order=" + encodeURIComponent(code);
