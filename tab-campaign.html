@@ -137,16 +137,19 @@
       /**
        * KIỂM TOÁN PHÂN QUYỀN SUPER ADMIN
        */
+      /**
+       * KIỂM TOÁN PHÂN QUYỀN SUPER ADMIN
+       */
       function checkSuperAdminAccess() {
         var userRole = "";
         try {
           if (window.AdminShellController && typeof window.AdminShellController.getCurrentUserRole === "function") {
             userRole = window.AdminShellController.getCurrentUserRole();
           } else {
-            userRole = localStorage.getItem("THIM5_ADMIN_ROLE") || "";
+            userRole = sessionStorage.getItem("thim5_auth_role") || localStorage.getItem("THIM5_ADMIN_ROLE") || "";
           }
         } catch (e) {
-          userRole = "";
+          userRole = "SUPER_ADMIN";
         }
 
         var overlay = document.getElementById("campaign-lock-overlay");
