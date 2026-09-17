@@ -1380,6 +1380,12 @@
           unlockWorkspace();
         }
       });
+      /**
+       * LẤY VAI TRÒ TÀI KHOẢN HIỆN HÀNH CHO CÁC MODULE CON
+       */
+      function getCurrentUserRole() {
+        return currentRole || sessionStorage.getItem("thim5_auth_role") || "POS_STAFF";
+      }
 
       return {
         switchAuthMode: switchAuthMode,
@@ -1396,7 +1402,8 @@
         handleSaveSystemConfig: handleSaveSystemConfig,
         openTotpSetupModal: openTotpSetupModal,
         closeTotpSetupModal: closeTotpSetupModal,
-        resetSystemConfigForm: resetSystemConfigForm
+        resetSystemConfigForm: resetSystemConfigForm,
+          getCurrentUserRole: getCurrentUserRole
       };
     })();
   </script>
