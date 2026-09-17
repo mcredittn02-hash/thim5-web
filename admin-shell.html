@@ -28,7 +28,7 @@
   </script>
 
   <!-- Nạp Adapter Kết Nối Trung Tâm Headless SaaS -->
-  <script src="api.js"></script>
+  <script src="api.js?v=20260917"></script>
 
   <style>
     /* Thanh cuộn tinh chỉnh chuẩn UI Cao Cấp */
@@ -201,6 +201,7 @@
     </div>
 
   </header>
+
   <!-- ========================================================================= -->
   <!-- 3. KHUNG BỐ CỤC CHÍNH WORKSPACE: SIDEBAR DRAWER & VIEWPORT TRUNG TÂM       -->
   <!-- ========================================================================= -->
@@ -247,7 +248,7 @@
           <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-70"></i>
         </a>
 
-        <!-- Nút Trạm Điều Phối Ship (Đã chuyển thành SPA Module) -->
+        <!-- Tab 4: Trạm Điều Phối Ship (Đã chuyển thành SPA Module) -->
         <button type="button" 
                 data-tab="shippers" 
                 onclick="AdminShellController.switchMainTab('shippers', this)" 
@@ -274,28 +275,16 @@
             <i class="fa-solid fa-sliders w-4 text-center text-sm"></i>
             <span class="truncate">Super Control Plane</span>
           </button>
-          <!-- Tab 5: Cấu Hình Toàn Hệ Thống (Super Control Plane) -->
-        <button type="button"
-                id="sidebar-btn-control-plane"
-                data-tab="control-plane"
-                onclick="AdminShellController.switchMainTab('control-plane', this)"
-                class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-rose-400 hover:text-white hover:bg-slate-800/60">
-          <i class="fa-solid fa-sliders w-4 text-center text-sm"></i>
-          <span class="truncate">Super Control Plane</span>
-        </button>
 
-        <!-- Tab 6: Trung Tâm Chiến Dịch Geo-Fencing & Voucher (Super Admin) -->
-        <button type="button" 
-                id="sidebar-btn-campaign" 
-                data-tab="campaign" 
-                onclick="AdminShellController.switchMainTab('campaign', this)" 
-                class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-purple-400 hover:text-white hover:bg-slate-800/60">
-          <i class="fa-solid fa-satellite-dish w-4 text-center text-sm"></i>
-          <span class="truncate font-bold">Trung Tâm Chiến Dịch</span>
-        </button>
-      </div>
-
-    </nav>
+          <!-- Tab 6: Trung Tâm Chiến Dịch Geo-Fencing & Voucher (Super Admin) -->
+          <button type="button" 
+                  id="sidebar-btn-campaign" 
+                  data-tab="campaign" 
+                  onclick="AdminShellController.switchMainTab('campaign', this)" 
+                  class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-purple-400 hover:text-white hover:bg-slate-800/60">
+            <i class="fa-solid fa-satellite-dish w-4 text-center text-sm"></i>
+            <span class="truncate font-bold">Trung Tâm Chiến Dịch</span>
+          </button>
         </div>
 
       </nav>
@@ -316,11 +305,12 @@
       </div>
 
     </aside>
-
-    <!-- KHUNG VIEWPORT TRUNG TÂM (CHỨA VIEW ĐỘNG HOẶC SUPER CONTROL PLANE) -->
+<!-- ======================================================================= -->
+    <!-- 4. KHUNG VIEWPORT TRUNG TÂM (CHỨA VIEW ĐỘNG HOẶC SUPER CONTROL PLANE)   -->
+    <!-- ======================================================================= -->
     <main class="flex-1 h-full overflow-y-auto custom-scroll bg-slate-950 p-2 sm:p-4">
       
-      <!-- CỬA NẠP ĐỘNG MICRO-FRONTEND CHO CÁC COMPONENT (tab-pl.html, tab-menu.html) -->
+      <!-- CỬA NẠP ĐỘNG MICRO-FRONTEND CHO CÁC COMPONENT (tab-pl.html, tab-menu.html...) -->
       <div id="dynamic-tab-outlet" class="w-full">
         <div class="p-12 text-center text-slate-400 space-y-3">
           <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
@@ -352,7 +342,7 @@
           </div>
         </div>
 
-        <!-- FORM CẤU HÌNH THAM SỐ ĐỘNG -->
+        <!-- FORM CẤU HÌNH THAM SỐ ĐỘNG TOÀN SÀN -->
         <form id="form-system-config" onsubmit="AdminShellController.handleSaveSystemConfig(event)" class="space-y-4">
           
           <!-- ================================================================= -->
@@ -554,6 +544,7 @@
             </div>
 
           </div>
+
           <!-- ================================================================= -->
           <!-- PHÂN HỆ 3: BẢO MẬT PHÂN TẦNG & MÃ PIN ĐIỀU HÀNH                   -->
           <!-- ================================================================= -->
@@ -619,8 +610,7 @@
             </div>
 
           </div>
-
-          <!-- ================================================================= -->
+<!-- ================================================================= -->
           <!-- PHÂN HỆ 4: CHIẾT KHẤU SÀN MASTER & THUẾ KHOÁN HKD                -->
           <!-- ================================================================= -->
           <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
@@ -751,7 +741,7 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <!-- Hạn Mức Nợ Tạm Tối Đa -->
+              <!-- Hạn Mức Nợ Tạm Bếp Tối Đa -->
               <div class="space-y-1">
                 <label class="font-bold text-slate-300 text-[11px] block">Hạn Mức Nợ Tạm Bếp Tối Đa (VNĐ) <span class="text-rose-400">*</span></label>
                 <input type="number" 
@@ -845,6 +835,7 @@
 
     </div>
   </div>
+
   <!-- ========================================================================= -->
   <!-- 4. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH TRUNG TÂM (ADMIN SHELL CONTROLLER)         -->
   <!-- ========================================================================= -->
@@ -999,8 +990,7 @@
           alert("Lỗi kết nối gửi mã: " + err.message);
         }
       }
-
-      /**
+/**
        * MỞ KHÓA GIAO DIỆN CHÍNH & PHÂN QUYỀN RBAC KHẮT KHE
        */
       function unlockWorkspace() {
@@ -1035,77 +1025,87 @@
 
       /**
        * ĐIỀU HƯỚNG TABS VÀ NẠP COMPONENT ĐỘNG (MICRO-FRONTEND LOADER)
+       * Bảo vệ đa tầng: RBAC Guard, Cache-Busting, Lookup Routing Map
        */
-     /**
-     * ĐIỀU HƯỚNG TABS VÀ NẠP COMPONENT ĐỘNG (MICRO-FRONTEND LOADER)
-     * Bảo vệ đa tầng: RBAC Guard, Cache-Busting, Lookup Routing Map
-     */
-    async function switchMainTab(tabKey, btnElement) {
-      // 1. Chốt chặn bảo mật RBAC: Cấm truy cập Control Plane & Campaign nếu không phải Super Admin
-      var restrictedTabs = ["control-plane", "campaign"];
-      if (restrictedTabs.includes(tabKey) && currentRole !== "SUPER_ADMIN") {
-        alert("⛔ TỪ CHỐI TRUY CẬP (403): Phân hệ này chỉ dành riêng cho Super Admin đã xác thực bảo mật 2FA!");
-        return;
-      }
-
-      currentActiveTab = tabKey;
-      toggleSidebar(false);
-
-      // 2. Cập nhật trạng thái đèn sáng Active trên thanh Sidebar
-      var allNavBtns = document.querySelectorAll(".sidebar-nav-btn");
-      allNavBtns.forEach(function(btn) {
-        btn.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60";
-      });
-
-      if (btnElement) {
-        btnElement.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/20";
-      }
-
-      var outlet = document.getElementById("main-content-viewport");
-      if (outlet) {
-        outlet.innerHTML = `
-          <div class="py-24 text-center text-slate-500 space-y-3">
-            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-amber-400"></i>
-            <p class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Đang nạp phân hệ: ${tabKey.toUpperCase()}...</p>
-          </div>
-        `;
-      }
-
-      // 3. Bảng tra cứu định tuyến động (Lookup Component Map)
-      var tabComponentMap = {
-        "pl": "tab-pl.html",
-        "menu": "tab-menu.html",
-        "shippers": "tab-shippers.html",
-        "campaign": "tab-campaign.html",
-        "control-plane": "tab-control-plane.html"
-      };
-
-      var componentFile = tabComponentMap[tabKey] || "tab-pl.html";
-
-      // 4. Nạp Component động kèm tham số phá cache (?v=Date.now())
-      try {
-        var response = await fetch(componentFile + "?v=" + Date.now());
-        if (!response.ok) {
-          throw new Error("Không thể tải component [" + componentFile + "] - Mã lỗi: " + response.status);
+      async function switchMainTab(tabKey, btnElement) {
+        // 1. Chốt chặn bảo mật RBAC: Cấm truy cập Control Plane & Campaign nếu không phải Super Admin
+        var restrictedTabs = ["control-plane", "campaign"];
+        if (restrictedTabs.includes(tabKey) && currentRole !== "SUPER_ADMIN") {
+          alert("⛔ TỪ CHỐI TRUY CẬP (403): Phân hệ này chỉ dành riêng cho Super Admin đã xác thực bảo mật 2FA!");
+          return;
         }
-        var htmlText = await response.text();
-        renderComponentWithScripts(outlet, htmlText);
-      } catch (err) {
-        console.error("Lỗi nạp component:", err);
+
+        currentActiveTab = tabKey;
+        toggleSidebar(false);
+
+        // 2. Cập nhật trạng thái đèn sáng Active trên thanh Sidebar
+        var allNavBtns = document.querySelectorAll(".sidebar-nav-btn");
+        allNavBtns.forEach(function(btn) {
+          btn.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60";
+        });
+
+        if (btnElement) {
+          btnElement.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/20";
+        }
+
+        var outlet = document.getElementById("dynamic-tab-outlet");
+        var controlPlaneView = document.getElementById("super-control-plane-view");
+
+        // 3. Phân luồng hiển thị: Control Plane nội tại vs Component tải động
+        if (tabKey === "control-plane") {
+          if (outlet) outlet.classList.add("hidden");
+          if (controlPlaneView) controlPlaneView.classList.remove("hidden");
+          loadSystemConfigData();
+          return;
+        }
+
+        // Với các tab khác: Hiện cửa nạp động và ẩn view Control Plane nội tại
+        if (controlPlaneView) controlPlaneView.classList.add("hidden");
         if (outlet) {
+          outlet.classList.remove("hidden");
           outlet.innerHTML = `
-            <div class="p-6 rounded-3xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-center space-y-2 max-w-md mx-auto my-12">
-              <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
-              <h4 class="font-bold text-xs uppercase">Không thể tải phân hệ ${tabKey}</h4>
-              <p class="text-[11px] text-slate-400">${err.message}</p>
-              <button onclick="AdminShellController.switchMainTab('${tabKey}', null)" class="mt-2 px-3.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold transition">
-                Thử Tải Lại
-              </button>
+            <div class="py-24 text-center text-slate-500 space-y-3">
+              <i class="fa-solid fa-circle-notch fa-spin text-3xl text-amber-400"></i>
+              <p class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Đang nạp phân hệ: ${tabKey.toUpperCase()}...</p>
             </div>
           `;
         }
+
+        // 4. Bảng tra cứu định tuyến động (Lookup Component Map)
+        var tabComponentMap = {
+          "pl": "tab-pl.html",
+          "menu": "tab-menu.html",
+          "shippers": "tab-shippers.html",
+          "campaign": "tab-campaign.html"
+        };
+
+        var componentFile = tabComponentMap[tabKey] || "tab-pl.html";
+
+        // 5. Nạp Component động kèm tham số phá cache (?v=Date.now())
+        try {
+          var response = await fetch(componentFile + "?v=" + Date.now());
+          if (!response.ok) {
+            throw new Error("Không thể tải component [" + componentFile + "] - Mã lỗi: " + response.status);
+          }
+          var htmlText = await response.text();
+          renderComponentWithScripts(outlet, htmlText);
+        } catch (err) {
+          console.error("Lỗi nạp component:", err);
+          if (outlet) {
+            outlet.innerHTML = `
+              <div class="p-6 rounded-3xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-center space-y-2 max-w-md mx-auto my-12">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                <h4 class="font-bold text-xs uppercase">Không thể tải phân hệ ${tabKey}</h4>
+                <p class="text-[11px] text-slate-400">${err.message}</p>
+                <button type="button" onclick="AdminShellController.switchMainTab('${tabKey}', null)" class="mt-2 px-3.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold transition">
+                  Thử Tải Lại
+                </button>
+              </div>
+            `;
+          }
+        }
       }
-    }
+
       /**
        * THỰC THI SCRIPT TRONG COMPONENT CON ĐẢM BẢO CHẠY 100%
        */
