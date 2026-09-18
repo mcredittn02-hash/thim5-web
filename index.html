@@ -91,183 +91,174 @@
 
         </div>
     </header>
-<!-- ========================================================================= -->
-  <!-- HERO BANNER CAROUSEL & FLASH SALE GIỜ VÀNG (FOMO AOV BOOSTER ENGINE)       -->
-  <!-- ========================================================================= -->
-  <section id="hero-banner-section" class="relative w-full max-w-5xl mx-auto px-3 sm:px-4 pt-3 pb-2 select-none">
-    
-    <!-- KHUNG BAO CHỨA SLIDER CHÍNH CÓ BO GÓC & BÓNG ĐỔ SANG TRỌNG -->
-    <div id="carousel-viewport" class="relative w-full overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl aspect-[16/8] sm:aspect-[21/9] md:aspect-[24/9]">
-      
-      <!-- KHAY TRƯỢT CHỨA CÁC SLIDES (TRACK CONTAINER) -->
-      <div id="carousel-track" class="flex h-full w-full transition-transform duration-500 ease-out">
+
+    <!-- ========================================================================= -->
+    <!-- 2. HERO BANNER CAROUSEL & FLASH SALE GIỜ VÀNG                             -->
+    <!-- ========================================================================= -->
+    <section id="hero-banner-section" class="relative w-full max-w-5xl mx-auto px-3 sm:px-4 pt-3 pb-2 select-none">
         
-        <!-- =================================================================== -->
-        <!-- SLIDE 0: FLASH SALE GIỜ VÀNG (TỰ ĐỘNG BẬT KHI ĐẾN KHUNG GIỜ VÀNG)    -->
-        <!-- =================================================================== -->
-        <div id="slide-happy-hour" class="relative flex-shrink-0 w-full h-full bg-gradient-to-r from-rose-950 via-slate-900 to-amber-950 flex items-center p-4 sm:p-8 overflow-hidden">
-          <!-- Ảnh nền mờ đồ họa chảo lửa -->
-          <div class="absolute -right-10 -bottom-10 w-64 h-64 sm:w-80 sm:h-80 bg-rose-600/20 rounded-full blur-3xl pointer-events-none"></div>
-          <div class="absolute right-4 sm:right-12 top-1/2 -translate-y-1/2 w-28 h-28 sm:w-44 sm:h-44 rounded-full border-4 border-amber-500/30 p-1 shadow-2xl shadow-rose-600/40 hidden xs:block">
-            <img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&auto=format&fit=crop&q=80" 
-                 alt="Giờ Vàng Thím 5" 
-                 class="w-full h-full object-cover rounded-full animate-spin-slow" />
-          </div>
+        <!-- Khung bao chứa slider có bo góc và bóng đổ -->
+        <div id="carousel-viewport" class="relative w-full overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl aspect-[16/8] sm:aspect-[21/9] md:aspect-[24/9]">
+            
+            <!-- Khay trượt chứa các slide -->
+            <div id="carousel-track" class="flex h-full w-full transition-transform duration-500 ease-out">
+                
+                <!-- SLIDE 0: FLASH SALE GIỜ VÀNG (FOMO AOV BOOSTER) -->
+                <div id="slide-happy-hour" class="relative flex-shrink-0 w-full h-full bg-gradient-to-r from-rose-950 via-slate-900 to-amber-950 flex items-center p-4 sm:p-8 overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 w-64 h-64 sm:w-80 sm:h-80 bg-rose-600/20 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute right-4 sm:right-12 top-1/2 -translate-y-1/2 w-28 h-28 sm:w-44 sm:h-44 rounded-full border-4 border-amber-500/30 p-1 shadow-2xl shadow-rose-600/40 hidden xs:block">
+                        <img src="https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=500&auto=format&fit=crop&q=80" 
+                             alt="Giờ Vàng Thím 5" 
+                             class="w-full h-full object-cover rounded-full animate-spin-slow" />
+                    </div>
 
-          <div class="relative z-10 max-w-md space-y-2 sm:space-y-3">
-            <!-- Tag Giờ Vàng Chớp Nháy -->
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-600 text-white text-[10.5px] font-black uppercase tracking-wider shadow-lg shadow-rose-600/40 animate-pulse">
-              <i class="fa-solid fa-bolt-lightning text-amber-300"></i>
-              <span>Flash Sale Giờ Vàng Đỏ Lửa</span>
+                    <div class="relative z-10 max-w-md space-y-2 sm:space-y-3">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-600 text-white text-[10.5px] font-black uppercase tracking-wider shadow-lg shadow-rose-600/40 animate-pulse">
+                            <i class="fa-solid fa-bolt-lightning text-amber-300"></i>
+                            <span>Flash Sale Giờ Vàng Đỏ Lửa</span>
+                        </div>
+
+                        <h2 class="text-base sm:text-2xl font-black text-white leading-tight uppercase">
+                            Đồng Giá Giờ Vàng <span class="text-amber-400">• Tặng Quà AOV</span>
+                        </h2>
+
+                        <p class="text-[11px] sm:text-xs text-slate-300 line-clamp-2">
+                            Giảm ngay 15.000đ cước Ship hoặc tặng kèm Trà Đào Khổng Lồ cho đơn trưa từ 79k!
+                        </p>
+
+                        <!-- Cụm đồng hồ đếm ngược -->
+                        <div class="flex items-center gap-2 pt-0.5">
+                            <span class="text-[10px] uppercase font-mono text-amber-300 font-bold">Kết thúc sau:</span>
+                            <div class="flex items-center gap-1 font-mono text-xs font-black">
+                                <span id="hh-timer-hours" class="px-2 py-1 rounded-lg bg-slate-950/80 border border-rose-500/40 text-rose-400 shadow">00</span>
+                                <span class="text-rose-400">:</span>
+                                <span id="hh-timer-minutes" class="px-2 py-1 rounded-lg bg-slate-950/80 border border-rose-500/40 text-rose-400 shadow">00</span>
+                                <span class="text-rose-400">:</span>
+                                <span id="hh-timer-seconds" class="px-2 py-1 rounded-lg bg-slate-950/80 border border-rose-500/40 text-amber-400 shadow">00</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-1">
+                            <button type="button" 
+                                    onclick="HeroBannerController.scrollToCategory('MI_XA_XIU')" 
+                                    class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 hover:opacity-95 active:scale-95 transition flex items-center gap-2">
+                                <span>Săn Deal Giờ Vàng</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 1: MÓN CHỦ LỰC - MÌ TRỘN XÁ XÍU TÓP MỠ -->
+                <div class="relative flex-shrink-0 w-full h-full bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 flex items-center p-4 sm:p-8 overflow-hidden">
+                    <div class="absolute right-0 top-0 w-1/2 h-full opacity-35 sm:opacity-50 pointer-events-none">
+                        <img src="https://images.unsplash.com/photo-1612927601601-6638404737ce?w=800&auto=format&fit=crop&q=80" 
+                             alt="Mì Trộn Xá Xíu" 
+                             class="w-full h-full object-cover object-center mask-radial" />
+                    </div>
+
+                    <div class="relative z-10 max-w-sm sm:max-w-md space-y-1.5 sm:space-y-2.5">
+                        <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 uppercase tracking-widest inline-block">
+                            Best Seller Đất Thánh
+                        </span>
+                        <h2 class="text-base sm:text-2xl font-black text-white leading-tight uppercase">
+                            Mì Trộn Xá Xíu <span class="text-amber-400">Tóp Mỡ Béo Ngậy</span>
+                        </h2>
+                        <p class="text-[11px] sm:text-xs text-slate-400 line-clamp-2">
+                            Sợi mì trứng dai giòn thấm đẫm sốt bí truyền • Xá xíu xông khói thơm lừng kèm tóp mỡ chiên giòn ráo dầu.
+                        </p>
+                        <div class="pt-1 flex items-center gap-3">
+                            <span class="text-base sm:text-lg font-black font-mono text-amber-400">39.000đ</span>
+                            <button type="button" 
+                                    onclick="HeroBannerController.scrollToCategory('MI_XA_XIU')" 
+                                    class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition border border-slate-700 active:scale-95">
+                                Đặt Món Ngay
+                            </button>
+                        </div>
+                    </div>
+                </div>
+<!-- =================================================================== -->
+                <!-- SLIDE 2: CHIẾN LƯỢC BƠM VÉ - FREESHIP ĐƠN TỪ 79K                    -->
+                <!-- =================================================================== -->
+                <div class="relative flex-shrink-0 w-full h-full bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 flex items-center p-4 sm:p-8 overflow-hidden">
+                    <div class="absolute right-4 sm:right-10 top-1/2 -translate-y-1/2 text-emerald-500/20 text-8xl sm:text-9xl font-black pointer-events-none">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+
+                    <div class="relative z-10 max-w-sm sm:max-w-md space-y-1.5 sm:space-y-2.5">
+                        <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 uppercase tracking-widest inline-block">
+                            Ưu Đãi D2C Độc Quyền
+                        </span>
+                        <h2 class="text-base sm:text-2xl font-black text-white leading-tight uppercase">
+                            Freeship Tận Cửa <span class="text-emerald-400">Cho Đơn Từ 79K</span>
+                        </h2>
+                        <p class="text-[11px] sm:text-xs text-slate-400 line-clamp-2">
+                            Bán kính 3km quanh Chợ Long Hoa • Shipper giao tận bàn nóng giòn chuẩn 5 sao!
+                        </p>
+                        <div class="pt-1">
+                            <button type="button" 
+                                    onclick="HeroBannerController.scrollToCategory('combo')" 
+                                    class="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-500/20 active:scale-95">
+                                Gom Đơn Đủ 79K Ngay
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- =================================================================== -->
+                <!-- SLIDE 3: TICKET BOOSTER - TRÀ ĐÀO LY KHỔNG LỒ 1L                     -->
+                <!-- =================================================================== -->
+                <div class="relative flex-shrink-0 w-full h-full bg-gradient-to-r from-amber-950 via-slate-900 to-slate-950 flex items-center p-4 sm:p-8 overflow-hidden">
+                    <div class="absolute right-0 top-0 w-1/2 h-full opacity-35 sm:opacity-50 pointer-events-none">
+                        <img src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=800&auto=format&fit=crop&q=80" 
+                             alt="Trà Đào 1L" 
+                             class="w-full h-full object-cover object-center" />
+                    </div>
+
+                    <div class="relative z-10 max-w-sm sm:max-w-md space-y-1.5 sm:space-y-2.5">
+                        <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 uppercase tracking-widest inline-block">
+                            Giải Nhiệt Cực Đã
+                        </span>
+                        <h2 class="text-base sm:text-2xl font-black text-white leading-tight uppercase">
+                            Trà Đào Khổng Lồ <span class="text-amber-400">Ly Siêu To 1 Lít</span>
+                        </h2>
+                        <p class="text-[11px] sm:text-xs text-slate-400 line-clamp-2">
+                            Đào miếng giòn ngọt sần sật, đậm vị trà lài thanh mát • Cặp đôi hoàn hảo cùng mì xá xíu cay.
+                        </p>
+                        <div class="pt-1 flex items-center gap-3">
+                            <span class="text-base sm:text-lg font-black font-mono text-amber-400">25.000đ</span>
+                            <button type="button" 
+                                    onclick="HeroBannerController.scrollToCategory('giai-khat')" 
+                                    class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition border border-slate-700 active:scale-95">
+                                Thêm Vào Giỏ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            <h2 class="text-base sm:text-2xl font-black text-white leading-tight uppercase">
-              Đồng Giá Giờ Vàng <span class="text-amber-400">• Tặng Quà AOV</span>
-            </h2>
+            <!-- Cụm Nút Điều Hướng Trái / Phải (Desktop Controls) -->
+            <button type="button" 
+                    onclick="HeroBannerController.prevSlide()" 
+                    aria-label="Slide Trước"
+                    class="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-slate-950/60 hover:bg-slate-900 text-slate-300 hover:text-white border border-slate-800 backdrop-blur-md items-center justify-center transition active:scale-90 z-20">
+                <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
 
-            <p class="text-[11px] sm:text-xs text-slate-300 line-clamp-2">
-              Giảm ngay 15.000đ cước Ship hoặc tặng kèm Trà Đào Khổng Lồ cho đơn trưa từ 79k!
-            </p>
+            <button type="button" 
+                    onclick="HeroBannerController.nextSlide()" 
+                    aria-label="Slide Sau"
+                    class="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-slate-950/60 hover:bg-slate-900 text-slate-300 hover:text-white border border-slate-800 backdrop-blur-md items-center justify-center transition active:scale-90 z-20">
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
 
-            <!-- Cụm Đồng Hồ Đếm Ngược Countdown Real-time -->
-            <div class="flex items-center gap-2 pt-0.5">
-              <span class="text-[10px] uppercase font-mono text-amber-300 font-bold">Kết thúc sau:</span>
-              <div class="flex items-center gap-1 font-mono text-xs font-black">
-                <span id="hh-timer-hours" class="px-2 py-1 rounded-lg bg-slate-950/80 border border-rose-500/40 text-rose-400 shadow">00</span>
-                <span class="text-rose-400">:</span>
-                <span id="hh-timer-minutes" class="px-2 py-1 rounded-lg bg-slate-950/80 border border-rose-500/40 text-rose-400 shadow">00</span>
-                <span class="text-rose-400">:</span>
-                <span id="hh-timer-seconds" class="px-2 py-1 rounded-lg bg-slate-950/80 border border-rose-500/40 text-amber-400 shadow">00</span>
-              </div>
-            </div>
+            <!-- Thanh Chấm Điều Hướng (Pagination Dots) -->
+            <div id="carousel-dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 bg-slate-950/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-slate-800/80"></div>
 
-            <!-- Nút Hành Động Nhanh -->
-            <div class="pt-1">
-              <button type="button" 
-                      onclick="HeroBannerController.scrollToCategory('MI_XA_XIU')" 
-                      class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 hover:opacity-95 active:scale-95 transition flex items-center gap-2">
-                <span>Săn Deal Giờ Vàng</span>
-                <i class="fa-solid fa-arrow-right text-[10px]"></i>
-              </button>
-            </div>
-          </div>
         </div>
 
-        <!-- =================================================================== -->
-        <!-- SLIDE 1: MÓN CHỦ LỰC - MÌ TRỘN XÁ XÍU TÓP MỠ (CORE PRODUCT)        -->
-        <!-- =================================================================== -->
-        <div class="relative flex-shrink-0 w-full h-full bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 flex items-center p-4 sm:p-8 overflow-hidden">
-          <div class="absolute right-0 top-0 w-1/2 h-full opacity-35 sm:opacity-50 pointer-events-none">
-            <img src="https://images.unsplash.com/photo-1612927601601-6638404737ce?w=800&auto=format&fit=crop&q=80" 
-                 alt="Mì Trộn Xá Xíu" 
-                 class="w-full h-full object-cover object-center mask-radial" />
-          </div>
-
-          <div class="relative z-10 max-w-sm sm:max-w-md space-y-1.5 sm:space-y-2.5">
-            <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 uppercase tracking-widest inline-block">
-              Best Seller Đất Thánh
-            </span>
-            <h2 class="text-base sm:text-2xl font-black text-white leading-tight uppercase">
-              Mì Trộn Xá Xíu <span class="text-amber-400">Tóp Mỡ Béo Ngậy</span>
-            </h2>
-            <p class="text-[11px] sm:text-xs text-slate-400 line-clamp-2">
-              Sợi mì trứng dai giòn thấm đẫm sốt bí truyền • Xá xíu xông khói thơm lừng kèm súp hành tóp mỡ.
-            </p>
-            <div class="pt-1 flex items-center gap-3">
-              <span class="text-base sm:text-lg font-black font-mono text-amber-400">39.000đ</span>
-              <button type="button" 
-                      onclick="HeroBannerController.scrollToCategory('MI_XA_XIU')" 
-                      class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition border border-slate-700 active:scale-95">
-                Đặt Món Ngay
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- =================================================================== -->
-        <!-- SLIDE 2: CHIẾN LƯỢC BƠM VÉ - FREESHIP ĐƠN TỪ 79K                    -->
-        <!-- =================================================================== -->
-        <div class="relative flex-shrink-0 w-full h-full bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 flex items-center p-4 sm:p-8 overflow-hidden">
-          <div class="absolute right-4 sm:right-10 top-1/2 -translate-y-1/2 text-emerald-500/20 text-8xl sm:text-9xl font-black pointer-events-none">
-            <i class="fa-solid fa-truck-fast"></i>
-          </div>
-
-          <div class="relative z-10 max-w-sm sm:max-w-md space-y-1.5 sm:space-y-2.5">
-            <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 uppercase tracking-widest inline-block">
-              Ưu Đãi D2C Độc Quyền
-            </span>
-            <h2 class="text-base sm:text-2xl font-black text-white leading-tight uppercase">
-              Freeship Tận Cửa <span class="text-emerald-400">Cho Đơn Từ 79K</span>
-            </h2>
-            <p class="text-[11px] sm:text-xs text-slate-400 line-clamp-2">
-              Bán kính 3km quanh Chợ Long Hoa • Shipper giao tận bàn nóng giòn chuẩn 5 sao!
-            </p>
-            <div class="pt-1">
-              <button type="button" 
-                      onclick="HeroBannerController.scrollToCategory('COMBO')" 
-                      class="px-4 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-500/20 active:scale-95">
-                Gom Đơn Đủ 79K Ngay
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- =================================================================== -->
-        <!-- SLIDE 3: TICKET BOOSTER - TRÀ ĐÀO LY KHỔNG LỒ 1L                     -->
-        <!-- =================================================================== -->
-        <div class="relative flex-shrink-0 w-full h-full bg-gradient-to-r from-amber-950 via-slate-900 to-slate-950 flex items-center p-4 sm:p-8 overflow-hidden">
-          <div class="absolute right-0 top-0 w-1/2 h-full opacity-35 sm:opacity-50 pointer-events-none">
-            <img src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=800&auto=format&fit=crop&q=80" 
-                 alt="Trà Đào 1L" 
-                 class="w-full h-full object-cover object-center" />
-          </div>
-
-          <div class="relative z-10 max-w-sm sm:max-w-md space-y-1.5 sm:space-y-2.5">
-            <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 uppercase tracking-widest inline-block">
-              Giải Nhiệt Cực Đã
-            </span>
-            <h2 class="text-base sm:text-2xl font-black text-white leading-tight uppercase">
-              Trà Đào Khổng Lồ <span class="text-amber-400">Ly Siêu To 1 Lít</span>
-            </h2>
-            <p class="text-[11px] sm:text-xs text-slate-400 line-clamp-2">
-              Đào miếng giòn ngọt sần sật, đậm vị trà lài thanh mát • Cặp đôi hoàn hảo cùng mì xá xíu cay.
-            </p>
-            <div class="pt-1 flex items-center gap-3">
-              <span class="text-base sm:text-lg font-black font-mono text-amber-400">25.000đ</span>
-              <button type="button" 
-                      onclick="HeroBannerController.scrollToCategory('TRA_DAO_1L')" 
-                      class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition border border-slate-700 active:scale-95">
-                Thêm Vào Giỏ
-              </button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- CỤM NÚT ĐIỀU HƯỚNG TRÁI / PHẢI (DESKTOP CONTROLS) -->
-      <button type="button" 
-              onclick="HeroBannerController.prevSlide()" 
-              aria-label="Slide Trước"
-              class="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-slate-950/60 hover:bg-slate-900 text-slate-300 hover:text-white border border-slate-800 backdrop-blur-md items-center justify-center transition active:scale-90 z-20">
-        <i class="fa-solid fa-chevron-left text-xs"></i>
-      </button>
-
-      <button type="button" 
-              onclick="HeroBannerController.nextSlide()" 
-              aria-label="Slide Sau"
-              class="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-2xl bg-slate-950/60 hover:bg-slate-900 text-slate-300 hover:text-white border border-slate-800 backdrop-blur-md items-center justify-center transition active:scale-90 z-20">
-        <i class="fa-solid fa-chevron-right text-xs"></i>
-      </button>
-
-      <!-- THANH CHẤM ĐIỀU HƯỚNG (PAGINATION DOTS) -->
-      <div id="carousel-dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 bg-slate-950/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-slate-800/80">
-        <!-- Dots sẽ được Controller sinh động tự động theo số lượng slide -->
-      </div>
-
-    </div>
-
-  </section>
+    </section>
     
     <!-- ========================================================================= -->
     <!-- 3. THANH TÌM KIẾM MÓN ĂN & BỘ LỌC DANH MỤC MA TRẬN 5 PHÂN HỆ             -->
@@ -365,8 +356,7 @@
         </div>
 
     </main>
-
-    <!-- ========================================================================= -->
+<!-- ========================================================================= -->
     <!-- 5. MODAL TÙY CHỌN MÓN ĐA NĂNG (ĐẶC TRỊ LỖI MẤT TOPPING & LỖI RỚT 0Đ)      -->
     <!-- ========================================================================= -->
     <div id="modal-dish-customizer" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/85 backdrop-blur-md p-0 sm:p-4">
@@ -688,8 +678,7 @@
         </div>
 
     </div>
-
-    <!-- ========================================================================= -->
+<!-- ========================================================================= -->
     <!-- 9. MODAL FORM ĐẶT HÀNG D2C & THANH TOÁN VIETQR KHÓA CỨNG SỐ TIỀN       -->
     <!-- ========================================================================= -->
     <div id="modal-checkout-order" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/85 backdrop-blur-md p-0 sm:p-4">
@@ -773,38 +762,38 @@
                     </div>
                 </div>
 
-                <!-- Phương Thức Thanh Toán -->
+                <!-- Phương Thức Thanh Toán (ƯU TIÊN COD MẶC ĐỊNH ĐỂ SHIPPER GỌI XÁC MINH) -->
                 <div class="space-y-2 pt-1 border-t border-slate-800/80">
                     <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
                         <i class="fa-solid fa-credit-card text-emerald-400"></i> Phương Thức Thanh Toán:
                     </span>
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" 
-                                data-method="VIETQR" 
-                                onclick="D2CStoreFrontController.selectPaymentMethod('VIETQR', this)" 
+                                data-method="COD" 
+                                onclick="D2CStoreFrontController.selectPaymentMethod('COD', this)" 
                                 class="btn-pay-method p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-left transition flex flex-col gap-1 active">
                             <div class="flex items-center justify-between">
-                                <span class="font-black text-xs text-amber-300">Quét Mã VietQR</span>
+                                <span class="font-black text-xs text-amber-300">Tiền Mặt (COD)</span>
+                                <i class="fa-solid fa-money-bill-wave text-emerald-400"></i>
+                            </div>
+                            <span class="text-[9.5px] text-slate-400">Shipper gọi chốt ➔ Thu tiền</span>
+                        </button>
+
+                        <button type="button" 
+                                data-method="VIETQR" 
+                                onclick="D2CStoreFrontController.selectPaymentMethod('VIETQR', this)" 
+                                class="btn-pay-method p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-left transition flex flex-col gap-1">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-slate-300">Quét Mã VietQR</span>
                                 <i class="fa-solid fa-qrcode text-amber-400"></i>
                             </div>
                             <span class="text-[9.5px] text-slate-400">Napas247 / MB / MoMo</span>
                         </button>
-
-                        <button type="button" 
-                                data-method="COD" 
-                                onclick="D2CStoreFrontController.selectPaymentMethod('COD', this)" 
-                                class="btn-pay-method p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-left transition flex flex-col gap-1">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-xs text-slate-300">Tiền Mặt (COD)</span>
-                                <i class="fa-solid fa-money-bill-wave text-emerald-400"></i>
-                            </div>
-                            <span class="text-[9.5px] text-slate-400">Trả shipper khi nhận</span>
-                        </button>
                     </div>
                 </div>
 
-                <!-- Khung Mã VietQR Khóa Cứng Số Tiền -->
-                <div id="box-vietqr-container" class="p-3.5 rounded-2xl bg-slate-950 border border-amber-500/30 space-y-3">
+                <!-- Khung Mã VietQR Khóa Cứng Số Tiền (ẨN MẶC ĐỊNH KHI CHỌN COD) -->
+                <div id="box-vietqr-container" class="hidden p-3.5 rounded-2xl bg-slate-950 border border-amber-500/30 space-y-3">
                     <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
                         <div class="flex items-center gap-2">
                             <img src="https://api.vietqr.io/img/ICONS/VIETQR.png" alt="VietQR" class="h-4 object-contain">
@@ -880,8 +869,7 @@
         </div>
 
     </div>
-
-    <!-- ========================================================================= -->
+<!-- ========================================================================= -->
     <!-- 10. MODAL THÔNG BÁO ĐẶT HÀNG THÀNH CÔNG                                  -->
     <!-- ========================================================================= -->
     <div id="modal-order-success" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4">
@@ -901,7 +889,7 @@
 
             <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-1 text-xs">
                 <span class="text-[10px] text-slate-500 block">Mã Tra Cứu Đơn Hàng:</span>
-                <strong id="disp-success-order-code" class="text-sm font-mono font-black text-amber-400">DH260913_XXXX</strong>
+                <strong id="disp-success-order-code" class="text-sm font-mono font-black text-amber-400">DH260918_XXXX</strong>
             </div>
 
             <div class="grid grid-cols-2 gap-2 pt-1">
@@ -925,7 +913,13 @@
     <!-- 11. VÙNG GẮN KẾT NẠP ĐỘNG COMPONENT VÒNG QUAY (DYNAMIC MOUNT POINT)       -->
     <!-- ========================================================================= -->
     <div id="wheel-mount-point" class="w-full"></div>
-<!-- ========================================================================= -->
+
+    <!-- ========================================================================= -->
+    <!-- NẠP THƯ VIỆN ĐIỀU PHỐI API TRUNG TÂM THÍM 5 (BẮT BUỘC ĐỂ KẾT NỐI GAS)     -->
+    <!-- ========================================================================= -->
+    <script src="api.js?v=20260918"></script>
+
+    <!-- ========================================================================= -->
     <!-- 12. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH MẶT TIỀN D2C THÍM 5 (ENTERPRISE CORE)     -->
     <!-- ========================================================================= -->
     <script>
@@ -940,7 +934,7 @@
      *   - Quick Add cho nước uống đóng chai, không hỏi cay phi lý.
      *   - Khắc phục triệt để lỗi rớt giá về 0đ và lỗi kẹt 0 món khi tải trang.
      *   - Đo cự ly Haversine từ tâm Bếp Hòa Thành (11.285267, 106.133347) chuẩn xác.
-     *   - Sinh mã VietQR Napas247 động khóa số tiền và cú pháp đơn hàng.
+     *   - Ưu tiên COD mặc định để kích hoạt trạm điều phối Shipper xác nhận.
      * =========================================================================
      */
     var D2CStoreFrontController = (function() {
@@ -978,7 +972,7 @@
             calculatedDistanceKm: 0,
             shippingFee: 12000,
             shippingSubsidy: 0,
-            selectedPaymentMethod: "VIETQR",
+            selectedPaymentMethod: "COD", // Khóa cứng mặc định là COD để Shipper gọi xác minh
             currentCustomizingDish: null,
             currentTaste: "Cay Nhẹ",
             currentSoup: "Súp Tóp Mỡ Hành Lá",
@@ -1056,12 +1050,11 @@
             if (linkPhone) linkPhone.href = "tel:" + STORE_BASE_CONFIG.phone;
             if (elName) elName.innerText = STORE_BASE_CONFIG.storeName;
         }
-
-        /**
+/**
          * ĐIỀU KHIỂN HERO CAROUSEL TỰ ĐỘNG TRƯỢT 4 GIÂY/LẦN
          */
         function initHeroCarousel() {
-            var track = document.getElementById("hero-carousel-track");
+            var track = document.getElementById("carousel-track");
             if (!track) return;
 
             if (appState.carouselTimer) clearInterval(appState.carouselTimer);
@@ -1072,7 +1065,7 @@
         }
 
         function goToSlide(index) {
-            var track = document.getElementById("hero-carousel-track");
+            var track = document.getElementById("carousel-track");
             var dots = document.querySelectorAll(".carousel-dot");
             if (!track) return;
 
@@ -1627,15 +1620,10 @@
                 }
             });
         }
+
         /**
          * THUẬT TOÁN HAVERSINE ĐO KHOẢNG CÁCH CHÍNH XÁC ĐẾN TỪNG MÉT
          * Gốc tọa độ Bếp Thím 5: (11.285267, 106.133347)
-         * 
-         * @param {number} lat1 - Vĩ độ điểm 1
-         * @param {number} lon1 - Kinh độ điểm 1
-         * @param {number} lat2 - Vĩ độ điểm 2
-         * @param {number} lon2 - Kinh độ điểm 2
-         * @returns {number} Khoảng cách tính bằng kilomet (km)
          */
         function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
             var R = 6371; // Bán kính trung bình Trái Đất (km)
@@ -1647,7 +1635,7 @@
                     Math.sin(dLon / 2) * Math.sin(dLon / 2);
                     
             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c; // Trả về số km thực tế chính xác (không làm tròn sớm)
+            return R * c; // Trả về số km thực tế chính xác
         }
 
         /**
@@ -1680,16 +1668,13 @@
                         uLat, uLng
                     );
 
-                    // Gán khoảng cách thực tế vào State (không bị kẹt 1.8km)
                     appState.calculatedDistanceKm = exactDistKm;
 
-                    // Điền tọa độ vào ô địa chỉ nếu khách chưa nhập
                     var addrEl = document.getElementById("chk-customer-address");
                     if (addrEl) {
                         addrEl.value = `Định vị GPS (${uLat.toFixed(5)}, ${uLng.toFixed(5)}) - Hòa Thành, Tây Ninh`;
                     }
 
-                    // TÍNH TOÁN LẠI PHÍ SHIP VÀ CẬP NHẬT GIAO DIỆN NGAY LẬP TỨC
                     recalculateShippingFee();
 
                     if (btn) {
@@ -1712,21 +1697,15 @@
             );
         }
 
-        /**
-         * KHI KHÁCH GÕ ĐỊA CHỈ TAY (CHỈ DÙNG 1.8KM KHI CHƯA HỀ CÓ GPS)
-         */
         function onAddressInput(val) {
-            // Nếu khách ĐÃ CÓ tọa độ GPS thực tế thì TUYỆT ĐỐI KHÔNG ghi đè lại 1.8km
             if (!appState.customerLocation) {
                 appState.calculatedDistanceKm = 1.8;
                 recalculateShippingFee();
             }
         }
 
-       /**
+        /**
          * TÍNH TOÁN BIỂU PHÍ SHIP VÀ KHÓA TRẦN TRỢ GIÁ CHUẨN XÁC THEO CƯỚC THỰC TẾ
-         * - Nếu trợ giá >= cước ship: Thể hiện trợ giá = đúng cước ship (Freeship 100%).
-         * - Nếu trợ giá < cước ship: Thể hiện đúng mức trợ giá và trừ trực tiếp vào bill.
          */
         function recalculateShippingFee() {
             var dist = (appState.calculatedDistanceKm !== undefined && appState.calculatedDistanceKm !== null) 
@@ -1735,13 +1714,11 @@
 
             var fee = STORE_BASE_CONFIG.shipBaseFee; // Mặc định nấc 2km đầu là 12.000đ
 
-            // Nếu cự ly vượt quá mốc cơ sở (2km) thì cộng thêm phí mỗi km phát sinh
             if (dist > STORE_BASE_CONFIG.shipBaseDistanceKm) {
                 var extraKm = dist - STORE_BASE_CONFIG.shipBaseDistanceKm;
                 fee += Math.round(extraKm * STORE_BASE_CONFIG.shipExtraFeePerKm);
             }
 
-            // Tính tổng tiền các món ăn có tính phí trong giỏ
             var subtotal = 0;
             appState.cartItems.forEach(function(i) {
                 if (!i.isGift) {
@@ -1749,23 +1726,20 @@
                 }
             });
 
-            // 1. TÍNH MỨC TRỢ GIÁ LÝ THUYẾT THEO BẬC THANG DOANH THU ĐƠN HÀNG (AOV)
             var rawSubsidy = 0;
             if (subtotal >= STORE_BASE_CONFIG.subsidyTier2Min) {
-                rawSubsidy = STORE_BASE_CONFIG.subsidyTier2Amount; // Đơn >= 150k được mức 25k
+                rawSubsidy = STORE_BASE_CONFIG.subsidyTier2Amount;
             } else if (subtotal >= STORE_BASE_CONFIG.subsidyTier1Min) {
-                rawSubsidy = STORE_BASE_CONFIG.subsidyTier1Amount; // Đơn >= 100k được mức 15k
+                rawSubsidy = STORE_BASE_CONFIG.subsidyTier1Amount;
             }
 
-            // 2. KHÓA TRẦN NGHIỆP VỤ: TRỢ GIÁ TỐI ĐA CHỈ ĐƯỢC BẰNG ĐÚNG PHÍ SHIP THỰC TẾ
+            // KHÓA TRẦN TRỢ GIÁ KHÔNG VƯỢT QUÁ PHÍ SHIP THỰC TẾ
             var appliedSubsidy = Math.min(fee, rawSubsidy);
             var actualShip = Math.max(0, fee - appliedSubsidy);
 
-            // Lưu vào State giá trị chính xác
             appState.shippingFee = fee;
             appState.shippingSubsidy = appliedSubsidy;
 
-            // 3. ĐỊNH DẠNG HIỂN THỊ CỰ LY THÔNG MINH CHO KHÁCH HÀNG
             var txtDist = document.getElementById("txt-calc-distance");
             var txtFee = document.getElementById("txt-calc-shipping-fee");
             var tagSubsidy = document.getElementById("txt-calc-subsidy-tag");
@@ -1799,13 +1773,9 @@
                 }
             }
 
-            // Đồng bộ trực tiếp sang bảng tổng kết đơn hàng phía dưới
             updateCheckoutSummary();
         }
 
-        /**
-         * CẬP NHẬT TỔNG KẾT ĐƠN HÀNG TRÊN BILL CHECKOUT VÀ MÃ VIETQR KHÓA CỨNG
-         */
         function updateCheckoutSummary() {
             var subtotal = 0;
             appState.cartItems.forEach(function(i) {
@@ -1815,7 +1785,7 @@
             });
 
             var fee = appState.shippingFee;
-            var sub = appState.shippingSubsidy; // Đã được khóa trần qua Math.min(fee, rawSubsidy)
+            var sub = appState.shippingSubsidy;
             var actualShip = Math.max(0, fee - sub);
             var finalTotal = subtotal + actualShip;
 
@@ -1827,54 +1797,6 @@
             if (elSub) elSub.innerText = subtotal.toLocaleString("vi-VN") + " đ";
             if (elFee) elFee.innerText = fee.toLocaleString("vi-VN") + " đ";
 
-            // HIỂN THỊ DÒNG TRỢ GIÁ SHIP CHUẨN MINH BẠCH TÀI CHÍNH
-            if (elSubTag) {
-                if (sub > 0) {
-                    if (actualShip === 0) {
-                        // Trường hợp trợ giá >= phí ship: Bằng đúng phí ship và đóng dấu Freeship
-                        elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ (Freeship)";
-                    } else {
-                        // Trường hợp trợ giá < phí ship: Hiện đúng số tiền giảm và trừ trực tiếp
-                        elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ";
-                    }
-                } else {
-                    elSubTag.innerText = "-0 đ";
-                }
-            }
-
-            if (elFinal) elFinal.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
-
-            // Tạo mã VietQR động khóa cứng chính xác số tiền thực thu
-            if (appState.selectedPaymentMethod === "VIETQR") {
-                renderDynamicVietQr(finalTotal);
-            }
-        }
-         
-                /**
-         * CẬP NHẬT TỔNG KẾT ĐƠN HÀNG CHECKOUT & KHÓA TIỀN MÃ VIETQR CHUẨN XÁC
-         */
-        function updateCheckoutSummary() {
-            var subtotal = 0;
-            appState.cartItems.forEach(function(i) {
-                if (!i.isGift) {
-                    subtotal += (i.price * i.quantity);
-                }
-            });
-
-            var fee = appState.shippingFee;
-            var sub = appState.shippingSubsidy; // Đã được khóa trần = Math.min(fee, rawSubsidy)
-            var actualShip = Math.max(0, fee - sub);
-            var finalTotal = subtotal + actualShip;
-
-            var elSub = document.getElementById("chk-summary-subtotal");
-            var elFee = document.getElementById("chk-summary-shipping-fee");
-            var elSubTag = document.getElementById("chk-summary-subsidy");
-            var elFinal = document.getElementById("chk-summary-final-total");
-
-            if (elSub) elSub.innerText = subtotal.toLocaleString("vi-VN") + " đ";
-            if (elFee) elFee.innerText = fee.toLocaleString("vi-VN") + " đ";
-
-            // Hiển thị dòng Trợ Giá Cước Giao Hàng chuẩn toán học (bằng đúng phí ship nếu được miễn phí)
             if (elSubTag) {
                 if (sub > 0) {
                     if (actualShip === 0) {
@@ -1889,12 +1811,12 @@
 
             if (elFinal) elFinal.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
 
-            // Tạo mã VietQR động khóa cứng số tiền chuẩn xác
             if (appState.selectedPaymentMethod === "VIETQR") {
                 renderDynamicVietQr(finalTotal);
             }
         }
-                function renderDynamicVietQr(amount) {
+
+        function renderDynamicVietQr(amount) {
             var memoCode = "T5_" + Date.now().toString().slice(-6);
             var bankBin = STORE_BASE_CONFIG.bankBin;
             var bankAcc = STORE_BASE_CONFIG.bankAccount;
@@ -1956,7 +1878,7 @@
         }
 
         /**
-         * GỬI ĐƠN HÀNG VỀ MÁY CHỦ BẾP
+         * GỬI ĐƠN HÀNG VỀ MÁY CHỦ BẾP (ZERO-SILENT-FAIL ARCHITECTURE)
          */
         async function submitFinalOrder() {
             var nameEl = document.getElementById("chk-customer-name");
@@ -1964,17 +1886,17 @@
             var addrEl = document.getElementById("chk-customer-address");
 
             var name = nameEl ? nameEl.value.trim() : "";
-            var phone = phoneEl ? phoneEl.value.trim() : "";
+            var phone = phoneEl ? phoneEl.value.trim().replace(/\D/g, '') : "";
             var addr = addrEl ? addrEl.value.trim() : "";
 
             if (!name) {
-                alert("⚠️ Quý khách vui lòng nhập Họ và Tên!");
+                alert("⚠️ Quý khách vui lòng nhập Họ và Tên người nhận!");
                 if (nameEl) nameEl.focus();
                 return;
             }
 
-            if (!phone || phone.length < 10) {
-                alert("⚠️ Quý khách vui lòng nhập Số Điện Thoại hợp lệ để Bếp gọi xác nhận!");
+            if (!phone || phone.length < 9) {
+                alert("⚠️ Quý khách vui lòng nhập Số Điện Thoại hợp lệ (từ 10 số) để Bếp và Shipper liên hệ!");
                 if (phoneEl) phoneEl.focus();
                 return;
             }
@@ -1985,22 +1907,43 @@
                 return;
             }
 
+            if (appState.cartItems.length === 0) {
+                alert("⚠️ Giỏ hàng đang trống. Quý khách vui lòng chọn món trước khi đặt!");
+                return;
+            }
+
             var subtotal = 0;
-            appState.cartItems.forEach(function(i) { subtotal += (i.price * i.quantity); });
+            appState.cartItems.forEach(function(i) { 
+                if (!i.isGift) {
+                    subtotal += (i.price * i.quantity); 
+                }
+            });
             var finalTotal = subtotal + Math.max(0, appState.shippingFee - appState.shippingSubsidy);
-            var orderCode = "DH" + new Date().toISOString().slice(2,10).replace(/-/g,"") + "_" + Math.floor(1000 + Math.random() * 9000);
+            
+            var now = new Date();
+            var yearStr = String(now.getFullYear()).slice(-2);
+            var monthStr = String(now.getMonth() + 1).padStart(2, '0');
+            var dayStr = String(now.getDate()).padStart(2, '0');
+            var randSuffix = Math.floor(1000 + Math.random() * 9000);
+            var orderCode = "DH" + yearStr + monthStr + dayStr + "_" + randSuffix;
 
             var orderPayload = {
                 orderCode: orderCode,
-                customer: { name: name, phone: phone, address: addr, location: appState.customerLocation },
+                customer: { 
+                    name: name, 
+                    phone: phone, 
+                    address: addr, 
+                    location: appState.customerLocation 
+                },
                 items: appState.cartItems,
                 gift: appState.appliedGift,
                 subtotal: subtotal,
                 shippingFee: appState.shippingFee,
                 shippingSubsidy: appState.shippingSubsidy,
                 finalTotal: finalTotal,
-                paymentMethod: appState.selectedPaymentMethod,
-                timestamp: new Date().toISOString()
+                paymentMethod: appState.selectedPaymentMethod, // "COD" hoặc "VIETQR"
+                note: "",
+                timestamp: now.toISOString()
             };
 
             var btnSubmit = document.getElementById("btn-submit-order");
@@ -2011,33 +1954,46 @@
             }
 
             try {
-                if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
-                    await Thim5API.callGAS("createD2COrder", orderPayload);
+                if (typeof Thim5API === "undefined" || typeof Thim5API.callGAS !== "function") {
+                    throw new Error("Không tìm thấy bộ kết nối Thim5API (file api.js chưa được nạp đúng)!");
                 }
+
+                var res = await Thim5API.callGAS("createD2COrder", orderPayload);
+
+                if (!res || (res.status !== "success" && res.code !== 200)) {
+                    var errorMsg = (res && res.message) ? res.message : "Máy chủ Bếp từ chối tiếp nhận đơn hàng!";
+                    throw new Error(errorMsg);
+                }
+
+                sessionStorage.setItem("thim5_last_order", JSON.stringify(orderPayload));
+
+                closeCheckoutModal();
+                var successModal = document.getElementById("modal-order-success");
+                var codeEl = document.getElementById("disp-success-order-code");
+                if (codeEl) codeEl.innerText = orderCode;
+                if (successModal) successModal.classList.remove("hidden");
+
+                appState.cartItems = [];
+                appState.appliedGift = null;
+                updateAovAndCartUI();
+
             } catch (err) {
-                console.warn("⚠️ Truyền đơn về Bếp chế độ mô phỏng:", err);
+                console.error("❌ [D2C Submit Error] Thất bại khi gửi đơn:", err);
+                alert("⛔ KHÔNG THỂ TRUYỀN ĐƠN HÀNG VỀ MÁY CHỦ BẾP!\n\nChi tiết lỗi: " + err.message + "\n\n(Vui lòng kiểm tra lại kết nối mạng hoặc đường link Google Apps Script trong api.js)");
+            } finally {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = origText;
+                }
             }
-
-            if (btnSubmit) {
-                btnSubmit.disabled = false;
-                btnSubmit.innerHTML = origText;
-            }
-
-            closeCheckoutModal();
-            var successModal = document.getElementById("modal-order-success");
-            var codeEl = document.getElementById("disp-success-order-code");
-            if (codeEl) codeEl.innerText = orderCode;
-            if (successModal) successModal.classList.remove("hidden");
-
-            // Reset giỏ hàng sau khi đặt thành công
-            appState.cartItems = [];
-            appState.appliedGift = null;
-            updateAovAndCartUI();
         }
 
         function viewLiveOrderTracking() {
-            var code = document.getElementById("disp-success-order-code").innerText;
-            window.location.href = "tracking.html?order=" + encodeURIComponent(code);
+            var codeEl = document.getElementById("disp-success-order-code");
+            var code = codeEl ? codeEl.innerText.trim() : "";
+            if (code) {
+                window.location.href = "tracking.html?order=" + encodeURIComponent(code);
+            }
         }
 
         function resetAndNewOrder() {
@@ -2046,7 +2002,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // PUBLIC INTERFACE
         return {
             init: init,
             goToSlide: goToSlide,
@@ -2079,7 +2034,6 @@
         };
     })();
 
-    // KHỞI ĐỘNG KHI TOÀN BỘ DOM ĐÃ SẴN SÀNG
     document.addEventListener("DOMContentLoaded", function() {
         D2CStoreFrontController.init();
     });

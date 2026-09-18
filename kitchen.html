@@ -176,13 +176,16 @@
     </main>
 
   </div>
-  <script src="api.js"></script>
+  <!-- Adapter kết nối Headless GAS API v2.9 -->
+  <script src="api.js?v=20260917"></script>
+
   <script>
   /**
    * =========================================================================
-   * CONTROLLER: KITCHEN DISPLAY SYSTEM (TRẠM BẾP KDS THÍM 5 v2.9)
-   * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
-   * Kiến trúc: Headless GAS API, Adaptive Polling, Web Audio Native
+   * CONTROLLER: KITCHEN DISPLAY SYSTEM (TRẠM BẾP KDS THÍM 5 v2.9 ENTERPRISE)
+   * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+   * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+   * Kiến trúc: Headless GAS API, Adaptive Polling, Web Audio API Native
    * =========================================================================
    */
   var KitchenKdsController = (function() {
@@ -197,9 +200,9 @@
       var localCancelledOrders = [];
 
       var cachedShippers = [
+          { name: "Nguyễn Hải Âu", phone: "0934220585" },
           { name: "Nguyễn Hải Âu", phone: "0969004693" },
-          { name: "Trần Minh Nam", phone: "0968222862" },
-          { name: "Tài Xế Ruột Hòa Thành", phone: "0934220585" }
+          { name: "Trần Minh Nam", phone: "0968222862" }
       ];
 
       function isRunningInsideGAS() {
@@ -219,15 +222,10 @@
                   }
               } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
                   window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
-                      .then(function(res) { 
-                          if (res && res.data !== undefined) resolve(res.data);
-                          else resolve(res);
-                      })
+                      .then(function(res) { resolve(res); })
                       .catch(function(err) { reject(err); });
               } else {
-                  setTimeout(function() {
-                      resolve(getMockKdsData());
-                  }, 300);
+                  reject(new Error("Không tìm thấy cổng kết nối Thim5API!"));
               }
           });
       }
@@ -370,20 +368,27 @@
           } catch(e) {}
       }
 
+      /**
+       * BÓC TÁCH MẢNG ĐƠN HÀNG AN TOÀN TỪ MỌI CẤU TRÚC PHẢN HỒI CỦA GAS
+       */
+      function unwrapOrdersArray(res) {
+          if (!res) return [];
+          if (Array.isArray(res)) return res;
+          if (Array.isArray(res.orders)) return res.orders;
+          if (res.data) {
+              if (Array.isArray(res.data)) return res.data;
+              if (Array.isArray(res.data.orders)) return res.data.orders;
+          }
+          return [];
+      }
+
       async function loadKitchenOrders(isSilent) {
           if (isCallingApi) return;
           isCallingApi = true;
 
           try {
               var res = await callBackend("getKitchenKdsOrders", [], "getKitchenKdsOrders", {});
-              var orders = [];
-              if (Array.isArray(res)) {
-                  orders = res;
-              } else if (res && Array.isArray(res.data)) {
-                  orders = res.data;
-              } else if (res && Array.isArray(res.orders)) {
-                  orders = res.orders;
-              }
+              var orders = unwrapOrdersArray(res);
 
               rawOrdersCache = orders.filter(function(o) {
                   var code = String(o.code || "").trim();
@@ -403,12 +408,13 @@
 
       function updateFilterCounts(orders) {
           var activeOrders = (orders || []).filter(function(o) {
-              return o.status !== "CANCELLED" && o.status !== "Đã Hủy" && Number(o.step) >= 0 && Number(o.step) <= 3;
+              var stepVal = Number(o.step !== undefined ? o.step : 0);
+              return o.status !== "CANCELLED" && o.status !== "Đã Hủy" && stepVal >= 0 && stepVal <= 3;
           });
 
           var cNeed = 0, cPacked = 0, cWait = 0;
           activeOrders.forEach(function(o) {
-              var st = Number(o.step);
+              var st = Number(o.step !== undefined ? o.step : 0);
               if (st === 2) cNeed++;
               else if (st === 2.5) cPacked++;
               else if (st === 0) cWait++;
@@ -444,9 +450,10 @@
 
           var activeOrders = (rawOrdersCache || []).filter(function(o) {
               var code = String(o.code || "").trim();
-              var isCancelledStatus = (o.status === "CANCELLED" || o.status === "Đã Hủy" || Number(o.step) === -1);
+              var stepVal = Number(o.step !== undefined ? o.step : 0);
+              var isCancelledStatus = (o.status === "CANCELLED" || o.status === "Đã Hủy" || stepVal === -1);
               var isLocallyCancelled = (localCancelledOrders.indexOf(code) !== -1);
-              return !isCancelledStatus && !isLocallyCancelled && Number(o.step) >= 0 && Number(o.step) <= 3;
+              return !isCancelledStatus && !isLocallyCancelled && stepVal >= 0 && stepVal <= 3;
           });
 
           var displayOrders = activeOrders;
@@ -471,7 +478,7 @@
 
           if (displayOrders.length === 0) {
               grid.innerHTML = `
-                  <div class="col-span-full p-12 rounded-3xl bg-slate-900/60 border border-slate-800 text-center text-slate-400 space-y-2">
+                  <div class="col-span-full p-12 rounded-3xl bg-slate-900/60 border border-slate-800 text-center text-slate-400 space-y-2 select-none">
                       <div class="text-4xl">🎉</div>
                       <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider">Không Có Đơn Nào Trong Mục Này</h3>
                       <p class="text-[11px] text-slate-500">Bếp KDS đang tự động lắng nghe đơn hàng mới từ Web D2C...</p>
@@ -483,7 +490,7 @@
           var html = "";
           displayOrders.forEach(function(o) {
               var cleanCode = String(o.code || '').trim();
-              var stepNum = Number(o.step);
+              var stepNum = Number(o.step !== undefined ? o.step : 0);
               var isCod = (o.method === "COD");
               var isPaidOnline = !isCod;
               var isNeedCook = (stepNum === 2);
@@ -524,7 +531,7 @@
                           </div>
 
                           <div class="text-[11px] text-slate-400 space-y-0.5">
-                              <div>Khách: <strong class="text-white">${o.name}</strong> • SĐT: <strong class="text-slate-200">${o.phone}</strong></div>
+                              <div>Khách: <strong class="text-white">${o.name || 'Khách vãng lai'}</strong> • SĐT: <strong class="text-slate-200">${o.phone || 'N/A'}</strong></div>
                               <div class="truncate">Nơi nhận: <strong class="text-slate-300">${o.address || 'Hòa Thành, Tây Ninh'}</strong></div>
                           </div>
 
@@ -683,12 +690,6 @@
           } catch (err) {
               console.warn("⚠️ Lỗi đồng bộ lệnh hủy về máy chủ:", err.message);
           }
-      }
-
-      function getMockKdsData() {
-          return {
-              orders: []
-          };
       }
 
       return {

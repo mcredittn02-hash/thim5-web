@@ -159,12 +159,15 @@
     </div>
 
   </div>
-  <script src="api.js"></script>
+  <!-- Adapter kết nối Headless GAS API v2.9 -->
+  <script src="api.js?v=20260917"></script>
+
   <script>
   /**
    * =========================================================================
-   * CONTROLLER: SHIPPER DISPATCH PORTAL (TRẠM ĐIỀU PHỐI TÀI XẾ THÍM 5 v2.9)
-   * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
+   * CONTROLLER: SHIPPER DISPATCH PORTAL (TRẠM ĐIỀU PHỐI TÀI XẾ THÍM 5 v2.9 ENTERPRISE)
+   * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+   * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
    * Kiến trúc: Headless GAS API, Adaptive Polling, Optimistic UI State Machine
    * =========================================================================
    */
@@ -198,15 +201,10 @@
                   }
               } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
                   window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
-                      .then(function(res) { 
-                          if (res && res.data !== undefined) resolve(res.data);
-                          else resolve(res);
-                      })
+                      .then(function(res) { resolve(res); })
                       .catch(function(err) { reject(err); });
               } else {
-                  setTimeout(function() {
-                      resolve(getMockDispatchData(apiActionName, apiPayloadObj));
-                  }, 300);
+                  reject(new Error("Không tìm thấy cổng kết nối Thim5API!"));
               }
           });
       }
@@ -264,6 +262,20 @@
           }, 15000);
       }
 
+      /**
+       * BÓC TÁCH MẢNG ĐƠN HÀNG AN TOÀN TỪ MỌI CẤU TRÚC PHẢN HỒI CỦA GAS
+       */
+      function unwrapOrdersArray(res) {
+          if (!res) return [];
+          if (Array.isArray(res)) return res;
+          if (Array.isArray(res.orders)) return res.orders;
+          if (res.data) {
+              if (Array.isArray(res.data)) return res.data;
+              if (Array.isArray(res.data.orders)) return res.data.orders;
+          }
+          return [];
+      }
+
       async function loadShipperOrders(isSilent) {
           if (!currentLast4 || isCallingApi) return;
           isCallingApi = true;
@@ -279,19 +291,14 @@
                   { last4: currentLast4 }
               );
               
-              if (res && Array.isArray(res.orders)) {
-                  cachedOrdersList = res.orders;
-              } else if (res && res.data && Array.isArray(res.data.orders)) {
-                  cachedOrdersList = res.data.orders;
-              } else if (Array.isArray(res)) {
-                  cachedOrdersList = res;
-              }
+              cachedOrdersList = unwrapOrdersArray(res);
 
-              if (res && res.shipper) {
+              var shipperObj = (res && res.shipper) ? res.shipper : ((res && res.data && res.data.shipper) ? res.data.shipper : null);
+              if (shipperObj) {
                   var dispName = document.getElementById("dispShipperName");
                   var dispPhone = document.getElementById("dispShipperPhone");
-                  if (res.shipper.name && dispName) dispName.innerText = "Tài Xế: " + res.shipper.name;
-                  if (res.shipper.phone && dispPhone) dispPhone.innerText = "SĐT: " + res.shipper.phone;
+                  if (shipperObj.name && dispName) dispName.innerText = "Tài Xế: " + shipperObj.name;
+                  if (shipperObj.phone && dispPhone) dispPhone.innerText = "SĐT: " + shipperObj.phone;
               }
 
               renderOrders();
@@ -319,7 +326,8 @@
           if (!container) return;
 
           var completedOrders = cachedOrdersList.filter(function(o) { 
-              return Number(o.step) === 4 || o.status === "Hoàn Tất" || o.status === "COMPLETED"; 
+              var st = Number(o.step !== undefined ? o.step : 0);
+              return st === 4 || o.status === "Hoàn Tất" || o.status === "COMPLETED"; 
           });
           var totalShipEarn = completedOrders.reduce(function(sum, o) { 
               return sum + (Number(o.shipFee) || 12000); 
@@ -332,18 +340,30 @@
 
           var displayList = cachedOrdersList;
           if (currentActiveFilter === 'wait_verify') {
-              displayList = cachedOrdersList.filter(function(o) { return Number(o.step) === 0; });
+              displayList = cachedOrdersList.filter(function(o) { 
+                  var st = Number(o.step !== undefined ? o.step : 0);
+                  return st === 0 || o.status === "RECEIVED"; 
+              });
           } else if (currentActiveFilter === 'delivering') {
-              displayList = cachedOrdersList.filter(function(o) { return Number(o.step) === 3; });
+              displayList = cachedOrdersList.filter(function(o) { 
+                  var st = Number(o.step !== undefined ? o.step : 0);
+                  return st === 3 || o.status === "DELIVERING"; 
+              });
           } else if (currentActiveFilter === 'completed') {
-              displayList = cachedOrdersList.filter(function(o) { return Number(o.step) === 4 || o.status === "Hoàn Tất" || o.status === "COMPLETED"; });
+              displayList = cachedOrdersList.filter(function(o) { 
+                  var st = Number(o.step !== undefined ? o.step : 0);
+                  return st === 4 || o.status === "Hoàn Tất" || o.status === "COMPLETED"; 
+              });
           } else {
-              displayList = cachedOrdersList.filter(function(o) { return Number(o.step) < 4 && o.status !== "Hoàn Tất" && o.status !== "COMPLETED"; });
+              displayList = cachedOrdersList.filter(function(o) { 
+                  var st = Number(o.step !== undefined ? o.step : 0);
+                  return st < 4 && o.status !== "Hoàn Tất" && o.status !== "COMPLETED"; 
+              });
           }
 
           if (displayList.length === 0) {
               container.innerHTML = `
-                  <div class="p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center text-slate-400 space-y-2">
+                  <div class="p-8 rounded-3xl bg-slate-900 border border-slate-800 text-center text-slate-400 space-y-2 select-none">
                       <i class="fa-solid fa-clipboard-check text-2xl text-slate-600"></i>
                       <p class="font-bold text-xs text-slate-300">Không có cuốc xe nào trong mục này.</p>
                       <p class="text-[10px] text-slate-500">Hệ thống tự động lắng nghe đơn mới mỗi 15 giây...</p>
@@ -355,9 +375,9 @@
           var html = "";
           displayList.forEach(function(o) {
               var cleanCode = String(o.code || "").trim();
-              var stepNum = Number(o.step);
-              var isStep0 = (stepNum === 0);
-              var isDelivering = (stepNum === 3);
+              var stepNum = Number(o.step !== undefined ? o.step : 0);
+              var isStep0 = (stepNum === 0 || o.status === "RECEIVED");
+              var isDelivering = (stepNum === 3 || o.status === "DELIVERING");
               var isCompleted = (stepNum === 4 || o.status === "Hoàn Tất" || o.status === "COMPLETED");
               var isOnlinePaid = (o.method === "CK_VIETQR" || o.method === "VIETQR" || o.method === "BANK" || o.method === "MOMO");
 
@@ -387,11 +407,11 @@
                       <div class="space-y-1 text-xs">
                           <div class="flex justify-between">
                               <span class="text-slate-400">Khách hàng:</span>
-                              <strong class="text-white">${o.name}</strong>
+                              <strong class="text-white">${o.name || 'Khách vãng lai'}</strong>
                           </div>
                           <div class="flex justify-between items-start gap-2">
                               <span class="text-slate-400 shrink-0">Địa chỉ:</span>
-                              <strong class="text-right text-slate-200 text-[11px] leading-tight">${o.address}</strong>
+                              <strong class="text-right text-slate-200 text-[11px] leading-tight">${o.address || 'Nhận tại quán'}</strong>
                           </div>
                       </div>
 
@@ -427,7 +447,7 @@
                               ` : `
                                   <span class="text-slate-300">Thu Tiền Mặt Của Khách:</span>
                                   <strong class="font-mono font-black text-rose-400 text-sm">
-                                      ${Number(o.collectFromCustomer || o.total).toLocaleString('vi-VN')} đ
+                                      ${Number(o.collectFromCustomer || o.total || 0).toLocaleString('vi-VN')} đ
                                   </strong>
                               `}
                           </div>
@@ -445,7 +465,7 @@
                       </div>
 
                       <a href="tel:${o.phone}" class="py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-center font-bold text-[11px] block transition">
-                          <i class="fa-solid fa-phone text-amber-400 mr-1"></i> Gọi Khách: ${o.phone}
+                          <i class="fa-solid fa-phone text-amber-400 mr-1"></i> Gọi Khách: ${o.phone || 'N/A'}
                       </a>
 
                       ${isStep0 ? `
@@ -501,6 +521,7 @@
                   { orderCode: cleanCode, shipperInfo: shipperLabel }
               );
               alert("✅ Đã xác minh COD thành công! Bếp KDS đã được mở để nấu.");
+              loadShipperOrders();
           } catch (err) {
               console.warn("⚠️ Đang chạy chế độ ngoại tuyến:", err.message);
           }
@@ -527,6 +548,7 @@
                   "shipperUpdateStep", 
                   { orderCode: cleanCode, shipperName: shipperLabel, stepNumber: 3 }
               );
+              loadShipperOrders();
           } catch (err) {
               console.warn("⚠️ Cập nhật backend chậm, giữ trạng thái Optimistic UI:", err.message);
           }
@@ -551,6 +573,7 @@
                   { orderCode: cleanCode, shipperName: "", stepNumber: 4 }
               );
               alert("🎉 Đã hoàn tất cuốc giao đơn " + cleanCode + "!");
+              loadShipperOrders();
           } catch (err) {
               console.warn("⚠️ Cập nhật hoàn tất ngoại tuyến:", err.message);
           }
@@ -574,6 +597,7 @@
                   { orderCode: cleanCode, reason: reason }
               );
               alert("⚠️ Đã nhả đơn về Bếp để điều phối tài xế khác!");
+              loadShipperOrders();
           } catch (err) {
               console.warn("⚠️ Lỗi nhả đơn:", err.message);
           }
@@ -592,13 +616,6 @@
           if (mainScreen) mainScreen.classList.add("hidden");
           if (authScreen) authScreen.classList.remove("hidden");
           if (pinInput) pinInput.value = "";
-      }
-
-      function getMockDispatchData(action, payload) {
-          return {
-              shipper: SHIPPER_PRESETS[currentLast4] || { name: "Nguyễn Hải Âu", phone: "0934.220.585" },
-              orders: cachedOrdersList.length > 0 ? cachedOrdersList : []
-          };
       }
 
       return {
