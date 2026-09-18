@@ -39,7 +39,6 @@
         .custom-scroll::-webkit-scrollbar { display: none; }
         .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Hiệu ứng nhịp thở cho bước đang hoạt động */
         @keyframes stepPulse {
             0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
             50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
@@ -73,7 +72,6 @@
                 </div>
             </div>
 
-            <!-- Nút Cập Nhật Thủ Công & Hotline Khẩn Cấp -->
             <div class="shrink-0 flex items-center gap-1.5">
                 <button type="button" 
                         id="btn-manual-refresh" 
@@ -93,10 +91,26 @@
     </header>
 
     <!-- ========================================================================= -->
-    <!-- 2. KHUNG TIẾN TRÌNH 5 BƯỚC THỜI GIAN THỰC (5-STEP LIVE STATUS STEPPER)   -->
+    <!-- 2. KHUNG TIẾN TRÌNH 5 BƯỚC THỜI GIAN THỰC                                 -->
     <!-- ========================================================================= -->
     <main class="w-full max-w-md mx-auto px-3 pt-3 pb-24 space-y-3.5 flex-1">
         
+        <!-- BANNER KHUYẾN MÃI CRM: LƯỢT QUAY CHƯA DÙNG DÀNH CHO ĐƠN >= 79K -->
+        <div id="box-unused-spin-banner" class="hidden p-3 rounded-2xl bg-gradient-to-r from-purple-950 via-slate-900 to-amber-950 border border-amber-500/40 shadow-xl flex items-center justify-between gap-3 animate-in fade-in duration-300">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-base shrink-0 animate-bounce">
+                    <i class="fa-solid fa-dharmachakra"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-xs font-black text-amber-300 block truncate">Quý Khách Có 1 Lượt Quay!</span>
+                    <p class="text-[10px] text-slate-300 truncate">Tích lũy theo đơn $\ge$ 79k để nhận quà cho lần đặt sau.</p>
+                </div>
+            </div>
+            <a href="index.html" class="shrink-0 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] uppercase transition shadow active:scale-95">
+                Quay Ngay
+            </a>
+        </div>
+
         <!-- CARD 1: BANNER TRẠNG THÁI HIỆN TẠI & TIẾN ĐỘ -->
         <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800/90 shadow-2xl relative overflow-hidden">
             <div class="absolute -right-6 -bottom-6 text-8xl text-amber-500/5 pointer-events-none -rotate-12">
@@ -124,9 +138,7 @@
             <!-- TIẾN TRÌNH 5 BƯỚC -->
             <div class="pt-5 border-t border-slate-800/80 mt-4">
                 <div class="relative flex items-center justify-between">
-                    <!-- Đường ray tiến trình xám nền -->
                     <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-800 z-0"></div>
-                    <!-- Đường ray tiến trình sáng chạy theo % trạng thái -->
                     <div id="stepper-progress-line" class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-400 z-0 transition-all duration-700" style="width: 10%;"></div>
 
                     <!-- Bước 1: Tiếp nhận đơn -->
@@ -171,7 +183,6 @@
                 </div>
             </div>
 
-            <!-- KHUNG THỐNG KÊ THỜI GIAN DỰ KIẾN (ETA) -->
             <div id="box-eta-status" class="mt-4 p-2.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between text-xs">
                 <div class="flex items-center gap-2 text-slate-400">
                     <i class="fa-regular fa-clock text-amber-400"></i>
@@ -224,7 +235,6 @@
                 </span>
             </div>
 
-            <!-- Danh sách món ăn được JS render -->
             <div id="tracking-items-list" class="space-y-2 text-xs">
                 <div class="p-2 rounded-xl bg-slate-950/60 border border-slate-800/60 animate-pulse flex justify-between">
                     <div class="h-3 bg-slate-800 rounded w-1/2"></div>
@@ -232,7 +242,6 @@
                 </div>
             </div>
 
-            <!-- Bảng Dòng Tiền Minh Bạch -->
             <div class="pt-2 border-t border-slate-800 space-y-1.5 text-xs">
                 <div class="flex justify-between text-slate-400 text-[11px]">
                     <span>Tiền Món Ăn:</span>
@@ -253,15 +262,15 @@
             </div>
         </div>
 
-        <!-- CỤM NÚT HỖ TRỢ & ĐẶT THÊM ĐƠN -->
-        <div class="grid grid-cols-2 gap-2.5 pt-1">
-            <a href="tel:0934220585" class="py-3 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white text-xs font-bold text-center transition flex items-center justify-center gap-2 active:scale-95 shadow">
-                <i class="fa-solid fa-phone text-red-400"></i>
-                <span>Gọi Bếp Hỗ Trợ</span>
+        <!-- CỤM NÚT HÀNH ĐỘNG SAU GIAO HÀNG -->
+        <div class="space-y-2 pt-1">
+            <a href="index.html" id="btn-return-home" class="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider text-center transition flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-red-600/20">
+                <i class="fa-solid fa-bowl-food"></i>
+                <span id="txt-return-home-btn">Đặt Thêm Món Ăn Khác</span>
             </a>
-            <a href="index.html" class="py-3 px-4 rounded-2xl bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider text-center transition flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-red-600/20">
-                <i class="fa-solid fa-plus"></i>
-                <span>Đặt Thêm Món</span>
+            <a href="tel:0934220585" class="w-full py-2.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-bold text-center transition flex items-center justify-center gap-2 active:scale-95 shadow">
+                <i class="fa-solid fa-phone text-red-400"></i>
+                <span>Cần Khiếu Nại / Hỗ Trợ Đơn Này (0934.220.585)</span>
             </a>
         </div>
 
@@ -420,7 +429,6 @@
                             var cachedObj = JSON.parse(cachedStr);
                             if (cachedObj && cachedObj.orderCode === currentOrderCode) {
                                 order = cachedObj;
-                                // Mặc định đơn mới tạo từ D2C
                                 if (!order.status) {
                                     order.status = (order.paymentMethod === "VIETQR") ? "COOKING" : "RECEIVED";
                                 }
@@ -436,6 +444,16 @@
                 }
 
                 renderOrderUI(order);
+
+                // KIỂM TOÁN VÒNG ĐỜI: DỪNG POLLING NẾU ĐƠN ĐÃ HOÀN TẤT HOẶC ĐÃ HỦY
+                var st = String(order.status || "").toUpperCase().trim();
+                var sp = Number(order.step !== undefined ? order.step : -99);
+                if (st === "COMPLETED" || st === "HOÀN TẤT" || sp === 4 || st === "CANCELLED" || st === "ĐÃ HỦY" || sp === -1) {
+                    if (pollTimer) {
+                        clearInterval(pollTimer);
+                        pollTimer = null;
+                    }
+                }
 
             } catch (err) {
                 console.error("❌ Lỗi truy vấn đơn hàng:", err);
@@ -636,6 +654,24 @@
                     payBadge.className = "px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20";
                     payBadge.innerText = "Thu Tiền Mặt (COD)";
                 }
+            }
+
+            // 6. KIỂM TOÁN VÒNG QUAY CRM DÀNH CHO ĐƠN >= 79K CHƯA SỬ DỤNG
+            var spinBanner = document.getElementById("box-unused-spin-banner");
+            if (spinBanner) {
+                var isEligibleAov = (subtotal >= 79000 || finalTotal >= 79000);
+                var hasUsedGift = (order.gift && order.gift.name);
+                if (isEligibleAov && !hasUsedGift) {
+                    spinBanner.classList.remove("hidden");
+                } else {
+                    spinBanner.classList.add("hidden");
+                }
+            }
+
+            // 7. CẬP NHẬT NÚT HÀNH ĐỘNG SAU KHI GIAO HOÀN TẤT
+            var returnHomeBtnTxt = document.getElementById("txt-return-home-btn");
+            if (returnHomeBtnTxt && mappedKey === "COMPLETED") {
+                returnHomeBtnTxt.innerText = "🎉 Đã Nhận Món • Đặt Đơn Mới";
             }
         }
 

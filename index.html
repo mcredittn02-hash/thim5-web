@@ -1017,7 +1017,7 @@
         }
 
         /**
-         * ĐỒNG BỘ CẤU HÌNH HỆ THỐNG TỪ BACKEND HOẶC BỘ NHỚ
+         * ĐỒNG BỘ CẤU HÌNH HỆ THỐNG TỪ BACKEND VÀ KIỂM SOÁT ĐÓNG/MỞ QUÁN ĐỘNG
          */
         async function loadSystemConfig() {
             try {
@@ -1036,21 +1036,60 @@
                             STORE_BASE_CONFIG.coords.lat = Number(cfg.centerCoords.lat);
                             STORE_BASE_CONFIG.coords.lng = Number(cfg.centerCoords.lng);
                         }
+
+                        // LƯU TRẠNG THÁI ĐÓNG / MỞ QUÁN VÀO BỘ NHỚ STATE
+                        appState.storeStatus = (cfg.storeStatus) ? String(cfg.storeStatus).toUpperCase().trim() : "OPEN";
+                        appState.closedMessage = cfg.closedMessage || "Bếp Thím 5 tạm dừng nhận đơn ít phút!";
                     }
                 }
             } catch (e) {
                 console.warn("⚠️ [D2CStoreFront] Sử dụng cấu hình fallback chuẩn Bếp Tây Ninh.");
+                appState.storeStatus = "OPEN";
+                appState.closedMessage = "";
             }
 
-            // Cập nhật lên Topbar
+            // 1. Cập nhật thông tin quán lên Topbar
             var elPhone = document.getElementById("disp-store-phone");
             var linkPhone = document.getElementById("link-store-phone");
             var elName = document.getElementById("disp-store-name");
             if (elPhone) elPhone.innerText = STORE_BASE_CONFIG.phone;
             if (linkPhone) linkPhone.href = "tel:" + STORE_BASE_CONFIG.phone;
             if (elName) elName.innerText = STORE_BASE_CONFIG.storeName;
+
+            // 2. CẬP NHẬT HIỂN THỊ CÔNG TẮC TRẠNG THÁI VÀ KHÓA ĐƠN TRÊN GIAO DIỆN
+            var dotStatus = document.getElementById("disp-store-status-dot");
+            var txtStatus = document.getElementById("disp-store-status-text");
+            var btnSubmitOrder = document.getElementById("btn-submit-order");
+
+            if (appState.storeStatus === "CLOSED") {
+                if (dotStatus) {
+                    dotStatus.className = "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-rose-500 border-2 border-slate-950";
+                }
+                if (txtStatus) {
+                    txtStatus.className = "text-rose-400 font-bold flex items-center gap-1 truncate";
+                    txtStatus.innerHTML = '<i class="fa-solid fa-circle text-[6px]"></i> Tạm Nghỉ (' + appState.closedMessage + ')';
+                }
+                if (btnSubmitOrder) {
+                    btnSubmitOrder.disabled = true;
+                    btnSubmitOrder.className = "w-full py-3.5 rounded-2xl bg-slate-800 text-slate-500 text-xs sm:text-sm font-black uppercase tracking-wider cursor-not-allowed flex items-center justify-center gap-2";
+                    btnSubmitOrder.innerHTML = '<i class="fa-solid fa-ban"></i> BẾP TẠM DỪNG NHẬN ĐƠN';
+                }
+            } else {
+                if (dotStatus) {
+                    dotStatus.className = "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-950";
+                }
+                if (txtStatus) {
+                    txtStatus.className = "text-emerald-400 font-bold flex items-center gap-1 truncate";
+                    txtStatus.innerHTML = '<i class="fa-solid fa-circle text-[6px] animate-pulse"></i> Đang Nhận Đơn Nóng Hổi';
+                }
+                if (btnSubmitOrder) {
+                    btnSubmitOrder.disabled = false;
+                    btnSubmitOrder.className = "w-full py-3.5 rounded-2xl bg-gradient-to-r from-red-600 via-amber-600 to-emerald-600 hover:opacity-95 text-white text-xs sm:text-sm font-black uppercase tracking-wider shadow-xl shadow-red-600/30 transition flex items-center justify-center gap-2";
+                    btnSubmitOrder.innerHTML = '<i class="fa-solid fa-paper-plane text-sm"></i> <span>XÁC NHẬN GỬI ĐƠN • NẤU NGAY</span>';
+                }
+            }
         }
-/**
+        /**
          * ĐIỀU KHIỂN HERO CAROUSEL TỰ ĐỘNG TRƯỢT 4 GIÂY/LẦN
          */
         function initHeroCarousel() {
@@ -1862,6 +1901,13 @@
         }
 
         function proceedToCheckoutModal() {
+            // RÀO CHẮN NGHIỆP VỤ: NẾU QUÁN ĐANG ĐÓNG CỬA THÌ CHẶN MỞ FORM CHECKOUT
+            if (appState.storeStatus === "CLOSED") {
+                var msg = appState.closedMessage || "Bếp Thím 5 hiện đang tạm dừng nhận đơn!";
+                alert("⛔ THÔNG BÁO TỪ BẾP THÍM 5:\n\n" + msg + "\n\nQuý khách vui lòng quay lại sau nhé!");
+                return;
+            }
+
             if (appState.cartItems.length === 0) {
                 alert("⚠️ Giỏ hàng đang trống. Quý khách vui lòng chọn món trước!");
                 return;

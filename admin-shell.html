@@ -146,61 +146,124 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 2. THANH ĐIỀU HÀNH TỔNG (TOPBAR & SYSTEM HEARTBEAT LATENCY)                -->
-  <!-- ========================================================================= -->
-  <header class="h-14 bg-slate-900 border-b border-slate-800 px-3 sm:px-6 flex items-center justify-between shrink-0 z-30">
-    
-    <!-- Logo & Tên Hệ Điều Hành -->
-    <div class="flex items-center gap-3">
-      <button type="button" 
-              onclick="AdminShellController.toggleSidebar()" 
-              class="md:hidden p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white">
-        <i class="fa-solid fa-bars text-sm"></i>
-      </button>
+    <!-- 2. THANH ĐIỀU HÀNH TỔNG (TOPBAR & SYSTEM HEARTBEAT LATENCY)                 -->
+    <!-- ========================================================================= -->
+    <header class="h-14 bg-slate-900 border-b border-slate-800 px-3 sm:px-6 flex items-center justify-between shrink-0 z-30">
+        
+        <!-- Cụm Trái: Menu Hamburger Mobile & Tên Hệ Điều Hành -->
+        <div class="flex items-center gap-3">
+            <button type="button" 
+                    onclick="AdminShellController.toggleSidebar()" 
+                    class="md:hidden p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition active:scale-95">
+                <i class="fa-solid fa-bars text-sm"></i>
+            </button>
 
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 font-black text-sm shadow-md shadow-amber-500/20">
-          5
+            <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-red-600 flex items-center justify-center text-slate-950 font-black text-xs shadow-md shadow-amber-500/10">
+                    T5
+                </span>
+                <div class="hidden sm:block">
+                    <h2 class="text-xs font-black text-white tracking-wide uppercase">LongHoaFood Master</h2>
+                    <p class="text-[10px] text-slate-400 font-mono">Control Plane v2.9 Enterprise</p>
+                </div>
+            </div>
         </div>
-        <div>
-          <h1 class="text-xs sm:text-sm font-black tracking-wider uppercase text-white flex items-center gap-1.5">
-            <span>THÍM 5 • CONTROL PLANE</span>
-          </h1>
-          <p class="text-[9.5px] text-slate-400 font-medium hidden sm:block">LongHoaFood Master SaaS Enterprise</p>
+
+        <!-- Cụm Phải: Nút Công Tắc Trạng Thái Quán, Heartbeat & Profile -->
+        <div class="flex items-center gap-2 sm:gap-3">
+            
+            <!-- CÔNG TẮC ĐÓNG/MỞ CỬA BẾP THỜI GIAN THỰC (LEVEL 2) -->
+            <button type="button" 
+                    id="btn-store-status-toggle" 
+                    onclick="AdminStoreControl.openToggleModal()" 
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 active:scale-95">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="dot-store-status"></span>
+                <span id="txt-store-status" class="tracking-tight">🟢 ĐANG MỞ CỬA</span>
+            </button>
+
+            <!-- Trạng Thái Mạng Heartbeat Latency -->
+            <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono text-slate-400">
+                <i class="fa-solid fa-wifi text-[10px] text-emerald-400"></i>
+                <span id="disp-heartbeat-latency">12ms</span>
+            </div>
+
+            <!-- Nút Làm Mới Nhanh Dữ Liệu -->
+            <button type="button" 
+                    onclick="AdminShellController.refreshCurrentTab()" 
+                    class="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition active:scale-95" 
+                    title="Tải lại tab hiện tại">
+                <i class="fa-solid fa-rotate-right text-xs"></i>
+            </button>
+
         </div>
-      </div>
+
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL POPUP CẬP NHẬT TRẠNG THÁI HOẠT ĐỘNG CỦA QUÁN (LEVEL 2)             -->
+    <!-- ========================================================================= -->
+    <div id="modal-store-status-toggle" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-2xl animate-in zoom-in-95 duration-150">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-sm shadow-inner">
+                        <i class="fa-solid fa-power-off"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-black uppercase text-white tracking-wider">Trạng Thái Tiếp Nhận Đơn</h4>
+                        <p class="text-[10px] text-slate-400">Đồng bộ tức thì lên Mặt Tiền D2C</p>
+                    </div>
+                </div>
+                <button type="button" onclick="AdminStoreControl.closeToggleModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1.5 font-bold">Lựa chọn trạng thái:</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" 
+                                id="opt-status-open" 
+                                onclick="AdminStoreControl.selectTargetStatus('OPEN')" 
+                                class="p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-1.5 transition">
+                            <i class="fa-solid fa-door-open"></i> Mở Bếp Nhận Đơn
+                        </button>
+                        <button type="button" 
+                                id="opt-status-closed" 
+                                onclick="AdminStoreControl.selectTargetStatus('CLOSED')" 
+                                class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition hover:border-rose-500/40">
+                            <i class="fa-solid fa-door-closed"></i> Tạm Nghỉ Quán
+                        </button>
+                    </div>
+                </div>
+
+                <div id="box-closed-note" class="space-y-1.5 hidden">
+                    <label class="block text-[11px] text-slate-400 font-bold">Lý do / Hẹn giờ mở lại:</label>
+                    <input type="text" 
+                           id="inp-closed-message" 
+                           placeholder="VD: Nghỉ trưa ca 13h30-16h30, hẹn gặp lại quý khách!" 
+                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 flex items-center gap-2">
+                <button type="button" 
+                        onclick="AdminStoreControl.closeToggleModal()" 
+                        class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+                    Đóng
+                </button>
+                <button type="button" 
+                        id="btn-confirm-toggle" 
+                        onclick="AdminStoreControl.submitToggleStatus()" 
+                        class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow flex items-center justify-center gap-1.5">
+                    <span>Xác Nhận Lưu</span>
+                </button>
+            </div>
+
+        </div>
     </div>
-
-    <!-- Cụm Nhịp Tim Kết Nối (System Heartbeat Monitor) & Phân Quyền -->
-    <div class="flex items-center gap-2 sm:gap-4 text-xs">
-      
-      <!-- Widget Giám Sát Nhịp Tim Máy Chủ Thực Tế -->
-      <div id="heartbeat-badge" class="px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2 font-mono text-[10.5px]">
-        <span id="heartbeat-indicator" class="w-2 h-2 rounded-full bg-slate-600"></span>
-        <span id="heartbeat-status" class="text-slate-400 hidden sm:inline">Checking...</span>
-        <span class="text-slate-700 hidden sm:inline">|</span>
-        <span id="heartbeat-latency" class="text-slate-400 font-medium">--ms</span>
-        <span class="text-slate-700">|</span>
-        <span id="system-version-tag" class="text-amber-400 font-bold">v2.9</span>
-      </div>
-
-      <!-- Badge Phân Quyền Tài Khoản Hiện Hành -->
-      <div id="user-role-badge" class="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5">
-        <i class="fa-solid fa-user-shield text-xs"></i>
-        <span id="user-role-text">KHÁCH</span>
-      </div>
-
-      <!-- Nút Đăng Xuất -->
-      <button type="button" 
-              onclick="AdminShellController.handleLogout()" 
-              title="Đăng xuất khỏi bảng điều khiển" 
-              class="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 transition">
-        <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
-      </button>
-
-    </div>
-
-  </header>
 
   <!-- ========================================================================= -->
   <!-- 3. KHUNG BỐ CỤC CHÍNH WORKSPACE: SIDEBAR DRAWER & VIEWPORT TRUNG TÂM       -->
@@ -1407,5 +1470,132 @@
       };
     })();
   </script>
+  <script>
+/**
+ * CONTROLLER: ADMIN STORE OPERATION SWITCH (LEVEL 2)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+ * Vai trò: Quản lý đóng/mở cửa quán thời gian thực và đồng bộ lên Mặt tiền D2C
+ */
+var AdminStoreControl = (function() {
+    var currentStatus = "OPEN";
+    var selectedStatus = "OPEN";
+
+    function init() {
+        fetchCurrentStatus();
+    }
+
+    async function fetchCurrentStatus() {
+        try {
+            if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+                var res = await window.Thim5API.callGAS("getStoreStatus");
+                if (res && res.storeStatus) {
+                    updateUI(res.storeStatus, res.closedMessage);
+                }
+            }
+        } catch (e) {
+            console.warn("⚠️ Không thể lấy trạng thái quán:", e);
+        }
+    }
+
+    function updateUI(status, message) {
+        currentStatus = status;
+        var btn = document.getElementById("btn-store-status-toggle");
+        var dot = document.getElementById("dot-store-status");
+        var txt = document.getElementById("txt-store-status");
+
+        if (!btn || !dot || !txt) return;
+
+        if (status === "OPEN") {
+            btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 active:scale-95";
+            dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+            txt.innerText = "🟢 ĐANG MỞ CỬA";
+        } else {
+            btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 active:scale-95";
+            dot.className = "w-2 h-2 rounded-full bg-rose-500";
+            txt.innerText = "🔴 TẠM NGHỈ QUÁN";
+        }
+    }
+
+    function openToggleModal() {
+        selectedStatus = currentStatus;
+        selectTargetStatus(currentStatus);
+        var modal = document.getElementById("modal-store-status-toggle");
+        if (modal) modal.classList.remove("hidden");
+    }
+
+    function closeToggleModal() {
+        var modal = document.getElementById("modal-store-status-toggle");
+        if (modal) modal.classList.add("hidden");
+    }
+
+    function selectTargetStatus(st) {
+        selectedStatus = st;
+        var btnOpen = document.getElementById("opt-status-open");
+        var btnClosed = document.getElementById("opt-status-closed");
+        var boxNote = document.getElementById("box-closed-note");
+
+        if (st === "OPEN") {
+            if (btnOpen) btnOpen.className = "p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-1.5 transition";
+            if (btnClosed) btnClosed.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition";
+            if (boxNote) boxNote.classList.add("hidden");
+        } else {
+            if (btnOpen) btnOpen.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition";
+            if (btnClosed) btnClosed.className = "p-2.5 rounded-xl border-2 border-rose-500 bg-rose-500/10 text-rose-400 font-bold flex items-center justify-center gap-1.5 transition";
+            if (boxNote) boxNote.classList.remove("hidden");
+        }
+    }
+
+    async function submitToggleStatus() {
+        var btn = document.getElementById("btn-confirm-toggle");
+        var inpMsg = document.getElementById("inp-closed-message");
+        var message = inpMsg ? inpMsg.value.trim() : "";
+
+        var origText = btn ? btn.innerHTML : "";
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lưu...';
+        }
+
+        try {
+            if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+                throw new Error("Không tìm thấy kết nối Thim5API!");
+            }
+
+            var res = await window.Thim5API.callGAS("toggleStoreStatus", {
+                status: selectedStatus,
+                message: message
+            });
+
+            if (!res || res.status !== "success") {
+                throw new Error((res && res.message) ? res.message : "Cập nhật thất bại!");
+            }
+
+            updateUI(selectedStatus, message);
+            closeToggleModal();
+            alert(res.message || "Đã cập nhật trạng thái hoạt động của Bếp thành công!");
+
+        } catch (err) {
+            alert("❌ Lỗi khi cập nhật trạng thái quán: " + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        }
+    }
+
+    return {
+        init: init,
+        openToggleModal: openToggleModal,
+        closeToggleModal: closeToggleModal,
+        selectTargetStatus: selectTargetStatus,
+        submitToggleStatus: submitToggleStatus
+    };
+})();
+
+document.addEventListener("DOMContentLoaded", function() {
+    AdminStoreControl.init();
+});
+</script>
 </body>
 </html>
