@@ -1,9 +1,9 @@
-<!-- ==========================================================================
-   FILE: admin-shell.html - PHẦN [1/6]
+/* ==========================================================================
+   FILE: admin-shell.html - PHẦN [1/8]
    BẮT ĐẦU TỪ: <!DOCTYPE html>
    KẾT THÚC TẠI: Hết khối Modal Xác Thực Phân Tầng (#auth-modal-overlay)
-   HƯỚNG DẪN: Tạo file admin-shell.html và dán đoạn mã này vào đầu tiên.
-   ========================================================================== -->
+   HƯỚNG DẪN: Tạo mới file admin-shell.html và dán toàn bộ đoạn này vào đầu file.
+   ========================================================================== */
 <!DOCTYPE html>
 <html lang="vi" class="dark h-full bg-slate-950 text-slate-100">
 <head>
@@ -26,9 +26,6 @@
               850: '#131c2e',
               900: '#0f172a',
               950: '#020617'
-            },
-            amber: {
-              450: '#f59e0b'
             }
           }
         }
@@ -153,11 +150,11 @@
 
     </div>
   </div>
-<!-- ==========================================================================
-   FILE: admin-shell.html - PHẦN [2/6]
+  <!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [2/8]
    BẮT ĐẦU TỪ: <!-- 2. THANH ĐIỀU HÀNH TỔNG (TOPBAR) -->
    KẾT THÚC TẠI: Hết thẻ đóng </aside> của thanh Sidebar điều hướng
-   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [1/6]
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [1/8]
    ========================================================================== -->
 
   <!-- ========================================================================= -->
@@ -184,7 +181,7 @@
           </div>
       </div>
 
-      <!-- Cụm Phải: Công Tắc Đóng/Mở Bếp, Chỉ Báo Vai Trò & Heartbeat -->
+      <!-- Cụm Phải: Nút Công Tắc Trạng Thái Quán, Heartbeat & Profile -->
       <div class="flex items-center gap-2 sm:gap-3">
           
           <!-- CÔNG TẮC ĐÓNG/MỞ CỬA BẾP THỜI GIAN THỰC (LEVEL 2) -->
@@ -202,7 +199,7 @@
               <span id="user-role-text">POS_STAFF</span>
           </div>
 
-          <!-- Trạng Thái Mạng Heartbeat Latency Thực Tế -->
+          <!-- Trạng Thái Mạng Heartbeat Latency -->
           <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono text-slate-400">
               <span class="w-2 h-2 rounded-full bg-emerald-400 heartbeat-active" id="heartbeat-indicator"></span>
               <span id="heartbeat-status">GAS Connected</span>
@@ -341,7 +338,7 @@
           <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-70"></i>
         </a>
 
-        <!-- Tab 4: Trạm Điều Phối Ship (SPA Module) -->
+        <!-- Tab 4: Trạm Điều Phối Ship (Đã chuyển thành SPA Module) -->
         <button type="button" 
                 data-tab="shippers" 
                 onclick="AdminShellController.switchMainTab('shippers', this)" 
@@ -398,11 +395,11 @@
       </div>
 
     </aside>
-<!-- ==========================================================================
-   FILE: admin-shell.html - PHẦN [3/6]
+    <!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [3/8]
    BẮT ĐẦU TỪ: <main class="flex-1 h-full overflow-y-auto custom-scroll bg-slate-950 p-2 sm:p-4">
-   KẾT THÚC TẠI: Hết khối thẻ đóng </div> của PHÂN HỆ 2 (Cổng Thanh Toán & VietQR)
-   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [2/6]
+   KẾT THÚC TẠI: Hết khối thẻ đóng </div> của PHÂN HỆ 1 (Nhận Diện Quán & GPS Bếp)
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [2/8]
    ========================================================================== -->
 
     <!-- ======================================================================= -->
@@ -542,6 +539,12 @@
             </div>
 
           </div>
+          <!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [4/8]
+   BẮT ĐẦU TỪ: <!-- PHÂN HỆ 2: CỔNG THANH TOÁN BANK, VÍ MOMO & TEST VIETQR ĐỘNG -->
+   KẾT THÚC TẠI: Hết khối thẻ đóng </div> của PHÂN HỆ 2
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [3/8]
+   ========================================================================== -->
 
           <!-- ================================================================= -->
           <!-- PHÂN HỆ 2: CỔNG THANH TOÁN BANK, VÍ MOMO & TEST VIETQR ĐỘNG      -->
@@ -563,7 +566,7 @@
               <!-- Cột Cấu Hình Thông Tin Ngân Hàng & Ví MoMo -->
               <div class="lg:col-span-2 space-y-3">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <!-- Chọn Ngân Hàng -->
+                  <!-- Chọn Ngân Hàng Thụ Hưởng -->
                   <div class="space-y-1">
                     <label class="font-bold text-slate-300 text-[11px] block">Ngân Hàng Nhận Tiền</label>
                     <select id="cfg-payment-bank-bin" 
@@ -644,11 +647,11 @@
             </div>
 
           </div>
-<!-- ==========================================================================
-   FILE: admin-shell.html - PHẦN [4/6]
+          <!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [5/8]
    BẮT ĐẦU TỪ: <!-- PHÂN HỆ 3: BẢO MẬT PHÂN TẦNG & MÃ PIN ĐIỀU HÀNH -->
-   KẾT THÚC TẠI: Hết khối Modal QR Google Authenticator (#modal-totp-setup)
-   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [3/6]
+   KẾT THÚC TẠI: Hết khối thẻ đóng </div> của PHÂN HỆ 4 (Chiết Khấu Sàn Master & Thuế)
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [4/8]
    ========================================================================== -->
 
           <!-- ================================================================= -->
@@ -769,6 +772,12 @@
             </div>
 
           </div>
+          <!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [6/8]
+   BẮT ĐẦU TỪ: <!-- PHÂN HỆ 5: CHIẾN LƯỢC KHUYẾN MÃI AOV & TRỢ GIÁ FREESHIP -->
+   KẾT THÚC TẠI: Hết khối thẻ đóng </div> của Modal TOTP Setup (#modal-totp-setup)
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [5/8]
+   ========================================================================== -->
 
           <!-- ================================================================= -->
           <!-- PHÂN HỆ 5: CHIẾN LƯỢC KHUYẾN MÃI AOV & TRỢ GIÁ FREESHIP          -->
@@ -796,7 +805,7 @@
                        required 
                        placeholder="79000" 
                        class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 outline-none transition" />
-                <span class="text-[9.5px] text-slate-500 block">Kích khách mua thêm súp/topping để chạm mốc.</span>
+                <span class="text-[9.5px] text-slate-500 block">Kích khách mua thêm súp Booster/topping để chạm mốc.</span>
               </div>
 
               <!-- Trần Trợ Giá Ship Quán Chịu -->
@@ -942,26 +951,25 @@
 
     </div>
   </div>
-<!-- ==========================================================================
-   FILE: admin-shell.html - PHẦN [5/6]
+  <!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [7/8]
    BẮT ĐẦU TỪ: <script> (Khai báo module AdminShellController)
    KẾT THÚC TẠI: Hết hàm runSystemHeartbeat()
-   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [4/6]
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [6/8]
    ========================================================================== -->
 
   <!-- ========================================================================= -->
   <!-- 4. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH TRUNG TÂM (ADMIN SHELL CONTROLLER)         -->
   <!-- ========================================================================= -->
-  <!-- ==========================================================================
-   FILE: admin-shell.html - KHỐI BỘ NÃO ĐIỀU HÀNH ADMIN SHELL CONTROLLER
-   VỊ TRÍ DÁN: Tìm đúng đoạn từ "var AdminShellController = (function() {"
-               đến hết "})();" và thay thế bằng toàn bộ đoạn mã bên dưới.
-   ========================================================================== -->
-
-  <!-- ========================================================================= -->
-  <!-- 4. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH TRUNG TÂM (ADMIN SHELL CONTROLLER BỌC THÉP) -->
-  <!-- ========================================================================= -->
   <script>
+    /**
+     * =========================================================================
+     * CONTROLLER: ADMIN SHELL OS & RBAC CONTROL PLANE (v3.0 SAAS ENTERPRISE)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+     * Kiến trúc: Bọc thép qua Thim5API, cách ly phân quyền Zero-Trust
+     * =========================================================================
+     */
     var AdminShellController = (function() {
       var currentRole = null; // 'POS_STAFF', 'KITCHEN_LEAD', hoặc 'SUPER_ADMIN'
       var currentMasterKey = "";
@@ -1425,9 +1433,16 @@
           }
         }
       }
+       <!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [8/8] (PHẦN HOÀN TẤT TOÀN BỘ FILE)
+   BẮT ĐẦU TỪ: function loadSystemConfigData()
+   KẾT THÚC TẠI: Hết file (Thẻ đóng </body></html>)
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [7/8] để hoàn chỉnh 100% admin-shell.html
+   ========================================================================== -->
 
       /**
-       * NẠP DỮ LIỆU CẤU HÌNH HỆ THỐNG - PHÍ MASTER MẶC ĐỊNH 5% (0.05)
+       * NẠP DỮ LIỆU CẤU HÌNH HỆ THỐNG TỪ BACKEND QUA THIM5API
+       * Phí Master SaaS mặc định là 5% (0.05) và có thể điều chỉnh động hoàn toàn
        */
       async function loadSystemConfigData() {
         try {
@@ -1456,7 +1471,7 @@
               document.getElementById("cfg-sec-pin-lv2").value = c.security.pinAdminLv2 || "2026";
             }
             if (c.finance) {
-              // Phí Master SaaS mặc định là 5% (0.05)
+              // Phí Master SaaS chuẩn hóa động 5% (0.05)
               document.getElementById("cfg-fin-master-fee").value = (c.finance.platformMasterFee !== undefined) ? c.finance.platformMasterFee : 0.05;
               document.getElementById("cfg-fin-tax-hkd").value = (c.finance.taxRateHkd !== undefined) ? c.finance.taxRateHkd : 0.045;
             }
@@ -1476,7 +1491,7 @@
       }
 
       /**
-       * CẬP NHẬT ẢNH MÃ VIETQR TRỰC TIẾP
+       * CẬP NHẬT ẢNH MÃ VIETQR TRỰC TIẾP (LIVE PREVIEW)
        */
       function updateLiveQrPreview() {
         var bankBin = document.getElementById("cfg-payment-bank-bin").value.trim();
@@ -1488,7 +1503,7 @@
       }
 
       /**
-       * LẤY TỌA ĐỘ GPS HIỆN TẠI TỪ TRÌNH DUYỆT
+       * LẤY TỌA ĐỘ GPS HIỆN TẠI TỪ TRÌNH DUYỆT THIẾT BỊ
        */
       function fetchCurrentBrowserGps() {
         if (!navigator.geolocation) {
@@ -1510,8 +1525,9 @@
       async function handleSaveSystemConfig(event) {
         event.preventDefault();
 
+        // Chốt chặn bảo mật: Chỉ Super Admin mới có quyền cập nhật
         if (currentRole !== "SUPER_ADMIN") {
-          alert("⛔ Từ chối quyền: Chỉ Super Admin mới có quyền cập nhật tham số hệ thống!");
+          alert("⛔ Từ chối quyền lưu: Chỉ Super Admin mới có quyền cập nhật tham số hệ thống!");
           return;
         }
 
@@ -1650,7 +1666,12 @@
       };
     })();
   </script>
-   /**
+
+  <!-- ========================================================================= -->
+  <!-- 5. CONTROLLER CÔNG TẮC ĐÓNG/MỞ CỬA BẾP THỜI GIAN THỰC (ADMIN STORE CONTROL) -->
+  <!-- ========================================================================= -->
+  <script>
+    /**
      * CONTROLLER: ADMIN STORE OPERATION SWITCH (LEVEL 2)
      * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
      * Vai trò: Quản lý đóng/mở cửa quán thời gian thực và đồng bộ lên Mặt tiền D2C
@@ -1778,7 +1799,7 @@
   </script>
 
   <!-- ========================================================================= -->
-  <!-- 5. GLOBAL MEDIA ENGINE: CANVAS COMPRESSOR DÙNG CHUNG CHO CÁC TAB CON     -->
+  <!-- 6. GLOBAL MEDIA ENGINE: CANVAS COMPRESSOR DÙNG CHUNG CHO CÁC TAB CON     -->
   <!-- ========================================================================= -->
   <script>
     /**
