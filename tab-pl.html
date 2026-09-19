@@ -1,193 +1,376 @@
-<!-- ========================================================================= -->
-<!-- COMPONENT: BÁO CÁO LÃI LỖ P&L & ĐỐI SOÁT DÒNG TIỀN (FINANCIAL SUITE v2.9)  -->
-<!-- Nạp động qua dynamic component loader vào admin-shell.html                -->
-<!-- ========================================================================= -->
-<div id="tab-pl-container" class="space-y-4 p-3 sm:p-5 max-w-6xl mx-auto text-xs select-none">
+<!-- ==========================================================================
+   FILE: tab-pl.html - PHẦN [1/3]
+   BẮT ĐẦU TỪ: <div id="tab-pl-container" class="space-y-4 p-3 sm:p-5 max-w-6xl mx-auto text-xs select-none">
+   KẾT THÚC TẠI: Hết khối chú giải phân bổ dòng tiền (Hết thẻ đóng </div> của Thanh phân bổ dòng tiền)
+   HƯỚNG DẪN: Tạo mới hoặc làm sạch file tab-pl.html, dán toàn bộ đoạn này vào đầu file.
+   ========================================================================== -->
+<div id="tab-pl-container" class="space-y-4 p-3 sm:p-5 max-w-6xl mx-auto text-xs select-none animate-in fade-in-50 duration-200">
 
-  <!-- 1. THANH BỘ LỌC THỜI GIAN & ĐIỀU KHIỂN BÁO CÁO -->
-  <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-md">
+  <!-- ======================================================================= -->
+  <!-- 1. THANH BỘ LỌC 4 KỲ TÀI CHÍNH ĐỘNG (NGÀY / TUẦN / THÁNG / QUÝ)         -->
+  <!-- ======================================================================= -->
+  <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-md">
     
     <div class="flex items-center gap-2.5 min-w-0">
-      <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base shrink-0">
+      <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 font-black text-sm shrink-0 shadow-md shadow-amber-500/20">
         <i class="fa-solid fa-chart-pie"></i>
       </div>
       <div class="min-w-0">
-        <h2 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider truncate">Báo Cáo Tài Chính & Lãi Lỗ P&L</h2>
-        <p class="text-[10px] text-slate-400 truncate">Kiểm soát Doanh thu thuần, Giá vốn COGS & Tiền ứng Shipper</p>
+        <h2 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider truncate">Báo Cáo Lãi Lỗ P&amp;L &amp; Dòng Tiền Ròng</h2>
+        <p class="text-[10px] text-slate-400 truncate">Kiểm toán Reverse-Pricing • Đồng bộ 4 kỳ tài chính thời gian thực</p>
       </div>
     </div>
 
-    <!-- Cụm Nút Chọn Nhanh Khoảng Thời Gian -->
-    <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll">
+    <!-- Cụm Nút Chọn Nhanh Kỳ Tài Chính -->
+    <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll p-1 rounded-2xl bg-slate-950 border border-slate-800 text-[11px] font-bold">
       <button type="button" 
-              onclick="TabPlController.setQuickFilter('today', this)" 
-              class="pl-filter-btn px-3 py-1.5 rounded-xl font-bold text-[10.5px] transition bg-amber-500 text-slate-950 shadow active">
+              onclick="TabPlController.switchPeriod('daily', this)" 
+              class="pl-period-btn px-3 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow active">
         Hôm Nay
       </button>
       <button type="button" 
-              onclick="TabPlController.setQuickFilter('yesterday', this)" 
-              class="pl-filter-btn px-3 py-1.5 rounded-xl font-bold text-[10.5px] transition bg-slate-950 text-slate-400 border border-slate-800 hover:text-white">
-        Hôm Qua
+              onclick="TabPlController.switchPeriod('weekly', this)" 
+              class="pl-period-btn px-3 py-1.5 rounded-xl transition text-slate-400 hover:text-white">
+        Tuần Này
       </button>
       <button type="button" 
-              onclick="TabPlController.setQuickFilter('7days', this)" 
-              class="pl-filter-btn px-3 py-1.5 rounded-xl font-bold text-[10.5px] transition bg-slate-950 text-slate-400 border border-slate-800 hover:text-white">
-        7 Ngày Qua
-      </button>
-      <button type="button" 
-              onclick="TabPlController.setQuickFilter('thisMonth', this)" 
-              class="pl-filter-btn px-3 py-1.5 rounded-xl font-bold text-[10.5px] transition bg-slate-950 text-slate-400 border border-slate-800 hover:text-white">
+              onclick="TabPlController.switchPeriod('monthly', this)" 
+              class="pl-period-btn px-3 py-1.5 rounded-xl transition text-slate-400 hover:text-white">
         Tháng Này
       </button>
-
-      <!-- Nút Làm Mới -->
       <button type="button" 
-              onclick="TabPlController.loadPlData()" 
-              class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 flex items-center justify-center transition active:scale-90" 
-              title="Tải lại dữ liệu">
+              onclick="TabPlController.switchPeriod('quarterly', this)" 
+              class="pl-period-btn px-3 py-1.5 rounded-xl transition text-slate-400 hover:text-white">
+        Quý Này
+      </button>
+      <button type="button" 
+              onclick="TabPlController.switchPeriod('allTime', this)" 
+              class="pl-period-btn px-3 py-1.5 rounded-xl transition text-slate-400 hover:text-white">
+        Toàn Thời Gian
+      </button>
+
+      <!-- Nút Làm Mới Dữ Liệu Ép Buộc (Bỏ Qua Cache) -->
+      <button type="button" 
+              onclick="TabPlController.loadPlData(true)" 
+              class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-amber-400 border border-slate-800 flex items-center justify-center transition active:scale-90 ml-1" 
+              title="Làm mới dữ liệu từ Google Sheets">
         <i id="pl-refresh-icon" class="fa-solid fa-rotate text-xs"></i>
       </button>
     </div>
 
   </div>
 
-  <!-- 2. RADAR CẢNH BÁO TÀI CHÍNH TỰ ĐỘNG (ALERTS CONTAINER) -->
+  <!-- ======================================================================= -->
+  <!-- 2. RADAR CẢNH BÁO TÀI CHÍNH TỰ ĐỘNG & NGƯỠNG AN TOÀN DÒNG TIỀN          -->
+  <!-- ======================================================================= -->
   <div id="pl-alerts-box" class="space-y-2"></div>
 
-  <!-- 3. CỤM 4 THẺ KPI TÀI CHÍNH CỐT LÕI -->
+  <!-- ======================================================================= -->
+  <!-- 3. CỤM 4 THẺ KPI TÀI CHÍNH CHIẾN LƯỢC CHO KỲ ĐANG XEM                  -->
+  <!-- ======================================================================= -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
     
-    <!-- KPI 1: Doanh Thu Thuần -->
-    <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden">
+    <!-- KPI 1: Doanh Thu Thực Thu (Net Revenue) -->
+    <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden">
       <div class="flex justify-between items-center text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-        <span>Doanh Thu Thuần</span>
-        <i class="fa-solid fa-money-bill-wave text-amber-400"></i>
+        <span>Doanh Thu Thực Thu</span>
+        <i class="fa-solid fa-money-bill-wave text-amber-400 text-xs"></i>
       </div>
       <div class="mt-1.5">
         <strong id="kpi-net-revenue" class="text-base sm:text-lg font-mono font-black text-white">0 đ</strong>
-        <p class="text-[9.5px] text-slate-400 mt-0.5">Sau khi trừ trợ giá Freeship</p>
+        <p id="kpi-order-count-sub" class="text-[9.5px] text-slate-400 mt-0.5">Tổng số: 0 đơn hoàn thành</p>
       </div>
       <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
     </div>
 
-    <!-- KPI 2: Lợi Nhuận Gộp -->
-    <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden">
-      <div class="flex justify-between items-center text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-        <span>Lợi Nhuận Gộp</span>
-        <i class="fa-solid fa-box-open text-sky-400"></i>
-      </div>
-      <div class="mt-1.5">
-        <strong id="kpi-gross-profit" class="text-base sm:text-lg font-mono font-black text-sky-400">0 đ</strong>
-        <p id="kpi-gross-margin" class="text-[9.5px] text-slate-400 mt-0.5">Biên gộp: 0.0%</p>
-      </div>
-      <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-600"></div>
-    </div>
-
-    <!-- KPI 3: Lợi Nhuận Ròng Thực Tế -->
-    <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden">
+    <!-- KPI 2: Lợi Nhuận Ròng Thực Tế (Net Profit) -->
+    <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden">
       <div class="flex justify-between items-center text-slate-400 text-[10px] font-bold uppercase tracking-wider">
         <span>Lãi Ròng Thực Nhận</span>
-        <i class="fa-solid fa-vault text-emerald-400"></i>
+        <i class="fa-solid fa-vault text-emerald-400 text-xs"></i>
       </div>
       <div class="mt-1.5">
         <strong id="kpi-net-profit" class="text-base sm:text-lg font-mono font-black text-emerald-400">0 đ</strong>
-        <p id="kpi-net-margin" class="text-[9.5px] text-emerald-400 font-bold mt-0.5">Biên ròng: 0.0%</p>
+        <p id="kpi-net-margin" class="text-[9.5px] text-emerald-400 font-bold mt-0.5 font-mono">Biên ròng: 0.0%</p>
       </div>
       <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
     </div>
 
-    <!-- KPI 4: Đối Soát Két Tiền Thực Tế -->
-    <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden">
+    <!-- KPI 3: Tỷ Lệ Food Cost (Margin Guard) -->
+    <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden">
       <div class="flex justify-between items-center text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-        <span>Két Tiền Đã Vào</span>
-        <i class="fa-solid fa-building-columns text-orange-400"></i>
+        <span>Tỷ Lệ Food Cost</span>
+        <i id="kpi-fc-icon" class="fa-solid fa-chart-pie text-sky-400 text-xs"></i>
       </div>
       <div class="mt-1.5">
-        <strong id="kpi-bank-collected" class="text-base sm:text-lg font-mono font-black text-amber-300">0 đ</strong>
-        <p id="kpi-cash-handover" class="text-[9.5px] text-slate-400 mt-0.5">Tiền ứng Bếp: 0 đ</p>
+        <strong id="kpi-food-cost-rate" class="text-base sm:text-lg font-mono font-black text-sky-400">0.0%</strong>
+        <p id="kpi-cogs-sub" class="text-[9.5px] text-slate-400 mt-0.5 font-mono">Giá vốn COGS: 0 đ</p>
       </div>
-      <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-red-500"></div>
+      <div id="kpi-fc-stripe" class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-600"></div>
+    </div>
+
+    <!-- KPI 4: Giá Trị Đơn Trung Bình (AOV Booster) -->
+    <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-sm relative overflow-hidden">
+      <div class="flex justify-between items-center text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+        <span>Giá Trị TB Đơn (AOV)</span>
+        <i class="fa-solid fa-bolt text-purple-400 text-xs"></i>
+      </div>
+      <div class="mt-1.5">
+        <strong id="kpi-aov-val" class="text-base sm:text-lg font-mono font-black text-purple-400">0 đ</strong>
+        <p class="text-[9.5px] text-purple-300/80 mt-0.5">Mục tiêu kéo vé: 70k - 100k</p>
+      </div>
+      <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-indigo-600"></div>
     </div>
 
   </div>
 
-  <!-- 4. THANH PHÂN BỔ DÒNG TIỀN DOANH THU & CẤU TRÚC GIÁ VỐN (COGS BREAKDOWN) -->
+  <!-- ======================================================================= -->
+  <!-- 4. THANH PHÂN BỔ DÒNG TIỀN DOANH THU & CẤU TRÚC KHẤU TRỪ ĐỘNG          -->
+  <!-- ======================================================================= -->
   <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-3">
     <div class="flex items-center justify-between">
       <h3 class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
         <i class="fa-solid fa-bars-progress text-amber-400"></i>
-        <span>Phân Bổ Dòng Tiền & Cấu Trúc Khấu Trừ</span>
+        <span>Phân Bổ Dòng Tiền &amp; Cấu Trúc Khấu Trừ Chi Phí</span>
       </h3>
-      <span class="text-[10px] text-slate-400 font-mono">Chuẩn kế toán F&B</span>
+      <span class="text-[10px] text-slate-400 font-mono">Hạch toán chuẩn Reverse-Pricing</span>
     </div>
 
-    <!-- Thanh tiến trình màu xếp lớp -->
+    <!-- Thanh tiến trình màu xếp lớp tự động co giãn theo tỷ lệ thực tế -->
     <div class="w-full h-3.5 rounded-full bg-slate-950 p-0.5 border border-slate-800 flex overflow-hidden">
       <div id="bar-cogs" class="bg-rose-500 h-full transition-all duration-500" style="width: 35%" title="Food Cost COGS"></div>
-      <div id="bar-subsidy" class="bg-amber-500 h-full transition-all duration-500" style="width: 10%" title="Trợ Giá Freeship"></div>
+      <div id="bar-discount" class="bg-amber-500 h-full transition-all duration-500" style="width: 5%" title="Khuyến mãi & Bù Ship"></div>
       <div id="bar-tax" class="bg-blue-500 h-full transition-all duration-500" style="width: 4.5%" title="Thuế HKD 4.5%"></div>
-      <div id="bar-fee" class="bg-purple-500 h-full transition-all duration-500" style="width: 2%" title="Phí Nền Tảng 2%"></div>
-      <div id="bar-net" class="bg-emerald-500 h-full transition-all duration-500" style="width: 48.5%" title="Lợi Nhuận Ròng"></div>
+      <div id="bar-fee" class="bg-purple-500 h-full transition-all duration-500" style="width: 5%" title="Phí Master SaaS 5%"></div>
+      <div id="bar-net" class="bg-emerald-500 h-full transition-all duration-500" style="width: 50.5%" title="Lợi Nhuận Ròng"></div>
     </div>
 
-    <!-- Chú giải các thành phần chi phí -->
+    <!-- Chú giải các thành phần chi phí động -->
     <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1 font-mono text-[10px]">
       <div class="flex items-center gap-1.5 text-slate-300">
         <span class="w-2.5 h-2.5 rounded-sm bg-rose-500 shrink-0"></span>
-        <span>Giá Vốn COGS: <strong id="lbl-cogs-val" class="text-rose-400">0%</strong></span>
+        <span>Giá Vốn COGS: <strong id="lbl-cogs-val" class="text-rose-400">0.0%</strong></span>
       </div>
       <div class="flex items-center gap-1.5 text-slate-300">
         <span class="w-2.5 h-2.5 rounded-sm bg-amber-500 shrink-0"></span>
-        <span>Bù Ship: <strong id="lbl-subsidy-val" class="text-amber-400">0%</strong></span>
+        <span>Giảm Giá/Ship: <strong id="lbl-discount-val" class="text-amber-400">0.0%</strong></span>
       </div>
       <div class="flex items-center gap-1.5 text-slate-300">
         <span class="w-2.5 h-2.5 rounded-sm bg-blue-500 shrink-0"></span>
-        <span>Thuế HKD: <strong class="text-blue-400">4.5%</strong></span>
+        <span>Thuế HKD: <strong id="lbl-tax-rate" class="text-blue-400">4.5%</strong></span>
       </div>
       <div class="flex items-center gap-1.5 text-slate-300">
         <span class="w-2.5 h-2.5 rounded-sm bg-purple-500 shrink-0"></span>
-        <span>Phí Master: <strong class="text-purple-400">2.0%</strong></span>
+        <span>Phí Master: <strong id="lbl-master-fee-rate" class="text-purple-400">5.0%</strong></span>
       </div>
       <div class="flex items-center gap-1.5 text-slate-300">
         <span class="w-2.5 h-2.5 rounded-sm bg-emerald-500 shrink-0"></span>
-        <span>Lãi Ròng: <strong id="lbl-net-val" class="text-emerald-400 font-black">0%</strong></span>
+        <span>Lãi Ròng: <strong id="lbl-net-val" class="text-emerald-400 font-black">0.0%</strong></span>
+      </div>
+    </div>
+  </div>
+  <!-- ==========================================================================
+   FILE: tab-pl.html - PHẦN [2/3]
+   BẮT ĐẦU TỪ: <!-- 5. KHUNG KIỂM TOÁN ĐIỂM HÒA VỐN VẬN HÀNH THEO NGÀY -->
+   KẾT THÚC TẠI: Hết khối bảng kiểm toán món ăn (Hết thẻ đóng </div> của Bảng món ăn)
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [1/3] của file tab-pl.html
+   ========================================================================== -->
+
+  <!-- ======================================================================= -->
+  <!-- 5. KHUNG KIỂM TOÁN ĐIỂM HÒA VỐN VẬN HÀNH THEO NGÀY (BREAK-EVEN RUN-RATE) -->
+  <!-- ======================================================================= -->
+  <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs">
+          <i class="fa-solid fa-flag-checkered"></i>
+        </div>
+        <div>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">Tiến Độ Vượt Điểm Hòa Vốn (Break-even Run-rate)</h3>
+          <p class="text-[10px] text-slate-400">Định phí ngày: Mặt bằng, khấu hao bếp, điện nước &amp; lương ca</p>
+        </div>
+      </div>
+      <span id="badge-break-even-status" class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+        Đang chạy tiến độ
+      </span>
+    </div>
+
+    <!-- Thanh tiến độ hoàn thành điểm hòa vốn -->
+    <div class="space-y-1.5">
+      <div class="flex justify-between text-[11px] font-mono">
+        <span class="text-slate-400">Số đơn hoàn thành: <strong id="lbl-be-current-orders" class="text-white">0 đơn</strong></span>
+        <span class="text-slate-400">Cần đạt: <strong id="lbl-be-target-orders" class="text-purple-400">0 đơn</strong> (<span id="lbl-be-percent" class="text-emerald-400 font-bold">0.0%</span>)</span>
+      </div>
+      <div class="w-full h-2.5 rounded-full bg-slate-950 border border-slate-800 overflow-hidden">
+        <div id="bar-break-even-progress" class="h-full bg-gradient-to-r from-purple-500 to-emerald-500 transition-all duration-500" style="width: 0%"></div>
+      </div>
+      <div class="flex justify-between text-[9.5px] text-slate-500 font-mono">
+        <span>Định phí ngày ước tính: <strong id="lbl-be-fixed-cost" class="text-slate-400">600.000 đ</strong></span>
+        <span>Lãi gộp bình quân/đơn: <strong id="lbl-be-avg-profit" class="text-slate-400">0 đ</strong></span>
       </div>
     </div>
   </div>
 
-  <!-- 5. BẢNG ĐỐI SOÁT DÒNG TIỀN TẠI BẾP & KIỂM SOÁT NỢ TẠM SHIPPER -->
-  <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-3">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-lg bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 text-xs">
-          <i class="fa-solid fa-hand-holding-dollar"></i>
+  <!-- ======================================================================= -->
+  <!-- 6. MA TRẬN 3 KÊNH BÁN HÀNG & ĐỐI SOÁT DÒNG TIỀN KÉT THỰC TẾ               -->
+  <!-- ======================================================================= -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    
+    <!-- Cột 1: Cơ Cấu 3 Kênh Bán Hàng -->
+    <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xs">
+            <i class="fa-solid fa-sitemap"></i>
+          </span>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">Cơ Cấu Doanh Thu Theo Kênh Bán</h3>
         </div>
-        <div>
-          <h3 class="text-xs font-black text-white uppercase tracking-wider">Đối Soát Tiền Ứng & Nợ Tạm Shipper Tại Bếp</h3>
-          <p class="text-[10px] text-slate-400">Mô hình: Tiền trao cháo múc • Chặn trần nợ tạm 300.000đ</p>
+        <span class="text-[10px] text-slate-400 font-mono">D2C vs POS vs App</span>
+      </div>
+
+      <div class="space-y-2 font-mono text-[11px]">
+        <!-- Kênh 1: D2C Web / Zalo Mini App -->
+        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+          <div class="space-y-0.5">
+            <span class="text-white font-bold block flex items-center gap-1.5 font-sans">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span>Kênh D2C Web / Zalo</span>
+            </span>
+            <span id="sub-channel-d2c" class="text-[9.5px] text-slate-500 block">0 đơn • AOV: 0 đ</span>
+          </div>
+          <div class="text-right">
+            <strong id="val-channel-d2c-rev" class="text-white block font-black">0 đ</strong>
+            <span id="val-channel-d2c-profit" class="text-[9.5px] text-emerald-400 block font-bold">Lãi: 0 đ</span>
+          </div>
+        </div>
+
+        <!-- Kênh 2: POS Tại Bếp / Ăn Tại Chỗ -->
+        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+          <div class="space-y-0.5">
+            <span class="text-white font-bold block flex items-center gap-1.5 font-sans">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span>Kênh POS Tại Bếp</span>
+            </span>
+            <span id="sub-channel-pos" class="text-[9.5px] text-slate-500 block">0 đơn • AOV: 0 đ</span>
+          </div>
+          <div class="text-right">
+            <strong id="val-channel-pos-rev" class="text-white block font-black">0 đ</strong>
+            <span id="val-channel-pos-profit" class="text-[9.5px] text-emerald-400 block font-bold">Lãi: 0 đ</span>
+          </div>
+        </div>
+
+        <!-- Kênh 3: App Giao Hàng Ngoài -->
+        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+          <div class="space-y-0.5">
+            <span class="text-white font-bold block flex items-center gap-1.5 font-sans">
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+              <span>Kênh App Giao Hàng</span>
+            </span>
+            <span id="sub-channel-app" class="text-[9.5px] text-slate-500 block">0 đơn • AOV: 0 đ</span>
+          </div>
+          <div class="text-right">
+            <strong id="val-channel-app-rev" class="text-white block font-black">0 đ</strong>
+            <span id="val-channel-app-profit" class="text-[9.5px] text-emerald-400 block font-bold">Lãi: 0 đ</span>
+          </div>
         </div>
       </div>
-      <span id="disp-total-debt-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-950 text-slate-400 border border-slate-800">
-        Tổng Nợ Tồn: 0 đ
-      </span>
     </div>
 
-    <!-- Bảng Dữ Liệu Shipper -->
+    <!-- Cột 2: Đối Soát Dòng Tiền Thực Tế Vào Két -->
+    <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs">
+            <i class="fa-solid fa-building-columns"></i>
+          </span>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">Đối Soát Dòng Tiền &amp; Két Thu Ngân</h3>
+        </div>
+        <span class="text-[10px] text-slate-400 font-mono">Tiền về két an toàn</span>
+      </div>
+
+      <div class="space-y-2 font-mono text-[11px]">
+        <!-- Tiền Chuyển Khoản Ngân Hàng Napas247 / MoMo -->
+        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+          <div class="space-y-0.5">
+            <span class="text-white font-bold block flex items-center gap-1.5 font-sans">
+              <i class="fa-solid fa-qrcode text-emerald-400"></i>
+              <span>Chuyển Khoản (VietQR / MoMo)</span>
+            </span>
+            <span class="text-[9.5px] text-slate-500 block">Tiền nổ ngay về tài khoản ngân hàng</span>
+          </div>
+          <strong id="val-pay-bank" class="text-amber-300 font-black text-xs">0 đ</strong>
+        </div>
+
+        <!-- Tiền Mặt Shipper Thu Hộ (COD Holding) -->
+        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+          <div class="space-y-0.5">
+            <span class="text-white font-bold block flex items-center gap-1.5 font-sans">
+              <i class="fa-solid fa-motorcycle text-sky-400"></i>
+              <span>Shipper Thu Hộ (COD Tạm Giữ)</span>
+            </span>
+            <span id="sub-shipper-cap" class="text-[9.5px] text-slate-500 block">Hạn mức khóa trần: 300.000 đ/tài xế</span>
+          </div>
+          <strong id="val-pay-cod" class="text-sky-400 font-black text-xs">0 đ</strong>
+        </div>
+
+        <!-- Tiền Mặt Tại Quầy POS -->
+        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+          <div class="space-y-0.5">
+            <span class="text-white font-bold block flex items-center gap-1.5 font-sans">
+              <i class="fa-solid fa-cash-register text-orange-400"></i>
+              <span>Tiền Mặt Tại Quầy POS</span>
+            </span>
+            <span class="text-[9.5px] text-slate-500 block">Tiền két thu ngân quản lý ca</span>
+          </div>
+          <strong id="val-pay-cash" class="text-orange-400 font-black text-xs">0 đ</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- 7. BẢNG KIỂM TOÁN MÓN ĂN ĐÓNG GÓP & CHÍNH SÁCH "KHÔNG SÚP MIỄN PHÍ"      -->
+  <!-- ======================================================================= -->
+  <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs">
+          <i class="fa-solid fa-utensils"></i>
+        </div>
+        <div>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">Kiểm Toán Đóng Góp Món Ăn &amp; Súp Booster Bán Kèm</h3>
+          <p class="text-[10px] text-slate-400">Chính sách: Tuyệt đối không phục vụ súp miễn phí • Giám sát đòn bẩy AOV</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 font-mono text-[10px]">
+        <span class="px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30">
+          🥣 Súp Booster: 12k - 18k
+        </span>
+        <span class="px-2.5 py-1 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/30">
+          🥤 Trà Đào 1L: FC &le; 20%
+        </span>
+      </div>
+    </div>
+
+    <!-- Bảng dữ liệu Top Món & Súp Booster -->
     <div class="overflow-x-auto custom-scroll">
       <table class="w-full text-left text-[11px] font-sans">
         <thead class="bg-slate-950 text-slate-400 text-[9.5px] uppercase tracking-wider font-mono border-b border-slate-800">
           <tr>
-            <th class="p-2.5 rounded-l-xl">Tài Xế Phụ Trách</th>
-            <th class="p-2.5 text-center">Đơn Đã Giao</th>
-            <th class="p-2.5 text-right">Tiền Ứng Đã Nộp Bếp</th>
-            <th class="p-2.5 text-right">Tiền Công Ship Nhận</th>
-            <th class="p-2.5 text-right rounded-r-xl">Nợ Tạm Hiện Tại</th>
+            <th class="p-2.5 rounded-l-xl">Món Ăn / Súp Booster</th>
+            <th class="p-2.5 text-center">Phân Loại</th>
+            <th class="p-2.5 text-center">Số Lượng Bán</th>
+            <th class="p-2.5 text-right">Giá Bán TB</th>
+            <th class="p-2.5 text-right">Doanh Thu</th>
+            <th class="p-2.5 text-center rounded-r-xl">Food Cost %</th>
           </tr>
         </thead>
-        <tbody id="tbl-shipper-body" class="divide-y divide-slate-800/60 font-mono text-[11px]">
+        <tbody id="tbl-top-items-body" class="divide-y divide-slate-800/60 font-mono text-[11px]">
           <tr>
-            <td colspan="5" class="p-6 text-center text-slate-500 font-sans">
-              Đang đối soát sổ cái tài chính từ Google Sheets...
+            <td colspan="6" class="p-6 text-center text-slate-500 font-sans">
+              Đang phân tích cấu trúc món ăn từ hệ thống dữ liệu đơn hàng...
             </td>
           </tr>
         </tbody>
@@ -196,321 +379,445 @@
   </div>
 
 </div>
-<script>
-/**
- * =========================================================================
- * CONTROLLER: TAB P&L FINANCIAL AUDIT & REAL-TIME CASH SETTLEMENT
- * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS Enterprise
- * Bản quyền: Bếp Thím 5 & LongHoaFood Master (2026)
- * Kiến trúc: Dynamic Config, Breakdown Allocation, Safe Fallback
- * =========================================================================
- */
-var TabPlController = (function() {
-  var currentStartDate = "";
-  var currentEndDate = "";
-  var isLoading = false;
+<!-- ==========================================================================
+   FILE: tab-pl.html - PHẦN [3/3] (HOÀN TẤT TOÀN BỘ FILE TAB P&L)
+   BẮT ĐẦU TỪ: <script> (Khai báo module TabPlController)
+   KẾT THÚC TẠI: Hết file (Thẻ đóng </script></div>)
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [2/3] để hoàn tất 100% file tab-pl.html
+   ========================================================================== -->
 
-  /**
-   * ĐỊNH DẠNG SỐ TIỀN VNĐ CHUẨN KẾ TOÁN
-   */
-  function formatMoneyVnd(amount) {
-    var val = Number(amount) || 0;
-    return val.toLocaleString("vi-VN") + " đ";
-  }
+  <!-- ========================================================================= -->
+  <!-- 8. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH P&L DÒNG TIỀN (TAB PL CONTROLLER)           -->
+  <!-- ========================================================================= -->
+  <script>
+    /**
+     * =========================================================================
+     * CONTROLLER: TAB P&L FINANCIAL AUDIT & REVERSE-PRICING DASHBOARD (v3.0 SAAS)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS Enterprise
+     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+     * Kiến trúc: Đồng bộ 4 kỳ tài chính, Cấu hình động 100%, Safe Fallback
+     * =========================================================================
+     */
+    var TabPlController = (function() {
+      var currentPeriod = "daily"; // 'daily', 'weekly', 'monthly', 'quarterly', 'allTime'
+      var cachedData = null;
+      var isLoading = false;
 
-  /**
-   * ĐỊNH DẠNG CHUỖI NGÀY YYYY-MM-DD THEO GIỜ VIỆT NAM (GMT+7)
-   */
-  function formatDateVn(dateObj) {
-    var d = new Date(dateObj.getTime() + (7 * 3600 * 1000));
-    return d.toISOString().split("T")[0];
-  }
-
-  /**
-   * CHUYỂN ĐỔI BỘ LỌC THỜI GIAN NHANH
-   */
-  function setQuickFilter(presetKey, btnElement) {
-    if (btnElement) {
-      document.querySelectorAll(".pl-filter-btn").forEach(function(b) {
-        b.className = "pl-filter-btn px-3 py-1.5 rounded-xl font-bold text-[10.5px] transition bg-slate-950 text-slate-400 border border-slate-800 hover:text-white";
-      });
-      btnElement.className = "pl-filter-btn px-3 py-1.5 rounded-xl font-bold text-[10.5px] transition bg-amber-500 text-slate-950 shadow active";
-    }
-
-    var now = new Date();
-    if (presetKey === "today") {
-      currentStartDate = formatDateVn(now);
-      currentEndDate = currentStartDate;
-    } else if (presetKey === "yesterday") {
-      var y = new Date(now.getTime() - (24 * 3600 * 1000));
-      currentStartDate = formatDateVn(y);
-      currentEndDate = currentStartDate;
-    } else if (presetKey === "7days") {
-      var past7 = new Date(now.getTime() - (7 * 24 * 3600 * 1000));
-      currentStartDate = formatDateVn(past7);
-      currentEndDate = formatDateVn(now);
-    } else if (presetKey === "thisMonth") {
-      var firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      currentStartDate = formatDateVn(firstDay);
-      currentEndDate = formatDateVn(now);
-    }
-
-    loadPlData();
-  }
-
-  /**
-   * TẢI BÁO CÁO P&L TỪ BACKEND GOOGLE APPS SCRIPT
-   */
-  async function loadPlData() {
-    if (isLoading) return;
-    isLoading = true;
-
-    var refreshIcon = document.getElementById("pl-refresh-icon");
-    if (refreshIcon) refreshIcon.classList.add("fa-spin");
-
-    try {
-      var payload = {
-        startDate: currentStartDate,
-        endDate: currentEndDate
-      };
-
-      var res = null;
-      if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
-        res = await Thim5API.callGAS("getFinancialPlSummary", payload);
+      /**
+       * ĐỊNH DẠNG SỐ TIỀN VNĐ CHUẨN KẾ TOÁN
+       */
+      function formatVnd(amount) {
+        var num = Number(amount) || 0;
+        return num.toLocaleString("vi-VN") + " đ";
       }
 
-      if (res && res.data) {
-        renderFinancialData(res.data);
-      } else {
-        renderFallbackData();
+      /**
+       * CHUYỂN ĐỔI KỲ BÁO CÁO TÀI CHÍNH TỨC THÌ TRONG 0MS
+       */
+      function switchPeriod(periodKey, btnElement) {
+        currentPeriod = periodKey;
+
+        // Cập nhật trạng thái nút bấm active
+        var allBtns = document.querySelectorAll(".pl-period-btn");
+        allBtns.forEach(function(b) {
+          b.className = "pl-period-btn px-3 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
+        });
+
+        if (btnElement) {
+          btnElement.className = "pl-period-btn px-3 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow active font-bold";
+        } else {
+          var targetBtn = document.querySelector(`.pl-period-btn[onclick*="'${periodKey}'"]`);
+          if (targetBtn) {
+            targetBtn.className = "pl-period-btn px-3 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow active font-bold";
+          }
+        }
+
+        // Render lại giao diện theo kỳ được chọn
+        if (cachedData) {
+          renderCurrentPeriodData();
+        } else {
+          loadPlData(false);
+        }
       }
-    } catch (err) {
-      console.warn("⚠️ Lỗi gọi API P&L, nạp dữ liệu an toàn:", err);
-      renderFallbackData();
-    } finally {
-      isLoading = false;
-      if (refreshIcon) refreshIcon.classList.remove("fa-spin");
-    }
-  }
 
-  /**
-   * HIỂN THỊ DỮ LIỆU TÀI CHÍNH LÊN GIAO DIỆN
-   */
-  function renderFinancialData(data) {
-    var kpi = data.kpiSummary || {};
-    var config = data.config || {};
-    var alerts = data.alerts || [];
-    var ledger = data.shipperLedger || [];
+      /**
+       * TẢI DỮ LIỆU P&L TỪ BACKEND GOOGLE APPS SCRIPT
+       */
+      async function loadPlData(forceRefresh) {
+        if (isLoading) return;
+        isLoading = true;
 
-    // 1. Cập nhật 4 thẻ KPI chính
-    var netRevEl = document.getElementById("kpi-net-revenue");
-    var grossProfitEl = document.getElementById("kpi-gross-profit");
-    var grossMarginEl = document.getElementById("kpi-gross-margin");
-    var netProfitEl = document.getElementById("kpi-net-profit");
-    var netMarginEl = document.getElementById("kpi-net-margin");
-    var bankCollectedEl = document.getElementById("kpi-bank-collected");
-    var cashHandoverEl = document.getElementById("kpi-cash-handover");
+        var refreshIcon = document.getElementById("pl-refresh-icon");
+        if (refreshIcon) refreshIcon.classList.add("fa-spin");
 
-    var netRev = Number(kpi.netRevenue) || 0;
-    var grossProfit = Number(kpi.grossProfit) || 0;
-    var netProfit = Number(kpi.netProfit) || 0;
+        try {
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+            throw new Error("Không tìm thấy kết nối Thim5API adapter!");
+          }
 
-    if (netRevEl) netRevEl.innerText = formatMoneyVnd(netRev);
-    if (grossProfitEl) grossProfitEl.innerText = formatMoneyVnd(grossProfit);
-    if (grossMarginEl) grossMarginEl.innerText = "Biên gộp: " + (kpi.grossMarginPercent || 0) + "%";
-    if (netProfitEl) netProfitEl.innerText = formatMoneyVnd(netProfit);
-    if (netMarginEl) netMarginEl.innerText = "Biên ròng: " + (kpi.netMarginPercent || 0) + "%";
-    if (bankCollectedEl) bankCollectedEl.innerText = formatMoneyVnd(kpi.cashInBankOnline || 0);
-    if (cashHandoverEl) cashHandoverEl.innerText = "Tiền ứng Bếp: " + formatMoneyVnd(kpi.cashHoldingCod || 0);
+          var payload = {
+            forceRefresh: Boolean(forceRefresh),
+            storeId: "THIM5_HOATHANH"
+          };
 
-    // 2. Tính toán & Cập nhật thanh tiến trình phân bổ dòng tiền
-    renderAllocationBar(kpi, config);
+          // Gọi đúng API Backend FinanceReport.gs
+          var res = await Thim5API.callGAS("getFinancePnLReport", payload);
 
-    // 3. Render danh sách Radar cảnh báo
-    renderAlertsList(alerts);
+          if (res && res.status === "success" && res.data) {
+            cachedData = res.data;
+            renderCurrentPeriodData();
+          } else {
+            console.warn("⚠️ Phản hồi P&L không chứa data, kích hoạt fallback an toàn:", res);
+            renderFallbackData();
+          }
+        } catch (err) {
+          console.error("Lỗi khi tải báo cáo P&L:", err);
+          renderFallbackData();
+        } finally {
+          isLoading = false;
+          if (refreshIcon) refreshIcon.classList.remove("fa-spin");
+        }
+      }
 
-    // 4. Render bảng đối soát công nợ Shipper tại Bếp
-    renderShipperLedgerTable(ledger, config);
-  }
+      /**
+       * PHÂN PHỐI RENDER TOÀN BỘ CÁC KHỐI DỮ LIỆU
+       */
+      function renderCurrentPeriodData() {
+        if (!cachedData || !cachedData.metrics) return;
 
-  /**
-   * VẼ THANH TIẾN TRÌNH PHÂN BỔ DÒNG TIỀN DOANH THU
-   */
-  function renderAllocationBar(kpi, config) {
-    var netRev = Number(kpi.netRevenue) || 1; // Tránh chia cho 0
-    var cogs = Number(kpi.totalCogs) || 0;
-    var subsidy = Number(kpi.shippingSubsidySpent) || 0;
-    var netProfit = Number(kpi.netProfit) || 0;
+        var metrics = cachedData.metrics[currentPeriod] || cachedData.metrics.daily;
+        var config = cachedData.config || {};
+        var channel = cachedData.channelBreakdown || {};
+        var payment = cachedData.paymentBreakdown || {};
+        var topItems = cachedData.topItems || {};
+        var breakEven = cachedData.breakEven || {};
 
-    var pctCogs = Math.max(0, Math.min(100, (cogs / netRev) * 100));
-    var pctSubsidy = Math.max(0, Math.min(100, (subsidy / netRev) * 100));
-    var pctTax = (config.taxRateHkd || 0.045) * 100;
-    var pctFee = (config.masterFeeRate || 0.02) * 100;
-    var pctNet = Math.max(0, Math.min(100, (netProfit / netRev) * 100));
+        // 1. Cập nhật 4 thẻ KPI cốt lõi
+        renderKpiCards(metrics);
 
-    var barCogs = document.getElementById("bar-cogs");
-    var barSubsidy = document.getElementById("bar-subsidy");
-    var barTax = document.getElementById("bar-tax");
-    var barFee = document.getElementById("bar-fee");
-    var barNet = document.getElementById("bar-net");
+        // 2. Cập nhật thanh phân bổ dòng tiền động
+        renderAllocationBar(metrics, config);
 
-    if (barCogs) barCogs.style.width = pctCogs.toFixed(1) + "%";
-    if (barSubsidy) barSubsidy.style.width = pctSubsidy.toFixed(1) + "%";
-    if (barTax) barTax.style.width = pctTax.toFixed(1) + "%";
-    if (barFee) barFee.style.width = pctFee.toFixed(1) + "%";
-    if (barNet) barNet.style.width = pctNet.toFixed(1) + "%";
+        // 3. Cập nhật khối Điểm Hòa Vốn
+        renderBreakEvenWidget(breakEven, metrics);
 
-    var lblCogs = document.getElementById("lbl-cogs-val");
-    var lblSubsidy = document.getElementById("lbl-subsidy-val");
-    var lblNet = document.getElementById("lbl-net-val");
+        // 4. Cập nhật cơ cấu Kênh Bán & Két Tiền
+        renderChannelAndPayment(channel, payment, config);
 
-    if (lblCogs) lblCogs.innerText = pctCogs.toFixed(1) + "%";
-    if (lblSubsidy) lblSubsidy.innerText = pctSubsidy.toFixed(1) + "%";
-    if (lblNet) lblNet.innerText = pctNet.toFixed(1) + "%";
-  }
+        // 5. Cập nhật bảng kiểm toán món & súp booster
+        renderTopItemsTable(topItems);
 
-  /**
-   * RENDER DANH SÁCH RADAR CẢNH BÁO TÀI CHÍNH
-   */
-  function renderAlertsList(alerts) {
-    var container = document.getElementById("pl-alerts-box");
-    if (!container) return;
+        // 6. Cập nhật Radar cảnh báo rủi ro tài chính
+        renderAlerts(metrics, config);
+      }
 
-    if (!alerts || alerts.length === 0) {
-      container.innerHTML = "";
-      return;
-    }
+      /**
+       * 1. RENDER 4 THẺ KPI TÀI CHÍNH
+       */
+      function renderKpiCards(m) {
+        var netRevEl = document.getElementById("kpi-net-revenue");
+        var orderCountEl = document.getElementById("kpi-order-count-sub");
+        var netProfitEl = document.getElementById("kpi-net-profit");
+        var netMarginEl = document.getElementById("kpi-net-margin");
+        var fcRateEl = document.getElementById("kpi-food-cost-rate");
+        var cogsSubEl = document.getElementById("kpi-cogs-sub");
+        var aovEl = document.getElementById("kpi-aov-val");
+        var fcIcon = document.getElementById("kpi-fc-icon");
+        var fcStripe = document.getElementById("kpi-fc-stripe");
 
-    var html = "";
-    alerts.forEach(function(a) {
-      var isDanger = (a.type === "DANGER" || a.type === "CRITICAL");
-      var isWarning = (a.type === "WARNING");
-      
-      var borderClass = isDanger ? "border-rose-500/50 bg-rose-500/10 text-rose-300" 
-                      : (isWarning ? "border-amber-500/50 bg-amber-500/10 text-amber-300" 
-                      : "border-emerald-500/50 bg-emerald-500/10 text-emerald-300");
-      var iconClass = isDanger ? "fa-triangle-exclamation text-rose-400" 
-                    : (isWarning ? "fa-circle-exclamation text-amber-400" 
-                    : "fa-shield-check text-emerald-400");
+        if (netRevEl) netRevEl.innerText = formatVnd(m.totalRevenue);
+        if (orderCountEl) orderCountEl.innerText = "Tổng số: " + m.orderCount + " đơn hoàn thành";
+        if (netProfitEl) netProfitEl.innerText = formatVnd(m.netProfit);
+        if (netMarginEl) netMarginEl.innerText = "Biên ròng: " + (m.netProfitRate || 0) + "%";
+        if (fcRateEl) fcRateEl.innerText = (m.foodCostRate || 0) + "%";
+        if (cogsSubEl) cogsSubEl.innerText = "Giá vốn COGS: " + formatVnd(m.cogsAmount);
+        if (aovEl) aovEl.innerText = formatVnd(m.aov);
 
-      html += `
-        <div class="p-3 rounded-2xl border ${borderClass} flex items-start gap-2.5 shadow-sm text-xs">
-          <i class="fa-solid ${iconClass} text-sm mt-0.5 shrink-0"></i>
-          <div class="space-y-0.5 min-w-0">
-            <strong class="font-black tracking-wide block">${a.title}</strong>
-            <p class="text-[11px] opacity-90 leading-relaxed">${a.message}</p>
-          </div>
-        </div>
-      `;
-    });
+        // Đổi màu cảnh báo Food Cost Margin Guard
+        var fc = Number(m.foodCostRate) || 0;
+        if (fc > 45) {
+          if (fcRateEl) fcRateEl.className = "text-base sm:text-lg font-mono font-black text-rose-400 animate-pulse";
+          if (fcIcon) fcIcon.className = "fa-solid fa-triangle-exclamation text-rose-400 text-xs";
+          if (fcStripe) fcStripe.className = "absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-red-600";
+        } else if (fc > 38) {
+          if (fcRateEl) fcRateEl.className = "text-base sm:text-lg font-mono font-black text-amber-400";
+          if (fcIcon) fcIcon.className = "fa-solid fa-chart-pie text-amber-400 text-xs";
+          if (fcStripe) fcStripe.className = "absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500";
+        } else {
+          if (fcRateEl) fcRateEl.className = "text-base sm:text-lg font-mono font-black text-sky-400";
+          if (fcIcon) fcIcon.className = "fa-solid fa-chart-pie text-sky-400 text-xs";
+          if (fcStripe) fcStripe.className = "absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-600";
+        }
+      }
 
-    container.innerHTML = html;
-  }
+      /**
+       * 2. VẼ THANH PHÂN BỔ DÒNG TIỀN DOANH THU ĐỘNG 100%
+       */
+      function renderAllocationBar(m, cfg) {
+        var rev = Number(m.totalRevenue) || 1;
+        var cogs = Number(m.cogsAmount) || 0;
+        var discount = (Number(m.discountAmount) || 0) + (Number(m.shippingFee) || 0);
+        var netProfit = Number(m.netProfit) || 0;
 
-  /**
-   * RENDER BẢNG ĐỐI SOÁT CÔNG NỢ TẠM SHIPPER TẠI BẾP
-   */
-  function renderShipperLedgerTable(ledger, config) {
-    var tbody = document.getElementById("tbl-shipper-body");
-    var debtBadge = document.getElementById("disp-total-debt-badge");
-    if (!tbody) return;
+        // Đọc cấu hình động từ SYS_CONFIG (Không hard-code)
+        var masterFeeRate = (cfg.platformMasterFee !== undefined) ? Number(cfg.platformMasterFee) : 0.05;
+        var taxRateHkd = (cfg.taxRateHkd !== undefined) ? Number(cfg.taxRateHkd) : 0.045;
 
-    if (!ledger || ledger.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="5" class="p-6 text-center text-slate-500 font-sans">
-            Không phát sinh giao dịch nhận món nào trong khoảng thời gian này.
-          </td>
-        </tr>
-      `;
-      if (debtBadge) debtBadge.innerText = "Tổng Nợ Tồn: 0 đ";
-      return;
-    }
+        var pctCogs = Math.max(0, Math.min(100, (cogs / rev) * 100));
+        var pctDiscount = Math.max(0, Math.min(100, (discount / rev) * 100));
+        var pctTax = taxRateHkd * 100;
+        var pctFee = masterFeeRate * 100;
+        var pctNet = Math.max(0, Math.min(100, (netProfit / rev) * 100));
 
-    var maxDebtCap = config.maxCodHoldingPerShipper || 300000;
-    var totalOutstandingDebt = 0;
-    var html = "";
+        var barCogs = document.getElementById("bar-cogs");
+        var barDiscount = document.getElementById("bar-discount");
+        var barTax = document.getElementById("bar-tax");
+        var barFee = document.getElementById("bar-fee");
+        var barNet = document.getElementById("bar-net");
 
-    ledger.forEach(function(item) {
-      var netHolding = Number(item.netCashHolding) || 0;
-      totalOutstandingDebt += netHolding;
+        if (barCogs) barCogs.style.width = pctCogs.toFixed(1) + "%";
+        if (barDiscount) barDiscount.style.width = pctDiscount.toFixed(1) + "%";
+        if (barTax) barTax.style.width = pctTax.toFixed(1) + "%";
+        if (barFee) barFee.style.width = pctFee.toFixed(1) + "%";
+        if (barNet) barNet.style.width = pctNet.toFixed(1) + "%";
 
-      var isExceeded = (netHolding > maxDebtCap);
-      var debtColorClass = isExceeded ? "text-rose-400 font-black" : (netHolding > 0 ? "text-amber-400 font-bold" : "text-emerald-400");
+        var lblCogs = document.getElementById("lbl-cogs-val");
+        var lblDiscount = document.getElementById("lbl-discount-val");
+        var lblTax = document.getElementById("lbl-tax-rate");
+        var lblFee = document.getElementById("lbl-master-fee-rate");
+        var lblNet = document.getElementById("lbl-net-val");
 
-      html += `
-        <tr class="hover:bg-slate-800/40 transition">
-          <td class="p-2.5 font-sans font-bold text-white flex items-center gap-2">
-            <div class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-amber-400">
-              <i class="fa-solid fa-motorcycle"></i>
+        if (lblCogs) lblCogs.innerText = pctCogs.toFixed(1) + "%";
+        if (lblDiscount) lblDiscount.innerText = pctDiscount.toFixed(1) + "%";
+        if (lblTax) lblTax.innerText = pctTax.toFixed(1) + "%";
+        if (lblFee) lblFee.innerText = pctFee.toFixed(1) + "%";
+        if (lblNet) lblNet.innerText = pctNet.toFixed(1) + "%";
+      }
+
+      /**
+       * 3. RENDER TIẾN ĐỘ ĐIỂM HÒA VỐN THEO NGÀY
+       */
+      function renderBreakEvenWidget(be, m) {
+        var currentOrders = m.orderCount || 0;
+        var targetOrders = be.breakEvenOrderCount || 24;
+        var fixedCost = be.dailyFixedCost || 600000;
+        var avgProfit = be.avgNetProfitPerOrder || (currentOrders > 0 ? Math.round(m.netProfit / currentOrders) : 25000);
+
+        var pct = targetOrders > 0 ? Math.min(100, (currentOrders / targetOrders) * 100) : 0;
+        var isPassed = (currentOrders >= targetOrders && targetOrders > 0);
+
+        var badge = document.getElementById("badge-break-even-status");
+        var bar = document.getElementById("bar-break-even-progress");
+        var lblCur = document.getElementById("lbl-be-current-orders");
+        var lblTgt = document.getElementById("lbl-be-target-orders");
+        var lblPct = document.getElementById("lbl-be-percent");
+        var lblFc = document.getElementById("lbl-be-fixed-cost");
+        var lblProf = document.getElementById("lbl-be-avg-profit");
+
+        if (lblCur) lblCur.innerText = currentOrders + " đơn";
+        if (lblTgt) lblTgt.innerText = targetOrders + " đơn";
+        if (lblPct) lblPct.innerText = pct.toFixed(1) + "%";
+        if (bar) bar.style.width = pct.toFixed(1) + "%";
+        if (lblFc) lblFc.innerText = formatVnd(fixedCost);
+        if (lblProf) lblProf.innerText = formatVnd(avgProfit);
+
+        if (badge) {
+          if (isPassed) {
+            badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30";
+            badge.innerText = "🎉 Đã Vượt Hòa Vốn!";
+          } else {
+            badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30";
+            badge.innerText = "Thiếu " + (targetOrders - currentOrders) + " đơn để hòa vốn";
+          }
+        }
+      }
+
+      /**
+       * 4. RENDER CƠ CẤU 3 KÊNH BÁN & ĐỐI SOÁT DÒNG TIỀN KÉT
+       */
+      function renderChannelAndPayment(ch, pay, cfg) {
+        var d2c = ch.d2cWeb || {};
+        var pos = ch.posKitchen || {};
+        var app = ch.deliveryPartner || {};
+
+        var valD2cRev = document.getElementById("val-channel-d2c-rev");
+        var valD2cProf = document.getElementById("val-channel-d2c-profit");
+        var subD2c = document.getElementById("sub-channel-d2c");
+
+        var valPosRev = document.getElementById("val-channel-pos-rev");
+        var valPosProf = document.getElementById("val-channel-pos-profit");
+        var subPos = document.getElementById("sub-channel-pos");
+
+        var valAppRev = document.getElementById("val-channel-app-rev");
+        var valAppProf = document.getElementById("val-channel-app-profit");
+        var subApp = document.getElementById("sub-channel-app");
+
+        if (valD2cRev) valD2cRev.innerText = formatVnd(d2c.totalRevenue || 0);
+        if (valD2cProf) valD2cProf.innerText = "Lãi: " + formatVnd(d2c.netProfit || 0);
+        if (subD2c) subD2c.innerText = (d2c.orderCount || 0) + " đơn • AOV: " + formatVnd(d2c.aov || 0);
+
+        if (valPosRev) valPosRev.innerText = formatVnd(pos.totalRevenue || 0);
+        if (valPosProf) valPosProf.innerText = "Lãi: " + formatVnd(pos.netProfit || 0);
+        if (subPos) subPos.innerText = (pos.orderCount || 0) + " đơn • AOV: " + formatVnd(pos.aov || 0);
+
+        if (valAppRev) valAppRev.innerText = formatVnd(app.totalRevenue || 0);
+        if (valAppProf) valAppProf.innerText = "Lãi: " + formatVnd(app.netProfit || 0);
+        if (subApp) subApp.innerText = (app.orderCount || 0) + " đơn • AOV: " + formatVnd(app.aov || 0);
+
+        var valBank = document.getElementById("val-pay-bank");
+        var valCod = document.getElementById("val-pay-cod");
+        var valCash = document.getElementById("val-pay-cash");
+        var subShipper = document.getElementById("sub-shipper-cap");
+
+        if (valBank) valBank.innerText = formatVnd(pay.bankTransfer || 0);
+        if (valCod) valCod.innerText = formatVnd(pay.shipperCod || 0);
+        if (valCash) valCash.innerText = formatVnd(pay.cashPos || 0);
+        if (subShipper) {
+          subShipper.innerText = "Khóa trần nợ: " + formatVnd(cfg.maxCodHoldingPerShipper || 300000) + "/tài xế";
+        }
+      }
+
+      /**
+       * 5. RENDER BẢNG KIỂM TOÁN MÓN ĂN & SÚP BOOSTER
+       */
+      function renderTopItemsTable(topItems) {
+        var tbody = document.getElementById("tbl-top-items-body");
+        if (!tbody) return;
+
+        var items = topItems.allRanked || [];
+        if (items.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="p-6 text-center text-slate-500 font-sans">
+                Chưa có dữ liệu món ăn được ghi nhận trong kỳ tài chính này.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        var html = "";
+        items.forEach(function(it) {
+          var typeBadge = '<span class="px-2 py-0.5 rounded text-[9.5px] bg-slate-800 text-slate-300">Chủ Lực</span>';
+          if (it.itemType === "BOOSTER_SOUP") {
+            typeBadge = '<span class="px-2 py-0.5 rounded text-[9.5px] bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold">🥣 Súp Booster</span>';
+          } else if (it.itemType === "DRINK_1L") {
+            typeBadge = '<span class="px-2 py-0.5 rounded text-[9.5px] bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold">🥤 Nước 1L</span>';
+          } else if (it.itemType === "COMBO_EXCLUSIVE") {
+            typeBadge = '<span class="px-2 py-0.5 rounded text-[9.5px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">🍱 Combo D2C</span>';
+          }
+
+          var fcColor = (it.foodCostRate > 45) ? "text-rose-400 font-black" : (it.foodCostRate > 38 ? "text-amber-400 font-bold" : "text-emerald-400 font-bold");
+
+          html += `
+            <tr class="hover:bg-slate-800/40 transition">
+              <td class="p-2.5 font-sans font-bold text-white flex items-center gap-2">
+                <span class="font-mono text-amber-400 text-[10px]">${it.code}</span>
+                <span class="truncate max-w-[180px]">${it.name}</span>
+              </td>
+              <td class="p-2.5 text-center">${typeBadge}</td>
+              <td class="p-2.5 text-center text-slate-200 font-bold">${it.quantity}</td>
+              <td class="p-2.5 text-right text-slate-400">${formatVnd(it.avgPrice)}</td>
+              <td class="p-2.5 text-right text-emerald-400 font-bold">${formatVnd(it.revenue)}</td>
+              <td class="p-2.5 text-center ${fcColor}">${it.foodCostRate}%</td>
+            </tr>
+          `;
+        });
+
+        tbody.innerHTML = html;
+      }
+
+      /**
+       * 6. RENDER RADAR CẢNH BÁO TÀI CHÍNH
+       */
+      function renderAlerts(m, cfg) {
+        var container = document.getElementById("pl-alerts-box");
+        if (!container) return;
+
+        var alerts = [];
+        var fc = Number(m.foodCostRate) || 0;
+        var maxFc = (cfg.foodCostWarningThreshold !== undefined) ? Number(cfg.foodCostWarningThreshold) * 100 : 45.0;
+
+        if (fc > maxFc) {
+          alerts.push({
+            type: "DANGER",
+            title: "CẢNH BÁO: FOOD COST VI PHẠM NGƯỠNG TRẦN (" + fc + "% > " + maxFc + "%)",
+            message: "Tỷ lệ giá vốn đang ăn mòn dòng tiền ròng của quán! Cần kiểm tra lại định lượng nguyên liệu xá xíu, tóp mỡ hoặc tăng giá bán D2C."
+          });
+        }
+
+        if (m.aov > 0 && m.aov < 65000) {
+          alerts.push({
+            type: "WARNING",
+            title: "CẢNH BÁO AOV THẤP (" + formatVnd(m.aov) + " < 70.000 đ)",
+            message: "Khách hàng đang mua đơn giá trị thấp. Nhắc nhở nhân viên tích cực mời thêm Súp Booster (12k - 18k) hoặc Trà Đào 1L để kéo vé đạt mục tiêu."
+          });
+        }
+
+        if (alerts.length === 0) {
+          container.innerHTML = "";
+          return;
+        }
+
+        var html = "";
+        alerts.forEach(function(a) {
+          var isDanger = (a.type === "DANGER");
+          var borderClass = isDanger ? "border-rose-500/50 bg-rose-500/10 text-rose-300" : "border-amber-500/50 bg-amber-500/10 text-amber-300";
+          var iconClass = isDanger ? "fa-triangle-exclamation text-rose-400" : "fa-circle-exclamation text-amber-400";
+
+          html += `
+            <div class="p-3 rounded-2xl border ${borderClass} flex items-start gap-2.5 shadow-sm text-xs">
+              <i class="fa-solid ${iconClass} text-sm mt-0.5 shrink-0"></i>
+              <div class="space-y-0.5 min-w-0">
+                <strong class="font-black tracking-wide block">${a.title}</strong>
+                <p class="text-[11px] opacity-90 leading-relaxed">${a.message}</p>
+              </div>
             </div>
-            <span>${item.shipperLabel}</span>
-          </td>
-          <td class="p-2.5 text-center text-slate-300">${item.completedOrders} đơn</td>
-          <td class="p-2.5 text-right text-emerald-400">${formatMoneyVnd(item.totalCashCollected)}</td>
-          <td class="p-2.5 text-right text-slate-300">${formatMoneyVnd(item.totalShipFeeEarned)}</td>
-          <td class="p-2.5 text-right ${debtColorClass}">
-            ${formatMoneyVnd(netHolding)}
-            ${isExceeded ? '<span class="text-[9px] block text-rose-400 uppercase font-sans">Vượt Trần!</span>' : ''}
-          </td>
-        </tr>
-      `;
-    });
+          `;
+        });
 
-    tbody.innerHTML = html;
-    if (debtBadge) {
-      debtBadge.innerText = "Tổng Nợ Tồn: " + formatMoneyVnd(totalOutstandingDebt);
-      if (totalOutstandingDebt > 0) {
-        debtBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
-      } else {
-        debtBadge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+        container.innerHTML = html;
       }
-    }
-  }
 
-  /**
-   * DỮ LIỆU MẪU DỰ PHÒNG AN TOÀN KHI MẤT MẠNG TẠM THỜI
-   */
-  function renderFallbackData() {
-    renderFinancialData({
-      kpiSummary: {
-        totalCompletedOrders: 0,
-        grossFoodSales: 0,
-        shippingCollected: 0,
-        shippingSubsidySpent: 0,
-        netRevenue: 0,
-        totalCogs: 0,
-        grossProfit: 0,
-        grossMarginPercent: 0,
-        netProfit: 0,
-        netMarginPercent: 0,
-        cashInBankOnline: 0,
-        cashHoldingCod: 0
-      },
-      config: {
-        taxRateHkd: 0.045,
-        masterFeeRate: 0.02,
-        maxCodHoldingPerShipper: 300000
-      },
-      cogsDetails: {},
-      shipperLedger: [],
-      alerts: [{
-        type: "SUCCESS",
-        code: "SYSTEM_READY",
-        title: "Hệ Thống Sẵn Sàng Kết Nối",
-        message: "Chưa ghi nhận dữ liệu doanh thu mới trong ngày. Mời chọn mốc thời gian khác để xem đối soát."
-      }]
-    });
-  }
+      /**
+       * DỮ LIỆU DỰ PHÒNG AN TOÀN KHI MẤT KẾT NỐI
+       */
+      function renderFallbackData() {
+        cachedData = {
+          config: {
+            platformMasterFee: 0.05,
+            taxRateHkd: 0.045,
+            foodCostWarningThreshold: 0.45,
+            maxCodHoldingPerShipper: 300000
+          },
+          metrics: {
+            daily: { periodName: "Hôm Nay", orderCount: 0, totalRevenue: 0, subtotal: 0, discountAmount: 0, shippingFee: 0, cogsAmount: 0, masterFee: 0, taxHkd: 0, netProfit: 0, aov: 0, foodCostRate: 0, netProfitRate: 0, isWarning: false },
+            weekly: { periodName: "Tuần Này", orderCount: 0, totalRevenue: 0, subtotal: 0, discountAmount: 0, shippingFee: 0, cogsAmount: 0, masterFee: 0, taxHkd: 0, netProfit: 0, aov: 0, foodCostRate: 0, netProfitRate: 0, isWarning: false },
+            monthly: { periodName: "Tháng Này", orderCount: 0, totalRevenue: 0, subtotal: 0, discountAmount: 0, shippingFee: 0, cogsAmount: 0, masterFee: 0, taxHkd: 0, netProfit: 0, aov: 0, foodCostRate: 0, netProfitRate: 0, isWarning: false },
+            quarterly: { periodName: "Quý Này", orderCount: 0, totalRevenue: 0, subtotal: 0, discountAmount: 0, shippingFee: 0, cogsAmount: 0, masterFee: 0, taxHkd: 0, netProfit: 0, aov: 0, foodCostRate: 0, netProfitRate: 0, isWarning: false },
+            allTime: { periodName: "Toàn Thời Gian", orderCount: 0, totalRevenue: 0, subtotal: 0, discountAmount: 0, shippingFee: 0, cogsAmount: 0, masterFee: 0, taxHkd: 0, netProfit: 0, aov: 0, foodCostRate: 0, netProfitRate: 0, isWarning: false }
+          },
+          channelBreakdown: {
+            d2cWeb: { channelName: "Kênh D2C Web / Zalo", orderCount: 0, totalRevenue: 0, cogsAmount: 0, netProfit: 0, aov: 0 },
+            posKitchen: { channelName: "Kênh POS Tại Bếp", orderCount: 0, totalRevenue: 0, cogsAmount: 0, netProfit: 0, aov: 0 },
+            deliveryPartner: { channelName: "Kênh App Giao Hàng", orderCount: 0, totalRevenue: 0, cogsAmount: 0, netProfit: 0, aov: 0 }
+          },
+          paymentBreakdown: { bankTransfer: 0, shipperCod: 0, cashPos: 0 },
+          topItems: { allRanked: [], topDishes: [], boosterSoups: [] },
+          breakEven: { dailyFixedCost: 600000, avgNetProfitPerOrder: 25000, breakEvenOrderCount: 24, currentOrderCount: 0, currentProgressPercent: 0, isPassedBreakEven: false }
+        };
+        renderCurrentPeriodData();
+      }
 
-  // TỰ ĐỘNG KHỞI CHẠY KHI COMPONENT ĐƯỢC NẠP VÀO DOM
-  setTimeout(function() {
-    setQuickFilter("today", null);
-  }, 100);
+      // Tự động tải dữ liệu khi component được nạp vào DOM
+      setTimeout(function() {
+        loadPlData(false);
+      }, 100);
 
-  return {
-    setQuickFilter: setQuickFilter,
-    loadPlData: loadPlData
-  };
-})();
-</script>
+      return {
+        switchPeriod: switchPeriod,
+        loadPlData: loadPlData
+      };
+    })();
+  </script>
+</div>
