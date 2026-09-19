@@ -1,9 +1,15 @@
+<!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [1/6]
+   BẮT ĐẦU TỪ: <!DOCTYPE html>
+   KẾT THÚC TẠI: Hết khối Modal Xác Thực Phân Tầng (#auth-modal-overlay)
+   HƯỚNG DẪN: Tạo file admin-shell.html và dán đoạn mã này vào đầu tiên.
+   ========================================================================== -->
 <!DOCTYPE html>
 <html lang="vi" class="dark h-full bg-slate-950 text-slate-100">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Bếp Thím 5 • Control Plane OS (v2.9 Enterprise)</title>
+  <title>Bếp Thím 5 • Control Plane OS (v3.0 SaaS Enterprise)</title>
   
   <!-- CDN Tailwind CSS v3 & FontAwesome Pro Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,6 +26,9 @@
               850: '#131c2e',
               900: '#0f172a',
               950: '#020617'
+            },
+            amber: {
+              450: '#f59e0b'
             }
           }
         }
@@ -28,10 +37,10 @@
   </script>
 
   <!-- Nạp Adapter Kết Nối Trung Tâm Headless SaaS -->
-  <script src="api.js?v=20260917"></script>
+  <script src="api.js?v=20260919"></script>
 
   <style>
-    /* Thanh cuộn tinh chỉnh chuẩn UI Cao Cấp */
+    /* Thanh cuộn tinh chỉnh chuẩn UI Cao Cấp Dark Mode */
     .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scroll::-webkit-scrollbar-track { background: #020617; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
@@ -55,7 +64,7 @@
   <div id="auth-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4">
     <div class="relative bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden p-6 space-y-5 animate-in zoom-in-95 duration-200 text-center">
       
-      <!-- Biểu tượng Thương Hiệu Hoàng Gia -->
+      <!-- Biểu tượng Thương Hiệu Hoàng Gia Bếp Thím 5 -->
       <div class="space-y-1.5">
         <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mx-auto shadow-inner shadow-amber-500/20">
           <i class="fa-solid fa-crown"></i>
@@ -69,7 +78,7 @@
         <button type="button" 
                 id="tab-btn-pin" 
                 onclick="AdminShellController.switchAuthMode('PIN')" 
-                class="flex-1 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow">
+                class="flex-1 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow font-bold">
           <i class="fa-solid fa-key text-[10px] mr-1"></i> Quản Lý (PIN)
         </button>
         <button type="button" 
@@ -89,7 +98,7 @@
                placeholder="••••" 
                class="w-full bg-slate-950 border border-slate-800 rounded-2xl py-2.5 text-center font-mono text-xl font-black tracking-widest text-amber-400 outline-none select-none shadow-inner" />
 
-        <!-- Numpad Cảm Ứng -->
+        <!-- Numpad Cảm Ứng Bọc Thép -->
         <div class="grid grid-cols-3 gap-2 font-mono font-bold text-base max-w-[240px] mx-auto">
           <button type="button" onclick="AdminShellController.appendPinDigit('1')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">1</button>
           <button type="button" onclick="AdminShellController.appendPinDigit('2')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">2</button>
@@ -144,126 +153,147 @@
 
     </div>
   </div>
+<!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [2/6]
+   BẮT ĐẦU TỪ: <!-- 2. THANH ĐIỀU HÀNH TỔNG (TOPBAR) -->
+   KẾT THÚC TẠI: Hết thẻ đóng </aside> của thanh Sidebar điều hướng
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [1/6]
+   ========================================================================== -->
 
   <!-- ========================================================================= -->
-    <!-- 2. THANH ĐIỀU HÀNH TỔNG (TOPBAR & SYSTEM HEARTBEAT LATENCY)                 -->
-    <!-- ========================================================================= -->
-    <header class="h-14 bg-slate-900 border-b border-slate-800 px-3 sm:px-6 flex items-center justify-between shrink-0 z-30">
-        
-        <!-- Cụm Trái: Menu Hamburger Mobile & Tên Hệ Điều Hành -->
-        <div class="flex items-center gap-3">
-            <button type="button" 
-                    onclick="AdminShellController.toggleSidebar()" 
-                    class="md:hidden p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition active:scale-95">
-                <i class="fa-solid fa-bars text-sm"></i>
-            </button>
+  <!-- 2. THANH ĐIỀU HÀNH TỔNG (TOPBAR & SYSTEM HEARTBEAT LATENCY)                 -->
+  <!-- ========================================================================= -->
+  <header class="h-14 bg-slate-900 border-b border-slate-800 px-3 sm:px-6 flex items-center justify-between shrink-0 z-30">
+      
+      <!-- Cụm Trái: Menu Hamburger Mobile & Tên Hệ Điều Hành -->
+      <div class="flex items-center gap-3">
+          <button type="button" 
+                  onclick="AdminShellController.toggleSidebar()" 
+                  class="md:hidden p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition active:scale-95">
+              <i class="fa-solid fa-bars text-sm"></i>
+          </button>
 
-            <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-red-600 flex items-center justify-center text-slate-950 font-black text-xs shadow-md shadow-amber-500/10">
-                    T5
-                </span>
-                <div class="hidden sm:block">
-                    <h2 class="text-xs font-black text-white tracking-wide uppercase">LongHoaFood Master</h2>
-                    <p class="text-[10px] text-slate-400 font-mono">Control Plane v2.9 Enterprise</p>
-                </div>
-            </div>
-        </div>
+          <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-red-600 flex items-center justify-center text-slate-950 font-black text-xs shadow-md shadow-amber-500/10">
+                  T5
+              </span>
+              <div class="hidden sm:block">
+                  <h2 class="text-xs font-black text-white tracking-wide uppercase">LongHoaFood Master</h2>
+                  <p class="text-[10px] text-slate-400 font-mono">Control Plane v3.0 SaaS Enterprise</p>
+              </div>
+          </div>
+      </div>
 
-        <!-- Cụm Phải: Nút Công Tắc Trạng Thái Quán, Heartbeat & Profile -->
-        <div class="flex items-center gap-2 sm:gap-3">
-            
-            <!-- CÔNG TẮC ĐÓNG/MỞ CỬA BẾP THỜI GIAN THỰC (LEVEL 2) -->
-            <button type="button" 
-                    id="btn-store-status-toggle" 
-                    onclick="AdminStoreControl.openToggleModal()" 
-                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 active:scale-95">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="dot-store-status"></span>
-                <span id="txt-store-status" class="tracking-tight">🟢 ĐANG MỞ CỬA</span>
-            </button>
+      <!-- Cụm Phải: Công Tắc Đóng/Mở Bếp, Chỉ Báo Vai Trò & Heartbeat -->
+      <div class="flex items-center gap-2 sm:gap-3">
+          
+          <!-- CÔNG TẮC ĐÓNG/MỞ CỬA BẾP THỜI GIAN THỰC (LEVEL 2) -->
+          <button type="button" 
+                  id="btn-store-status-toggle" 
+                  onclick="AdminStoreControl.openToggleModal()" 
+                  class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 active:scale-95">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="dot-store-status"></span>
+              <span id="txt-store-status" class="tracking-tight">🟢 ĐANG MỞ CỬA</span>
+          </button>
 
-            <!-- Trạng Thái Mạng Heartbeat Latency -->
-            <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono text-slate-400">
-                <i class="fa-solid fa-wifi text-[10px] text-emerald-400"></i>
-                <span id="disp-heartbeat-latency">12ms</span>
-            </div>
+          <!-- Huy Hiệu Quyền Hạn Đang Đăng Nhập -->
+          <div id="user-role-badge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <i class="fa-solid fa-user-shield text-[10px]"></i>
+              <span id="user-role-text">POS_STAFF</span>
+          </div>
 
-            <!-- Nút Làm Mới Nhanh Dữ Liệu -->
-            <button type="button" 
-                    onclick="AdminShellController.refreshCurrentTab()" 
-                    class="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition active:scale-95" 
-                    title="Tải lại tab hiện tại">
-                <i class="fa-solid fa-rotate-right text-xs"></i>
-            </button>
+          <!-- Trạng Thái Mạng Heartbeat Latency Thực Tế -->
+          <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono text-slate-400">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 heartbeat-active" id="heartbeat-indicator"></span>
+              <span id="heartbeat-status">GAS Connected</span>
+              <span id="heartbeat-latency" class="text-emerald-400 font-medium">12ms</span>
+          </div>
 
-        </div>
+          <!-- Nút Làm Mới Nhanh Dữ Liệu -->
+          <button type="button" 
+                  onclick="AdminShellController.refreshCurrentTab()" 
+                  class="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition active:scale-95" 
+                  title="Tải lại tab hiện tại">
+              <i class="fa-solid fa-rotate-right text-xs"></i>
+          </button>
 
-    </header>
+          <!-- Nút Đăng Xuất -->
+          <button type="button" 
+                  onclick="AdminShellController.handleLogout()" 
+                  class="p-2 rounded-xl bg-slate-950 border border-slate-800 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition active:scale-95" 
+                  title="Đăng xuất ca làm việc">
+              <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+          </button>
 
-    <!-- ========================================================================= -->
-    <!-- MODAL POPUP CẬP NHẬT TRẠNG THÁI HOẠT ĐỘNG CỦA QUÁN (LEVEL 2)             -->
-    <!-- ========================================================================= -->
-    <div id="modal-store-status-toggle" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-2xl animate-in zoom-in-95 duration-150">
-            
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-sm shadow-inner">
-                        <i class="fa-solid fa-power-off"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-black uppercase text-white tracking-wider">Trạng Thái Tiếp Nhận Đơn</h4>
-                        <p class="text-[10px] text-slate-400">Đồng bộ tức thì lên Mặt Tiền D2C</p>
-                    </div>
-                </div>
-                <button type="button" onclick="AdminStoreControl.closeToggleModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
+      </div>
 
-            <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block text-[11px] text-slate-400 mb-1.5 font-bold">Lựa chọn trạng thái:</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" 
-                                id="opt-status-open" 
-                                onclick="AdminStoreControl.selectTargetStatus('OPEN')" 
-                                class="p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-1.5 transition">
-                            <i class="fa-solid fa-door-open"></i> Mở Bếp Nhận Đơn
-                        </button>
-                        <button type="button" 
-                                id="opt-status-closed" 
-                                onclick="AdminStoreControl.selectTargetStatus('CLOSED')" 
-                                class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition hover:border-rose-500/40">
-                            <i class="fa-solid fa-door-closed"></i> Tạm Nghỉ Quán
-                        </button>
-                    </div>
-                </div>
+  </header>
 
-                <div id="box-closed-note" class="space-y-1.5 hidden">
-                    <label class="block text-[11px] text-slate-400 font-bold">Lý do / Hẹn giờ mở lại:</label>
-                    <input type="text" 
-                           id="inp-closed-message" 
-                           placeholder="VD: Nghỉ trưa ca 13h30-16h30, hẹn gặp lại quý khách!" 
-                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-                </div>
-            </div>
+  <!-- ========================================================================= -->
+  <!-- MODAL POPUP CẬP NHẬT TRẠNG THÁI HOẠT ĐỘNG CỦA QUÁN (LEVEL 2)             -->
+  <!-- ========================================================================= -->
+  <div id="modal-store-status-toggle" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+      <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-2xl animate-in zoom-in-95 duration-150">
+          
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-sm shadow-inner">
+                      <i class="fa-solid fa-power-off"></i>
+                  </div>
+                  <div>
+                      <h4 class="text-xs font-black uppercase text-white tracking-wider">Trạng Thái Tiếp Nhận Đơn</h4>
+                      <p class="text-[10px] text-slate-400">Đồng bộ tức thì lên Mặt Tiền D2C</p>
+                  </div>
+              </div>
+              <button type="button" onclick="AdminStoreControl.closeToggleModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-xmark"></i>
+              </button>
+          </div>
 
-            <div class="pt-2 border-t border-slate-800 flex items-center gap-2">
-                <button type="button" 
-                        onclick="AdminStoreControl.closeToggleModal()" 
-                        class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
-                    Đóng
-                </button>
-                <button type="button" 
-                        id="btn-confirm-toggle" 
-                        onclick="AdminStoreControl.submitToggleStatus()" 
-                        class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow flex items-center justify-center gap-1.5">
-                    <span>Xác Nhận Lưu</span>
-                </button>
-            </div>
+          <div class="space-y-3 text-xs">
+              <div>
+                  <label class="block text-[11px] text-slate-400 mb-1.5 font-bold">Lựa chọn trạng thái:</label>
+                  <div class="grid grid-cols-2 gap-2">
+                      <button type="button" 
+                              id="opt-status-open" 
+                              onclick="AdminStoreControl.selectTargetStatus('OPEN')" 
+                              class="p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-1.5 transition">
+                          <i class="fa-solid fa-door-open"></i> Mở Bếp Nhận Đơn
+                      </button>
+                      <button type="button" 
+                              id="opt-status-closed" 
+                              onclick="AdminStoreControl.selectTargetStatus('CLOSED')" 
+                              class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition hover:border-rose-500/40">
+                          <i class="fa-solid fa-door-closed"></i> Tạm Nghỉ Quán
+                      </button>
+                  </div>
+              </div>
 
-        </div>
-    </div>
+              <div id="box-closed-note" class="space-y-1.5 hidden">
+                  <label class="block text-[11px] text-slate-400 font-bold">Lý do / Hẹn giờ mở lại:</label>
+                  <input type="text" 
+                         id="inp-closed-message" 
+                         placeholder="VD: Nghỉ trưa ca 13h30-16h30, hẹn gặp lại quý khách!" 
+                         class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+              </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800 flex items-center gap-2">
+              <button type="button" 
+                      onclick="AdminStoreControl.closeToggleModal()" 
+                      class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+                  Đóng
+              </button>
+              <button type="button" 
+                      id="btn-confirm-toggle" 
+                      onclick="AdminStoreControl.submitToggleStatus()" 
+                      class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow flex items-center justify-center gap-1.5">
+                  <span>Xác Nhận Lưu</span>
+              </button>
+          </div>
+
+      </div>
+  </div>
 
   <!-- ========================================================================= -->
   <!-- 3. KHUNG BỐ CỤC CHÍNH WORKSPACE: SIDEBAR DRAWER & VIEWPORT TRUNG TÂM       -->
@@ -311,7 +341,7 @@
           <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-70"></i>
         </a>
 
-        <!-- Tab 4: Trạm Điều Phối Ship (Đã chuyển thành SPA Module) -->
+        <!-- Tab 4: Trạm Điều Phối Ship (SPA Module) -->
         <button type="button" 
                 data-tab="shippers" 
                 onclick="AdminShellController.switchMainTab('shippers', this)" 
@@ -356,7 +386,7 @@
       <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-1 text-[10px] font-mono">
         <div class="flex justify-between text-slate-400">
           <span>Hệ thống:</span>
-          <span class="text-amber-400 font-bold">v2.9 Enterprise</span>
+          <span class="text-amber-400 font-bold">v3.0 SaaS</span>
         </div>
         <div class="flex justify-between text-slate-400">
           <span>Phân quyền:</span>
@@ -368,7 +398,14 @@
       </div>
 
     </aside>
-<!-- ======================================================================= -->
+<!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [3/6]
+   BẮT ĐẦU TỪ: <main class="flex-1 h-full overflow-y-auto custom-scroll bg-slate-950 p-2 sm:p-4">
+   KẾT THÚC TẠI: Hết khối thẻ đóng </div> của PHÂN HỆ 2 (Cổng Thanh Toán & VietQR)
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [2/6]
+   ========================================================================== -->
+
+    <!-- ======================================================================= -->
     <!-- 4. KHUNG VIEWPORT TRUNG TÂM (CHỨA VIEW ĐỘNG HOẶC SUPER CONTROL PLANE)   -->
     <!-- ======================================================================= -->
     <main class="flex-1 h-full overflow-y-auto custom-scroll bg-slate-950 p-2 sm:p-4">
@@ -394,13 +431,13 @@
             </div>
             <div>
               <h2 class="text-sm font-black text-white uppercase tracking-wider">Bảng Điều Khiển Super Admin Toàn Năng</h2>
-              <p class="text-[10.5px] text-slate-400">Điều chỉnh thông số vận hành chuỗi thời gian thực • Kiến trúc Zero-Code</p>
+              <p class="text-[10.5px] text-slate-400">Điều chỉnh thông số vận hành chuỗi thời gian thực • Kiến trúc Multi-Tenant Dynamic</p>
             </div>
           </div>
 
           <div class="flex items-center gap-2">
             <span class="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
-              Multi-tenant Engine
+              Multi-tenant Engine v3.0
             </span>
           </div>
         </div>
@@ -607,6 +644,12 @@
             </div>
 
           </div>
+<!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [4/6]
+   BẮT ĐẦU TỪ: <!-- PHÂN HỆ 3: BẢO MẬT PHÂN TẦNG & MÃ PIN ĐIỀU HÀNH -->
+   KẾT THÚC TẠI: Hết khối Modal QR Google Authenticator (#modal-totp-setup)
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [3/6]
+   ========================================================================== -->
 
           <!-- ================================================================= -->
           <!-- PHÂN HỆ 3: BẢO MẬT PHÂN TẦNG & MÃ PIN ĐIỀU HÀNH                   -->
@@ -673,7 +716,8 @@
             </div>
 
           </div>
-<!-- ================================================================= -->
+
+          <!-- ================================================================= -->
           <!-- PHÂN HỆ 4: CHIẾT KHẤU SÀN MASTER & THUẾ KHOÁN HKD                -->
           <!-- ================================================================= -->
           <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
@@ -689,38 +733,38 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <!-- Phí Master SaaS -->
+              <!-- Phí Master SaaS Động (Mặc định 5% = 0.05, điều chỉnh linh hoạt) -->
               <div class="space-y-1">
                 <label class="font-bold text-slate-300 text-[11px] block">Phí Nền Tảng Master SaaS (Hệ số thập phân)</label>
                 <div class="relative">
                   <input type="number" 
                          step="0.001" 
                          min="0" 
-                         max="0.3" 
+                         max="0.5" 
                          id="cfg-fin-master-fee" 
                          required 
-                         placeholder="0.02" 
-                         class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl pl-3 pr-16 py-2 text-xs font-mono font-bold text-sky-400 outline-none transition" />
-                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400">0.02 = 2%</span>
+                         placeholder="0.05" 
+                         class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl pl-3 pr-20 py-2 text-xs font-mono font-bold text-sky-400 outline-none transition" />
+                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400">0.05 = 5%</span>
                 </div>
-                <span class="text-[9.5px] text-slate-500 block">Doanh thu trích lại cho nền tảng quản trị chuỗi.</span>
+                <span class="text-[9.5px] text-slate-500 block">Doanh thu trích lại cho nền tảng quản trị chuỗi (Thiết lập động tùy chi nhánh).</span>
               </div>
 
-              <!-- Thuế Khoán HKD -->
+              <!-- Thuế Khoán HKD (Mặc định 4.5% = 0.045) -->
               <div class="space-y-1">
                 <label class="font-bold text-slate-300 text-[11px] block">Tỷ Lệ Thuế Khoán Hộ Kinh Doanh (Hệ số thập phân)</label>
                 <div class="relative">
                   <input type="number" 
                          step="0.001" 
                          min="0" 
-                         max="0.3" 
+                         max="0.5" 
                          id="cfg-fin-tax-hkd" 
                          required 
                          placeholder="0.045" 
                          class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl pl-3 pr-20 py-2 text-xs font-mono font-bold text-sky-400 outline-none transition" />
                   <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400">0.045 = 4.5%</span>
                 </div>
-                <span class="text-[9.5px] text-slate-500 block">Mức thuế GTGT và TNCN khoán theo quy định.</span>
+                <span class="text-[9.5px] text-slate-500 block">Mức thuế GTGT và TNCN khoán theo quy định pháp luật.</span>
               </div>
             </div>
 
@@ -752,7 +796,7 @@
                        required 
                        placeholder="79000" 
                        class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 outline-none transition" />
-                <span class="text-[9.5px] text-slate-500 block">Kích khách mua thêm nước/topping để chạm mốc.</span>
+                <span class="text-[9.5px] text-slate-500 block">Kích khách mua thêm súp/topping để chạm mốc.</span>
               </div>
 
               <!-- Trần Trợ Giá Ship Quán Chịu -->
@@ -898,6 +942,12 @@
 
     </div>
   </div>
+<!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [5/6]
+   BẮT ĐẦU TỪ: <script> (Khai báo module AdminShellController)
+   KẾT THÚC TẠI: Hết hàm runSystemHeartbeat()
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [4/6]
+   ========================================================================== -->
 
   <!-- ========================================================================= -->
   <!-- 4. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH TRUNG TÂM (ADMIN SHELL CONTROLLER)         -->
@@ -905,7 +955,7 @@
   <script>
     /**
      * =========================================================================
-     * CONTROLLER: ADMIN SHELL OS & RBAC CONTROL PLANE (v2.9 ENTERPRISE)
+     * CONTROLLER: ADMIN SHELL OS & RBAC CONTROL PLANE (v3.0 SAAS ENTERPRISE)
      * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
      * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
      * Kiến trúc: Bọc thép qua Thim5API, cách ly phân quyền Zero-Trust
@@ -1053,7 +1103,8 @@
           alert("Lỗi kết nối gửi mã: " + err.message);
         }
       }
-/**
+
+      /**
        * MỞ KHÓA GIAO DIỆN CHÍNH & PHÂN QUYỀN RBAC KHẮT KHE
        */
       function unlockWorkspace() {
@@ -1217,6 +1268,16 @@
       }
 
       /**
+       * LÀM MỚI NHANH TAB HIỆN TẠI
+       */
+      function refreshCurrentTab() {
+        if (currentActiveTab) {
+          var activeBtn = document.querySelector(`.sidebar-nav-btn[data-tab="${currentActiveTab}"]`);
+          switchMainTab(currentActiveTab, activeBtn);
+        }
+      }
+
+      /**
        * GIÁM SÁT NHỊP TIM MÁY CHỦ THỰC TẾ QUA THIM5API (HEARTBEAT PING)
        */
       async function runSystemHeartbeat() {
@@ -1250,9 +1311,16 @@
           }
         }
       }
+<!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [6/6]
+   BẮT ĐẦU TỪ: function loadSystemConfigData()
+   KẾT THÚC TẠI: Hết file (Thẻ đóng </body></html>)
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [5/6] để hoàn tất 100% file admin-shell.html
+   ========================================================================== -->
 
       /**
        * NẠP DỮ LIỆU CẤU HÌNH TỪ BACKEND QUA THIM5API
+       * Phí Master SaaS mặc định là 5% (0.05) và có thể điều chỉnh động hoàn toàn
        */
       async function loadSystemConfigData() {
         try {
@@ -1281,13 +1349,14 @@
               document.getElementById("cfg-sec-pin-lv2").value = c.security.pinAdminLv2 || "2026";
             }
             if (c.finance) {
-              document.getElementById("cfg-fin-master-fee").value = c.finance.platformMasterFee || 0.02;
-              document.getElementById("cfg-fin-tax-hkd").value = c.finance.taxRateHkd || 0.045;
+              // Phí Master SaaS thiết lập chuẩn động 5% (0.05)
+              document.getElementById("cfg-fin-master-fee").value = (c.finance.platformMasterFee !== undefined) ? c.finance.platformMasterFee : 0.05;
+              document.getElementById("cfg-fin-tax-hkd").value = (c.finance.taxRateHkd !== undefined) ? c.finance.taxRateHkd : 0.045;
             }
             if (c.promotions) {
               document.getElementById("cfg-promo-freeship-min").value = c.promotions.freeshipMinSubtotal || 79000;
               document.getElementById("cfg-promo-max-subsidy").value = c.promotions.maxShippingSubsidy || 15000;
-              document.getElementById("cfg-promo-max-rate").value = c.promotions.maxPromotionRate || 0.15;
+              document.getElementById("cfg-promo-max-rate").value = (c.promotions.maxPromotionRate !== undefined) ? c.promotions.maxPromotionRate : 0.15;
             }
             if (c.dispatch) {
               document.getElementById("cfg-dispatch-max-holding").value = c.dispatch.maxCodHoldingPerShipper || 300000;
@@ -1443,6 +1512,7 @@
           unlockWorkspace();
         }
       });
+
       /**
        * LẤY VAI TRÒ TÀI KHOẢN HIỆN HÀNH CHO CÁC MODULE CON
        */
@@ -1460,44 +1530,46 @@
         switchMainTab: switchMainTab,
         toggleSidebar: toggleSidebar,
         handleLogout: handleLogout,
+        refreshCurrentTab: refreshCurrentTab,
         fetchCurrentBrowserGps: fetchCurrentBrowserGps,
         updateLiveQrPreview: updateLiveQrPreview,
         handleSaveSystemConfig: handleSaveSystemConfig,
         openTotpSetupModal: openTotpSetupModal,
         closeTotpSetupModal: closeTotpSetupModal,
         resetSystemConfigForm: resetSystemConfigForm,
-          getCurrentUserRole: getCurrentUserRole
+        getCurrentUserRole: getCurrentUserRole
       };
     })();
   </script>
+
   <script>
-/**
- * CONTROLLER: ADMIN STORE OPERATION SWITCH (LEVEL 2)
- * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
- * Vai trò: Quản lý đóng/mở cửa quán thời gian thực và đồng bộ lên Mặt tiền D2C
- */
-var AdminStoreControl = (function() {
-    var currentStatus = "OPEN";
-    var selectedStatus = "OPEN";
+    /**
+     * CONTROLLER: ADMIN STORE OPERATION SWITCH (LEVEL 2)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * Vai trò: Quản lý đóng/mở cửa quán thời gian thực và đồng bộ lên Mặt tiền D2C
+     */
+    var AdminStoreControl = (function() {
+      var currentStatus = "OPEN";
+      var selectedStatus = "OPEN";
 
-    function init() {
+      function init() {
         fetchCurrentStatus();
-    }
+      }
 
-    async function fetchCurrentStatus() {
+      async function fetchCurrentStatus() {
         try {
-            if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
-                var res = await window.Thim5API.callGAS("getStoreStatus");
-                if (res && res.storeStatus) {
-                    updateUI(res.storeStatus, res.closedMessage);
-                }
+          if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+            var res = await window.Thim5API.callGAS("getStoreStatus");
+            if (res && res.storeStatus) {
+              updateUI(res.storeStatus, res.closedMessage);
             }
+          }
         } catch (e) {
-            console.warn("⚠️ Không thể lấy trạng thái quán:", e);
+          console.warn("⚠️ Không thể lấy trạng thái quán:", e);
         }
-    }
+      }
 
-    function updateUI(status, message) {
+      function updateUI(status, message) {
         currentStatus = status;
         var btn = document.getElementById("btn-store-status-toggle");
         var dot = document.getElementById("dot-store-status");
@@ -1506,96 +1578,176 @@ var AdminStoreControl = (function() {
         if (!btn || !dot || !txt) return;
 
         if (status === "OPEN") {
-            btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 active:scale-95";
-            dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-            txt.innerText = "🟢 ĐANG MỞ CỬA";
+          btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 active:scale-95";
+          dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+          txt.innerText = "🟢 ĐANG MỞ CỬA";
         } else {
-            btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 active:scale-95";
-            dot.className = "w-2 h-2 rounded-full bg-rose-500";
-            txt.innerText = "🔴 TẠM NGHỈ QUÁN";
+          btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 active:scale-95";
+          dot.className = "w-2 h-2 rounded-full bg-rose-500";
+          txt.innerText = "🔴 TẠM NGHỈ QUÁN";
         }
-    }
+      }
 
-    function openToggleModal() {
+      function openToggleModal() {
         selectedStatus = currentStatus;
         selectTargetStatus(currentStatus);
         var modal = document.getElementById("modal-store-status-toggle");
         if (modal) modal.classList.remove("hidden");
-    }
+      }
 
-    function closeToggleModal() {
+      function closeToggleModal() {
         var modal = document.getElementById("modal-store-status-toggle");
         if (modal) modal.classList.add("hidden");
-    }
+      }
 
-    function selectTargetStatus(st) {
+      function selectTargetStatus(st) {
         selectedStatus = st;
         var btnOpen = document.getElementById("opt-status-open");
         var btnClosed = document.getElementById("opt-status-closed");
         var boxNote = document.getElementById("box-closed-note");
 
         if (st === "OPEN") {
-            if (btnOpen) btnOpen.className = "p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-1.5 transition";
-            if (btnClosed) btnClosed.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition";
-            if (boxNote) boxNote.classList.add("hidden");
+          if (btnOpen) btnOpen.className = "p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-1.5 transition";
+          if (btnClosed) btnClosed.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition";
+          if (boxNote) boxNote.classList.add("hidden");
         } else {
-            if (btnOpen) btnOpen.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition";
-            if (btnClosed) btnClosed.className = "p-2.5 rounded-xl border-2 border-rose-500 bg-rose-500/10 text-rose-400 font-bold flex items-center justify-center gap-1.5 transition";
-            if (boxNote) boxNote.classList.remove("hidden");
+          if (btnOpen) btnOpen.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition";
+          if (btnClosed) btnClosed.className = "p-2.5 rounded-xl border-2 border-rose-500 bg-rose-500/10 text-rose-400 font-bold flex items-center justify-center gap-1.5 transition";
+          if (boxNote) boxNote.classList.remove("hidden");
         }
-    }
+      }
 
-    async function submitToggleStatus() {
+      async function submitToggleStatus() {
         var btn = document.getElementById("btn-confirm-toggle");
         var inpMsg = document.getElementById("inp-closed-message");
         var message = inpMsg ? inpMsg.value.trim() : "";
 
         var origText = btn ? btn.innerHTML : "";
         if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lưu...';
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lưu...';
         }
 
         try {
-            if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
-                throw new Error("Không tìm thấy kết nối Thim5API!");
-            }
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+            throw new Error("Không tìm thấy kết nối Thim5API!");
+          }
 
-            var res = await window.Thim5API.callGAS("toggleStoreStatus", {
-                status: selectedStatus,
-                message: message
-            });
+          var res = await window.Thim5API.callGAS("toggleStoreStatus", {
+            status: selectedStatus,
+            message: message
+          });
 
-            if (!res || res.status !== "success") {
-                throw new Error((res && res.message) ? res.message : "Cập nhật thất bại!");
-            }
+          if (!res || res.status !== "success") {
+            throw new Error((res && res.message) ? res.message : "Cập nhật thất bại!");
+          }
 
-            updateUI(selectedStatus, message);
-            closeToggleModal();
-            alert(res.message || "Đã cập nhật trạng thái hoạt động của Bếp thành công!");
+          updateUI(selectedStatus, message);
+          closeToggleModal();
+          alert(res.message || "Đã cập nhật trạng thái hoạt động của Bếp thành công!");
 
         } catch (err) {
-            alert("❌ Lỗi khi cập nhật trạng thái quán: " + err.message);
+          alert("❌ Lỗi khi cập nhật trạng thái quán: " + err.message);
         } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = origText;
-            }
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = origText;
+          }
         }
-    }
+      }
 
-    return {
+      return {
         init: init,
         openToggleModal: openToggleModal,
         closeToggleModal: closeToggleModal,
         selectTargetStatus: selectTargetStatus,
         submitToggleStatus: submitToggleStatus
-    };
-})();
+      };
+    })();
 
-document.addEventListener("DOMContentLoaded", function() {
-    AdminStoreControl.init();
-});
-</script>
+    document.addEventListener("DOMContentLoaded", function() {
+      AdminStoreControl.init();
+    });
+  </script>
+
+  <!-- ========================================================================= -->
+  <!-- 5. GLOBAL MEDIA ENGINE: CANVAS COMPRESSOR DÙNG CHUNG CHO CÁC TAB CON     -->
+  <!-- ========================================================================= -->
+  <script>
+    /**
+     * THIM5 MEDIA ENGINE - BỘ NÉN ẢNH CLIENT-SIDE TỐI ƯU HẠ TẦNG GOOGLE DRIVE
+     * Tự động scale về Max 800x800, nén chất lượng 0.78, sinh Base64 < 120KB
+     */
+    window.Thim5MediaEngine = (function() {
+      function compressImage(file, maxDimension, quality) {
+        maxDimension = maxDimension || 800;
+        quality = quality || 0.78;
+
+        return new Promise(function(resolve, reject) {
+          if (!file || !file.type.match(/image.*/)) {
+            reject(new Error("File tải lên không phải là định dạng hình ảnh hợp lệ!"));
+            return;
+          }
+
+          var reader = new FileReader();
+          reader.onload = function(readerEvent) {
+            var image = new Image();
+            image.onload = function() {
+              var width = image.width;
+              var height = image.height;
+
+              if (width > height) {
+                if (width > maxDimension) {
+                  height = Math.round((height * maxDimension) / width);
+                  width = maxDimension;
+                }
+              } else {
+                if (height > maxDimension) {
+                  width = Math.round((width * maxDimension) / height);
+                  height = maxDimension;
+                }
+              }
+
+              var canvas = document.createElement("canvas");
+              canvas.width = width;
+              canvas.height = height;
+
+              var ctx = canvas.getContext("2d");
+              ctx.drawImage(image, 0, 0, width, height);
+
+              // Ưu tiên WebP, fallback JPEG nếu trình duyệt cũ
+              var mimeType = "image/webp";
+              var dataUrl = canvas.toDataURL(mimeType, quality);
+              if (dataUrl.indexOf("data:image/webp") === -1) {
+                mimeType = "image/jpeg";
+                dataUrl = canvas.toDataURL(mimeType, quality);
+              }
+
+              resolve({
+                base64Data: dataUrl,
+                mimeType: mimeType,
+                width: width,
+                height: height,
+                originalSize: file.size,
+                compressedLength: dataUrl.length
+              });
+            };
+            image.onerror = function() {
+              reject(new Error("Không thể nạp dữ liệu hình ảnh vào Canvas!"));
+            };
+            image.src = readerEvent.target.result;
+          };
+          reader.onerror = function() {
+            reject(new Error("Lỗi khi đọc file ảnh từ thiết bị!"));
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      return {
+        compressImage: compressImage
+      };
+    })();
+  </script>
 </body>
 </html>
