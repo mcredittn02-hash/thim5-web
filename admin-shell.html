@@ -984,30 +984,18 @@
 
     </div>
   </div>
-  <!-- ==========================================================================
-   FILE: admin-shell.html - PHẦN [7/8]
-   BẮT ĐẦU TỪ: <script> (Khai báo module AdminShellController)
-   KẾT THÚC TẠI: Hết hàm runSystemHeartbeat()
-   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [6/8]
-   ========================================================================== -->
+  
 
   <!-- ========================================================================= -->
   <!-- 4. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH TRUNG TÂM (ADMIN SHELL CONTROLLER)         -->
   <!-- ========================================================================= -->
   <script>
-    /**
-     * =========================================================================
-     * CONTROLLER: ADMIN SHELL OS & RBAC CONTROL PLANE (v3.0 SAAS ENTERPRISE)
-     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
-     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
-     * Kiến trúc: Bọc thép qua Thim5API, cách ly phân quyền Zero-Trust
-     * =========================================================================
-     */
- /* ==========================================================================
-   FILE: admin-shell.html - ĐOẠN THAY THẾ CONTROLLER - PHẦN [1/2]
+    
+/* ==========================================================================
+   FILE: admin-shell.html - PHẦN [1/2] (BẢN VÁ TIÊU DIỆT MODAL TRAP & GIẢI PHÓNG SHELL)
    BẮT ĐẦU TỪ: var AdminShellController = (function() {
    KẾT THÚC TẠI: Hết hàm unlockWorkspace()
-   HƯỚNG DẪN: Bôi đen từ "var AdminShellController = (function() {" trong file admin-shell.html và dán đoạn này vào
+   HƯỚNG DẪN: Thay thế từ "var AdminShellController = (function() {" đến hết hàm unlockWorkspace()
    ========================================================================== */
 
 var AdminShellController = (function() {
@@ -1054,7 +1042,7 @@ var AdminShellController = (function() {
   }
 
   /**
-   * XÁC THỰC MÃ PIN VẬN HÀNH (LEVEL 1: BẾP, LEVEL 2: QUẢN LÝ POS)
+   * XÁC THỰC MÃ PIN VẬN HÀNH (LEVEL 1 & LEVEL 2)
    */
   async function submitPinAuth() {
     var pinInput = document.getElementById("input-pos-pin");
@@ -1073,9 +1061,9 @@ var AdminShellController = (function() {
     }
 
     try {
-      // 1. Kiểm tra nhanh mã PIN hệ thống chuẩn hóa
-      // PIN 1985: Level 1 - Trưởng Ca Bếp (KDS Bếp & Bật/Tắt hết món)[cite: 4]
-      // PIN 2026: Level 2 - Quản Lý Ca POS (KDS, Thực đơn, Báo cáo ca, Mở cửa quán)[cite: 4]
+      // 1. Kiểm tra mã PIN mặc định hệ thống (Ưu tiên số 1 - Chạy ngay tức thì)
+      // PIN 1985: Level 1 - Trưởng Ca Bếp (KDS Bếp & Tắt món)[cite: 4]
+      // PIN 2026: Level 2 - Quản Lý Ca POS (KDS, Menu, P&L, Mở quán)[cite: 4]
       if (pin === "1985") {
         currentRole = "KITCHEN_LEAD";
         sessionStorage.setItem("thim5_auth_role", "KITCHEN_LEAD");
@@ -1088,7 +1076,7 @@ var AdminShellController = (function() {
         return;
       }
 
-      // 2. Nếu không khớp PIN mặc định, gọi API Backend xác thực phân quyền động
+      // 2. Nếu không trùng PIN mặc định, gọi API Backend xác thực động
       if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
         var res = await Thim5API.callGAS("verifyAdminRole", { pin: pin });
         if (res && res.status === "success" && res.data) {
@@ -1107,7 +1095,7 @@ var AdminShellController = (function() {
       }
     } catch (err) {
       console.error("Lỗi xác thực PIN:", err);
-      // Cơ chế Bypass an toàn: nếu đúng mã PIN hệ thống thì vẫn cho vào
+      // Fallback an toàn tuyệt đối nếu rớt mạng
       if (pin === "1985" || pin === "2026") {
         currentRole = (pin === "1985") ? "KITCHEN_LEAD" : "POS_STAFF";
         sessionStorage.setItem("thim5_auth_role", currentRole);
@@ -1125,7 +1113,7 @@ var AdminShellController = (function() {
   }
 
   /**
-   * XÁC THỰC SUPER ADMIN 2FA (MASTER KEY + TOTP GOOGLE AUTHENTICATOR)
+   * XÁC THỰC SUPER ADMIN 2FA (MASTER KEY + TOTP)
    */
   async function submitSuperAdminAuth(event) {
     if (event) event.preventDefault();
@@ -1144,7 +1132,7 @@ var AdminShellController = (function() {
 
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Kiểm Tra 2FA...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Xác Thực 2FA...';
     }
 
     try {
@@ -1177,7 +1165,7 @@ var AdminShellController = (function() {
   }
 
   /**
-   * YÊU CẦU MÃ BACKUP OTP QUA EMAIL TRONG TRƯỜNG HỢP KHẨN CẤP
+   * YÊU CẦU MÃ BACKUP OTP QUA EMAIL
    */
   async function requestEmergencyBackupOtp() {
     var masterKey = prompt("Nhập Master Key của chuỗi để nhận mã khẩn cấp qua Email:");
@@ -1198,19 +1186,34 @@ var AdminShellController = (function() {
   }
 
   /**
-   * MỞ KHÓA GIAO DIỆN CHÍNH - TIÊU DIỆT HOÀN TOÀN MODAL KHỎI MÀN HÌNH (ANTI-HANG)
+   * MỞ KHÓA GIAO DIỆN CHÍNH - TIÊU DIỆT VẬT LÝ TOÀN BỘ MODAL & BẬT HIỂN THỊ SHELL
    */
   function unlockWorkspace() {
-    console.log(">>> [AUTH SUCCESS] Mở khóa giao diện thành công! Quyền:", currentRole);
+    console.log(">>> [AUTH CRITICAL] Kích hoạt mở khóa cưỡng bức! Quyền:", currentRole);
 
-    // 1. CAN THIỆP THÔ VÀO INLINE STYLE ĐỂ XÓA SỔ HOÀN TOÀN MODAL KHỎI DOM
-    var overlay = document.getElementById("auth-modal-overlay");
-    if (overlay) {
-      overlay.classList.add("hidden");
-      overlay.style.cssText = "display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important;";
-    }
+    // 1. TIÊU DIỆT VẬT LÝ TẤT CẢ PHẦN TỬ MODAL OVERLAY KHỎI DOM
+    var overlays = document.querySelectorAll("#auth-modal-overlay, .auth-overlay");
+    overlays.forEach(function(ov) {
+      ov.style.cssText = "display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; z-index: -999 !important;";
+      try {
+        ov.remove(); // Xóa sổ vật lý khỏi cây DOM của trình duyệt
+      } catch (eRemove) {
+        console.warn("Không thể remove node:", eRemove);
+      }
+    });
 
-    // 2. CẬP NHẬT PHÂN QUYỀN RBAC TRÊN TOPBAR & SIDEBAR
+    // 2. GIẢI PHÓNG TOÀN BỘ THANH ĐIỀU HÀNH VÀ KHUNG LÀM VIỆC CHÍNH
+    var mainShellElements = document.querySelectorAll("#app-shell, #admin-workspace, main, #main-layout");
+    mainShellElements.forEach(function(el) {
+      el.classList.remove("hidden");
+      el.style.cssText = "display: flex !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important;";
+    });
+
+    // Bỏ cấm cuộn trên body
+    document.body.style.overflow = "auto";
+    document.body.classList.remove("overflow-hidden");
+
+    // 3. ĐỒNG BỘ GIAO DIỆN PHÂN QUYỀN RBAC (TOPBAR & SIDEBAR)
     try {
       var roleBadgeText = document.getElementById("user-role-text");
       var roleBadgeBox = document.getElementById("user-role-badge");
@@ -1234,13 +1237,11 @@ var AdminShellController = (function() {
         if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "POS_STAFF";
       }
     } catch (eRbac) {
-      console.warn("Cảnh báo đồng bộ RBAC UI:", eRbac);
+      console.warn("Cảnh báo RBAC UI:", eRbac);
     }
 
-    // 3. ĐIỀU HƯỚNG TAB THÔNG MINH THEO CẤP ĐỘ QUYỀN HẠN
+    // 4. ĐIỀU HƯỚNG TAB THÔNG MINH (BỌC TRONG TRY...CATCH CHỐNG NGHẼN)
     try {
-      // Bếp (Level 1) mặc định mở tab Quản lý đơn hàng/KDS
-      // Quản lý ca (Level 2) & Super Admin mặc định mở tab P&L Lãi Lỗ
       var defaultTab = (currentRole === "KITCHEN_LEAD") ? "orders" : "pl";
       var targetTabBtn = document.querySelector('[data-tab="' + defaultTab + '"]');
       switchMainTab(defaultTab, targetTabBtn);
@@ -1248,14 +1249,14 @@ var AdminShellController = (function() {
       console.error("Lỗi điều hướng tab mặc định:", eTab);
     }
 
-    // 4. KÍCH HOẠT NHỊP ĐẬP HEARTBEAT HỆ THỐNG
+    // 5. KHỞI ĐỘNG HEARTBEAT PING HỆ THỐNG
     try {
       runSystemHeartbeat();
       if (!heartbeatInterval) heartbeatInterval = setInterval(runSystemHeartbeat, 30000);
     } catch (eHb) {
       console.warn("Lỗi khởi động Heartbeat:", eHb);
     }
-  }
+  }   
    /* ==========================================================================
    FILE: admin-shell.html - ĐOẠN THAY THẾ CONTROLLER - PHẦN [2/2]
    BẮT ĐẦU TỪ: async function switchMainTab(tabKey, btnElement)
@@ -1327,6 +1328,130 @@ var AdminShellController = (function() {
         }
       }
 
+      /**
+       * TỰ ĐỘNG RENDER KHUNG VIEW DỰ PHÒNG NẾU FILE CHƯA ĐƯỢC TẢI LÊN HOSTING
+       */
+      function renderFallbackTabContent(container, tabKey, fileName, errorDetail) {
+        if (!container) return;
+
+        var tabTitles = {
+          "pl": "Báo Cáo Tài Chính P&L & Dòng Tiền",
+          "menu": "Quản Lý Thực Đơn & Phân Tích Reverse-Pricing",
+          "orders": "Màn Hình Điều Phối Bếp & Đơn Hàng (KDS)",
+          "shippers": "Trạm Điều Phối Đội Xe & Shipper",
+          "campaign": "Trung Tâm Chiến Dịch Geo-Fencing & Voucher",
+          "config": "Cấu Hình Hệ Thống & Tham Số SaaS"
+        };
+
+        var currentTitle = tabTitles[tabKey] || ("Phân Hệ " + tabKey.toUpperCase());
+
+        container.innerHTML = `
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-4 max-w-lg mx-auto my-12 shadow-xl animate-in fade-in-50 duration-200">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mx-auto">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="space-y-1.5">
+              <h3 class="text-sm font-black text-white uppercase tracking-wider">${currentTitle}</h3>
+              <p class="text-xs text-slate-400">Không tìm thấy tệp giao diện <code>${fileName}</code> hoặc kết nối mạng bị gián đoạn.</p>
+              <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-left font-mono text-[10px] text-rose-400 break-all">
+                Lỗi chi tiết: ${errorDetail}
+              </div>
+            </div>
+            <div class="flex items-center justify-center gap-2 pt-2">
+              <button type="button" onclick="AdminShellController.switchMainTab('${tabKey}')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow">
+                <i class="fa-solid fa-rotate mr-1"></i> Thử Tải Lại Phân Hệ
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      /**
+       * NHỊP ĐẬP HỆ THỐNG HEARTBEAT PING (ĐỒNG BỘ TRẠNG THÁI MẠNG REALTIME)
+       */
+      async function runSystemHeartbeat() {
+        var dot = document.getElementById("system-status-dot");
+        var text = document.getElementById("system-status-text");
+
+        try {
+          if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+            var pingRes = await Thim5API.callGAS("systemHeartbeatPing", { role: currentRole });
+            if (pingRes && pingRes.status === "success") {
+              if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+              if (text) text.innerText = "KẾT NỐI ỔN ĐỊNH";
+              return;
+            }
+          }
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-500";
+          if (text) text.innerText = "CHẾ ĐỘ NGOẠI TUYẾN";
+        } catch (e) {
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-rose-500";
+          if (text) text.innerText = "MẤT KẾT NỐI MÁY CHỦ";
+        }
+      }
+
+      /**
+       * ĐIỀU HƯỚNG ĐÓNG / MỞ THANH SIDEBAR TRÊN THIẾT BỊ DI ĐỘNG
+       */
+      function toggleSidebar() {
+        var sidebar = document.getElementById("app-sidebar");
+        var backdrop = document.getElementById("sidebar-backdrop");
+        if (sidebar) {
+          var isHidden = sidebar.classList.contains("hidden");
+          if (isHidden) {
+            sidebar.classList.remove("hidden");
+            if (backdrop) backdrop.classList.remove("hidden");
+          } else {
+            sidebar.classList.add("hidden");
+            if (backdrop) backdrop.classList.add("hidden");
+          }
+        }
+      }
+
+      /**
+       * ĐĂNG XUẤT VÀ XÓA SẠCH PHIÊN LÀM VIỆC AN TOÀN
+       */
+      function handleLogout() {
+        if (confirm("Anh Hải Âu có chắc muốn đăng xuất khỏi Trung Tâm Điều Hành?")) {
+          sessionStorage.clear();
+          window.location.reload();
+        }
+      }
+
+      /**
+       * LÀM MỚI TAB ĐANG HOẠT ĐỘNG
+       */
+      function refreshCurrentTab() {
+        switchMainTab(currentActiveTab);
+      }
+
+      // TỰ ĐỘNG PHỤC HỒI PHIÊN LÀM VIỆC KHI TẢI LẠI TRANG (F5)
+      window.addEventListener("DOMContentLoaded", function() {
+        var savedRole = sessionStorage.getItem("thim5_auth_role");
+        var savedKey = sessionStorage.getItem("thim5_master_key");
+
+        if (savedRole) {
+          currentRole = savedRole;
+          if (savedKey) currentMasterKey = savedKey;
+          console.log(">>> [SESSION RECOVERED] Tự động phục hồi phiên làm việc:", currentRole);
+          unlockWorkspace();
+        }
+      });
+
+      // PUBLIC API RA NGOÀI PHẠM VI SHELL
+      return {
+        switchAuthMode: switchAuthMode,
+        appendPinDigit: appendPinDigit,
+        clearPinDigit: clearPinDigit,
+        submitPinAuth: submitPinAuth,
+        submitSuperAdminAuth: submitSuperAdminAuth,
+        requestEmergencyBackupOtp: requestEmergencyBackupOtp,
+        switchMainTab: switchMainTab,
+        toggleSidebar: toggleSidebar,
+        handleLogout: handleLogout,
+        refreshCurrentTab: refreshCurrentTab
+      };
+    })();
       /**
        * TỰ ĐỘNG RENDER KHUNG VIEW DỰ PHÒNG NẾU FILE CHƯA ĐƯỢC TẢI LÊN HOSTING
        */
