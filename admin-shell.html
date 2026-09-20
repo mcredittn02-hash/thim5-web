@@ -55,101 +55,134 @@
 </head>
 <body class="h-full flex flex-col bg-slate-950 text-slate-100 font-sans overflow-hidden select-none">
 
-  <!-- ========================================================================= -->
-  <!-- 1. MODAL XÁC THỰC PHÂN TẦNG DỰ PHÒNG (NẾU MỞ TRỰC TIẾP ADMIN-SHELL.HTML)  -->
-  <!-- ========================================================================= -->
-  <div id="auth-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4">
-    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden p-6 space-y-5 animate-in zoom-in-95 duration-200 text-center">
+  <!-- ==========================================================================
+   FILE: admin-auth-modal.html - PHẦN [1/2]
+   BẮT ĐẦU TỪ: <!-- MODAL XÁC THỰC QUYỀN TRUY CẬP 3 CẤP ĐỘ -->
+   KẾT THÚC TẠI: Hết cấu trúc HTML Modal Xác Thực (#auth-modal-overlay)
+   HƯỚNG DẪN: Thay thế toàn bộ khối #auth-modal-overlay trong admin-shell.html
+   ========================================================================== -->
+
+<!-- ========================================================================= -->
+<!-- MODAL XÁC THỰC QUYỀN TRUY CẬP 3 CẤP ĐỘ (LEVEL 1, LEVEL 2 & SUPER ADMIN)     -->
+<!-- ========================================================================= -->
+<div id="auth-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4 transition-all duration-300 select-none">
+  <div class="relative bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-7 space-y-5 animate-in zoom-in-95 duration-200">
+    
+    <!-- Tiêu đề & Biểu tượng vương miện hệ thống -->
+    <div class="text-center space-y-1.5">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 text-xl font-black mx-auto shadow-lg shadow-amber-500/20">
+        <i class="fa-solid fa-crown"></i>
+      </div>
+      <h2 class="text-base font-black text-white uppercase tracking-wider">Xác Thực Quyền Truy Cập</h2>
+      <p class="text-[11px] text-slate-400">Chọn phương thức xác thực quyền hạn vận hành của bạn:</p>
+    </div>
+
+    <!-- Thanh chuyển đổi chế độ xác thực (Tabs) -->
+    <div class="flex items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-bold">
+      <button type="button" 
+              id="tab-btn-pin" 
+              onclick="AdminShellController.switchAuthMode('PIN')" 
+              class="flex-1 py-2 rounded-xl transition bg-amber-500 text-slate-950 shadow font-bold flex items-center justify-center gap-1.5">
+        <i class="fa-solid fa-key text-xs"></i>
+        <span>Quản Lý (PIN)</span>
+      </button>
+      <button type="button" 
+              id="tab-btn-super" 
+              onclick="AdminShellController.switchAuthMode('SUPER')" 
+              class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white flex items-center justify-center gap-1.5">
+        <i class="fa-solid fa-shield-halved text-xs"></i>
+        <span>Super Admin (2FA)</span>
+      </button>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- KHỐI 1: XÁC THỰC MÃ PIN CHO LEVEL 1 (BẾP) & LEVEL 2 (QUẢN LÝ POS)     -->
+    <!-- ===================================================================== -->
+    <div id="auth-box-pin" class="space-y-4">
       
-      <!-- Biểu tượng Thương Hiệu Hoàng Gia Bếp Thím 5 -->
-      <div class="space-y-1.5">
-        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mx-auto shadow-inner shadow-amber-500/20">
-          <i class="fa-solid fa-crown"></i>
-        </div>
-        <h2 class="text-base font-black tracking-wider uppercase text-white">Xác Thực Quyền Truy Cập</h2>
-        <p class="text-xs text-slate-400">Chọn phương thức xác thực quyền hạn của bạn:</p>
-      </div>
-
-      <!-- Tab Chuyển Đổi: Mã PIN POS vs Super Admin 2FA -->
-      <div class="flex items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-bold">
-        <button type="button" 
-                id="tab-btn-pin" 
-                onclick="AdminShellController.switchAuthMode('PIN')" 
-                class="flex-1 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow font-bold">
-          <i class="fa-solid fa-key text-[10px] mr-1"></i> Quản Lý (PIN)
-        </button>
-        <button type="button" 
-                id="tab-btn-super" 
-                onclick="AdminShellController.switchAuthMode('SUPER')" 
-                class="flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white">
-          <i class="fa-solid fa-shield-halved text-[10px] mr-1"></i> Super Admin (2FA)
-        </button>
-      </div>
-
-      <!-- Khung 1: Bàn Phím Số Ảo Mã PIN Quản Lý (1985 / 2026) -->
-      <div id="auth-box-pin" class="space-y-4">
+      <!-- Màn hình hiển thị số chấm PIN dạng bullet -->
+      <div class="relative">
         <input type="password" 
                id="input-pos-pin" 
-               readonly 
                maxlength="6" 
+               readonly 
                placeholder="••••" 
-               class="w-full bg-slate-950 border border-slate-800 rounded-2xl py-2.5 text-center font-mono text-xl font-black tracking-widest text-amber-400 outline-none select-none shadow-inner" />
-
-        <!-- Numpad Cảm Ứng Bọc Thép -->
-        <div class="grid grid-cols-3 gap-2 font-mono font-bold text-base max-w-[240px] mx-auto">
-          <button type="button" onclick="AdminShellController.appendPinDigit('1')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">1</button>
-          <button type="button" onclick="AdminShellController.appendPinDigit('2')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">2</button>
-          <button type="button" onclick="AdminShellController.appendPinDigit('3')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">3</button>
-          <button type="button" onclick="AdminShellController.appendPinDigit('4')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">4</button>
-          <button type="button" onclick="AdminShellController.appendPinDigit('5')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">5</button>
-          <button type="button" onclick="AdminShellController.appendPinDigit('6')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">6</button>
-          <button type="button" onclick="AdminShellController.appendPinDigit('7')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">7</button>
-          <button type="button" onclick="AdminShellController.appendPinDigit('8')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">8</button>
-          <button type="button" onclick="AdminShellController.appendPinDigit('9')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">9</button>
-          <button type="button" onclick="AdminShellController.clearPinDigit()" class="h-10 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 active:scale-95 transition text-xs font-sans font-bold">Xóa</button>
-          <button type="button" onclick="AdminShellController.appendPinDigit('0')" class="h-10 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 active:scale-95 transition">0</button>
-          <button type="button" onclick="AdminShellController.submitPinAuth()" class="h-10 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black active:scale-95 transition text-xs font-sans">Vào</button>
-        </div>
+               class="w-full bg-slate-950 border-2 border-slate-800 focus:border-amber-500 rounded-2xl py-3 text-center text-xl tracking-[0.5em] font-mono font-black text-amber-400 outline-none transition select-none" />
       </div>
 
-      <!-- Khung 2: Super Admin 2FA (Master Key + Mã TOTP 30s Google Authenticator) -->
-      <div id="auth-box-super" class="hidden space-y-3 text-left">
+      <!-- Bàn phím số ảo (Numpad) cảm ứng mượt mà -->
+      <div class="grid grid-cols-3 gap-2 text-sm font-bold font-mono">
+        <button type="button" onclick="AdminShellController.appendPinDigit('1')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">1</button>
+        <button type="button" onclick="AdminShellController.appendPinDigit('2')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">2</button>
+        <button type="button" onclick="AdminShellController.appendPinDigit('3')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">3</button>
+        <button type="button" onclick="AdminShellController.appendPinDigit('4')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">4</button>
+        <button type="button" onclick="AdminShellController.appendPinDigit('5')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">5</button>
+        <button type="button" onclick="AdminShellController.appendPinDigit('6')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">6</button>
+        <button type="button" onclick="AdminShellController.appendPinDigit('7')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">7</button>
+        <button type="button" onclick="AdminShellController.appendPinDigit('8')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">8</button>
+        <button type="button" onclick="AdminShellController.appendPinDigit('9')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">9</button>
+        <button type="button" onclick="AdminShellController.clearPinDigit()" class="h-11 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 active:scale-95 text-rose-400 border border-rose-500/30 transition text-xs font-sans">Xóa</button>
+        <button type="button" onclick="AdminShellController.appendPinDigit('0')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">0</button>
+        <button type="button" id="btn-submit-pin" onclick="AdminShellController.submitPinAuth()" class="h-11 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-black transition text-xs font-sans shadow-lg shadow-emerald-500/20 flex items-center justify-center">Vào</button>
+      </div>
+
+      <div class="text-center pt-1">
+        <span class="text-[10px] text-slate-500 font-mono">Gợi ý: 1985 (Trưởng Ca Bếp) • 2026 (Quản Lý POS)</span>
+      </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- KHỐI 2: XÁC THỰC SUPER ADMIN 2FA (MASTER KEY + TOTP GOOGLE AUTH)      -->
+    <!-- ===================================================================== -->
+    <div id="auth-box-super" class="hidden space-y-3.5 text-xs">
+      <form onsubmit="AdminShellController.submitSuperAdminAuth(event)" class="space-y-3">
+        
+        <!-- Nhập Master Key -->
         <div class="space-y-1">
-          <label class="text-[11px] font-bold text-slate-300">Khóa Master Super Key:</label>
-          <input type="password" 
-                 id="input-master-key" 
-                 placeholder="Nhập Master Key tối cao..." 
-                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono text-white outline-none transition" />
+          <label class="font-bold text-slate-300 text-[11px] block">Master Secret Key <span class="text-rose-400">*</span></label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            <input type="password" 
+                   id="input-master-key" 
+                   required 
+                   placeholder="Nhập khóa bảo mật Master..." 
+                   class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl pl-8 pr-3 py-2 text-white font-mono text-xs outline-none transition" />
+          </div>
         </div>
 
+        <!-- Nhập Mã 6 số 2FA Authenticator -->
         <div class="space-y-1">
-          <label class="text-[11px] font-bold text-slate-300">Mã Google Authenticator (6 Số):</label>
-          <input type="text" 
-                 id="input-totp-code" 
-                 maxlength="6" 
-                 placeholder="000000" 
-                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-center text-sm font-mono tracking-widest text-amber-400 font-bold outline-none transition" />
+          <label class="font-bold text-slate-300 text-[11px] block">Mã 6 Số Google Authenticator (TOTP) <span class="text-amber-400">*</span></label>
+          <div class="relative">
+            <i class="fa-solid fa-mobile-screen-button absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            <input type="text" 
+                   id="input-totp-code" 
+                   required 
+                   maxlength="6" 
+                   placeholder="000000" 
+                   class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl pl-8 pr-3 py-2 text-center text-base tracking-[0.4em] font-mono font-bold text-amber-400 outline-none transition" />
+          </div>
         </div>
 
-        <div class="text-right">
-          <button type="button" 
-                  onclick="AdminShellController.requestEmergencyBackupOtp()" 
-                  class="text-[10px] text-amber-400 hover:underline">
-            Mất điện thoại? Nhận mã khẩn cấp qua haiau2205@gmail.com
-          </button>
-        </div>
-
-        <button type="button" 
+        <!-- Nút Xác Nhận Super Admin -->
+        <button type="submit" 
                 id="btn-super-auth-submit" 
-                onclick="AdminShellController.submitSuperAdminAuth()" 
                 class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black uppercase text-xs tracking-wider transition active:scale-95 shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2">
-          <i class="fa-solid fa-key"></i>
-          <span>Xác Thực Toàn Quyền Super Admin</span>
+          <i class="fa-solid fa-shield-halved text-xs"></i>
+          <span>Xác Thực Quyền Super Admin</span>
+        </button>
+
+      </form>
+      
+      <div class="text-center pt-1">
+        <button type="button" onclick="AdminShellController.requestEmergencyBackupOtp()" class="text-[10px] text-slate-400 hover:text-amber-400 underline transition">
+          Quên điện thoại 2FA? Gửi mã khẩn cấp qua Email HQ
         </button>
       </div>
-
     </div>
+
   </div>
+</div>
   <!-- ==========================================================================
    FILE: admin-shell.html - PHẦN [2/8]
    BẮT ĐẦU TỪ: <!-- 2. THANH ĐIỀU HÀNH TỔNG (TOPBAR) -->
@@ -970,313 +1003,454 @@
      * Kiến trúc: Bọc thép qua Thim5API, cách ly phân quyền Zero-Trust
      * =========================================================================
      */
-    var AdminShellController = (function() {
-      var currentRole = null; // 'POS_STAFF', 'KITCHEN_LEAD', hoặc 'SUPER_ADMIN'
-      var currentMasterKey = "";
-      var currentActiveTab = "pl";
-      var heartbeatInterval = null;
+ /* ==========================================================================
+   FILE: admin-shell.html - ĐOẠN THAY THẾ CONTROLLER - PHẦN [1/2]
+   BẮT ĐẦU TỪ: var AdminShellController = (function() {
+   KẾT THÚC TẠI: Hết hàm unlockWorkspace()
+   HƯỚNG DẪN: Bôi đen từ "var AdminShellController = (function() {" trong file admin-shell.html và dán đoạn này vào
+   ========================================================================== */
 
-      /**
-       * CHUYỂN ĐỔI CHẾ ĐỘ XÁC THỰC TRÊN AUTH MODAL
-       */
-      function switchAuthMode(mode) {
-        var boxPin = document.getElementById("auth-box-pin");
-        var boxSuper = document.getElementById("auth-box-super");
-        var btnPin = document.getElementById("tab-btn-pin");
-        var btnSuper = document.getElementById("tab-btn-super");
+var AdminShellController = (function() {
+  var currentRole = null;
+  var currentMasterKey = "";
+  var currentActiveTab = "pl";
+  var heartbeatInterval = null;
 
-        if (mode === "PIN") {
-          if (boxPin) boxPin.classList.remove("hidden");
-          if (boxSuper) boxSuper.classList.add("hidden");
-          if (btnPin) btnPin.className = "flex-1 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow font-bold";
-          if (btnSuper) btnSuper.className = "flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
+  /**
+   * CHUYỂN ĐỔI CHẾ ĐỘ XÁC THỰC TRÊN MODAL (PIN VS 2FA)
+   */
+  function switchAuthMode(mode) {
+    var boxPin = document.getElementById("auth-box-pin");
+    var boxSuper = document.getElementById("auth-box-super");
+    var btnPin = document.getElementById("tab-btn-pin");
+    var btnSuper = document.getElementById("tab-btn-super");
+
+    if (mode === "PIN") {
+      if (boxPin) boxPin.classList.remove("hidden");
+      if (boxSuper) boxSuper.classList.add("hidden");
+      if (btnPin) btnPin.className = "flex-1 py-2 rounded-xl transition bg-amber-500 text-slate-950 shadow font-bold flex items-center justify-center gap-1.5";
+      if (btnSuper) btnSuper.className = "flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white flex items-center justify-center gap-1.5";
+    } else {
+      if (boxPin) boxPin.classList.add("hidden");
+      if (boxSuper) boxSuper.classList.remove("hidden");
+      if (btnSuper) btnSuper.className = "flex-1 py-2 rounded-xl transition bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 shadow font-black flex items-center justify-center gap-1.5";
+      if (btnPin) btnPin.className = "flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white flex items-center justify-center gap-1.5";
+    }
+  }
+
+  /**
+   * THAO TÁC BÀN PHÍM SỐ ẢO (NUMPAD PIN)
+   */
+  function appendPinDigit(digit) {
+    var pinInput = document.getElementById("input-pos-pin");
+    if (pinInput && pinInput.value.length < 6) {
+      pinInput.value += digit;
+    }
+  }
+
+  function clearPinDigit() {
+    var pinInput = document.getElementById("input-pos-pin");
+    if (pinInput) pinInput.value = "";
+  }
+
+  /**
+   * XÁC THỰC MÃ PIN VẬN HÀNH (LEVEL 1: BẾP, LEVEL 2: QUẢN LÝ POS)
+   */
+  async function submitPinAuth() {
+    var pinInput = document.getElementById("input-pos-pin");
+    var pin = pinInput ? pinInput.value.trim() : "";
+
+    if (!pin) {
+      alert("Vui lòng nhập mã PIN quyền hạn!");
+      return;
+    }
+
+    var btnSubmit = document.getElementById("btn-submit-pin");
+    var originalBtnText = btnSubmit ? btnSubmit.innerHTML : "Vào";
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+    }
+
+    try {
+      // 1. Kiểm tra nhanh mã PIN hệ thống chuẩn hóa
+      // PIN 1985: Level 1 - Trưởng Ca Bếp (KDS Bếp & Bật/Tắt hết món)[cite: 4]
+      // PIN 2026: Level 2 - Quản Lý Ca POS (KDS, Thực đơn, Báo cáo ca, Mở cửa quán)[cite: 4]
+      if (pin === "1985") {
+        currentRole = "KITCHEN_LEAD";
+        sessionStorage.setItem("thim5_auth_role", "KITCHEN_LEAD");
+        unlockWorkspace();
+        return;
+      } else if (pin === "2026") {
+        currentRole = "POS_STAFF";
+        sessionStorage.setItem("thim5_auth_role", "POS_STAFF");
+        unlockWorkspace();
+        return;
+      }
+
+      // 2. Nếu không khớp PIN mặc định, gọi API Backend xác thực phân quyền động
+      if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+        var res = await Thim5API.callGAS("verifyAdminRole", { pin: pin });
+        if (res && res.status === "success" && res.data) {
+          currentRole = res.data.role || "POS_STAFF";
+          sessionStorage.setItem("thim5_auth_role", currentRole);
+          sessionStorage.setItem("thim5_admin_token", res.data.authToken || "");
+          unlockWorkspace();
+          return;
         } else {
-          if (boxPin) boxPin.classList.add("hidden");
-          if (boxSuper) boxSuper.classList.remove("hidden");
-          if (btnSuper) btnSuper.className = "flex-1 py-1.5 rounded-xl transition bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 shadow font-black";
-          if (btnPin) btnPin.className = "flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
-        }
-      }
-
-      /**
-       * THAO TÁC BÀN PHÍM SỐ ẢO (NUMPAD PIN)
-       */
-      function appendPinDigit(digit) {
-        var pinInput = document.getElementById("input-pos-pin");
-        if (pinInput && pinInput.value.length < 6) {
-          pinInput.value += digit;
-        }
-      }
-
-      function clearPinDigit() {
-        var pinInput = document.getElementById("input-pos-pin");
-        if (pinInput) pinInput.value = "";
-      }
-
-      /**
-       * XÁC THỰC MÃ PIN VẬN HÀNH (BỌC THÉP VÀ FALLBACK NỘI BỘ TRÁNH KẸT)
-       */
-      async function submitPinAuth() {
-        var pinInput = document.getElementById("input-pos-pin");
-        var pin = pinInput ? pinInput.value.trim() : "";
-
-        if (!pin) {
-          alert("Vui lòng nhập mã PIN quyền hạn!");
-          return;
-        }
-
-        var btnSubmit = document.querySelector("#auth-box-pin button:last-child");
-        var originalBtnText = btnSubmit ? btnSubmit.innerHTML : "Vào";
-        if (btnSubmit) {
-          btnSubmit.disabled = true;
-          btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-        }
-
-        try {
-          // 1. Fallback chế độ dự phòng nếu chưa kết nối được Thim5API
-          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
-            console.warn("⚠️ Chưa nạp Thim5API, sử dụng mã PIN dự phòng hệ thống...");
-            if (pin === "1985") {
-              currentRole = "KITCHEN_LEAD";
-              sessionStorage.setItem("thim5_auth_role", "KITCHEN_LEAD");
-              unlockWorkspace();
-              return;
-            } else if (pin === "2026") {
-              currentRole = "POS_STAFF";
-              sessionStorage.setItem("thim5_auth_role", "POS_STAFF");
-              unlockWorkspace();
-              return;
-            } else {
-              throw new Error("Không thể kết nối api.js và mã PIN nhập không khớp dự phòng!");
-            }
-          }
-
-          // 2. Gửi request xác thực lên Backend Google Apps Script
-          var res = await Thim5API.callGAS("verifyAdminRole", { pin: pin });
-
-          if (res && res.status === "success" && res.data) {
-            currentRole = res.data.role || "POS_STAFF";
-            sessionStorage.setItem("thim5_auth_role", currentRole);
-            sessionStorage.setItem("thim5_admin_token", res.data.authToken || "");
-
-            if (currentRole === "SUPER_ADMIN") {
-              currentMasterKey = pin;
-              sessionStorage.setItem("thim5_master_key", pin);
-            }
-
-            console.log(">>> [AUTH] Xác thực thành công! Quyền:", currentRole);
-            unlockWorkspace();
-          } else {
-            alert("⛔ " + (res && res.message ? res.message : "Mã PIN không chính xác!"));
-            clearPinDigit();
-          }
-        } catch (err) {
-          console.error("Lỗi xác thực:", err);
-          alert("❌ Lỗi kết nối máy chủ xác thực: " + err.message);
+          alert("⛔ " + (res && res.message ? res.message : "Mã PIN không chính xác!"));
           clearPinDigit();
-        } finally {
-          if (btnSubmit) {
-            btnSubmit.disabled = false;
-            btnSubmit.innerHTML = originalBtnText;
-          }
         }
+      } else {
+        alert("⛔ Mã PIN không hợp lệ! (Gợi ý: 1985 cho Bếp, 2026 cho Quản lý ca)");
+        clearPinDigit();
       }
-
-      /**
-       * XÁC THỰC SUPER ADMIN 2FA (MASTER KEY + TOTP GOOGLE AUTHENTICATOR)
-       */
-      async function submitSuperAdminAuth() {
-        var keyInput = document.getElementById("input-master-key");
-        var totpInput = document.getElementById("input-totp-code");
-        var btn = document.getElementById("btn-super-auth-submit");
-
-        var masterKey = keyInput ? keyInput.value.trim() : "";
-        var totpCode = totpInput ? totpInput.value.trim() : "";
-
-        if (!masterKey || !totpCode) {
-          alert("Vui lòng nhập đầy đủ Master Key và Mã 6 số Google Authenticator!");
-          return;
-        }
-
-        if (btn) {
-          btn.disabled = true;
-          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Kiểm Toán 2FA...';
-        }
-
-        try {
-          var res = await Thim5API.callGAS("verifySuperAdminTotp", {
-            masterKey: masterKey,
-            totpCode: totpCode
-          });
-
-          if (res && res.status === "success" && res.data) {
-            currentRole = "SUPER_ADMIN";
-            currentMasterKey = masterKey;
-            sessionStorage.setItem("thim5_auth_role", "SUPER_ADMIN");
-            sessionStorage.setItem("thim5_master_key", masterKey);
-            sessionStorage.setItem("thim5_admin_token", res.data.sessionToken || "");
-
-            unlockWorkspace();
-          } else {
-            alert("❌ " + (res && res.message ? res.message : "Xác thực 2FA thất bại!"));
-          }
-        } catch (err) {
-          alert("❌ Lỗi kết nối máy chủ xác thực: " + err.message);
-        } finally {
-          if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-key"></i> Xác Thực Toàn Quyền Super Admin';
-          }
-        }
+    } catch (err) {
+      console.error("Lỗi xác thực PIN:", err);
+      // Cơ chế Bypass an toàn: nếu đúng mã PIN hệ thống thì vẫn cho vào
+      if (pin === "1985" || pin === "2026") {
+        currentRole = (pin === "1985") ? "KITCHEN_LEAD" : "POS_STAFF";
+        sessionStorage.setItem("thim5_auth_role", currentRole);
+        unlockWorkspace();
+      } else {
+        alert("❌ Lỗi kết nối xác thực: " + err.message);
+        clearPinDigit();
       }
-
-      /**
-       * YÊU CẦU MÃ GIẢI CỨU KHẨN CẤP QUA GMAIL
-       */
-      async function requestEmergencyBackupOtp() {
-        var masterKey = prompt("Vui lòng nhập Master Key để nhận mã giải cứu khẩn cấp qua Gmail haiau2205@gmail.com:");
-        if (!masterKey) return;
-
-        try {
-          var res = await Thim5API.callGAS("sendEmergencyBackupOtpToEmail", { masterKey: masterKey.trim() });
-          if (res && res.status === "success") {
-            alert("📬 " + res.data.message);
-            var keyEl = document.getElementById("input-master-key");
-            var totpEl = document.getElementById("input-totp-code");
-            if (keyEl) keyEl.value = masterKey.trim();
-            if (totpEl) totpEl.focus();
-          } else {
-            alert("⛔ " + (res && res.message ? res.message : "Không thể gửi mã giải cứu!"));
-          }
-        } catch (err) {
-          alert("Lỗi kết nối gửi mã: " + err.message);
-        }
+    } finally {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = originalBtnText;
       }
+    }
+  }
 
-      /**
-       * MỞ KHÓA GIAO DIỆN CHÍNH & CAN THIỆP TRỰC TIẾP CSS DISPLAY ĐỂ GỠ BỎ MODAL
-       */
-      function unlockWorkspace() {
-        try {
-          var overlay = document.getElementById("auth-modal-overlay");
-          var roleBadgeText = document.getElementById("user-role-text");
-          var roleBadgeBox = document.getElementById("user-role-badge");
-          var superNavGroup = document.getElementById("super-admin-nav-group");
-          var sidebarRoleIndicator = document.getElementById("sidebar-role-indicator");
+  /**
+   * XÁC THỰC SUPER ADMIN 2FA (MASTER KEY + TOTP GOOGLE AUTHENTICATOR)
+   */
+  async function submitSuperAdminAuth(event) {
+    if (event) event.preventDefault();
 
-          // 1. Gỡ bỏ triệt để Modal Overlay khỏi màn hình (chống kẹt giao diện)
-          if (overlay) {
-            overlay.classList.add("hidden");
-            overlay.style.setProperty("display", "none", "important");
-            overlay.style.pointerEvents = "none";
-          }
+    var keyInput = document.getElementById("input-master-key");
+    var totpInput = document.getElementById("input-totp-code");
+    var btn = document.getElementById("btn-super-auth-submit");
 
-          // 2. Cập nhật phân quyền hiển thị
-          if (currentRole === "SUPER_ADMIN") {
-            if (roleBadgeText) roleBadgeText.innerText = "SUPER ADMIN";
-            if (roleBadgeBox) roleBadgeBox.className = "px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center gap-1.5";
-            if (superNavGroup) superNavGroup.classList.remove("hidden");
-            if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "SUPER_ADMIN";
-            loadSystemConfigData();
-          } else {
-            var displayRole = (currentRole === "KITCHEN_LEAD") ? "TRƯỞNG CA BẾP" : "QUẢN LÝ CA (POS)";
-            if (roleBadgeText) roleBadgeText.innerText = displayRole;
-            if (roleBadgeBox) roleBadgeBox.className = "px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5";
-            if (superNavGroup) superNavGroup.classList.add("hidden");
-            if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = currentRole || "POS_STAFF";
-          }
+    var masterKey = keyInput ? keyInput.value.trim() : "";
+    var totpCode = totpInput ? totpInput.value.trim() : "";
 
-          // 3. Nạp tab mặc định an toàn
-          var defaultTabBtn = document.querySelector('[data-tab="pl"]');
-          switchMainTab("pl", defaultTabBtn);
+    if (!masterKey || !totpCode) {
+      alert("Vui lòng nhập đầy đủ Master Secret Key và Mã 6 số 2FA!");
+      return;
+    }
 
-          // 4. Khởi chạy Heartbeat Ping
-          runSystemHeartbeat();
-          if (!heartbeatInterval) heartbeatInterval = setInterval(runSystemHeartbeat, 30000);
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Kiểm Tra 2FA...';
+    }
 
-        } catch (e) {
-          console.error("Lỗi trong quá trình mở khóa Workspace:", e);
-        }
-      }
-
-      /**
-       * ĐIỀU HƯỚNG TABS & NẠP COMPONENT ĐỘNG (CÓ FALLBACK VIEW NẾU CHƯA CÓ FILE)
-       */
-      async function switchMainTab(tabKey, btnElement) {
-        // Chốt chặn bảo mật RBAC
-        var restrictedTabs = ["control-plane", "campaign"];
-        if (restrictedTabs.includes(tabKey) && currentRole !== "SUPER_ADMIN") {
-          alert("⛔ TỪ CHỐI TRUY CẬP (403): Phân hệ này chỉ dành riêng cho Super Admin đã xác thực bảo mật 2FA!");
-          return;
-        }
-
-        currentActiveTab = tabKey;
-        toggleSidebar(false);
-
-        // Đổi trạng thái Active trên Sidebar
-        var allNavBtns = document.querySelectorAll(".sidebar-nav-btn");
-        allNavBtns.forEach(function(btn) {
-          btn.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60";
+    try {
+      if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+        var res = await Thim5API.callGAS("verifySuperAdminTotp", {
+          masterKey: masterKey,
+          totpCode: totpCode
         });
 
-        if (btnElement) {
-          btnElement.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/20";
+        if (res && res.status === "success") {
+          currentRole = "SUPER_ADMIN";
+          currentMasterKey = masterKey;
+          sessionStorage.setItem("thim5_auth_role", "SUPER_ADMIN");
+          sessionStorage.setItem("thim5_master_key", masterKey);
+          unlockWorkspace();
         } else {
-          var targetBtn = document.querySelector(`.sidebar-nav-btn[data-tab="${tabKey}"]`);
-          if (targetBtn) {
-            targetBtn.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/20";
-          }
+          alert("❌ " + (res && res.message ? res.message : "Mã xác thực 2FA không chính xác hoặc đã hết hạn!"));
         }
+      } else {
+        throw new Error("Không tìm thấy kết nối Thim5API Backend!");
+      }
+    } catch (err) {
+      alert("❌ Lỗi xác thực 2FA: " + err.message);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-shield-halved text-xs"></i> <span>Xác Thực Quyền Super Admin</span>';
+      }
+    }
+  }
 
-        var outlet = document.getElementById("dynamic-tab-outlet");
-        var controlPlaneView = document.getElementById("super-control-plane-view");
+  /**
+   * YÊU CẦU MÃ BACKUP OTP QUA EMAIL TRONG TRƯỜNG HỢP KHẨN CẤP
+   */
+  async function requestEmergencyBackupOtp() {
+    var masterKey = prompt("Nhập Master Key của chuỗi để nhận mã khẩn cấp qua Email:");
+    if (!masterKey) return;
 
-        // Phân luồng Super Control Plane nội tại
-        if (tabKey === "control-plane") {
-          if (outlet) outlet.classList.add("hidden");
-          if (controlPlaneView) controlPlaneView.classList.remove("hidden");
-          loadSystemConfigData();
-          return;
-        }
-
-        if (controlPlaneView) controlPlaneView.classList.add("hidden");
-        if (outlet) {
-          outlet.classList.remove("hidden");
-          outlet.innerHTML = `
-            <div class="py-24 text-center text-slate-500 space-y-3">
-              <i class="fa-solid fa-circle-notch fa-spin text-3xl text-amber-400"></i>
-              <p class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Đang nạp phân hệ: ${tabKey.toUpperCase()}...</p>
-            </div>
-          `;
-        }
-
-        var tabComponentMap = {
-          "pl": "tab-pl.html",
-          "menu": "tab-menu.html",
-          "shippers": "tab-shippers.html",
-          "campaign": "tab-campaign.html"
-        };
-
-        var componentFile = tabComponentMap[tabKey] || "tab-pl.html";
-
-        try {
-          var response = await fetch(componentFile + "?v=" + Date.now());
-          
-          if (!response.ok) {
-            // NẾU FILE CHƯA TỒN TẠI (HTTP 404): Tự động render Fallback View chuẩn thay vì dừng luồng
-            console.warn(`⚠️ Component [${componentFile}] chưa tồn tại trên máy chủ (HTTP ${response.status}). Kích hoạt Fallback View...`);
-            renderFallbackTabContent(outlet, tabKey, componentFile);
-            return;
-          }
-
-          var htmlText = await response.text();
-          renderComponentWithScripts(outlet, htmlText);
-
-        } catch (err) {
-          console.error("Lỗi mạng khi tải component:", err);
-          renderFallbackTabContent(outlet, tabKey, componentFile, err.message);
+    try {
+      if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+        var res = await Thim5API.callGAS("requestEmergencyBackupOtp", { masterKey: masterKey });
+        if (res && res.status === "success") {
+          alert("📧 " + (res.message || "Đã gửi mã xác thực khẩn cấp về Email Super Admin!"));
+        } else {
+          alert("⛔ " + (res && res.message ? res.message : "Yêu cầu thất bại!"));
         }
       }
+    } catch (e) {
+      alert("Lỗi kết nối khẩn cấp: " + e.message);
+    }
+  }
+
+  /**
+   * MỞ KHÓA GIAO DIỆN CHÍNH - TIÊU DIỆT HOÀN TOÀN MODAL KHỎI MÀN HÌNH (ANTI-HANG)
+   */
+  function unlockWorkspace() {
+    console.log(">>> [AUTH SUCCESS] Mở khóa giao diện thành công! Quyền:", currentRole);
+
+    // 1. CAN THIỆP THÔ VÀO INLINE STYLE ĐỂ XÓA SỔ HOÀN TOÀN MODAL KHỎI DOM
+    var overlay = document.getElementById("auth-modal-overlay");
+    if (overlay) {
+      overlay.classList.add("hidden");
+      overlay.style.cssText = "display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important;";
+    }
+
+    // 2. CẬP NHẬT PHÂN QUYỀN RBAC TRÊN TOPBAR & SIDEBAR
+    try {
+      var roleBadgeText = document.getElementById("user-role-text");
+      var roleBadgeBox = document.getElementById("user-role-badge");
+      var superNavGroup = document.getElementById("super-admin-nav-group");
+      var sidebarRoleIndicator = document.getElementById("sidebar-role-indicator");
+
+      if (currentRole === "SUPER_ADMIN") {
+        if (roleBadgeText) roleBadgeText.innerText = "SUPER ADMIN";
+        if (roleBadgeBox) roleBadgeBox.className = "px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30 flex items-center gap-1.5";
+        if (superNavGroup) superNavGroup.classList.remove("hidden");
+        if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "SUPER_ADMIN";
+      } else if (currentRole === "KITCHEN_LEAD") {
+        if (roleBadgeText) roleBadgeText.innerText = "TRƯỞNG CA BẾP";
+        if (roleBadgeBox) roleBadgeBox.className = "px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5";
+        if (superNavGroup) superNavGroup.classList.add("hidden");
+        if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "KITCHEN_LEAD";
+      } else {
+        if (roleBadgeText) roleBadgeText.innerText = "QUẢN LÝ CA (POS)";
+        if (roleBadgeBox) roleBadgeBox.className = "px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center gap-1.5";
+        if (superNavGroup) superNavGroup.classList.add("hidden");
+        if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "POS_STAFF";
+      }
+    } catch (eRbac) {
+      console.warn("Cảnh báo đồng bộ RBAC UI:", eRbac);
+    }
+
+    // 3. ĐIỀU HƯỚNG TAB THÔNG MINH THEO CẤP ĐỘ QUYỀN HẠN
+    try {
+      // Bếp (Level 1) mặc định mở tab Quản lý đơn hàng/KDS
+      // Quản lý ca (Level 2) & Super Admin mặc định mở tab P&L Lãi Lỗ
+      var defaultTab = (currentRole === "KITCHEN_LEAD") ? "orders" : "pl";
+      var targetTabBtn = document.querySelector('[data-tab="' + defaultTab + '"]');
+      switchMainTab(defaultTab, targetTabBtn);
+    } catch (eTab) {
+      console.error("Lỗi điều hướng tab mặc định:", eTab);
+    }
+
+    // 4. KÍCH HOẠT NHỊP ĐẬP HEARTBEAT HỆ THỐNG
+    try {
+      runSystemHeartbeat();
+      if (!heartbeatInterval) heartbeatInterval = setInterval(runSystemHeartbeat, 30000);
+    } catch (eHb) {
+      console.warn("Lỗi khởi động Heartbeat:", eHb);
+    }
+  }
+   /* ==========================================================================
+   FILE: admin-shell.html - ĐOẠN THAY THẾ CONTROLLER - PHẦN [2/2]
+   BẮT ĐẦU TỪ: async function switchMainTab(tabKey, btnElement)
+   KẾT THÚC TẠI: Hết module AdminShellController (dòng })();)
+   HƯỚNG DẪN: Copy nối tiếp ngay sau hàm unlockWorkspace() của Phần [1/2]
+   ========================================================================== */
+
+      /**
+       * CHUYỂN ĐỔI TAB CHÍNH VÀ NẠP COMPONENT ĐỘNG (SAFE COMPONENT LOADER)
+       */
+      async function switchMainTab(tabKey, btnElement) {
+        currentActiveTab = tabKey;
+
+        // Cập nhật trạng thái Active trên Navigation Sidebar
+        document.querySelectorAll(".shell-nav-btn").forEach(function(b) {
+          b.className = "shell-nav-btn w-full px-3 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-3 transition text-slate-400 hover:text-white hover:bg-slate-900";
+        });
+        if (btnElement) {
+          btnElement.className = "shell-nav-btn w-full px-3 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-3 transition bg-amber-500 text-slate-950 shadow-md active";
+        }
+
+        var container = document.getElementById("main-component-container");
+        if (!container) return;
+
+        // Hiển thị vòng xoay nạp dữ liệu mượt mà
+        container.innerHTML = `
+          <div class="py-20 text-center text-slate-400 space-y-3">
+            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-amber-400"></i>
+            <p class="text-xs font-mono">Đang nạp phân hệ [${tabKey.toUpperCase()}]...</p>
+          </div>
+        `;
+
+        // Tự động đóng Sidebar trên thiết bị di động sau khi chọn tab
+        var sidebar = document.getElementById("app-sidebar");
+        var backdrop = document.getElementById("sidebar-backdrop");
+        if (sidebar && !sidebar.classList.contains("hidden") && window.innerWidth < 1024) {
+          sidebar.classList.add("hidden");
+          if (backdrop) backdrop.classList.add("hidden");
+        }
+
+        // Xác định đường dẫn tệp tin HTML view tương ứng
+        var fileName = "tab-" + tabKey + ".html";
+        if (tabKey === "config") fileName = "tab-system-config.html";
+
+        try {
+          var response = await fetch(fileName + "?v=" + Date.now());
+          if (!response.ok) {
+            throw new Error("Mã phản hồi HTTP: " + response.status + " (" + response.statusText + ")");
+          }
+          var htmlContent = await response.text();
+
+          // Chèn nội dung giao diện vào container
+          container.innerHTML = htmlContent;
+
+          // Tái tạo và kích hoạt toàn bộ các đoạn mã <script> bên trong component con
+          var scripts = container.querySelectorAll("script");
+          scripts.forEach(function(oldScript) {
+            var newScript = document.createElement("script");
+            Array.from(oldScript.attributes).forEach(function(attr) {
+              newScript.setAttribute(attr.name, attr.value);
+            });
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+          });
+
+        } catch (fetchErr) {
+          console.warn("⚠️ Không thể nạp component từ máy chủ, hiển thị view dự phòng an toàn:", fetchErr);
+          renderFallbackTabContent(container, tabKey, fileName, fetchErr.message);
+        }
+      }
+
+      /**
+       * TỰ ĐỘNG RENDER KHUNG VIEW DỰ PHÒNG NẾU FILE CHƯA ĐƯỢC TẢI LÊN HOSTING
+       */
+      function renderFallbackTabContent(container, tabKey, fileName, errorDetail) {
+        if (!container) return;
+
+        var tabTitles = {
+          "pl": "Báo Cáo Tài Chính P&L & Dòng Tiền",
+          "menu": "Quản Lý Thực Đơn & Phân Tích Reverse-Pricing",
+          "orders": "Màn Hình Điều Phối Bếp & Đơn Hàng (KDS)",
+          "shippers": "Trạm Điều Phối Đội Xe & Shipper",
+          "campaign": "Trung Tâm Chiến Dịch Geo-Fencing & Voucher",
+          "config": "Cấu Hình Hệ Thống & Tham Số SaaS"
+        };
+
+        var currentTitle = tabTitles[tabKey] || ("Phân Hệ " + tabKey.toUpperCase());
+
+        container.innerHTML = `
+          <div class="p-6 rounded-3xl bg-slate-900 border border-slate-800 text-center space-y-4 max-w-lg mx-auto my-12 shadow-xl animate-in fade-in-50 duration-200">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mx-auto">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="space-y-1.5">
+              <h3 class="text-sm font-black text-white uppercase tracking-wider">${currentTitle}</h3>
+              <p class="text-xs text-slate-400">Không tìm thấy tệp giao diện <code>${fileName}</code> hoặc kết nối mạng bị gián đoạn.</p>
+              <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-left font-mono text-[10px] text-rose-400 break-all">
+                Lỗi chi tiết: ${errorDetail}
+              </div>
+            </div>
+            <div class="flex items-center justify-center gap-2 pt-2">
+              <button type="button" onclick="AdminShellController.switchMainTab('${tabKey}')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition active:scale-95 shadow">
+                <i class="fa-solid fa-rotate mr-1"></i> Thử Tải Lại Phân Hệ
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      /**
+       * NHỊP ĐẬP HỆ THỐNG HEARTBEAT PING (ĐỒNG BỘ TRẠNG THÁI MẠNG REALTIME)
+       */
+      async function runSystemHeartbeat() {
+        var dot = document.getElementById("system-status-dot");
+        var text = document.getElementById("system-status-text");
+
+        try {
+          if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+            var pingRes = await Thim5API.callGAS("systemHeartbeatPing", { role: currentRole });
+            if (pingRes && pingRes.status === "success") {
+              if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+              if (text) text.innerText = "KẾT NỐI ỔN ĐỊNH";
+              return;
+            }
+          }
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-amber-500";
+          if (text) text.innerText = "CHẾ ĐỘ NGOẠI TUYẾN";
+        } catch (e) {
+          if (dot) dot.className = "w-2 h-2 rounded-full bg-rose-500";
+          if (text) text.innerText = "MẤT KẾT NỐI MÁY CHỦ";
+        }
+      }
+
+      /**
+       * ĐIỀU HƯỚNG ĐÓNG / MỞ THANH SIDEBAR TRÊN THIẾT BỊ DI ĐỘNG
+       */
+      function toggleSidebar() {
+        var sidebar = document.getElementById("app-sidebar");
+        var backdrop = document.getElementById("sidebar-backdrop");
+        if (sidebar) {
+          var isHidden = sidebar.classList.contains("hidden");
+          if (isHidden) {
+            sidebar.classList.remove("hidden");
+            if (backdrop) backdrop.classList.remove("hidden");
+          } else {
+            sidebar.classList.add("hidden");
+            if (backdrop) backdrop.classList.add("hidden");
+          }
+        }
+      }
+
+      /**
+       * ĐĂNG XUẤT VÀ XÓA SẠCH PHIÊN LÀM VIỆC AN TOÀN
+       */
+      function handleLogout() {
+        if (confirm("Anh Hải Âu có chắc muốn đăng xuất khỏi Trung Tâm Điều Hành?")) {
+          sessionStorage.clear();
+          window.location.reload();
+        }
+      }
+
+      /**
+       * LÀM MỚI TAB ĐANG HOẠT ĐỘNG
+       */
+      function refreshCurrentTab() {
+        switchMainTab(currentActiveTab);
+      }
+
+      // TỰ ĐỘNG PHỤC HỒI PHIÊN LÀM VIỆC KHI TẢI LẠI TRANG (F5)
+      window.addEventListener("DOMContentLoaded", function() {
+        var savedRole = sessionStorage.getItem("thim5_auth_role");
+        var savedKey = sessionStorage.getItem("thim5_master_key");
+
+        if (savedRole) {
+          currentRole = savedRole;
+          if (savedKey) currentMasterKey = savedKey;
+          console.log(">>> [SESSION RECOVERED] Tự động phục hồi phiên làm việc:", currentRole);
+          unlockWorkspace();
+        }
+      });
+
+      // PUBLIC API RA NGOÀI PHẠM VI SHELL
+      return {
+        switchAuthMode: switchAuthMode,
+        appendPinDigit: appendPinDigit,
+        clearPinDigit: clearPinDigit,
+        submitPinAuth: submitPinAuth,
+        submitSuperAdminAuth: submitSuperAdminAuth,
+        requestEmergencyBackupOtp: requestEmergencyBackupOtp,
+        switchMainTab: switchMainTab,
+        toggleSidebar: toggleSidebar,
+        handleLogout: handleLogout,
+        refreshCurrentTab: refreshCurrentTab
+      };
+    })();
 
       /**
        * TỰ ĐỘNG RENDER KHUNG VIEW DỰ PHÒNG NẾU FILE CHƯA ĐƯỢC TẢI LÊN HOSTING
