@@ -839,24 +839,42 @@
           }
           var htmlContent = await response.text();
 
+          // 1. Nhúng nội dung HTML vào container
           outlet.innerHTML = htmlContent;
 
+          // 2. Kích hoạt toàn bộ mã JavaScript độc lập ra phạm vi toàn cục (Global Scope)
           var scripts = outlet.querySelectorAll("script");
           scripts.forEach(function(oldScript) {
-            var newScript = document.createElement("script");
-            Array.from(oldScript.attributes).forEach(function(attr) {
-              newScript.setAttribute(attr.name, attr.value);
-            });
-            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-            oldScript.parentNode.replaceChild(newScript, oldScript);
+            var scriptContent = oldScript.innerText || oldScript.textContent;
+            if (scriptContent && scriptContent.trim()) {
+              try {
+                // Sử dụng Function constructor để thực thi mã ở global scope mà không bị chặn
+                var executableFn = new Function(scriptContent);
+                executableFn();
+              } catch (execErr) {
+                console.error("Lỗi thực thi script tab [" + tabKey + "]:", execErr);
+              }
+            }
+            // Xóa thẻ script nội bộ trong DOM để tránh trùng lặp
+            oldScript.remove();
           });
 
+          // 3. Cưỡng bức gọi hàm init() của module con tương ứng nếu tồn tại
+          setTimeout(function() {
+            if (tabKey === "pl" && window.TabPlController && typeof window.TabPlController.init === "function") {
+              console.log(">>> [SHELL] Kích hoạt cưỡng bức TabPlController.init()...");
+              window.TabPlController.init();
+            } else if (tabKey === "menu" && window.TabMenuController && typeof window.TabMenuController.init === "function") {
+              console.log(">>> [SHELL] Kích hoạt cưỡng bức TabMenuController.init()...");
+              window.TabMenuController.init();
+            }
+          }, 60);
+
         } catch (fetchErr) {
-          console.warn("⚠️ Không thể nạp component từ máy chủ, hiển thị view dự phòng an toàn:", fetchErr);
+          console.warn("⚠️ Không thể nạp component từ máy chủ, hiển thị view dự phòng:", fetchErr);
           renderFallbackTabContent(outlet, tabKey, fileName, fetchErr.message);
         }
       }
-
       function renderFallbackTabContent(container, tabKey, fileName, errorDetail) {
         if (!container) return;
 
