@@ -1,3 +1,274 @@
+<script>
+  /**
+   * =========================================================================
+   * CONTROLLER: TAB P&L FINANCIAL & CASH FLOW AUDIT (v3.0 SAAS)
+   * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+   * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+   * Nghiệp vụ: Reverse-Pricing, 4 Kỳ Tài Chính, Kiểm Toán Súp Booster / AOV
+   * =========================================================================
+   */
+  var TabPlController = (function() {
+    var currentPeriod = "today";
+    var financialDataCache = null;
+
+    /**
+     * KHỞI TẠO PHÂN HỆ P&L KHI ĐƯỢC SHELL NẠP VÀO DOM
+     */
+    function init() {
+      fetchFinancialData();
+    }
+
+    /**
+     * THAY ĐỔI KỲ BÁO CÁO TÀI CHÍNH (HÔM NAY / TUẦN / THÁNG / QUÝ / TẤT CẢ)
+     */
+    function changePeriod(period) {
+      currentPeriod = period;
+
+      var periods = ["today", "week", "month", "quarter", "all"];
+      periods.forEach(function(p) {
+        var btn = document.getElementById("btn-period-" + p);
+        if (btn) {
+          if (p === period) {
+            btn.className = "px-3 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow font-bold";
+          } else {
+            btn.className = "px-3 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
+          }
+        }
+      });
+
+      fetchFinancialData();
+    }
+
+    /**
+     * GỌI API BACKEND THIM5 LẤY SỐ LIỆU TÀI CHÍNH THỰC TẾ
+     */
+    async function fetchFinancialData() {
+      renderLoadingState(true);
+
+      try {
+        if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+          var res = await Thim5API.callGAS("getFinancialPlReport", {
+            period: currentPeriod,
+            role: (window.AdminShellController && typeof window.AdminShellController.getCurrentUserRole === "function") 
+                  ? window.AdminShellController.getCurrentUserRole() 
+                  : "POS_STAFF"
+          });
+
+          if (res && res.status === "success" && res.data) {
+            financialDataCache = res.data;
+            renderFinancialUI(res.data);
+            return;
+          }
+        }
+        
+        // Fallback mô phỏng giao diện an toàn nếu chưa có kết nối Sheets
+        renderFallbackData();
+
+      } catch (err) {
+        console.warn("⚠️ Lỗi tải số liệu P&L từ GAS, chuyển chế độ dự phòng:", err);
+        renderFallbackData();
+      } finally {
+        renderLoadingState(false);
+      }
+    }
+
+    /**
+     * HIỂN THỊ DỮ LIỆU TÀI CHÍNH LÊN CÁC KHỐI GIAO DIỆN
+     */
+    function renderFinancialUI(data) {
+      if (!data) return;
+
+      var summary = data.summary || {};
+      var revenue = summary.totalRevenue || 0;
+      var cogs = summary.totalCogs || 0;
+      var promo = summary.totalPromo || 0;
+      var tax = summary.totalTax || Math.round(revenue * 0.045);
+      var masterFee = summary.totalMasterFee || Math.round(revenue * 0.05);
+      var netProfit = summary.netProfit || Math.max(0, revenue - cogs - promo - tax - masterFee);
+
+      var orderCount = summary.orderCount || 0;
+      var aov = orderCount > 0 ? Math.round(revenue / orderCount) : 0;
+      var foodCostPct = revenue > 0 ? ((cogs / revenue) * 100).toFixed(1) : 0;
+      var netMarginPct = revenue > 0 ? ((netProfit / revenue) * 100).toFixed(1) : 0;
+
+      // 1. Cập nhật 4 thẻ KPI Header
+      setElementText("kpi-revenue", formatVND(revenue));
+      setElementText("kpi-order-count", orderCount + " đơn hoàn thành");
+      setElementText("kpi-net-profit", formatVND(netProfit));
+      setElementText("kpi-net-margin", netMarginPct + "%");
+      setElementText("kpi-food-cost-pct", foodCostPct + "%");
+      setElementText("kpi-food-cost-val", formatVND(cogs));
+      setElementText("kpi-aov", formatVND(aov));
+
+      // 2. Cập nhật thanh tiến trình phân bổ % chi phí đa sắc
+      var cogsPct = revenue > 0 ? Math.min(100, (cogs / revenue) * 100) : 0;
+      var promoPct = revenue > 0 ? Math.min(100, (promo / revenue) * 100) : 0;
+      var taxPct = revenue > 0 ? 4.5 : 0;
+      var masterPct = revenue > 0 ? 5.0 : 0;
+      var profitPct = Math.max(0, 100 - cogsPct - promoPct - taxPct - masterPct);
+
+      setElementStyleWidth("bar-cogs", cogsPct + "%");
+      setElementStyleWidth("bar-promo", promoPct + "%");
+      setElementStyleWidth("bar-tax", taxPct + "%");
+      setElementStyleWidth("bar-master", masterPct + "%");
+      setElementStyleWidth("bar-profit", profitPct + "%");
+
+      setElementText("pct-cogs", cogsPct.toFixed(1) + "%");
+      setElementText("pct-promo", promoPct.toFixed(1) + "%");
+      setElementText("pct-tax", taxPct.toFixed(1) + "%");
+      setElementText("pct-master", masterPct.toFixed(1) + "%");
+      setElementText("pct-profit", profitPct.toFixed(1) + "%");
+
+      // 3. Cơ cấu theo kênh bán (D2C vs POS vs App)
+      var channels = data.channels || {};
+      var d2c = channels.d2c || { orders: 0, revenue: 0, profit: 0, aov: 0 };
+      var pos = channels.pos || { orders: 0, revenue: 0, profit: 0, aov: 0 };
+      var app = channels.app || { orders: 0, revenue: 0, profit: 0, aov: 0 };
+
+      setElementText("chan-d2c-orders", d2c.orders);
+      setElementText("chan-d2c-aov", formatVND(d2c.aov));
+      setElementText("chan-d2c-rev", formatVND(d2c.revenue));
+      setElementText("chan-d2c-profit", formatVND(d2c.profit));
+
+      setElementText("chan-pos-orders", pos.orders);
+      setElementText("chan-pos-aov", formatVND(pos.aov));
+      setElementText("chan-pos-rev", formatVND(pos.revenue));
+      setElementText("chan-pos-profit", formatVND(pos.profit));
+
+      setElementText("chan-app-orders", app.orders);
+      setElementText("chan-app-aov", formatVND(app.aov));
+      setElementText("chan-app-rev", formatVND(app.revenue));
+      setElementText("chan-app-profit", formatVND(app.profit));
+
+      // 4. Đối soát dòng tiền và két thu ngân
+      var cashFlow = data.cashFlow || {};
+      setElementText("cash-bank", formatVND(cashFlow.bankTransfer || 0));
+      setElementText("cash-shipper-cod", formatVND(cashFlow.shipperHolding || 0));
+      setElementText("cash-pos-drawer", formatVND(cashFlow.posCashDrawer || 0));
+
+      // 5. Bảng kiểm toán món ăn & Súp Booster
+      renderItemAuditTable(data.items || []);
+    }
+
+    /**
+     * RENDER BẢNG KIỂM TOÁN MÓN ĂN & SÚP BOOSTER BÁN KÈM
+     */
+    function renderItemAuditTable(items) {
+      var tbody = document.getElementById("tbl-item-audit-body");
+      if (!tbody) return;
+
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-8 text-slate-500 font-sans text-xs">
+              Chưa có dữ liệu món ăn được ghi nhận trong kỳ tài chính này.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      var html = "";
+      items.forEach(function(item) {
+        var fcPct = item.revenue > 0 ? ((item.cogsTotal / item.revenue) * 100).toFixed(1) : 0;
+        var badgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+        var catName = item.category || "Món Chính";
+
+        if (catName.indexOf("Súp Booster") !== -1 || catName.indexOf("Nước") !== -1) {
+          badgeColor = "bg-purple-500/10 text-purple-400 border-purple-500/30";
+        } else if (fcPct > 45) {
+          badgeColor = "bg-rose-500/10 text-rose-400 border-rose-500/30";
+        }
+
+        html += `
+          <tr class="hover:bg-slate-850/50 transition">
+            <td class="py-2.5 px-3 font-bold text-white flex items-center gap-2">
+              <span>${item.icon || "🍜"}</span>
+              <span>${item.name}</span>
+            </td>
+            <td class="py-2.5 px-2 text-center">
+              <span class="px-2 py-0.5 rounded-lg border text-[10px] font-bold ${badgeColor}">
+                ${catName}
+              </span>
+            </td>
+            <td class="py-2.5 px-2 text-right text-slate-300 font-bold">${item.qtySold || 0}</td>
+            <td class="py-2.5 px-2 text-right text-slate-400">${formatVND(item.avgPrice || 0)}</td>
+            <td class="py-2.5 px-2 text-right font-black text-amber-400">${formatVND(item.revenue || 0)}</td>
+            <td class="py-2.5 px-3 text-right font-mono font-bold ${Number(fcPct) <= 35 ? 'text-emerald-400' : (Number(fcPct) <= 45 ? 'text-sky-400' : 'text-rose-400')}">
+              ${fcPct}%
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    /**
+     * DỮ LIỆU DỰ PHÒNG CHUẨN FORM (FALLBACK ZERO-STATE)
+     */
+    function renderFallbackData() {
+      renderFinancialUI({
+        summary: {
+          totalRevenue: 0,
+          totalCogs: 0,
+          totalPromo: 0,
+          totalTax: 0,
+          totalMasterFee: 0,
+          netProfit: 0,
+          orderCount: 0
+        },
+        channels: {
+          d2c: { orders: 0, revenue: 0, profit: 0, aov: 0 },
+          pos: { orders: 0, revenue: 0, profit: 0, aov: 0 },
+          app: { orders: 0, revenue: 0, profit: 0, aov: 0 }
+        },
+        cashFlow: {
+          bankTransfer: 0,
+          shipperHolding: 0,
+          posCashDrawer: 0
+        },
+        items: []
+      });
+    }
+
+    /**
+     * HIỆU ỨNG VÒNG XOAY NẠP DỮ LIỆU
+     */
+    function renderLoadingState(isLoading) {
+      var revEl = document.getElementById("kpi-revenue");
+      if (!revEl) return;
+
+      if (isLoading) {
+        revEl.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-sm text-amber-400"></i>';
+      }
+    }
+
+    // CÁC HÀM TIỆN ÍCH ĐỒNG BỘ DOM & FORMAT TIỀN TỆ
+    function formatVND(amount) {
+      return (Number(amount) || 0).toLocaleString("vi-VN") + " đ";
+    }
+
+    function setElementText(id, text) {
+      var el = document.getElementById(id);
+      if (el) el.innerText = text;
+    }
+
+    function setElementStyleWidth(id, widthStr) {
+      var el = document.getElementById(id);
+      if (el) el.style.width = widthStr;
+    }
+
+    // TỰ ĐỘNG KHỞI TẠO KHI NHÚNG VÀO SPA SHELL
+    init();
+
+    return {
+      init: init,
+      changePeriod: changePeriod,
+      fetchFinancialData: fetchFinancialData
+    };
+  })();
+</script>
 <div id="tab-pl-container" class="space-y-4 max-w-6xl mx-auto pb-12 select-none text-xs">
 
   <!-- BANNER TIÊU ĐỀ & BỘ LỌC KỲ TÀI CHÍNH THỜI GIAN THỰC -->
@@ -237,130 +508,7 @@
       </div>
     </div>
   </div>
-
-  <!-- BẢNG KIỂM TOÁN ĐÓNG GÓP MÓN ĂN & SÚP BOOSTER BÁN KÈM -->
-  <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-3">
-    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
-      <div class="flex items-center gap-2">
-        <span class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs">
-          <i class="fa-solid fa-utensils"></i>
-        </span>
-        <div>
-          <h3 class="text-xs font-black uppercase text-white tracking-wider">Kiểm Toán Đóng Góp Món Ăn &amp; Súp Booster Bán Kèm</h3>
-          <p class="text-[10px] text-slate-400">Chính sách: Tuyệt đối không phục vụ súp miễn phí • Giám sát đòn bẩy AOV</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2 font-mono text-[10px]">
-        <span class="px-2.5 py-1 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 font-bold">
-          <i class="fa-solid fa-bowl-food mr-1"></i>Súp Booster: 12k - 18k
-        </span>
-        <span class="px-2.5 py-1 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold">
-          <i class="fa-solid fa-wine-glass mr-1"></i>Trà Đào 1L: FC &le; 20%
-        </span>
-      </div>
-    </div>
-
-    <!-- Bảng Dữ Liệu Thực Chiến -->
-    <div class="overflow-x-auto custom-scroll">
-      <table class="w-full text-left font-mono text-[11px]">
-        <thead>
-          <tr class="text-slate-400 border-b border-slate-800">
-            <th class="py-2.5 px-3">MÓN ĂN / SÚP BOOSTER</th>
-            <th class="py-2.5 px-2 text-center">PHÂN LOẠI</th>
-            <th class="py-2.5 px-2 text-right">SỐ LƯỢNG BÁN</th>
-            <th class="py-2.5 px-2 text-right">GIÁ BÁN TB</th>
-            <th class="py-2.5 px-2 text-right">DOANH THU</th>
-            <th class="py-2.5 px-3 text-right">FOOD COST %</th>
-          </tr>
-        </thead>
-        <tbody id="tbl-item-audit-body" class="divide-y divide-slate-800/60 text-slate-200">
-          <tr>
-            <td colspan="6" class="text-center py-8 text-slate-500 font-sans text-xs">
-              Chưa có dữ liệu món ăn được ghi nhận trong kỳ tài chính này.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</div>
-<script>
   /**
-   * =========================================================================
-   * CONTROLLER: TAB P&L FINANCIAL & CASH FLOW AUDIT (v3.0 SAAS)
-   * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
-   * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
-   * Nghiệp vụ: Reverse-Pricing, 4 Kỳ Tài Chính, Kiểm Toán Súp Booster / AOV
-   * =========================================================================
-   */
-  var TabPlController = (function() {
-    var currentPeriod = "today";
-    var financialDataCache = null;
-
-    /**
-     * KHỞI TẠO PHÂN HỆ P&L KHI ĐƯỢC SHELL NẠP VÀO DOM
-     */
-    function init() {
-      fetchFinancialData();
-    }
-
-    /**
-     * THAY ĐỔI KỲ BÁO CÁO TÀI CHÍNH (HÔM NAY / TUẦN / THÁNG / QUÝ / TẤT CẢ)
-     */
-    function changePeriod(period) {
-      currentPeriod = period;
-
-      var periods = ["today", "week", "month", "quarter", "all"];
-      periods.forEach(function(p) {
-        var btn = document.getElementById("btn-period-" + p);
-        if (btn) {
-          if (p === period) {
-            btn.className = "px-3 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow font-bold";
-          } else {
-            btn.className = "px-3 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
-          }
-        }
-      });
-
-      fetchFinancialData();
-    }
-
-    /**
-     * GỌI API BACKEND THIM5 LẤY SỐ LIỆU TÀI CHÍNH THỰC TẾ
-     */
-    async function fetchFinancialData() {
-      renderLoadingState(true);
-
-      try {
-        if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
-          var res = await Thim5API.callGAS("getFinancialPlReport", {
-            period: currentPeriod,
-            role: (window.AdminShellController && typeof window.AdminShellController.getCurrentUserRole === "function") 
-                  ? window.AdminShellController.getCurrentUserRole() 
-                  : "POS_STAFF"
-          });
-
-          if (res && res.status === "success" && res.data) {
-            financialDataCache = res.data;
-            renderFinancialUI(res.data);
-            return;
-          }
-        }
-        
-        // Fallback mô phỏng giao diện an toàn nếu chưa có kết nối Sheets
-        renderFallbackData();
-
-      } catch (err) {
-        console.warn("⚠️ Lỗi tải số liệu P&L từ GAS, chuyển chế độ dự phòng:", err);
-        renderFallbackData();
-      } finally {
-        renderLoadingState(false);
-      }
-    }
-
-    /**
      * HIỂN THỊ DỮ LIỆU TÀI CHÍNH LÊN CÁC KHỐI GIAO DIỆN
      */
     function renderFinancialUI(data) {
