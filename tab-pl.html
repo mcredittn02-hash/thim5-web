@@ -353,6 +353,7 @@
      * KHỞI TẠO PHÂN HỆ P&L KHI ĐƯỢC SHELL NẠP VÀO DOM
      */
     function init() {
+      console.log(">>> [P&L] TabPlController.init() đang khởi chạy...");
       fetchFinancialData();
     }
 
@@ -389,23 +390,30 @@
                          ? window.AdminShellController.getCurrentUserRole() 
                          : "POS_STAFF";
 
+          console.log(">>> [P&L] Gọi Backend getFinancialPlReport kỳ:", currentPeriod, "Role:", userRole);
+
           var res = await Thim5API.callGAS("getFinancialPlReport", {
             period: currentPeriod,
             role: userRole
           });
 
           if (res && res.status === "success" && res.data) {
+            console.log(">>> [P&L] Dữ liệu nhận về thành công:", res.data);
             financialDataCache = res.data;
             renderFinancialUI(res.data);
             return;
+          } else {
+            console.warn(">>> [P&L] Backend trả về cấu trúc không hợp lệ:", res);
           }
+        } else {
+          console.warn(">>> [P&L] Không tìm thấy đối tượng Thim5API!");
         }
         
         // Fallback mô phỏng giao diện an toàn nếu chưa kết nối Sheets
         renderFallbackData();
 
       } catch (err) {
-        console.warn("⚠️ Lỗi tải số liệu P&L từ GAS, chuyển sang chế độ dự phòng:", err);
+        console.error("⚠️ Lỗi tải số liệu P&L từ GAS, chuyển sang chế độ dự phòng:", err);
         renderFallbackData();
       } finally {
         renderLoadingState(false);
@@ -607,4 +615,18 @@
       fetchFinancialData: fetchFinancialData
     };
   })();
+
+  // ĐĂNG KÝ VÀO PHẠM VI TOÀN CỤC (GLOBAL EXPOSURE)
+  window.TabPlController = TabPlController;
+
+  // BỘ TỰ ĐỘNG KÍCH HOẠT DỰ PHÒNG (SELF-TRIGGERING ENGINE)
+  setTimeout(function() {
+    if (window.TabPlController && typeof window.TabPlController.fetchFinancialData === "function") {
+      var revEl = document.getElementById("kpi-revenue");
+      if (revEl && (revEl.innerText.trim() === "0 đ" || revEl.innerText.indexOf("fa-circle-notch") !== -1)) {
+        console.log(">>> [SELF-TRIGGER] Kích hoạt tự động nạp dữ liệu P&L sau 50ms...");
+        window.TabPlController.fetchFinancialData();
+      }
+    }
+  }, 50);
 </script>
