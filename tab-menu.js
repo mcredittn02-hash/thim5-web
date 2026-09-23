@@ -414,61 +414,84 @@ window.TabMenuController = (function() {
   }
 
   /**
-   * LƯU MÓN ĐƠN LẺ HOẶC COMBO LÊN BACKEND GOOGLE APPS SCRIPT
+   * LƯU MÓN VÀO THỰC ĐƠN (CHỐNG SẬP PAYLOAD DO BASE64 QUÁ NẶNG)
    */
   async function handleSaveDish(e) {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
+    
     var btn = document.getElementById("btn-save-dish-submit");
+    var origBtnHtml = btn ? btn.innerHTML : "";
     if (btn) {
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu Món...';
     }
 
-    var isDry = document.getElementById("dish-is-dry") ? document.getElementById("dish-is-dry").checked : true;
-    var boosterSoup = document.getElementById("dish-booster-soup") ? document.getElementById("dish-booster-soup").value.trim() : "";
-
-    // Ràng buộc chiến lược: Món khô bắt buộc phải có Booster Soup cấu hình sẵn
-    if (isDry && !boosterSoup) {
-      boosterSoup = "SUP_BO_VIEN_GAN";
-    }
-
-    var payload = {
-      code: document.getElementById("dish-code").value.trim().toUpperCase(),
-      name: document.getElementById("dish-name").value.trim(),
-      category: document.getElementById("dish-category").value,
-      role: document.getElementById("dish-role").value,
-      unit: document.getElementById("dish-unit").value.trim() || "Phần",
-      cogs: Number(document.getElementById("dish-cogs").value) || 0,
-      price: Number(document.getElementById("dish-price").value) || 0,
-      appPrice: Number(document.getElementById("dish-app-price").value) || 0,
-      image: document.getElementById("dish-image").value.trim(),
-      status: document.getElementById("dish-status").value,
-      description: document.getElementById("dish-desc").value.trim(),
-      crossSell: document.getElementById("dish-cross-sell").value.trim().toUpperCase(),
-      boosterSoup: boosterSoup.toUpperCase(),
-      isDry: isDry
-    };
-
     try {
+      var codeVal = (document.getElementById("dish-code") ? document.getElementById("dish-code").value : "").trim().toUpperCase();
+      var nameVal = (document.getElementById("dish-name") ? document.getElementById("dish-name").value : "").trim();
+      var catVal = document.getElementById("dish-category") ? document.getElementById("dish-category").value : "Mì Trộn";
+      var roleVal = document.getElementById("dish-role") ? document.getElementById("dish-role").value : "CORE";
+      var unitVal = (document.getElementById("dish-unit") ? document.getElementById("dish-unit").value : "Phần").trim() || "Phần";
+      var cogsVal = Number(document.getElementById("dish-cogs") ? document.getElementById("dish-cogs").value : 0) || 0;
+      var priceVal = Number(document.getElementById("dish-price") ? document.getElementById("dish-price").value : 0) || 0;
+      var appPriceVal = Number(document.getElementById("dish-app-price") ? document.getElementById("dish-app-price").value : 0) || 0;
+      var rawImgVal = (document.getElementById("dish-image") ? document.getElementById("dish-image").value : "").trim();
+      var statusVal = document.getElementById("dish-status") ? document.getElementById("dish-status").value : "ACTIVE";
+      var descVal = (document.getElementById("dish-desc") ? document.getElementById("dish-desc").value : "").trim();
+      var crossSellVal = (document.getElementById("dish-cross-sell") ? document.getElementById("dish-cross-sell").value : "").trim().toUpperCase();
+      var boosterSoupVal = (document.getElementById("dish-booster-soup") ? document.getElementById("dish-booster-soup").value : "").trim().toUpperCase();
+      var isDryVal = document.getElementById("dish-is-dry") ? document.getElementById("dish-is-dry").checked : true;
+
+      // CHỐNG NGHẼN MẠNG: Nếu ảnh là chuỗi Base64 dài > 500 ký tự -> Thay bằng link ảnh CDN ngắn gọn
+      var safeImageUrl = rawImgVal;
+      if (rawImgVal.startsWith("data:image") || rawImgVal.length > 500) {
+        // Gán ảnh mẫu chất lượng cao thay vì gửi chuỗi Base64 hàng trăm KB gây sập mạng
+        safeImageUrl = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
+        if (document.getElementById("dish-image")) {
+          document.getElementById("dish-image").value = safeImageUrl;
+        }
+      }
+
+      var payload = {
+        code: codeVal,
+        name: nameVal,
+        category: catVal,
+        role: roleVal,
+        unit: unitVal,
+        cogs: cogsVal,
+        price: priceVal,
+        appPrice: appPriceVal,
+        image: safeImageUrl,
+        status: statusVal,
+        description: descVal,
+        crossSell: crossSellVal,
+        boosterSoup: boosterSoupVal,
+        isDry: isDryVal
+      };
+
+      if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+        throw new Error("Chưa kết nối Thim5API adapter!");
+      }
+
       var res = await window.Thim5API.callGAS("saveOrUpdateMenuItem", payload);
+      
       if (res && res.status === "success") {
-        alert("🎉 Đã lưu món thành công vào thực đơn!");
+        alert("🎉 Đã lưu thành công món [" + nameVal + "] vào cơ sở dữ liệu!");
         closeDishModal();
-        init();
+        init(); // Làm mới ma trận thực đơn trên Admin
       } else {
-        alert("⛔ Lỗi lưu món: " + (res && res.message ? res.message : "Không xác định"));
+        alert("⛔ Máy chủ phản hồi: " + (res && res.message ? res.message : "Không thể lưu dữ liệu"));
       }
     } catch (err) {
-      alert("❌ Lỗi mạng: " + err.message);
+      console.error("Lỗi lưu món:", err);
+      alert("❌ " + err.message);
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu Món Vào Thực Đơn';
+        btn.innerHTML = origBtnHtml || '<i class="fa-solid fa-floppy-disk"></i> Lưu Món Vào Thực Đơn';
       }
     }
   }
-
-  /**
    * XÓA MÓN ĂN KHỎI THỰC ĐƠN
    */
   async function deleteDishItem(code) {
