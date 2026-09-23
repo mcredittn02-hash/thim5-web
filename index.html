@@ -978,56 +978,72 @@
   }
 
   /**
-   * CỖ MÁY TỰ ĐỘNG QUÉT VÀ DỰNG CÁC TAB DANH MỤC ĐỘNG RA GIAO DIỆN
-   * @param {Array} menuItems - Danh sách món ăn lấy từ Backend Google Sheets
+   * CỖ MÁY TỰ SINH TAB DANH MỤC FAIL-SAFE (KHÔNG BAO GIỜ LÀM SẬP GIAO DIỆN)
    */
   function renderDynamicCategoryTabs(menuItems) {
-    var slot = document.getElementById("category-tabs-dynamic-slot");
-    if (!slot || !Array.isArray(menuItems) || menuItems.length === 0) return;
+    try {
+      // 1. Tìm khe chứa động, nếu HTML chưa có thì tự động gắn vào sau nút 'all'
+      var slot = document.getElementById("category-tabs-dynamic-slot");
+      if (!slot) {
+        var allBtn = document.querySelector('button[data-cat="all"]') || document.getElementById("cat-tab-all");
+        if (allBtn && allBtn.parentNode) {
+          slot = document.createElement("div");
+          slot.id = "category-tabs-dynamic-slot";
+          slot.className = "flex items-center gap-1.5 shrink-0";
+          allBtn.parentNode.insertBefore(slot, allBtn.nextSibling);
+        }
+      }
 
-    slot.innerHTML = "";
+      if (!slot) return;
+      slot.innerHTML = "";
 
-    // 1. Quét toàn bộ danh mục duy nhất từ các món ăn hợp lệ
-    var rawCategories = menuItems.map(function(item) {
-      return (item.category || "").trim();
-    }).filter(function(cat) {
-      return cat.length > 0;
-    });
+      var items = Array.isArray(menuItems) && menuItems.length > 0 ? menuItems : (typeof FALLBACK_MENU !== "undefined" ? FALLBACK_MENU : []);
+      if (!items || items.length === 0) return;
 
-    var uniqueCategories = Array.from(new Set(rawCategories));
+      // 2. Quét danh mục: Nhận cả item.cat lẫn item.category
+      var catMap = {};
+      items.forEach(function(it) {
+        var rawCat = it.category || it.cat || "";
+        rawCat = String(rawCat).trim();
+        if (!rawCat || rawCat.toLowerCase() === "all") return;
+        
+        // Chuẩn hóa tên hiển thị
+        var displayLabel = rawCat;
+        var lower = rawCat.toLowerCase();
+        if (lower === "com" || lower === "cơm") displayLabel = "Cơm";
+        else if (lower === "nuoc" || lower === "mì nước" || lower === "súp") displayLabel = "Món Nước Súp";
+        else if (lower === "an-kem" || lower === "topping") displayLabel = "Ăn Kèm & Topping";
+        else if (lower === "giai-khat" || lower === "đồ uống") displayLabel = "Giải Khát (1L)";
 
-    // 2. Sắp xếp thứ tự ưu tiên: Mì Trộn & Cơm luôn lên hàng đầu
-    uniqueCategories.sort(function(a, b) {
-      var aLow = a.toLowerCase();
-      var bLow = b.toLowerCase();
-      if (aLow.includes("mì")) return -1;
-      if (bLow.includes("mì")) return 1;
-      if (aLow.includes("cơm")) return -1;
-      if (bLow.includes("cơm")) return 1;
-      if (aLow.includes("combo")) return -1;
-      if (bLow.includes("combo")) return 1;
-      return a.localeCompare(b);
-    });
+        catMap[rawCat] = displayLabel;
+      });
 
-    // 3. Render từng nút Tab động vào khe chứa
-    var buffer = "";
-    uniqueCategories.forEach(function(cat) {
-      var style = getCategoryStyle(cat);
-      var btnHtml = `
-        <button type="button"
-                data-cat="${cat}"
-                onclick="window.D2CStoreFrontController && window.D2CStoreFrontController.filterCategory('${cat}', this)"
-                class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5 active:scale-95">
-          <i class="${style.icon} text-xs ${style.color}"></i>
-          <span>${cat}</span>
-        </button>
-      `;
-      buffer += btnHtml;
-    });
+      // 3. Render các nút bấm ra giao diện
+      var buffer = "";
+      Object.keys(catMap).forEach(function(rawKey) {
+        var label = catMap[rawKey];
+        var icon = "fa-solid fa-bowl-food text-orange-400";
+        if (label.includes("Cơm")) icon = "fa-solid fa-bowl-rice text-amber-400";
+        else if (label.includes("Nước Súp")) icon = "fa-solid fa-mug-hot text-sky-400";
+        else if (label.includes("Ăn Kèm")) icon = "fa-solid fa-bacon text-rose-400";
+        else if (label.includes("Giải Khát")) icon = "fa-solid fa-bottle-water text-emerald-400";
 
-    slot.innerHTML = buffer;
+        buffer += `
+          <button type="button" 
+                  data-cat="${rawKey}" 
+                  onclick="D2CStoreFrontController.filterCategory('${rawKey}', this)" 
+                  class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5 active:scale-95">
+            <i class="${icon} text-xs"></i>
+            <span>${label}</span>
+          </button>
+        `;
+      });
+
+      slot.innerHTML = buffer;
+    } catch (err) {
+      console.error("⚠️ Lỗi nhẹ tại renderDynamicCategoryTabs (Đã tự động bỏ qua để bảo vệ hiển thị món):", err);
+    }
   }
-
   /**
    * BỘ LỌC DANH MỤC THÔNG MINH CHO GIAO DIỆN D2C STOREFRONT
    * @param {string} categoryKey - 'all' hoặc tên danh mục cụ thể (VD: 'Cơm', 'Mì Trộn')
