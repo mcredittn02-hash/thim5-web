@@ -978,14 +978,15 @@
   }
 
   /**
-   * CỖ MÁY TỰ SINH TAB DANH MỤC FAIL-SAFE (KHÔNG BAO GIỜ LÀM SẬP GIAO DIỆN)
+   * CỖ MÁY TỰ SINH TAB DANH MỤC TỰ ĐỘNG VÁ DOM (AUTO-INJECT DOM)
+   * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
    */
   function renderDynamicCategoryTabs(menuItems) {
     try {
-      // 1. Tìm khe chứa động, nếu HTML chưa có thì tự động gắn vào sau nút 'all'
+      // 1. Tìm hoặc tự động tạo khe cắm động nếu HTML chưa có
       var slot = document.getElementById("category-tabs-dynamic-slot");
       if (!slot) {
-        var allBtn = document.querySelector('button[data-cat="all"]') || document.getElementById("cat-tab-all");
+        var allBtn = document.querySelector('button[data-cat="all"]') || document.querySelector('.cat-tab-btn');
         if (allBtn && allBtn.parentNode) {
           slot = document.createElement("div");
           slot.id = "category-tabs-dynamic-slot";
@@ -997,55 +998,66 @@
       if (!slot) return;
       slot.innerHTML = "";
 
-      var items = Array.isArray(menuItems) && menuItems.length > 0 ? menuItems : (typeof FALLBACK_MENU !== "undefined" ? FALLBACK_MENU : []);
+      // 2. Lấy dữ liệu nguồn (ưu tiên menuItems truyền vào, fallback sang FALLBACK_MENU)
+      var items = (Array.isArray(menuItems) && menuItems.length > 0) 
+                  ? menuItems 
+                  : (typeof FALLBACK_MENU !== "undefined" ? FALLBACK_MENU : []);
+      
       if (!items || items.length === 0) return;
 
-      // 2. Quét danh mục: Nhận cả item.cat lẫn item.category
+      // 3. Gom nhóm danh mục duy nhất từ dữ liệu thực tế
       var catMap = {};
       items.forEach(function(it) {
         var rawCat = it.category || it.cat || "";
         rawCat = String(rawCat).trim();
         if (!rawCat || rawCat.toLowerCase() === "all") return;
-        
-        // Chuẩn hóa tên hiển thị
-        var displayLabel = rawCat;
-        var lower = rawCat.toLowerCase();
-        if (lower === "com" || lower === "cơm") displayLabel = "Cơm";
-        else if (lower === "nuoc" || lower === "mì nước" || lower === "súp") displayLabel = "Món Nước Súp";
-        else if (lower === "an-kem" || lower === "topping") displayLabel = "Ăn Kèm & Topping";
-        else if (lower === "giai-khat" || lower === "đồ uống") displayLabel = "Giải Khát (1L)";
 
-        catMap[rawCat] = displayLabel;
+        // Chuẩn hóa tên hiển thị có dấu và Icon cảm xúc
+        var displayLabel = rawCat;
+        var iconClass = "fa-solid fa-bowl-food text-orange-400";
+        var lower = rawCat.toLowerCase();
+
+        if (lower === "com" || lower === "cơm") {
+          displayLabel = "Cơm";
+          iconClass = "fa-solid fa-bowl-rice text-amber-400";
+        } else if (lower === "nuoc" || lower === "súp" || lower === "món nước") {
+          displayLabel = "Món Nước Súp";
+          iconClass = "fa-solid fa-mug-hot text-sky-400";
+        } else if (lower === "an-kem" || lower === "topping") {
+          displayLabel = "Ăn Kèm & Topping";
+          iconClass = "fa-solid fa-bacon text-rose-400";
+        } else if (lower === "giai-khat" || lower === "đồ uống") {
+          displayLabel = "Giải Khát (1L)";
+          iconClass = "fa-solid fa-bottle-water text-emerald-400";
+        } else if (lower === "combo") {
+          displayLabel = "Combo Độc Quyền";
+          iconClass = "fa-solid fa-crown text-amber-400";
+        }
+
+        catMap[rawCat] = { label: displayLabel, icon: iconClass };
       });
 
-      // 3. Render các nút bấm ra giao diện
+      // 4. Render các nút bấm ra thanh trượt danh mục
       var buffer = "";
       Object.keys(catMap).forEach(function(rawKey) {
-        var label = catMap[rawKey];
-        var icon = "fa-solid fa-bowl-food text-orange-400";
-        if (label.includes("Cơm")) icon = "fa-solid fa-bowl-rice text-amber-400";
-        else if (label.includes("Nước Súp")) icon = "fa-solid fa-mug-hot text-sky-400";
-        else if (label.includes("Ăn Kèm")) icon = "fa-solid fa-bacon text-rose-400";
-        else if (label.includes("Giải Khát")) icon = "fa-solid fa-bottle-water text-emerald-400";
-
+        var info = catMap[rawKey];
         buffer += `
           <button type="button" 
                   data-cat="${rawKey}" 
                   onclick="D2CStoreFrontController.filterCategory('${rawKey}', this)" 
                   class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5 active:scale-95">
-            <i class="${icon} text-xs"></i>
-            <span>${label}</span>
+            <i class="${info.icon} text-xs"></i>
+            <span>${info.label}</span>
           </button>
         `;
       });
 
       slot.innerHTML = buffer;
     } catch (err) {
-      console.error("⚠️ Lỗi nhẹ tại renderDynamicCategoryTabs (Đã tự động bỏ qua để bảo vệ hiển thị món):", err);
+      console.warn("⚠️ Bỏ qua lỗi renderDynamicCategoryTabs để bảo vệ hiển thị món:", err);
     }
   }
-  /**
-   * BỘ LỌC DANH MỤC THÔNG MINH CHO GIAO DIỆN D2C STOREFRONT
+        * BỘ LỌC DANH MỤC THÔNG MINH CHO GIAO DIỆN D2C STOREFRONT
    * @param {string} categoryKey - 'all' hoặc tên danh mục cụ thể (VD: 'Cơm', 'Mì Trộn')
    * @param {HTMLElement} btnEl - Nút Tab người dùng vừa click
    */
@@ -1115,17 +1127,24 @@
          * KHỞI ĐỘNG HỆ THỐNG MẶT TIỀN D2C
          */
         function init() {
-            loadSystemConfig();
-            initHeroCarousel();
-            initPwaInstaller();
-            initGiftEventListener();
-            renderMenuGrid();
-            updateAovAndCartUI();
-            if (typeof renderDynamicCategoryTabs === "function") {
-        renderDynamicCategoryTabs(typeof FALLBACK_MENU !== "undefined" ? FALLBACK_MENU : []);
+    loadSystemConfig();
+    initHeroCarousel();
+    initPwaInstaller();
+    initGiftEventListener();
+    
+    // 1. ƯU TIÊN VẼ LƯỚI MÓN ĂN TRƯỚC HẾT (ĐẢM BẢO KHÔNG BAO GIỜ BỊ TRẮNG MÀN HÌNH)
+    renderMenuGrid();
+    updateAovAndCartUI();
+
+    // 2. TỰ ĐỘNG SINH TAB DANH MỤC ĐỘNG CƠM, SÚP, NƯỚC
+    try {
+        if (typeof renderDynamicCategoryTabs === "function") {
+            renderDynamicCategoryTabs(typeof FALLBACK_MENU !== "undefined" ? FALLBACK_MENU : []);
+        }
+    } catch (e) {
+        console.warn("Lỗi sinh tab:", e);
     }
 }
-
         /**
          * ĐỒNG BỘ CẤU HÌNH HỆ THỐNG TỪ BACKEND VÀ KIỂM SOÁT ĐÓNG/MỞ QUÁN ĐỘNG
          */
