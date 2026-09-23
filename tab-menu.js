@@ -3,7 +3,7 @@
  * MODULE: TAB MENU & OMNI-INGESTION PIPELINE (v3.0 SAAS ENTERPRISE)
  * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
  * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
- * Kiến trúc: Global Module, Optimistic UI, Canvas Client Compression, Margin Guard
+ * Kiến trúc: Global Module, Dynamic Category Ingestion, Canvas Compression, Margin Guard
  * =========================================================================
  */
 window.TabMenuController = (function() {
@@ -13,8 +13,20 @@ window.TabMenuController = (function() {
   var searchKeyword = "";
   var stagedIngestItems = [];
 
+  // STATE QUẢN LÝ DANH MỤC ĐỘNG (DYNAMIC CATEGORY CRUD)
+  var dynamicCategories = [
+    { id: "CAT_MI", name: "Mì Trộn Đặc Sản", icon: "🍜", slug: "Mì Trộn" },
+    { id: "CAT_COM", name: "Cơm Tấm / Cơm Chiên", icon: "🍛", slug: "Cơm" },
+    { id: "CAT_COMBO", name: "Combo Đại Tiệc D2C (99k-149k)", icon: "🍱", slug: "Combo Độc Quyền" },
+    { id: "CAT_SOUP", name: "Súp Booster Bán Kèm (12k-18k)", icon: "🥣", slug: "Súp Booster" },
+    { id: "CAT_DRINK", name: "Đồ Uống Ly Khổng Lồ 1L", icon: "🥤", slug: "Đồ Uống 1L" },
+    { id: "CAT_TOPPING", name: "Topping Thịt & Trứng", icon: "🥓", slug: "Topping Thêm" },
+    { id: "CAT_SPECIAL", name: "Đặc Sản Bánh Tráng Phơi Sương", icon: "🌶️", slug: "Đặc Sản Tây Ninh" },
+    { id: "CAT_EXTEND", name: "Món Mở Rộng (Gà Ủ Muối / Fastfood)", icon: "🍗", slug: "Món Mở Rộng" }
+  ];
+
   /**
-   * KHỞI CHẠY TẢI THỰC ĐƠN TỪ MÁY CHỦ QUA THIM5API
+   * KHỞI CHẠY TẢI THỰC ĐƠN VÀ DANH MỤC TỪ MÁY CHỦ GOOGLE APPS SCRIPT
    */
   async function init() {
     showTableLoading(true);
@@ -22,18 +34,34 @@ window.TabMenuController = (function() {
       if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
         throw new Error("Không tìm thấy kết nối Thim5API adapter!");
       }
-      var res = await window.Thim5API.callGAS("getAdminMenuCatalog", {});
-      if (res && res.status === "success" && Array.isArray(res.data)) {
-        rawMenuList = res.data;
+
+      // Tải song song Thực đơn và Danh mục cấu hình
+      var results = await Promise.allSettled([
+        window.Thim5API.callGAS("getAdminMenuCatalog", {}),
+        window.Thim5API.callGAS("getMenuCategories", {})
+      ]);
+
+      var menuRes = results[0].status === "fulfilled" ? results[0].value : null;
+      var catRes = results[1].status === "fulfilled" ? results[1].value : null;
+
+      if (menuRes && menuRes.status === "success" && Array.isArray(menuRes.data)) {
+        rawMenuList = menuRes.data;
       } else {
         rawMenuList = [];
       }
+
+      if (catRes && catRes.status === "success" && Array.isArray(catRes.data) && catRes.data.length > 0) {
+        dynamicCategories = catRes.data;
+      }
+
     } catch (err) {
-      console.error("Lỗi tải thực đơn:", err);
+      console.warn("⚠️ Lỗi khởi tạo thực đơn, sử dụng bộ nhớ đệm an toàn:", err);
       rawMenuList = [];
     } finally {
       showTableLoading(false);
+      renderCategoryDropdownOptions();
       applyFiltersAndRender();
+      bindDomEventHandlers();
     }
   }
 
@@ -51,27 +79,51 @@ window.TabMenuController = (function() {
   }
 
   /**
+   * ĐIỀU PHỐI ĐỔ DỮ LIỆU DANH MỤC ĐỘNG VÀO CÁC DROPDOWN VÀ BẢNG QUẢN LÝ
+   */
+  function renderCategoryDropdownOptions(selectedVal) {
+    var selectEl = document.getElementById("dish-category");
+    if (!selectEl) return;
+
+    var currentVal = selectedVal || selectEl.value || "Mì Trộn";
+    selectEl.innerHTML = "";
+
+    dynamicCategories.forEach(function(cat) {
+      var opt = document.createElement("option");
+      opt.value = cat.slug || cat.name;
+      opt.textContent = (cat.icon ? cat.icon + " " : "") + cat.name;
+      if (opt.value === currentVal) {
+        opt.selected = true;
+      }
+      selectEl.appendChild(opt);
+    });
+  }
+
+  /**
    * LỌC DỮ LIỆU & CẬP NHẬT GIAO DIỆN BẢNG MA TRẬN
    */
   function applyFiltersAndRender() {
     filteredMenuList = rawMenuList.filter(function(item) {
       var itemRole = String(item.role || "CORE").toUpperCase();
+      var itemCat = String(item.category || "").toLowerCase();
       var matchRole = false;
 
       if (currentRoleFilter === "ALL") {
         matchRole = true;
       } else if (currentRoleFilter === "CORE") {
         matchRole = (itemRole === "CORE");
+      } else if (currentRoleFilter === "RICE") {
+        matchRole = (itemCat.includes("cơm") || itemCat.includes("com"));
       } else if (currentRoleFilter === "COMBO") {
         matchRole = (itemRole === "COMBO_EXCLUSIVE" || itemRole === "COMBO");
       } else if (currentRoleFilter === "BOOSTER_SOUP") {
-        matchRole = (itemRole === "BOOSTER_SOUP" || (item.category && item.category.indexOf("Súp") !== -1));
+        matchRole = (itemRole === "BOOSTER_SOUP" || itemCat.includes("súp"));
       } else if (currentRoleFilter === "TRAFFIC") {
         matchRole = (itemRole === "TRAFFIC");
       } else if (currentRoleFilter === "DRINKS") {
-        matchRole = (itemRole === "DRINKS" || (item.category && item.category.indexOf("Đồ Uống") !== -1));
+        matchRole = (itemRole === "DRINKS" || itemCat.includes("uống") || itemCat.includes("nước"));
       } else if (currentRoleFilter === "EXTENDED") {
-        matchRole = (itemRole === "EXTENDED" || (item.category && item.category.indexOf("Mở Rộng") !== -1));
+        matchRole = (itemRole === "EXTENDED" || itemCat.includes("mở rộng") || itemCat.includes("fastfood"));
       } else {
         matchRole = (itemRole === currentRoleFilter);
       }
@@ -138,7 +190,7 @@ window.TabMenuController = (function() {
       }
 
       var soupBadge = '<span class="text-slate-500 text-[10px] font-mono">--</span>';
-      if (item.isDry || item.boosterSoup || item.category === "Mì Trộn") {
+      if (item.isDry || item.boosterSoup || String(item.category).includes("Mì") || String(item.category).includes("Cơm")) {
         var soupName = item.boosterSoup || "Súp Bò Viên/Hoành Thánh";
         soupBadge = '<span class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 truncate block max-w-[130px]" title="' + soupName + '">🥣 ' + soupName + '</span>';
       }
@@ -186,7 +238,6 @@ window.TabMenuController = (function() {
 
     tbody.insertAdjacentHTML("beforeend", htmlBuffer);
   }
-
   /**
    * CẬP NHẬT CHỈ SỐ 4 THẺ KPI TRÊN ĐẦU TRANG
    */
@@ -200,14 +251,15 @@ window.TabMenuController = (function() {
     items.forEach(function(i) {
       if (i.status !== "OUT_OF_STOCK" && i.status !== "HIDDEN") activeCount++;
       var r = String(i.role || "").toUpperCase();
-      if (r === "BOOSTER" || r === "BOOSTER_SOUP" || (i.category && (i.category.indexOf("Súp") !== -1 || i.category.indexOf("Đồ Uống") !== -1))) {
+      var c = String(i.category || "").toLowerCase();
+      if (r === "BOOSTER" || r === "BOOSTER_SOUP" || c.includes("súp") || c.includes("đồ uống") || c.includes("uống")) {
         boosterCount++;
       }
       var p = Number(i.price) || 0;
-      var c = Number(i.cogs) || 0;
+      var cg = Number(i.cogs) || 0;
       if (p > 0) {
         totalPrice += p;
-        totalCogs += c;
+        totalCogs += cg;
       }
     });
 
@@ -225,7 +277,7 @@ window.TabMenuController = (function() {
   }
 
   /**
-   * TÌM KIẾM & LỌC THEO VAI TRÒ CHIẾN LƯỢC
+   * TÌM KIẾM VÀ LỌC THEO VAI TRÒ CHIẾN LƯỢC
    */
   function handleSearch(val) {
     searchKeyword = String(val || "").trim();
@@ -267,6 +319,7 @@ window.TabMenuController = (function() {
       applyFiltersAndRender();
     }
   }
+
   /**
    * XỬ LÝ MARGIN GUARD KHI NHẬP GIÁ VỐN / GIÁ BÁN THỜI GIAN THỰC
    */
@@ -371,7 +424,9 @@ window.TabMenuController = (function() {
       document.getElementById("dish-code").value = item.code;
       document.getElementById("dish-code").readOnly = true;
       document.getElementById("dish-name").value = item.name || "";
-      document.getElementById("dish-category").value = item.category || "Mì Trộn";
+      
+      renderCategoryDropdownOptions(item.category || "Mì Trộn");
+
       document.getElementById("dish-role").value = item.role || "CORE";
       document.getElementById("dish-unit").value = item.unit || "Phần";
       document.getElementById("dish-cogs").value = item.cogs || "";
@@ -388,6 +443,9 @@ window.TabMenuController = (function() {
       if (isEditInput) isEditInput.value = "false";
       var form = document.getElementById("form-single-dish");
       if (form) form.reset();
+      
+      renderCategoryDropdownOptions("Mì Trộn");
+
       var codeInput = document.getElementById("dish-code");
       if (codeInput) {
         codeInput.readOnly = false;
@@ -445,7 +503,6 @@ window.TabMenuController = (function() {
       // CHỐNG NGHẼN MẠNG: Nếu ảnh là chuỗi Base64 dài > 500 ký tự -> Thay bằng link ảnh CDN ngắn gọn
       var safeImageUrl = rawImgVal;
       if (rawImgVal.startsWith("data:image") || rawImgVal.length > 500) {
-        // Gán ảnh mẫu chất lượng cao thay vì gửi chuỗi Base64 hàng trăm KB gây sập mạng
         safeImageUrl = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
         if (document.getElementById("dish-image")) {
           document.getElementById("dish-image").value = safeImageUrl;
@@ -492,27 +549,271 @@ window.TabMenuController = (function() {
       }
     }
   }
-   * XÓA MÓN ĂN KHỎI THỰC ĐƠN
+  /**
+   * XÓA MÓN ĂN KHỎI THỰC ĐƠN GOOGLE SHEETS
    */
   async function deleteDishItem(code) {
-    if (confirm("Anh có chắc muốn xóa vĩnh viễn món [" + code + "] khỏi thực đơn?")) {
+    if (confirm("Anh Hải Âu có chắc chắn muốn xóa vĩnh viễn món [" + code + "] khỏi cơ sở dữ liệu thực đơn?")) {
       try {
+        if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+          throw new Error("Không tìm thấy kết nối Thim5API adapter!");
+        }
+
         var res = await window.Thim5API.callGAS("deleteMenuItem", { itemCode: code });
         if (res && res.status === "success") {
-          alert("🗑️ Đã xóa món thành công!");
+          alert("🗑️ Đã xóa món [" + code + "] thành công!");
           init();
         } else {
-          alert("⛔ Lỗi: " + (res && res.message ? res.message : "Không thể xóa!"));
+          alert("⛔ Lỗi: " + (res && res.message ? res.message : "Máy chủ từ chối xóa món!"));
         }
       } catch (err) {
-        alert("Lỗi kết nối xóa món: " + err.message);
+        alert("❌ Lỗi kết nối xóa món: " + err.message);
       }
     }
   }
 
+  // =========================================================================
+  // PHÂN HỆ QUẢN LÝ DANH MỤC ĐA NGÀNH TỰ ĐỘNG LƯU VÀO GOOGLE SHEETS (CRUD)
+  // =========================================================================
+
   /**
-   * MODAL OMNI-INGESTION ĐA KÊNH
+   * MỞ MODAL QUẢN LÝ DANH MỤC ĐA NGÀNH
    */
+  function openCategoryManagerModal() {
+    var modal = document.getElementById("modal-category-manager");
+    if (!modal) {
+      injectCategoryManagerModalToDom();
+      modal = document.getElementById("modal-category-manager");
+    }
+
+    renderCategoryManagerTable();
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.display = "flex";
+      modal.style.zIndex = "10000";
+    }
+  }
+
+  function closeCategoryManagerModal() {
+    var modal = document.getElementById("modal-category-manager");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.style.display = "none";
+    }
+  }
+
+  /**
+   * TỰ ĐỘNG TẠO MODAL QUẢN LÝ DANH MỤC NẾU DOM CHƯA CÓ SẴN (ZERO-DOM-LEAK)
+   */
+  function injectCategoryManagerModalToDom() {
+    if (document.getElementById("modal-category-manager")) return;
+
+    var modalHtml = `
+      <div id="modal-category-manager" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
+        <div class="relative bg-slate-900 border border-slate-800 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200">
+          
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm">
+                <i class="fa-solid fa-tags"></i>
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Quản Lý Danh Mục Đa Ngành</h3>
+                <p class="text-[10px] text-slate-400">Thêm, xóa, đổi Icon và đồng bộ thời gian thực vào Google Sheets</p>
+              </div>
+            </div>
+            <button type="button" onclick="window.TabMenuController.closeCategoryManagerModal()" class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center">
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+          </div>
+
+          <!-- Form Thêm Nhanh Danh Mục Mới -->
+          <form id="form-quick-category" onsubmit="window.TabMenuController.handleSaveCategory(event)" class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
+            <span class="text-[11px] font-bold text-amber-400 block">+ Thêm / Cập Nhật Danh Mục Mới:</span>
+            <div class="grid grid-cols-4 gap-2">
+              <div class="col-span-1">
+                <input type="text" id="cat-inp-icon" placeholder="Icon (🍛)" maxlength="4" class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-2.5 py-1.5 text-center text-sm outline-none transition" />
+              </div>
+              <div class="col-span-2">
+                <input type="text" id="cat-inp-name" required placeholder="Tên danh mục (VD: Cơm Tấm)" class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-1.5 text-xs text-white outline-none transition font-medium" />
+              </div>
+              <div class="col-span-1">
+                <button type="submit" id="btn-submit-save-category" class="w-full py-1.5 px-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black text-xs transition active:scale-95 shadow">
+                  Lưu Danh Mục
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Bảng Danh Sách Các Danh Mục Đang Có -->
+          <div class="max-h-56 overflow-y-auto custom-scroll rounded-2xl bg-slate-950 border border-slate-800">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-900 text-slate-400 uppercase font-mono text-[9.5px] sticky top-0">
+                <tr>
+                  <th class="p-2.5 text-center w-12">Icon</th>
+                  <th class="p-2.5">Tên Danh Mục Hiển Thị</th>
+                  <th class="p-2.5 text-center w-24">Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="category-manager-tbody" class="divide-y divide-slate-800/60 font-medium"></tbody>
+            </table>
+          </div>
+
+          <div class="flex justify-end pt-1 border-t border-slate-800">
+            <button type="button" onclick="window.TabMenuController.closeCategoryManagerModal()" class="px-4 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 font-bold transition text-xs">
+              Đóng Cửa Sổ
+            </button>
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML("beforeend", modalHtml);
+  }
+
+  /**
+   * VẼ BẢNG DANH MỤC TRONG MODAL QUẢN LÝ
+   */
+  function renderCategoryManagerTable() {
+    var tbody = document.getElementById("category-manager-tbody");
+    if (!tbody) return;
+
+    var htmlBuffer = "";
+    dynamicCategories.forEach(function(cat, idx) {
+      htmlBuffer += `
+        <tr class="hover:bg-slate-900/60 transition">
+          <td class="p-2 text-center text-base">${cat.icon || '🍽️'}</td>
+          <td class="p-2 text-white font-bold">${cat.name}</td>
+          <td class="p-2 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button type="button" onclick="window.TabMenuController.editCategoryItem(${idx})" class="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-800 transition" title="Sửa danh mục">
+                <i class="fa-solid fa-pen text-[10px]"></i>
+              </button>
+              <button type="button" onclick="window.TabMenuController.deleteCategoryItem(${idx})" class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition" title="Xóa danh mục">
+                <i class="fa-solid fa-trash text-[10px]"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = htmlBuffer;
+  }
+
+  /**
+   * LƯU DANH MỤC MỚI VÀ GHI VÀO GOOGLE SHEETS
+   */
+  async function handleSaveCategory(e) {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+
+    var inpName = document.getElementById("cat-inp-name");
+    var inpIcon = document.getElementById("cat-inp-icon");
+    var btn = document.getElementById("btn-submit-save-category");
+
+    var nameVal = inpName ? inpName.value.trim() : "";
+    var iconVal = inpIcon ? inpIcon.value.trim() : "🍽️";
+
+    if (!nameVal) {
+      alert("⚠️ Vui lòng nhập tên danh mục!");
+      return;
+    }
+
+    var origBtnText = btn ? btn.innerHTML : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu...';
+    }
+
+    var newCatObj = {
+      id: "CAT_" + Date.now(),
+      name: nameVal,
+      icon: iconVal || "🍽️",
+      slug: nameVal
+    };
+
+    // Kiểm tra xem danh mục đã tồn tại chưa để cập nhật hoặc thêm mới
+    var existingIdx = dynamicCategories.findIndex(function(c) {
+      return c.name.toLowerCase() === nameVal.toLowerCase() || c.slug.toLowerCase() === nameVal.toLowerCase();
+    });
+
+    if (existingIdx !== -1) {
+      dynamicCategories[existingIdx].icon = iconVal;
+      dynamicCategories[existingIdx].name = nameVal;
+    } else {
+      dynamicCategories.push(newCatObj);
+    }
+
+    try {
+      if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+        var res = await window.Thim5API.callGAS("saveMenuCategory", {
+          category: newCatObj,
+          allCategories: dynamicCategories
+        });
+        if (res && res.status === "success") {
+          alert("🎉 Đã lưu danh mục [" + nameVal + "] vào cơ sở dữ liệu Google Sheets thành công!");
+        }
+      }
+    } catch (err) {
+      console.warn("⚠️ Lưu danh mục cục bộ, backend phản hồi:", err.message);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origBtnText || "Lưu Danh Mục";
+      }
+      if (inpName) inpName.value = "";
+      if (inpIcon) inpIcon.value = "";
+
+      renderCategoryManagerTable();
+      renderCategoryDropdownOptions(nameVal);
+    }
+  }
+
+  /**
+   * SỬA DANH MỤC TRÊN GIAO DIỆN
+   */
+  function editCategoryItem(index) {
+    var target = dynamicCategories[index];
+    if (!target) return;
+
+    var inpName = document.getElementById("cat-inp-name");
+    var inpIcon = document.getElementById("cat-inp-icon");
+    if (inpName) inpName.value = target.name;
+    if (inpIcon) inpIcon.value = target.icon;
+    if (inpName) inpName.focus();
+  }
+
+  /**
+   * XÓA DANH MỤC VÀ ĐỒNG BỘ XÓA TRÊN GOOGLE SHEETS
+   */
+  async function deleteCategoryItem(index) {
+    var target = dynamicCategories[index];
+    if (!target) return;
+
+    if (confirm("Anh Hải Âu có chắc muốn xóa danh mục [" + target.name + "]? Các món thuộc danh mục này sẽ giữ nguyên tên danh mục.")) {
+      dynamicCategories.splice(index, 1);
+      renderCategoryManagerTable();
+      renderCategoryDropdownOptions();
+
+      try {
+        if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+          await window.Thim5API.callGAS("deleteMenuCategory", {
+            categoryId: target.id,
+            categoryName: target.name,
+            allCategories: dynamicCategories
+          });
+        }
+      } catch (err) {
+        console.warn("⚠️ Lỗi đồng bộ xóa danh mục lên Apps Script:", err);
+      }
+    }
+  }
+
+  // =========================================================================
+  // PHÂN HỆ NẠP THỰC ĐƠN ĐA KÊNH OMNI-INGESTION (EXCEL, AI OCR, LINK, JSON)
+  // =========================================================================
+
   function openOmniIngestionModal() {
     var modal = document.getElementById("modal-omni-ingestion");
     if (modal) {
@@ -531,9 +832,7 @@ window.TabMenuController = (function() {
     }
     clearIngestPreview();
   }
-  /**
-   * CHUYỂN ĐỔI 4 KÊNH NẠP THỰC ĐƠN ĐA KÊNH
-   */
+
   function switchIngestChannel(channel) {
     var channels = ["excel", "ocr", "link", "json"];
     channels.forEach(function(c) {
@@ -549,9 +848,6 @@ window.TabMenuController = (function() {
     if (activeBtn) activeBtn.className = "flex-1 py-2 rounded-xl transition bg-amber-500 text-slate-950 font-black shadow";
   }
 
-  /**
-   * TẢI TỆP MẪU EXCEL CHUẨN F&B SAAS
-   */
   function downloadExcelTemplate() {
     if (window.Thim5API && typeof window.Thim5API.getEndpoint === "function") {
       window.open(window.Thim5API.getEndpoint() + "?action=getMenuExcelTemplateStructure", "_blank");
@@ -560,9 +856,6 @@ window.TabMenuController = (function() {
     }
   }
 
-  /**
-   * ĐỌC FILE EXCEL / CSV TRÊN CLIENT
-   */
   function handleExcelFileSelect(input) {
     var file = input.files[0];
     if (!file) return;
@@ -576,7 +869,7 @@ window.TabMenuController = (function() {
     if (file.name.endsWith(".csv")) {
       reader.readAsText(file, "UTF-8");
     } else {
-      reader.readAsDataURL(file); // Gửi Base64 cho backend bóc tách
+      reader.readAsDataURL(file);
     }
   }
 
@@ -618,9 +911,6 @@ window.TabMenuController = (function() {
     }
   }
 
-  /**
-   * CANVAS CLIENT-SIDE NÉN ẢNH & GỬI GEMINI OCR
-   */
   async function handleOcrImageSelect(input) {
     var file = input.files[0];
     if (!file) return;
@@ -668,9 +958,6 @@ window.TabMenuController = (function() {
     }
   }
 
-  /**
-   * TRÍCH XUẤT THỰC ĐƠN TỪ ĐƯỜNG LINK CÔNG KHAI
-   */
   async function handleParseUrl() {
     var urlInput = document.getElementById("input-public-url");
     var url = urlInput ? urlInput.value.trim() : "";
@@ -691,9 +978,6 @@ window.TabMenuController = (function() {
     }
   }
 
-  /**
-   * KIỂM TRA & HIỂN THỊ DỮ LIỆU JSON DỰ PHÒNG
-   */
   function handleParseJson() {
     var jsonEl = document.getElementById("input-raw-json");
     var txt = jsonEl ? jsonEl.value.trim() : "";
@@ -710,9 +994,6 @@ window.TabMenuController = (function() {
     }
   }
 
-  /**
-   * HIỂN THỊ BẢNG XEM TRƯỚC HÀNG LOẠT TRƯỚC KHI NẠP (PREVIEW MATRIX)
-   */
   function displayIngestPreview(items) {
     if (!items || items.length === 0) return;
     stagedIngestItems = items;
@@ -754,9 +1035,6 @@ window.TabMenuController = (function() {
     if (tbody) tbody.innerHTML = "";
   }
 
-  /**
-   * GỬI HÀNG LOẠT VÀO CƠ SỞ DỮ LIỆU THỰC ĐƠN
-   */
   async function submitBatchIngest() {
     if (!stagedIngestItems || stagedIngestItems.length === 0) return;
 
@@ -772,7 +1050,7 @@ window.TabMenuController = (function() {
       if (res && res.status === "success") {
         alert("🎉 " + (res.data && res.data.message ? res.data.message : "Đã nạp thành công các món ăn!"));
         closeOmniIngestionModal();
-        init(); // Tải lại toàn bộ thực đơn
+        init();
       } else {
         alert("⛔ Lỗi nạp hàng loạt: " + (res && res.message ? res.message : "Không xác định"));
       }
@@ -787,31 +1065,22 @@ window.TabMenuController = (function() {
   }
 
   /**
-   * BỘ GẮN SỰ KIỆN TRỰC TIẾP (DUAL EVENT BINDING CHỐNG BLOCKED INLINE ONCLICK)
+   * BỘ GẮN SỰ KIỆN TRỰC TIẾP (DUAL EVENT BINDING CHỐNG KHÓA INLINE ONCLICK)
    */
   function bindDomEventHandlers() {
-    var btnTopCreate = document.getElementById("btn-create-dish-top");
-    var btnEmptyCreate = document.getElementById("btn-create-dish-empty");
-    var btnTopOmni = document.getElementById("btn-open-omni-top");
-    var btnEmptyOmni = document.getElementById("btn-open-omni-empty");
+    var btnCreateDish = document.querySelector('button[onclick*="openDishModal"]');
+    var btnOmni = document.querySelector('button[onclick*="openOmniIngestionModal"]');
 
-    if (btnTopCreate) {
-      btnTopCreate.onclick = function() { openDishModal(null); };
+    if (btnCreateDish) {
+      btnCreateDish.addEventListener("click", function() { openDishModal(null); });
     }
-    if (btnEmptyCreate) {
-      btnEmptyCreate.onclick = function() { openDishModal(null); };
-    }
-    if (btnTopOmni) {
-      btnTopOmni.onclick = function() { openOmniIngestionModal(); };
-    }
-    if (btnEmptyOmni) {
-      btnEmptyOmni.onclick = function() { openOmniIngestionModal(); };
+    if (btnOmni) {
+      btnOmni.addEventListener("click", function() { openOmniIngestionModal(); });
     }
   }
 
   // Tự động khởi chạy nạp thực đơn ngay khi component được nạp vào SPA
   init();
-  bindDomEventHandlers();
 
   return {
     init: init,
@@ -834,14 +1103,19 @@ window.TabMenuController = (function() {
     clearIngestPreview: clearIngestPreview,
     submitBatchIngest: submitBatchIngest,
     handleSingleImageUpload: handleSingleImageUpload,
+    openCategoryManagerModal: openCategoryManagerModal,
+    closeCategoryManagerModal: closeCategoryManagerModal,
+    handleSaveCategory: handleSaveCategory,
+    editCategoryItem: editCategoryItem,
+    deleteCategoryItem: deleteCategoryItem,
     bindDomEventHandlers: bindDomEventHandlers
   };
 })();
 
-// ĐỒNG BỘ CẢ 2 CÁCH GỌI ĐỂ KHÔNG BAO GIỜ BỊ LỖI UNDEFINED TRÊN WINDOW SCOPE
+// ĐỒNG BỘ TOÀN CỤC CHO WINDOW SCOPE
 window.TabMenuController = window.TabMenuController;
 
-// BỘ KÍCH HOẠT DỰ PHÒNG SAU 50MS KHI INNERHTML RENDER XONG TRÊN DOM
+// KÍCH HOẠT DỰ PHÒNG SAU KHI INNERHTML RENDER XONG TRÊN DOM
 setTimeout(function() {
   if (window.TabMenuController && typeof window.TabMenuController.bindDomEventHandlers === "function") {
     window.TabMenuController.bindDomEventHandlers();
