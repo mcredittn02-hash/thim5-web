@@ -283,7 +283,7 @@
             </button>
         </div>
 
-        <!-- Thanh Trượt Bộ Lọc Danh Mục Ngang (Scroll Vuốt Mượt) -->
+        <!-- Thanh Trượt Bộ Lọc Danh Mục Ngang (Scroll Vuốt Mượt Đã Tích Hợp Món Cơm) -->
         <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 -mx-3 px-3 select-none">
             <button type="button" 
                     data-cat="all" 
@@ -291,6 +291,15 @@
                     class="cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-sm active">
                 <i class="fa-solid fa-fire text-xs"></i>
                 <span>Tất Cả Món</span>
+            </button>
+
+            <!-- DANH MỤC CƠM MỚI BỔ SUNG NGAY ĐẦU THANH MENU -->
+            <button type="button" 
+                    data-cat="cơm" 
+                    onclick="D2CStoreFrontController.filterCategory('cơm', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-bowl-rice text-xs text-amber-400"></i>
+                <span>Món Cơm</span>
             </button>
 
             <button type="button" 
@@ -322,7 +331,7 @@
                     onclick="D2CStoreFrontController.filterCategory('an-kem', this)" 
                     class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
                 <i class="fa-solid fa-cookie-bite text-xs text-amber-400"></i>
-                <span>Ăn Kèm & Topping</span>
+                <span>Ăn Kèm &amp; Topping</span>
             </button>
 
             <button type="button" 
@@ -333,7 +342,6 @@
                 <span>Giải Khát (1L)</span>
             </button>
         </div>
-
     </section>
 
     <!-- ========================================================================= -->
@@ -1002,6 +1010,7 @@
             { id: "M08", cat: "an-kem", name: "Trứng Lòng Đào Béo Ngậy (Quả)", price: 6000, img: "https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=400", desc: "Trứng gà luộc chuẩn canh giờ, lòng đào dẻo quánh hòa quyện sốt mì.", isHot: false },
             { id: "M09", cat: "giai-khat", name: "Trà Đào Mát Lạnh Khổng Lồ 1L", price: 25000, img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400", desc: "Ly khổng lồ 1000ml mát lạnh, kèm miếng đào giòn ngọt giải ngấy cực đã.", isHot: true },
             { id: "M10", cat: "giai-khat", name: "Nước Suối Tinh Khiết Ướp Lạnh", price: 10000, img: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400", desc: "Chai 500ml ướp lạnh đập tan cơn khát tức thì.", isHot: false }
+            { id: "C01", cat: "cơm", name: "Cơm Tấm Sườn Bì Chả Thím 5", price: 45000, img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400", desc: "Cơm tấm hạt dẻo thơm, sườn nướng sốt mật ong thơm lừng, chả trứng hấp béo ngậy kèm súp booster.", isHot: true }
         ];
 
         /**
