@@ -283,19 +283,69 @@
             </button>
         </div>
 
-        <!-- Thanh Trượt Bộ Lọc Danh Mục Ngang (Tự Động Sinh Tab Đa Ngành Chuẩn SaaS) -->
+    <!-- Thanh Trượt Bộ Lọc Danh Mục Ngang (Tự Động Sinh Tab Đa Ngành Chuẩn SaaS) -->
   <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 -mx-3 px-3 select-none" id="d2c-category-bar-wrapper">
-    <!-- Nút Cố Định: Tất Cả Món -->
+    <!-- Nút 1: Tất Cả Món -->
     <button type="button"
             id="cat-tab-all"
             data-cat="all"
-            onclick="window.D2CStoreFrontController && window.D2CStoreFrontController.filterCategory('all', this)"
+            onclick="D2CStoreFrontController.filterCategory('all', this)"
             class="cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-md">
       <i class="fa-solid fa-fire text-xs"></i>
       <span>Tất Cả Món</span>
     </button>
 
-    <!-- KHE CẮM NẠP TAB TỰ ĐỘNG THEO CƠ SỞ DỮ LIỆU (CƠM, MÌ, SÚP, NƯỚC 1L...) -->
+    <!-- Nút 2: Món Cơm (Kích Hoạt Danh Mục Cơm Ngay Lập Tức) -->
+    <button type="button"
+            id="cat-tab-com"
+            data-cat="cơm"
+            onclick="D2CStoreFrontController.filterCategory('cơm', this)"
+            class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5 active:scale-95">
+      <i class="fa-solid fa-bowl-rice text-xs text-amber-400"></i>
+      <span>Món Cơm</span>
+    </button>
+
+    <!-- Nút 3: Combo Độc Quyền -->
+    <button type="button"
+            id="cat-tab-combo"
+            data-cat="combo"
+            onclick="D2CStoreFrontController.filterCategory('combo', this)"
+            class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5 active:scale-95">
+      <i class="fa-solid fa-crown text-xs text-amber-400"></i>
+      <span>Combo Độc Quyền</span>
+    </button>
+
+    <!-- Nút 4: Món Nước Súp -->
+    <button type="button"
+            id="cat-tab-nuoc"
+            data-cat="nuoc"
+            onclick="D2CStoreFrontController.filterCategory('nuoc', this)"
+            class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5 active:scale-95">
+      <i class="fa-solid fa-mug-hot text-xs text-sky-400"></i>
+      <span>Món Nước Súp</span>
+    </button>
+
+    <!-- Nút 5: Ăn Kèm & Topping -->
+    <button type="button"
+            id="cat-tab-ankem"
+            data-cat="an-kem"
+            onclick="D2CStoreFrontController.filterCategory('an-kem', this)"
+            class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5 active:scale-95">
+      <i class="fa-solid fa-bacon text-xs text-rose-400"></i>
+      <span>Ăn Kèm &amp; Topping</span>
+    </button>
+
+    <!-- Nút 6: Giải Khát (1L) -->
+    <button type="button"
+            id="cat-tab-giaikhat"
+            data-cat="giai-khat"
+            onclick="D2CStoreFrontController.filterCategory('giai-khat', this)"
+            class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5 active:scale-95">
+      <i class="fa-solid fa-bottle-water text-xs text-emerald-400"></i>
+      <span>Giải Khát (1L)</span>
+    </button>
+
+    <!-- KHE CẮM NẠP TAB TỰ ĐỘNG THEO CƠ SỞ DỮ LIỆU GOOGLE SHEETS -->
     <div id="category-tabs-dynamic-slot" class="flex items-center gap-1.5 shrink-0"></div>
   </div>
     </section>
