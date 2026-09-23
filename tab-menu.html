@@ -217,21 +217,31 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <!-- Danh Mục Phục Vụ Đa Ngành -->
+        <!-- Danh Mục Phục Vụ Đa Ngành (Đã bổ sung Cơm & Nút Quản Lý Động) -->
           <div class="space-y-1">
-            <label class="font-bold text-slate-300 text-[11px] block">Danh Mục Đa Ngành</label>
-            <select id="dish-category" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
-              <option value="Mì Trộn">🍜 Mì Trộn Đặc Sản</option>
-              <option value="Combo Độc Quyền">🍱 Combo Đại Tiệc D2C (99k-149k)</option>
-              <option value="Súp Booster">🥣 Súp Booster Bán Kèm (12k-18k)</option>
-              <option value="Đồ Uống 1L">🥤 Đồ Uống Ly Khổng Lồ 1L</option>
-              <option value="Topping Thêm">🥓 Topping Thịt &amp; Trứng</option>
-              <option value="Đặc Sản Tây Ninh">🌶️ Đặc Sản Bánh Tráng Phơi Sương</option>
-              <option value="Món Mở Rộng">🍗 Món Mở Rộng (Gà Ủ Muối / Fastfood)</option>
-            </select>
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-slate-300 text-[11px] block">Danh Mục Đa Ngành <span class="text-rose-400">*</span></label>
+              <button type="button" 
+                      onclick="window.TabMenuController && window.TabMenuController.openCategoryManagerModal ? window.TabMenuController.openCategoryManagerModal() : alert('Đang mở bộ quản lý danh mục!')" 
+                      class="text-[10px] text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 transition">
+                <i class="fa-solid fa-gear text-[10px]"></i>
+                <span>Quản Lý</span>
+              </button>
+            </div>
+            <div class="relative">
+              <select id="dish-category" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium appearance-none pr-8">
+                <option value="Mì Trộn">🍜 Mì Trộn Đặc Sản</option>
+                <option value="Cơm">🍛 Cơm Tấm / Cơm Chiên</option>
+                <option value="Combo Độc Quyền">🍱 Combo Đại Tiệc D2C (99k-149k)</option>
+                <option value="Súp Booster">🥣 Súp Booster Bán Kèm (12k-18k)</option>
+                <option value="Đồ Uống 1L">🥤 Đồ Uống Ly Khổng Lồ 1L</option>
+                <option value="Topping Thêm">🥓 Topping Thịt &amp; Trứng</option>
+                <option value="Đặc Sản Tây Ninh">🌶️ Đặc Sản Bánh Tráng Phơi Sương</option>
+                <option value="Món Mở Rộng">🍗 Món Mở Rộng (Gà Ủ Muối / Fastfood)</option>
+              </select>
+              <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none"></i>
+            </div>
           </div>
-
           <!-- Vai Trò Món Chiến Lược -->
           <div class="space-y-1">
             <label class="font-bold text-slate-300 text-[11px] block">Vai Trò Chiến Lược</label>
