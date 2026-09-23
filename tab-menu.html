@@ -100,11 +100,12 @@
 
     </div>
 
-    <!-- Cụm Nút Hành Động Nạp Hàng Loạt & Thêm Món Mới -->
+    <!-- Cụm Nút Hành Động Nạp Hàng Loạt & Thêm Món Mới (Bổ sung ID riêng để bắt sự kiện đa tầng) -->
     <div class="flex items-center gap-2">
       
       <!-- Nút 1: Nạp Thực Đơn Đa Kênh (Excel / AI OCR Gemini / Public Link) -->
       <button type="button" 
+              id="btn-open-omni-top" 
               onclick="window.TabMenuController && window.TabMenuController.openOmniIngestionModal()" 
               class="px-3.5 py-2 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-amber-500/40 text-amber-400 hover:text-amber-300 font-bold transition flex items-center gap-2 active:scale-95 shadow-sm">
         <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
@@ -113,10 +114,11 @@
 
       <!-- Nút 2: Thêm Món Đơn Lẻ hoặc Combo Mới Thủ Công -->
       <button type="button" 
+              id="btn-create-dish-top" 
               onclick="window.TabMenuController && window.TabMenuController.openDishModal(null)" 
               class="px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-600 hover:opacity-95 text-white font-black uppercase tracking-wider transition flex items-center gap-1.5 active:scale-95 shadow-lg shadow-rose-600/25">
         <i class="fa-solid fa-plus text-xs"></i>
-        <span>+ Tạo Món / Combo Mới</span>
+        <span>+ TẠO MÓN / COMBO MỚI</span>
       </button>
 
     </div>
@@ -166,10 +168,16 @@
                 <p class="text-[11px] text-slate-500">Mời anh Hải Âu bấm nút bên dưới để thêm món đầu tiên hoặc nạp nhanh qua file Excel / AI OCR.</p>
               </div>
               <div class="flex items-center justify-center gap-2 pt-1">
-                <button type="button" onclick="window.TabMenuController && window.TabMenuController.openOmniIngestionModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold transition text-xs">
+                <button type="button" 
+                        id="btn-open-omni-empty" 
+                        onclick="window.TabMenuController && window.TabMenuController.openOmniIngestionModal()" 
+                        class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold transition text-xs flex items-center gap-1.5 active:scale-95">
                   <i class="fa-solid fa-file-excel mr-1"></i> Nạp File Excel / AI
                 </button>
-                <button type="button" onclick="window.TabMenuController && window.TabMenuController.openDishModal(null)" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black transition text-xs">
+                <button type="button" 
+                        id="btn-create-dish-empty" 
+                        onclick="window.TabMenuController && window.TabMenuController.openDishModal(null)" 
+                        class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black transition text-xs flex items-center gap-1 active:scale-95 shadow">
                   + Thêm Món Mới
                 </button>
               </div>
@@ -922,6 +930,7 @@
       if (modal) {
         modal.classList.remove("hidden");
         modal.style.display = "flex";
+        modal.style.zIndex = "9999";
       }
     }
 
@@ -1015,6 +1024,7 @@
       if (modal) {
         modal.classList.remove("hidden");
         modal.style.display = "flex";
+        modal.style.zIndex = "9999";
       }
       switchIngestChannel("EXCEL");
     }
@@ -1273,8 +1283,32 @@
       }
     }
 
+    /**
+     * BỘ GẮN SỰ KIỆN TRỰC TIẾP (DUAL EVENT BINDING CHỐNG BLOCKED INLINE ONCLICK)
+     */
+    function bindDomEventHandlers() {
+      var btnTopCreate = document.getElementById("btn-create-dish-top");
+      var btnEmptyCreate = document.getElementById("btn-create-dish-empty");
+      var btnTopOmni = document.getElementById("btn-open-omni-top");
+      var btnEmptyOmni = document.getElementById("btn-open-omni-empty");
+
+      if (btnTopCreate) {
+        btnTopCreate.onclick = function() { openDishModal(null); };
+      }
+      if (btnEmptyCreate) {
+        btnEmptyCreate.onclick = function() { openDishModal(null); };
+      }
+      if (btnTopOmni) {
+        btnTopOmni.onclick = function() { openOmniIngestionModal(); };
+      }
+      if (btnEmptyOmni) {
+        btnEmptyOmni.onclick = function() { openOmniIngestionModal(); };
+      }
+    }
+
     // Tự động khởi chạy nạp thực đơn ngay khi component được nạp vào SPA
     init();
+    bindDomEventHandlers();
 
     return {
       init: init,
@@ -1296,7 +1330,18 @@
       handleParseJson: handleParseJson,
       clearIngestPreview: clearIngestPreview,
       submitBatchIngest: submitBatchIngest,
-      handleSingleImageUpload: handleSingleImageUpload
+      handleSingleImageUpload: handleSingleImageUpload,
+      bindDomEventHandlers: bindDomEventHandlers
     };
   })();
+
+  // ĐỒNG BỘ CẢ 2 CÁCH GỌI ĐỂ KHÔNG BAO GIỜ BỊ LỖI UNDEFINED
+  var TabMenuController = window.TabMenuController;
+
+  // BỘ KÍCH HOẠT DỰ PHÒNG SAU 50MS KHI INNERHTML RENDER XONG
+  setTimeout(function() {
+    if (window.TabMenuController && typeof window.TabMenuController.bindDomEventHandlers === "function") {
+      window.TabMenuController.bindDomEventHandlers();
+    }
+  }, 50);
 </script>
