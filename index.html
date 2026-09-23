@@ -283,57 +283,21 @@
             </button>
         </div>
 
-        <!-- Thanh Trượt Bộ Lọc Danh Mục Ngang (Scroll Vuốt Mượt) -->
-        <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 -mx-3 px-3 select-none">
-            <button type="button" 
-                    data-cat="all" 
-                    onclick="D2CStoreFrontController.filterCategory('all', this)" 
-                    class="cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-sm active">
-                <i class="fa-solid fa-fire text-xs"></i>
-                <span>Tất Cả Món</span>
-            </button>
+        <!-- Thanh Trượt Bộ Lọc Danh Mục Ngang (Tự Động Sinh Tab Đa Ngành Chuẩn SaaS) -->
+  <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 -mx-3 px-3 select-none" id="d2c-category-bar-wrapper">
+    <!-- Nút Cố Định: Tất Cả Món -->
+    <button type="button"
+            id="cat-tab-all"
+            data-cat="all"
+            onclick="window.D2CStoreFrontController && window.D2CStoreFrontController.filterCategory('all', this)"
+            class="cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-md">
+      <i class="fa-solid fa-fire text-xs"></i>
+      <span>Tất Cả Món</span>
+    </button>
 
-            <button type="button" 
-                    data-cat="combo" 
-                    onclick="D2CStoreFrontController.filterCategory('combo', this)" 
-                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
-                <i class="fa-solid fa-crown text-xs text-amber-400"></i>
-                <span>Combo Đại Tiệc</span>
-            </button>
-
-            <button type="button" 
-                    data-cat="kho" 
-                    onclick="D2CStoreFrontController.filterCategory('kho', this)" 
-                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
-                <i class="fa-solid fa-bowl-food text-xs text-red-400"></i>
-                <span>Mì Trộn (Khô)</span>
-            </button>
-
-            <button type="button" 
-                    data-cat="nuoc" 
-                    onclick="D2CStoreFrontController.filterCategory('nuoc', this)" 
-                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
-                <i class="fa-solid fa-spoon text-xs text-sky-400"></i>
-                <span>Món Nước Súp</span>
-            </button>
-
-            <button type="button" 
-                    data-cat="an-kem" 
-                    onclick="D2CStoreFrontController.filterCategory('an-kem', this)" 
-                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
-                <i class="fa-solid fa-cookie-bite text-xs text-amber-400"></i>
-                <span>Ăn Kèm & Topping</span>
-            </button>
-
-            <button type="button" 
-                    data-cat="giai-khat" 
-                    onclick="D2CStoreFrontController.filterCategory('giai-khat', this)" 
-                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
-                <i class="fa-solid fa-bottle-water text-xs text-emerald-400"></i>
-                <span>Giải Khát (1L)</span>
-            </button>
-        </div>
-
+    <!-- KHE CẮM NẠP TAB TỰ ĐỘNG THEO CƠ SỞ DỮ LIỆU (CƠM, MÌ, SÚP, NƯỚC 1L...) -->
+    <div id="category-tabs-dynamic-slot" class="flex items-center gap-1.5 shrink-0"></div>
+  </div>
     </section>
 
     <!-- ========================================================================= -->
@@ -978,13 +942,137 @@
             currentSoup: "Súp Tóp Mỡ Hành Lá",
             customizerQty: 1
         };
+        // =========================================================================
+  // DYNAMIC CATEGORY AGGREGATOR ENGINE (SAAS MULTI-TENANT V3.0)
+  // Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
+  // Giải quyết triệt để: Khóa cứng danh mục, tự sinh Tab Cơm / Mì / Súp / Nước
+  // =========================================================================
+
+  var currentActiveCategory = "all";
+
+  // Bảng ánh xạ Icon FontAwesome & Màu sắc theo từ khóa danh mục
+  var CATEGORY_STYLE_MAP = {
+    "cơm": { icon: "fa-solid fa-bowl-rice", color: "text-amber-400", labelPrefix: "🍛" },
+    "mì": { icon: "fa-solid fa-bowl-food", color: "text-orange-400", labelPrefix: "🍜" },
+    "hủ tiếu": { icon: "fa-solid fa-bowl-food", color: "text-orange-400", labelPrefix: "🍜" },
+    "combo": { icon: "fa-solid fa-crown", color: "text-amber-400", labelPrefix: "🍱" },
+    "súp": { icon: "fa-solid fa-mug-hot", color: "text-sky-400", labelPrefix: "🥣" },
+    "canh": { icon: "fa-solid fa-mug-hot", color: "text-sky-400", labelPrefix: "🥣" },
+    "nước": { icon: "fa-solid fa-bottle-water", color: "text-emerald-400", labelPrefix: "🥤" },
+    "giải khát": { icon: "fa-solid fa-bottle-water", color: "text-emerald-400", labelPrefix: "🥤" },
+    "trà": { icon: "fa-solid fa-mug-saucer", color: "text-emerald-400", labelPrefix: "🥤" },
+    "topping": { icon: "fa-solid fa-bacon", color: "text-rose-400", labelPrefix: "🥓" },
+    "ăn kèm": { icon: "fa-solid fa-utensils", color: "text-slate-400", labelPrefix: "🥟" },
+    "đặc sản": { icon: "fa-solid fa-pepper-hot", color: "text-rose-500", labelPrefix: "🌶️" },
+    "mở rộng": { icon: "fa-solid fa-drumstick-bite", color: "text-amber-400", labelPrefix: "🍗" }
+  };
+
+  function getCategoryStyle(catName) {
+    var lower = String(catName || "").toLowerCase();
+    for (var key in CATEGORY_STYLE_MAP) {
+      if (lower.indexOf(key) !== -1) {
+        return CATEGORY_STYLE_MAP[key];
+      }
+    }
+    return { icon: "fa-solid fa-tag", color: "text-slate-400", labelPrefix: "🍽️" };
+  }
+
+  /**
+   * CỖ MÁY TỰ ĐỘNG QUÉT VÀ DỰNG CÁC TAB DANH MỤC ĐỘNG RA GIAO DIỆN
+   * @param {Array} menuItems - Danh sách món ăn lấy từ Backend Google Sheets
+   */
+  function renderDynamicCategoryTabs(menuItems) {
+    var slot = document.getElementById("category-tabs-dynamic-slot");
+    if (!slot || !Array.isArray(menuItems) || menuItems.length === 0) return;
+
+    slot.innerHTML = "";
+
+    // 1. Quét toàn bộ danh mục duy nhất từ các món ăn hợp lệ
+    var rawCategories = menuItems.map(function(item) {
+      return (item.category || "").trim();
+    }).filter(function(cat) {
+      return cat.length > 0;
+    });
+
+    var uniqueCategories = Array.from(new Set(rawCategories));
+
+    // 2. Sắp xếp thứ tự ưu tiên: Mì Trộn & Cơm luôn lên hàng đầu
+    uniqueCategories.sort(function(a, b) {
+      var aLow = a.toLowerCase();
+      var bLow = b.toLowerCase();
+      if (aLow.includes("mì")) return -1;
+      if (bLow.includes("mì")) return 1;
+      if (aLow.includes("cơm")) return -1;
+      if (bLow.includes("cơm")) return 1;
+      if (aLow.includes("combo")) return -1;
+      if (bLow.includes("combo")) return 1;
+      return a.localeCompare(b);
+    });
+
+    // 3. Render từng nút Tab động vào khe chứa
+    var buffer = "";
+    uniqueCategories.forEach(function(cat) {
+      var style = getCategoryStyle(cat);
+      var btnHtml = `
+        <button type="button"
+                data-cat="${cat}"
+                onclick="window.D2CStoreFrontController && window.D2CStoreFrontController.filterCategory('${cat}', this)"
+                class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5 active:scale-95">
+          <i class="${style.icon} text-xs ${style.color}"></i>
+          <span>${cat}</span>
+        </button>
+      `;
+      buffer += btnHtml;
+    });
+
+    slot.innerHTML = buffer;
+  }
+
+  /**
+   * BỘ LỌC DANH MỤC THÔNG MINH CHO GIAO DIỆN D2C STOREFRONT
+   * @param {string} categoryKey - 'all' hoặc tên danh mục cụ thể (VD: 'Cơm', 'Mì Trộn')
+   * @param {HTMLElement} btnEl - Nút Tab người dùng vừa click
+   */
+  function filterCategory(categoryKey, btnEl) {
+    currentActiveCategory = categoryKey;
+
+    // Cập nhật trạng thái Active trực quan cho dãy nút
+    document.querySelectorAll(".cat-tab-btn").forEach(function(btn) {
+      btn.className = "cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5 active:scale-95";
+    });
+
+    if (btnEl) {
+      btnEl.className = "cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-md";
+    }
+
+    // Lọc danh sách món ăn đang hiển thị trên lưới sản phẩm
+    var allProductCards = document.querySelectorAll(".d2c-dish-card, [data-dish-category]");
+    allProductCards.forEach(function(card) {
+      var itemCat = (card.getAttribute("data-dish-category") || "").toLowerCase().trim();
+      var targetCat = String(categoryKey).toLowerCase().trim();
+
+      if (targetCat === "all" || targetCat === "tất cả món") {
+        card.style.display = "";
+      } else if (itemCat.includes(targetCat) || targetCat.includes(itemCat)) {
+        card.style.display = "";
+      } else {
+        card.style.display = "none";
+      }
+    });
+
+    // Cuộn nhẹ lưới sản phẩm vào tầm nhìn nếu cần
+    var menuSection = document.getElementById("public-menu-section") || document.getElementById("menu-container");
+    if (menuSection && window.scrollY > 400) {
+      menuSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
         // DANH MỤC TOPPING ĂN KÈM CHUẨN F&B ĐẤT THÁNH
         var TOPPING_PRESETS = [
-            { id: "top_trung", name: "Trứng Lòng Đào Béo Ngậy", price: 6000, icon: "🥚" },
+            { id: "top_trung", name: "Trứng ốp la", price: 6000, icon: "🥚" },
             { id: "top_topmo", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn", price: 16000, icon: "🥓" },
-            { id: "top_bovien", name: "Bò Viên Gân Giòn (3 Viên)", price: 12000, icon: "🍡" },
-            { id: "top_xaxiu", name: "Xá Xíu Mềm Thơm Thêm", price: 15000, icon: "🥩" },
+            { id: "top_bovien", name: "Bò Viên Gân Giòn", price: 12000, icon: "🍡" },
+            { id: "top_xaxiu", name: "Bò tây ninh Mềm Thơm Thêm", price: 15000, icon: "🥩" },
             { id: "top_vatmi", name: "Thêm 1 Vắt Mì Trộn", price: 8000, icon: "🍜" }
         ];
 
@@ -994,15 +1082,18 @@
         var FALLBACK_MENU = [
             { id: "M01", cat: "combo", name: "Combo Đại Tiệc Thím 5", price: 89000, img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400", desc: "Mì trộn xá xíu tóp mỡ + 1 chén súp bò viên + 1 ly trà đào 1L.", isHot: true },
             { id: "M02", cat: "combo", name: "Combo No Say Đôi Lứa", price: 119000, img: "https://images.unsplash.com/photo-1552611052-33e04de081de?w=400", desc: "2 tô mì trộn thập cẩm đặc biệt + 2 chén súp trứng cút + 2 nước ngọt.", isHot: true },
-            { id: "M03", cat: "kho", name: "Mì Trộn Xá Xíu Tóp Mỡ", price: 39000, img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400", desc: "Mì dai giòn trộn sốt sa tế cay độc bản, xá xíu mềm thơm, tóp mỡ giòn rụm.", isHot: true },
+            { id: "M03", cat: "kho", name: "Mì Trộn thịt bò Tóp Mỡ", price: 39000, img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400", desc: "Mì dai giòn trộn sốt sa tế cay độc bản, xá xíu mềm thơm, tóp mỡ giòn rụm.", isHot: true },
             { id: "M04", cat: "kho", name: "Mì Trộn Bò Viên Gân Giòn", price: 42000, img: "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=400", desc: "Bò viên gân loại 1 dai giòn sần sật, phủ sốt sa tế tóp mỡ hành phi.", isHot: false },
             { id: "M05", cat: "kho", name: "Mì Trộn Thập Cẩm Đặc Biệt", price: 49000, img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400", desc: "Đầy đặn xá xíu, bò viên gân, trứng lòng đào béo ngậy và tóp mỡ vàng ươm.", isHot: true },
             { id: "M06", cat: "nuoc", name: "Mì Súp Bò Mỹ Sa Tế Cay", price: 45000, img: "https://images.unsplash.com/photo-1594998893017-36147cbcae05?w=400", desc: "Nước súp hầm xương thanh ngọt đậm đà, thịt bò Mỹ béo ngậy the the sa tế.", isHot: false },
             { id: "M07", cat: "an-kem", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn (Hũ)", price: 16000, img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=400", desc: "Tóp mỡ nóng giòn ráo dầu, lắc tỏi ớt sa tế cay tê nhức nách.", isHot: false },
-            { id: "M08", cat: "an-kem", name: "Trứng Lòng Đào Béo Ngậy (Quả)", price: 6000, img: "https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=400", desc: "Trứng gà luộc chuẩn canh giờ, lòng đào dẻo quánh hòa quyện sốt mì.", isHot: false },
-            { id: "M09", cat: "giai-khat", name: "Trà Đào Mát Lạnh Khổng Lồ 1L", price: 25000, img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400", desc: "Ly khổng lồ 1000ml mát lạnh, kèm miếng đào giòn ngọt giải ngấy cực đã.", isHot: true },
+            { id: "M08", cat: "an-kem", name: "Trứng ốp la (Quả)", price: 6000, img: "https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=400", desc: "Trứng gà luộc chuẩn canh giờ, lòng đào dẻo quánh hòa quyện sốt mì.", isHot: false },
+            { id: "M09", cat: "giai-khat", name: "Trà Đào Mát Lạnh Khổng Lồ", price: 25000, img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400", desc: "Ly khổng lồ 1000ml mát lạnh, kèm miếng đào giòn ngọt giải ngấy cực đã.", isHot: true },
             { id: "M10", cat: "giai-khat", name: "Nước Suối Tinh Khiết Ướp Lạnh", price: 10000, img: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400", desc: "Chai 500ml ướp lạnh đập tan cơn khát tức thì.", isHot: false }
+            { id: "C01", cat: "cơm", name: "Cơm Tấm Sườn Bì Chả Thím 5", price: 45000, desc: "Cơm tấm dẻo thơm, sườn nướng sốt mật ong, chả trứng béo ngậy kèm súp booster", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300" }
+        
         ];
+        
 
         /**
          * KHỞI ĐỘNG HỆ THỐNG MẶT TIỀN D2C
@@ -1014,7 +1105,10 @@
             initGiftEventListener();
             renderMenuGrid();
             updateAovAndCartUI();
-        }
+            if (typeof renderDynamicCategoryTabs === "function") {
+        renderDynamicCategoryTabs(typeof FALLBACK_MENU !== "undefined" ? FALLBACK_MENU : []);
+    }
+}
 
         /**
          * ĐỒNG BỘ CẤU HÌNH HỆ THỐNG TỪ BACKEND VÀ KIỂM SOÁT ĐÓNG/MỞ QUÁN ĐỘNG
@@ -1203,16 +1297,109 @@
             }).join("");
         }
 
-        function filterCategory(cat, btnEl) {
-            appState.currentCategory = cat;
-            document.querySelectorAll(".cat-tab-btn").forEach(function(b) {
-                b.className = "cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5";
-            });
-            if (btnEl) {
-                btnEl.className = "cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-sm active";
-            }
-            renderMenuGrid();
-        }
+        // =========================================================================
+  // DYNAMIC CATEGORY AGGREGATOR ENGINE (ĐỒNG BỘ CHUẨN APPSTATE V3.0)
+  // Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
+  // Giải quyết: Tự động quét món từ CSDL và sinh Tab Cơm, Mì, Súp, Đồ Uống 1L
+  // =========================================================================
+
+  // Bảng ánh xạ Icon FontAwesome & Màu sắc theo từ khóa danh mục
+  var CATEGORY_STYLE_MAP = {
+    "cơm": { icon: "fa-solid fa-bowl-rice", color: "text-amber-400" },
+    "mì": { icon: "fa-solid fa-bowl-food", color: "text-orange-400" },
+    "hủ tiếu": { icon: "fa-solid fa-bowl-food", color: "text-orange-400" },
+    "combo": { icon: "fa-solid fa-crown", color: "text-amber-400" },
+    "súp": { icon: "fa-solid fa-mug-hot", color: "text-sky-400" },
+    "canh": { icon: "fa-solid fa-mug-hot", color: "text-sky-400" },
+    "nước": { icon: "fa-solid fa-bottle-water", color: "text-emerald-400" },
+    "giải khát": { icon: "fa-solid fa-bottle-water", color: "text-emerald-400" },
+    "trà": { icon: "fa-solid fa-mug-saucer", color: "text-emerald-400" },
+    "topping": { icon: "fa-solid fa-bacon", color: "text-rose-400" },
+    "ăn kèm": { icon: "fa-solid fa-utensils", color: "text-slate-400" },
+    "đặc sản": { icon: "fa-solid fa-pepper-hot", color: "text-rose-500" },
+    "mở rộng": { icon: "fa-solid fa-drumstick-bite", color: "text-amber-400" }
+  };
+
+  function getCategoryFaIcon(catName) {
+    var lower = String(catName || "").toLowerCase();
+    for (var key in CATEGORY_STYLE_MAP) {
+      if (lower.indexOf(key) !== -1) {
+        return CATEGORY_STYLE_MAP[key].icon + " " + CATEGORY_STYLE_MAP[key].color;
+      }
+    }
+    return "fa-solid fa-tag text-slate-400";
+  }
+
+  /**
+   * CỖ MÁY TỰ ĐỘNG QUÉT VÀ DỰNG CÁC TAB DANH MỤC ĐỘNG RA GIAO DIỆN
+   * @param {Array} menuItems - Danh sách món ăn lấy từ Backend Google Sheets
+   */
+  function renderDynamicCategoryTabs(menuItems) {
+    var slot = document.getElementById("category-tabs-dynamic-slot");
+    if (!slot || !Array.isArray(menuItems) || menuItems.length === 0) return;
+
+    slot.innerHTML = "";
+
+    // 1. Quét toàn bộ danh mục duy nhất từ các món ăn hợp lệ
+    var rawCategories = menuItems.map(function(item) {
+      return (item.category || "").trim();
+    }).filter(function(cat) {
+      return cat.length > 0;
+    });
+
+    var uniqueCategories = Array.from(new Set(rawCategories));
+
+    // 2. Sắp xếp thứ tự ưu tiên: Mì Trộn & Cơm luôn lên hàng đầu
+    uniqueCategories.sort(function(a, b) {
+      var aLow = a.toLowerCase();
+      var bLow = b.toLowerCase();
+      if (aLow.includes("mì")) return -1;
+      if (bLow.includes("mì")) return 1;
+      if (aLow.includes("cơm")) return -1;
+      if (bLow.includes("cơm")) return 1;
+      if (aLow.includes("combo")) return -1;
+      if (bLow.includes("combo")) return 1;
+      return a.localeCompare(b);
+    });
+
+    // 3. Render từng nút Tab động vào khe chứa
+    var buffer = "";
+    uniqueCategories.forEach(function(cat) {
+      var iconClasses = getCategoryFaIcon(cat);
+      var btnHtml = `
+        <button type="button"
+                data-cat="${cat}"
+                onclick="D2CStoreFrontController.filterCategory('${cat}', this)"
+                class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5 active:scale-95">
+          <i class="${iconClasses} text-xs"></i>
+          <span>${cat}</span>
+        </button>
+      `;
+      buffer += btnHtml;
+    });
+
+    slot.innerHTML = buffer;
+  }
+
+  /**
+   * BỘ LỌC DANH MỤC ĐỒNG BỘ CHUẨN APPSTATE VÀ RENDER LƯỚI MÓN
+   */
+  function filterCategory(cat, btnEl) {
+    appState.currentCategory = cat;
+
+    // Reset lại class của tất cả các nút tab danh mục
+    document.querySelectorAll(".cat-tab-btn").forEach(function(b) {
+      b.className = "cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5";
+    });
+
+    // Bật hiệu ứng Active cho nút vừa được bấm
+    if (btnEl) {
+      btnEl.className = "cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-black transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-md";
+    }
+
+    // Vẽ lại danh sách món ăn theo danh mục đã chọn
+    renderMenuGrid();
+  }
 
         function onSearchInput(val) {
             appState.searchKeyword = val || "";
