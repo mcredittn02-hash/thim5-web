@@ -998,7 +998,7 @@
 
         var activeCustomizerToppingIds = [];
 
-        // DANH MỤC THỰC ĐƠN MA TRẬN 3 TẦNG ĐẦY ĐỦ 10 MÓN CHUẨN MỰC
+        // DANH MỤC THỰC ĐƠN HẠT GIỐNG ĐẦY ĐỦ 11 MÓN CHUẨN MỰC (ĐÃ BỔ SUNG MÓN CƠM TẤM)
         var FALLBACK_MENU = [
             { id: "M01", cat: "combo", name: "Combo Đại Tiệc Thím 5", price: 89000, img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400", desc: "Mì trộn xá xíu tóp mỡ + 1 chén súp bò viên + 1 ly trà đào 1L.", isHot: true },
             { id: "M02", cat: "combo", name: "Combo No Say Đôi Lứa", price: 119000, img: "https://images.unsplash.com/photo-1552611052-33e04de081de?w=400", desc: "2 tô mì trộn thập cẩm đặc biệt + 2 chén súp trứng cút + 2 nước ngọt.", isHot: true },
@@ -1009,10 +1009,112 @@
             { id: "M07", cat: "an-kem", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn (Hũ)", price: 16000, img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=400", desc: "Tóp mỡ nóng giòn ráo dầu, lắc tỏi ớt sa tế cay tê nhức nách.", isHot: false },
             { id: "M08", cat: "an-kem", name: "Trứng Lòng Đào Béo Ngậy (Quả)", price: 6000, img: "https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=400", desc: "Trứng gà luộc chuẩn canh giờ, lòng đào dẻo quánh hòa quyện sốt mì.", isHot: false },
             { id: "M09", cat: "giai-khat", name: "Trà Đào Mát Lạnh Khổng Lồ 1L", price: 25000, img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400", desc: "Ly khổng lồ 1000ml mát lạnh, kèm miếng đào giòn ngọt giải ngấy cực đã.", isHot: true },
-            { id: "M10", cat: "giai-khat", name: "Nước Suối Tinh Khiết Ướp Lạnh", price: 10000, img: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400", desc: "Chai 500ml ướp lạnh đập tan cơn khát tức thì.", isHot: false }
+            { id: "M10", cat: "giai-khat", name: "Nước Suối Tinh Khiết Ướp Lạnh", price: 10000, img: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400", desc: "Chai 500ml ướp lạnh đập tan cơn khát tức thì.", isHot: false },
             { id: "C01", cat: "cơm", name: "Cơm Tấm Sườn Bì Chả Thím 5", price: 45000, img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400", desc: "Cơm tấm hạt dẻo thơm, sườn nướng sốt mật ong thơm lừng, chả trứng hấp béo ngậy kèm súp booster.", isHot: true }
         ];
 
+        /**
+         * MỞ MODAL TÙY CHỌN MÓN THÔNG MINH - HỖ TRỢ TRỌN VẸN MÓN CƠM & TOPPING
+         */
+        function openCustomizerModal(dishId) {
+            var dish = FALLBACK_MENU.find(function(d) { return d.id === dishId; });
+            if (!dish) return;
+
+            // 1. NẾU LÀ NƯỚC UỐNG ĐÓNG CHAI -> QUICK ADD KHÔNG HỎI CAY
+            if (dish.cat === "giai-khat" && dish.id === "M10") {
+                appState.cartItems.push({
+                    id: dish.id + "_" + Date.now(),
+                    dishId: dish.id,
+                    name: dish.name,
+                    price: Number(dish.price) || 10000,
+                    quantity: 1,
+                    taste: "Không Cay",
+                    soup: "",
+                    note: "",
+                    toppings: [],
+                    isGift: false
+                });
+
+                updateAovAndCartUI();
+                alert("💧 Đã thêm 1 phần \"" + dish.name + "\" vào giỏ hàng thành công!");
+                return;
+            }
+
+            // 2. KHỞI TẠO TRẠNG THÁI MỚI CHO MODAL TÙY CHỌN MÓN CHÍNH
+            appState.currentCustomizingDish = dish;
+            appState.customizerQty = 1;
+            appState.currentTaste = "Cay Nhẹ"; // Khóa cứng mặc định là Cay Nhẹ chuẩn vị
+            appState.currentSoup = "Súp Tóp Mỡ Hành Lá";
+            activeCustomizerToppingIds = [];
+
+            var modal = document.getElementById("modal-dish-customizer");
+            var elImg = document.getElementById("cust-dish-img");
+            var elName = document.getElementById("cust-dish-name");
+            var elBasePrice = document.getElementById("cust-dish-base-price");
+            var elCatBadge = document.getElementById("cust-dish-cat-badge");
+            var elQty = document.getElementById("cust-dish-qty");
+            var boxTaste = document.getElementById("box-taste-selector");
+            var boxSoup = document.getElementById("box-soup-selector");
+            var boxTopping = document.getElementById("box-topping-selector");
+            var noteEl = document.getElementById("cust-dish-note");
+
+            var dishPriceNum = Number(dish.price) || 0;
+            if (elImg) elImg.src = dish.img || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
+            if (elName) elName.innerText = dish.name;
+            if (elBasePrice) elBasePrice.innerText = dishPriceNum.toLocaleString("vi-VN") + " đ";
+            if (elQty) elQty.innerText = "1";
+            if (noteEl) noteEl.value = "";
+
+            // 3. ĐIỀU PHỐI ẨN/HIỆN PHÂN KHU TÙY THEO DANH MỤC MÓN (BAO GỒM MÓN CƠM)
+            var catLower = String(dish.cat || dish.category || "").toLowerCase();
+
+            if (catLower === "giai-khat") {
+                if (elCatBadge) elCatBadge.innerText = "Giải Khát (1L)";
+                if (boxTaste) boxTaste.classList.add("hidden");
+                if (boxSoup) boxSoup.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.add("hidden");
+                appState.currentTaste = "Không Cay";
+                appState.currentSoup = "";
+            } else if (catLower === "nuoc") {
+                if (elCatBadge) elCatBadge.innerText = "Món Nước Súp";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                if (boxSoup) boxSoup.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.remove("hidden");
+                appState.currentSoup = "";
+                selectTaste("Cay Nhẹ");
+                renderCustomizerToppingsList();
+            } else if (catLower === "an-kem") {
+                if (elCatBadge) elCatBadge.innerText = "Món Ăn Kèm";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                if (boxSoup) boxSoup.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.add("hidden");
+                selectTaste("Cay Nhẹ");
+            } else if (catLower === "cơm" || catLower === "com") {
+                // PHÂN HỆ MÓN CƠM: BẬT KHẨU VỊ, SÚP BOOSTER VÀ TOPPING
+                if (elCatBadge) elCatBadge.innerText = "Món Cơm Đất Thánh";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                if (boxSoup) boxSoup.classList.remove("hidden");
+                if (boxTopping) boxTopping.classList.remove("hidden");
+
+                selectTaste("Cay Nhẹ");
+                selectSoup("Súp Tóp Mỡ Hành Lá");
+                renderCustomizerToppingsList();
+            } else {
+                // Mì Trộn Khô & Combo: Mở toàn bộ và kích hoạt vẽ Topping
+                if (elCatBadge) elCatBadge.innerText = (catLower === "combo") ? "Combo Đại Tiệc" : "Mì Trộn Khô";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                if (boxSoup) boxSoup.classList.remove("hidden");
+                if (boxTopping) boxTopping.classList.remove("hidden");
+
+                selectTaste("Cay Nhẹ");
+                selectSoup("Súp Tóp Mỡ Hành Lá");
+                renderCustomizerToppingsList();
+            }
+
+            updateCustomizerPrice();
+
+            if (modal) modal.classList.remove("hidden");
+        }
         /**
          * KHỞI ĐỘNG HỆ THỐNG MẶT TIỀN D2C
          */
@@ -1160,49 +1262,75 @@
                 if (modalIos) modalIos.classList.remove("hidden");
             }
         }
-
         /**
-         * RENDER DANH SÁCH MÓN ĂN - TRIỆT TIÊU HOÀN TOÀN LỖI 0 MÓN
+         * RENDER DANH SÁCH MÓN ĂN - TRIỆT TIÊU HOÀN TOÀN LỖI 0 MÓN (FAIL-SAFE 100%)
          */
         function renderMenuGrid() {
             var grid = document.getElementById("dish-menu-grid");
             var countLabel = document.getElementById("disp-dish-count-label");
             if (!grid) return;
 
-            var list = FALLBACK_MENU.filter(function(item) {
-                var matchCat = (appState.currentCategory === "all") || (item.cat === appState.currentCategory);
+            var sourceData = (typeof FALLBACK_MENU !== "undefined" && Array.isArray(FALLBACK_MENU)) ? FALLBACK_MENU : [];
+
+            var list = sourceData.filter(function(item) {
+                if (!item) return false;
+
+                // 1. Khớp nối danh mục an toàn (hỗ trợ cả slug không dấu lẫn chữ tiếng Việt có dấu)
+                var currentCat = String(appState.currentCategory || "all").toLowerCase().trim();
+                var itemCat = String(item.cat || item.category || "").toLowerCase().trim();
+
+                var matchCat = (currentCat === "all");
+                if (!matchCat) {
+                    if (currentCat === "cơm" || currentCat === "com") {
+                        matchCat = (itemCat === "cơm" || itemCat === "com");
+                    } else {
+                        matchCat = (itemCat === currentCat);
+                    }
+                }
+
+                // 2. Khớp nối tìm kiếm từ khóa an toàn (Triệt tiêu hoàn toàn lỗi undefined desc)
                 var matchSearch = true;
                 if (appState.searchKeyword) {
-                    var kw = appState.searchKeyword.toLowerCase().trim();
-                    matchSearch = item.name.toLowerCase().indexOf(kw) !== -1 || item.desc.toLowerCase().indexOf(kw) !== -1;
+                    var kw = String(appState.searchKeyword).toLowerCase().trim();
+                    var itemName = String(item.name || "").toLowerCase();
+                    var itemDesc = String(item.desc || item.description || "").toLowerCase();
+                    matchSearch = (itemName.indexOf(kw) !== -1 || itemDesc.indexOf(kw) !== -1);
                 }
+
                 return matchCat && matchSearch;
             });
 
-            if (countLabel) countLabel.innerText = list.length + " món";
+            if (countLabel) {
+                countLabel.innerText = list.length + " món";
+            }
 
             if (list.length === 0) {
-                grid.innerHTML = '<div class="p-8 text-center text-slate-500 text-xs">Không tìm thấy món phù hợp. Quý khách vui lòng thử từ khóa khác!</div>';
+                grid.innerHTML = '<div class="p-8 text-center text-slate-500 text-xs">Không tìm thấy món phù hợp. Quý khách vui lòng chọn tab "Tất Cả Món"!</div>';
                 return;
             }
 
             grid.innerHTML = list.map(function(dish) {
+                var priceNum = Number(dish.price) || 0;
+                var safeDesc = dish.desc || dish.description || "Hương vị thơm ngon đặc trưng Bếp Thím 5.";
+                var safeImg = dish.img || dish.image || "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400";
+                var isHotBadge = dish.isHot ? '<span class="px-1.5 py-0.2 rounded-md bg-red-500/20 text-red-400 text-[9px] font-bold border border-red-500/30 shrink-0">Bán Chạy</span>' : '';
+
                 return `
                     <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800/80 hover:border-slate-700 transition flex gap-3 shadow-sm">
-                        <img src="${dish.img}" alt="${dish.name}" class="w-20 h-20 rounded-xl object-cover shrink-0 border border-slate-800">
+                        <img src="${safeImg}" alt="${dish.name}" class="w-20 h-20 rounded-xl object-cover shrink-0 border border-slate-800" onerror="this.src='https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400'">
                         <div class="flex-1 flex flex-col justify-between min-w-0">
                             <div>
                                 <div class="flex items-center gap-1.5">
                                     <h4 class="text-xs font-black text-white truncate">${dish.name}</h4>
-                                    ${dish.isHot ? '<span class="px-1.5 py-0.2 rounded-md bg-red-500/20 text-red-400 text-[9px] font-bold border border-red-500/30 shrink-0">Bán Chạy</span>' : ''}
+                                    ${isHotBadge}
                                 </div>
-                                <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">${dish.desc}</p>
+                                <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">${safeDesc}</p>
                             </div>
                             <div class="flex items-center justify-between pt-1">
-                                <span class="text-xs font-mono font-black text-amber-400">${dish.price.toLocaleString("vi-VN")} đ</span>
+                                <span class="text-xs font-mono font-black text-amber-400">${priceNum.toLocaleString("vi-VN")} đ</span>
                                 <button type="button" 
                                         onclick="D2CStoreFrontController.openCustomizerModal('${dish.id}')" 
-                                        class="px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-black uppercase tracking-wider transition shadow flex items-center gap-1">
+                                        class="px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-black uppercase tracking-wider transition shadow flex items-center gap-1 active:scale-95">
                                     <i class="fa-solid fa-plus text-[9px]"></i> Thêm
                                 </button>
                             </div>
@@ -1212,7 +1340,7 @@
             }).join("");
         }
 
-        function filterCategory(cat, btnEl) {
+                function filterCategory(cat, btnEl) {
             appState.currentCategory = cat;
             document.querySelectorAll(".cat-tab-btn").forEach(function(b) {
                 b.className = "cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5";
