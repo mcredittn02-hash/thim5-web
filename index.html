@@ -945,7 +945,7 @@
      *   - Ưu tiên COD mặc định để kích hoạt trạm điều phối Shipper xác nhận.
      * =========================================================================
      */
-    var D2CStoreFrontController = (function() {
+        var D2CStoreFrontController = (function() {
         // TỌA ĐỘ GỐC CỦA BẾP TRUNG TÂM THÍM 5 TÂY NINH (CHUẨN HAVERSINE)
         var STORE_BASE_CONFIG = {
             storeName: "Mì Trộn Thím 5",
@@ -980,10 +980,10 @@
             calculatedDistanceKm: 0,
             shippingFee: 12000,
             shippingSubsidy: 0,
-            selectedPaymentMethod: "COD", // Khóa cứng mặc định là COD để Shipper gọi xác minh
+            selectedPaymentMethod: "COD",
             currentCustomizingDish: null,
             currentTaste: "Cay Nhẹ",
-            currentSoup: "Súp Tóp Mỡ Hành Lá",
+            currentSoup: "",
             customizerQty: 1
         };
 
@@ -998,7 +998,7 @@
 
         var activeCustomizerToppingIds = [];
 
-        // DANH MỤC THỰC ĐƠN HẠT GIỐNG ĐẦY ĐỦ 11 MÓN CHUẨN MỰC (ĐÃ BỔ SUNG MÓN CƠM TẤM)
+        // DANH MỤC THỰC ĐƠN HẠT GIỐNG ĐẦY ĐỦ 11 MÓN CHUẨN HÓA (ĐÃ BỔ SUNG MÓN CƠM TẤM)
         var FALLBACK_MENU = [
             { id: "M01", cat: "combo", name: "Combo Đại Tiệc Thím 5", price: 89000, img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400", desc: "Mì trộn xá xíu tóp mỡ + 1 chén súp bò viên + 1 ly trà đào 1L.", isHot: true },
             { id: "M02", cat: "combo", name: "Combo No Say Đôi Lứa", price: 119000, img: "https://images.unsplash.com/photo-1552611052-33e04de081de?w=400", desc: "2 tô mì trộn thập cẩm đặc biệt + 2 chén súp trứng cút + 2 nước ngọt.", isHot: true },
@@ -1010,14 +1010,250 @@
             { id: "M08", cat: "an-kem", name: "Trứng Lòng Đào Béo Ngậy (Quả)", price: 6000, img: "https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=400", desc: "Trứng gà luộc chuẩn canh giờ, lòng đào dẻo quánh hòa quyện sốt mì.", isHot: false },
             { id: "M09", cat: "giai-khat", name: "Trà Đào Mát Lạnh Khổng Lồ 1L", price: 25000, img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400", desc: "Ly khổng lồ 1000ml mát lạnh, kèm miếng đào giòn ngọt giải ngấy cực đã.", isHot: true },
             { id: "M10", cat: "giai-khat", name: "Nước Suối Tinh Khiết Ướp Lạnh", price: 10000, img: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400", desc: "Chai 500ml ướp lạnh đập tan cơn khát tức thì.", isHot: false },
-            { id: "C01", cat: "cơm", name: "Cơm Tấm Sườn Bì Chả Thím 5", price: 45000, img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400", desc: "Cơm tấm hạt dẻo thơm, sườn nướng sốt mật ong thơm lừng, chả trứng hấp béo ngậy kèm súp booster.", isHot: true }
+            { id: "C01", cat: "cơm", name: "Cơm Tấm Sườn Bì Chả Thím 5", price: 45000, img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400", desc: "Cơm tấm hạt dẻo thơm, sườn nướng mật ong thảo mộc, chả trứng hấp béo ngậy.", isHot: true }
         ];
 
         /**
-         * MỞ MODAL TÙY CHỌN MÓN THÔNG MINH (TRIỆT TIÊU HOÀN TOÀN SÚP FREE CHO MÓN CƠM)
-         * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+         * KHỞI ĐỘNG HỆ THỐNG MẶT TIỀN D2C
          */
-        function openCustomizerModal(dishId) {
+        function init() {
+            loadSystemConfig();
+            initHeroCarousel();
+            initPwaInstaller();
+            initGiftEventListener();
+            renderMenuGrid();
+            updateAovAndCartUI();
+        }
+
+        /**
+         * ĐỒNG BỘ CẤU HÌNH HỆ THỐNG TỪ BACKEND
+         */
+        async function loadSystemConfig() {
+            try {
+                if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                    var res = await Thim5API.callGAS("getConfig");
+                    var cfg = (res && res.data) ? res.data : res;
+                    if (cfg) {
+                        STORE_BASE_CONFIG.storeName = cfg.storeName || STORE_BASE_CONFIG.storeName;
+                        STORE_BASE_CONFIG.phone = cfg.phone || "0934220585";
+                        STORE_BASE_CONFIG.address = cfg.address || STORE_BASE_CONFIG.address;
+                        STORE_BASE_CONFIG.bankCode = cfg.bankCode || STORE_BASE_CONFIG.bankCode;
+                        STORE_BASE_CONFIG.bankAccount = cfg.bankAccount || STORE_BASE_CONFIG.bankAccount;
+                        STORE_BASE_CONFIG.accountHolder = cfg.accountHolderName || STORE_BASE_CONFIG.accountHolder;
+
+                        if (cfg.centerCoords && cfg.centerCoords.lat && cfg.centerCoords.lng) {
+                            STORE_BASE_CONFIG.coords.lat = Number(cfg.centerCoords.lat);
+                            STORE_BASE_CONFIG.coords.lng = Number(cfg.centerCoords.lng);
+                        }
+
+                        appState.storeStatus = (cfg.storeStatus) ? String(cfg.storeStatus).toUpperCase().trim() : "OPEN";
+                        appState.closedMessage = cfg.closedMessage || "Bếp Thím 5 tạm dừng nhận đơn ít phút!";
+                    }
+                }
+            } catch (e) {
+                console.warn("⚠️ [D2CStoreFront] Sử dụng cấu hình fallback chuẩn Bếp Tây Ninh.");
+                appState.storeStatus = "OPEN";
+                appState.closedMessage = "";
+            }
+
+            var elPhone = document.getElementById("disp-store-phone");
+            var linkPhone = document.getElementById("link-store-phone");
+            var elName = document.getElementById("disp-store-name");
+            if (elPhone) elPhone.innerText = STORE_BASE_CONFIG.phone;
+            if (linkPhone) linkPhone.href = "tel:" + STORE_BASE_CONFIG.phone;
+            if (elName) elName.innerText = STORE_BASE_CONFIG.storeName;
+
+            var dotStatus = document.getElementById("disp-store-status-dot");
+            var txtStatus = document.getElementById("disp-store-status-text");
+            var btnSubmitOrder = document.getElementById("btn-submit-order");
+
+            if (appState.storeStatus === "CLOSED") {
+                if (dotStatus) dotStatus.className = "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-rose-500 border-2 border-slate-950";
+                if (txtStatus) {
+                    txtStatus.className = "text-rose-400 font-bold flex items-center gap-1 truncate";
+                    txtStatus.innerHTML = '<i class="fa-solid fa-circle text-[6px]"></i> Tạm Nghỉ (' + appState.closedMessage + ')';
+                }
+                if (btnSubmitOrder) {
+                    btnSubmitOrder.disabled = true;
+                    btnSubmitOrder.className = "w-full py-3.5 rounded-2xl bg-slate-800 text-slate-500 text-xs sm:text-sm font-black uppercase tracking-wider cursor-not-allowed flex items-center justify-center gap-2";
+                    btnSubmitOrder.innerHTML = '<i class="fa-solid fa-ban"></i> BẾP TẠM DỪNG NHẬN ĐƠN';
+                }
+            } else {
+                if (dotStatus) dotStatus.className = "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-950";
+                if (txtStatus) {
+                    txtStatus.className = "text-emerald-400 font-bold flex items-center gap-1 truncate";
+                    txtStatus.innerHTML = '<i class="fa-solid fa-circle text-[6px] animate-pulse"></i> Đang Nhận Đơn Nóng Hổi';
+                }
+                if (btnSubmitOrder) {
+                    btnSubmitOrder.disabled = false;
+                    btnSubmitOrder.className = "w-full py-3.5 rounded-2xl bg-gradient-to-r from-red-600 via-amber-600 to-emerald-600 hover:opacity-95 text-white text-xs sm:text-sm font-black uppercase tracking-wider shadow-xl shadow-red-600/30 transition flex items-center justify-center gap-2";
+                    btnSubmitOrder.innerHTML = '<i class="fa-solid fa-paper-plane text-sm"></i> <span>XÁC NHẬN GỬI ĐƠN • NẤU NGAY</span>';
+                }
+            }
+        }
+
+        function initHeroCarousel() {
+            var track = document.getElementById("carousel-track");
+            if (!track) return;
+            if (appState.carouselTimer) clearInterval(appState.carouselTimer);
+            appState.carouselTimer = setInterval(function() {
+                var next = (appState.carouselIndex + 1) % 3;
+                goToSlide(next);
+            }, 4000);
+        }
+
+        function goToSlide(index) {
+            var track = document.getElementById("carousel-track");
+            var dots = document.querySelectorAll(".carousel-dot");
+            if (!track) return;
+            appState.carouselIndex = index;
+            track.style.transform = "translateX(-" + (index * 100) + "%)";
+            dots.forEach(function(dot, idx) {
+                if (idx === index) {
+                    dot.className = "carousel-dot w-5 h-1.5 rounded-full bg-amber-400 transition-all duration-300";
+                } else {
+                    dot.className = "carousel-dot w-2 h-1.5 rounded-full bg-slate-700 transition-all duration-300";
+                }
+            });
+        }
+
+        function initPwaInstaller() {
+            var btnInstall = document.getElementById("btn-install-pwa");
+            window.addEventListener("beforeinstallprompt", function(e) {
+                e.preventDefault();
+                appState.deferredPwaPrompt = e;
+                if (btnInstall) btnInstall.classList.remove("hidden");
+            });
+            var isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            var isStandalone = window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches;
+            if (isIos && !isStandalone && btnInstall) {
+                btnInstall.classList.remove("hidden");
+            }
+        }
+
+        function handleInstallPwaClick() {
+            if (appState.deferredPwaPrompt) {
+                appState.deferredPwaPrompt.prompt();
+                appState.deferredPwaPrompt.userChoice.then(function() {
+                    appState.deferredPwaPrompt = null;
+                });
+            } else {
+                var modalIos = document.getElementById("modal-ios-install-guide");
+                if (modalIos) modalIos.classList.remove("hidden");
+            }
+        }
+
+        /**
+         * RENDER DANH SÁCH MÓN ĂN - CHỐNG CRASH UNDEFINED 100%
+         */
+        function renderMenuGrid() {
+            var grid = document.getElementById("dish-menu-grid");
+            var countLabel = document.getElementById("disp-dish-count-label");
+            if (!grid) return;
+
+            var sourceData = (typeof FALLBACK_MENU !== "undefined" && Array.isArray(FALLBACK_MENU)) ? FALLBACK_MENU : [];
+
+            var list = sourceData.filter(function(item) {
+                if (!item) return false;
+
+                var currentCat = String(appState.currentCategory || "all").toLowerCase().trim();
+                var itemCat = String(item.cat || item.category || "").toLowerCase().trim();
+
+                var matchCat = (currentCat === "all");
+                if (!matchCat) {
+                    if (currentCat === "cơm" || currentCat === "com") {
+                        matchCat = (itemCat === "cơm" || itemCat === "com");
+                    } else if (currentCat === "kho" || currentCat === "mì trộn" || currentCat === "mi-tron") {
+                        matchCat = (itemCat === "kho" || itemCat === "mì trộn" || itemCat === "mi-tron");
+                    } else {
+                        matchCat = (itemCat === currentCat);
+                    }
+                }
+
+                var matchSearch = true;
+                if (appState.searchKeyword) {
+                    var kw = String(appState.searchKeyword).toLowerCase().trim();
+                    var itemName = String(item.name || "").toLowerCase();
+                    var itemDesc = String(item.desc || item.description || "").toLowerCase();
+                    matchSearch = (itemName.indexOf(kw) !== -1 || itemDesc.indexOf(kw) !== -1);
+                }
+
+                return matchCat && matchSearch;
+            });
+
+            if (countLabel) {
+                countLabel.innerText = list.length + " món";
+            }
+
+            if (list.length === 0) {
+                grid.innerHTML = `
+                    <div class="p-8 text-center text-slate-500 space-y-2 col-span-full">
+                        <i class="fa-solid fa-bowl-food text-2xl text-slate-600"></i>
+                        <p class="text-xs font-bold text-slate-400">Không tìm thấy món ăn phù hợp!</p>
+                        <p class="text-[10.5px] text-slate-500">Mời anh bấm vào tab "Tất Cả Món" để xem toàn bộ thực đơn.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = list.map(function(dish) {
+                var priceNum = Number(dish.price) || 0;
+                var safeDesc = String(dish.desc || dish.description || "Hương vị đậm đà độc bản Bếp Thím 5.");
+                var safeImg = String(dish.img || dish.image || "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400");
+                var isHotBadge = dish.isHot ? '<span class="px-1.5 py-0.2 rounded-md bg-red-500/20 text-red-400 text-[9px] font-bold border border-red-500/30 shrink-0">Bán Chạy</span>' : '';
+
+                return `
+                    <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800/80 hover:border-slate-700 transition flex gap-3 shadow-sm">
+                        <img src="${safeImg}" alt="${dish.name}" class="w-20 h-20 rounded-xl object-cover shrink-0 border border-slate-800" onerror="this.src='https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400'">
+                        <div class="flex-1 flex flex-col justify-between min-w-0">
+                            <div>
+                                <div class="flex items-center gap-1.5">
+                                    <h4 class="text-xs font-black text-white truncate">${dish.name}</h4>
+                                    ${isHotBadge}
+                                </div>
+                                <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">${safeDesc}</p>
+                            </div>
+                            <div class="flex items-center justify-between pt-1">
+                                <span class="text-xs font-mono font-black text-amber-400">${priceNum.toLocaleString("vi-VN")} đ</span>
+                                <button type="button" 
+                                        onclick="D2CStoreFrontController.openCustomizerModal('${dish.id}')" 
+                                        class="px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-black uppercase tracking-wider transition shadow flex items-center gap-1 active:scale-95">
+                                    <i class="fa-solid fa-plus text-[9px]"></i> Thêm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function filterCategory(cat, btnEl) {
+            appState.currentCategory = cat;
+            document.querySelectorAll(".cat-tab-btn").forEach(function(b) {
+                b.className = "cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5";
+            });
+            if (btnEl) {
+                btnEl.className = "cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-sm active";
+            }
+            renderMenuGrid();
+        }
+
+        function onSearchInput(val) {
+            appState.searchKeyword = val || "";
+            var btnClear = document.getElementById("btn-clear-search");
+            if (btnClear) {
+                if (appState.searchKeyword) btnClear.classList.remove("hidden");
+                else btnClear.classList.add("hidden");
+            }
+            renderMenuGrid();
+        }
+
+        function clearSearch() {
+            var inp = document.getElementById("inp-search-dish");
+            if (inp) inp.value = "";
+            onSearchInput("");
+        }
+            function openCustomizerModal(dishId) {
             var dish = FALLBACK_MENU.find(function(d) { return d.id === dishId; });
             if (!dish) return;
 
