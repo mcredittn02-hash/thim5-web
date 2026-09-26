@@ -3,7 +3,7 @@
  * MODULE: TAB MENU & OMNI-INGESTION PIPELINE (v3.0 SAAS ENTERPRISE)
  * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
  * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
- * Tệp tin: tab-menu.js (Thuần JavaScript 100% - Cấm thẻ HTML <script> và </div>)
+ * Tệp tin: tab-menu.js (Thuần JavaScript 100% - Tuyệt đối không dính thẻ HTML)
  * =========================================================================
  */
 window.TabMenuController = (function() {
@@ -12,7 +12,7 @@ window.TabMenuController = (function() {
   var currentRoleFilter = "ALL";
   var searchKeyword = "";
   var stagedIngestItems = [];
-  var DEFAULT_PLATFORM_FEE_RATE = 0.20; // Tỷ lệ chiết khấu sàn 20% do Super Admin quy định
+  var DEFAULT_PLATFORM_FEE_RATE = 0.20; // Tỷ lệ khấu trừ sàn 20% do Super Admin quy định
 
   // STATE QUẢN LÝ DANH MỤC ĐỘNG (DYNAMIC CATEGORY CRUD)
   var dynamicCategories = [
@@ -25,6 +25,33 @@ window.TabMenuController = (function() {
     { id: "CAT_SPECIAL", name: "Đặc Sản Bánh Tráng Phơi Sương", icon: "🌶️", slug: "Đặc Sản Tây Ninh" },
     { id: "CAT_EXTEND", name: "Món Mở Rộng (Gà Ủ Muối / Fastfood)", icon: "🍗", slug: "Món Mở Rộng" }
   ];
+
+  /**
+   * BỘ BÓC TÁCH MẢNG THỰC ĐƠN AN TOÀN TỪ MỌI CẤU TRÚC PHẢN HỒI CỦA GAS
+   */
+  function unwrapMenuArray(res) {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res.data)) return res.data;
+    if (Array.isArray(res.menu)) return res.menu;
+    if (Array.isArray(res.catalog)) return res.catalog;
+    if (Array.isArray(res.items)) return res.items;
+    if (res.data) {
+      if (Array.isArray(res.data.menu)) return res.data.menu;
+      if (Array.isArray(res.data.catalog)) return res.data.catalog;
+      if (Array.isArray(res.data.items)) return res.data.items;
+    }
+    // Nếu trả về JSON string chưa giải mã
+    if (typeof res === "string" && (res.trim().startsWith("[") || res.trim().startsWith("{"))) {
+      try {
+        var parsed = JSON.parse(res);
+        return unwrapMenuArray(parsed);
+      } catch (e) {
+        console.warn("⚠️ Không thể giải mã JSON chuỗi thực đơn:", e);
+      }
+    }
+    return [];
+  }
 
   /**
    * KHỞI CHẠY TẢI THỰC ĐƠN VÀ DANH MỤC TỪ MÁY CHỦ GOOGLE APPS SCRIPT
@@ -44,16 +71,13 @@ window.TabMenuController = (function() {
       var menuRes = results[0].status === "fulfilled" ? results[0].value : null;
       var catRes = results[1].status === "fulfilled" ? results[1].value : null;
 
-      if (menuRes && menuRes.status === "success" && Array.isArray(menuRes.data)) {
-        rawMenuList = menuRes.data;
-      } else if (menuRes && Array.isArray(menuRes)) {
-        rawMenuList = menuRes;
-      } else {
-        rawMenuList = [];
-      }
+      // Bóc tách an toàn tuyệt đối mảng thực đơn
+      rawMenuList = unwrapMenuArray(menuRes);
 
-      if (catRes && catRes.status === "success" && Array.isArray(catRes.data) && catRes.data.length > 0) {
-        dynamicCategories = catRes.data;
+      // Bóc tách danh mục động nếu Backend có trả về
+      var fetchedCats = unwrapMenuArray(catRes);
+      if (fetchedCats && fetchedCats.length > 0) {
+        dynamicCategories = fetchedCats;
       }
 
     } catch (err) {
@@ -62,6 +86,7 @@ window.TabMenuController = (function() {
     } finally {
       showTableLoading(false);
       renderCategoryDropdownOptions();
+      renderDynamicFilterTabs();
       applyFiltersAndRender();
     }
   }
@@ -77,6 +102,37 @@ window.TabMenuController = (function() {
         loadingRow.classList.add("hidden");
       }
     }
+  }
+
+  /**
+   * TỰ ĐỘNG SINH CÁC NÚT LỌC DANH MỤC ĐỘNG TRÊN HEADER (ĐÃ CÓ MÓN CƠM)
+   */
+  function renderDynamicFilterTabs() {
+    var filterContainer = document.querySelector(".menu-role-btn") 
+      ? document.querySelector(".menu-role-btn").parentElement 
+      : null;
+    
+    if (!filterContainer) return;
+
+    var tabs = [
+      { role: "ALL", label: "Tất Cả" },
+      { role: "RICE", label: "🍛 Món Cơm" },
+      { role: "CORE", label: "🍜 Mì Chủ Lực" },
+      { role: "COMBO", label: "🍱 Combo Độc Quyền" },
+      { role: "BOOSTER_SOUP", label: "🥣 Súp Booster" },
+      { role: "DRINKS", label: "🥤 Nước 1L" },
+      { role: "EXTENDED", label: "🍗 Món Mở Rộng" }
+    ];
+
+    var html = tabs.map(function(t) {
+      var isActive = (currentRoleFilter === t.role);
+      var activeClass = isActive 
+        ? "bg-amber-500 text-slate-950 font-bold shadow" 
+        : "text-slate-400 hover:text-white transition";
+      return `<button type="button" onclick="window.TabMenuController.filterRole('${t.role}', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-[11px] ${activeClass}">${t.label}</button>`;
+    }).join("");
+
+    filterContainer.innerHTML = html;
   }
 
   /**
@@ -105,26 +161,31 @@ window.TabMenuController = (function() {
    */
   function applyFiltersAndRender() {
     filteredMenuList = rawMenuList.filter(function(item) {
+      if (!item) return false;
+
       var itemRole = String(item.role || "CORE").toUpperCase();
-      var itemCat = String(item.category || "").toLowerCase();
+      var rawCat = String(item.category || item.Nhóm_Phân_Loại || "").toLowerCase().trim();
+      
+      // Chuẩn hóa loại bỏ dấu tiếng Việt để so khớp an toàn
+      var normCat = rawCat.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
       var matchRole = false;
 
       if (currentRoleFilter === "ALL") {
         matchRole = true;
-      } else if (currentRoleFilter === "CORE") {
-        matchRole = (itemRole === "CORE");
       } else if (currentRoleFilter === "RICE") {
-        matchRole = (itemCat.includes("cơm") || itemCat.includes("com"));
+        matchRole = (normCat.indexOf("com") !== -1 || rawCat.indexOf("cơm") !== -1);
+      } else if (currentRoleFilter === "CORE") {
+        matchRole = (itemRole === "CORE" || normCat.indexOf("mi") !== -1);
       } else if (currentRoleFilter === "COMBO") {
-        matchRole = (itemRole === "COMBO_EXCLUSIVE" || itemRole === "COMBO");
+        matchRole = (itemRole === "COMBO_EXCLUSIVE" || itemRole === "COMBO" || normCat.indexOf("combo") !== -1);
       } else if (currentRoleFilter === "BOOSTER_SOUP") {
-        matchRole = (itemRole === "BOOSTER_SOUP" || itemCat.includes("súp"));
+        matchRole = (itemRole === "BOOSTER_SOUP" || normCat.indexOf("sup") !== -1 || rawCat.indexOf("súp") !== -1);
       } else if (currentRoleFilter === "TRAFFIC") {
         matchRole = (itemRole === "TRAFFIC");
       } else if (currentRoleFilter === "DRINKS") {
-        matchRole = (itemRole === "DRINKS" || itemCat.includes("uống") || itemCat.includes("nước"));
+        matchRole = (itemRole === "DRINKS" || normCat.indexOf("uong") !== -1 || normCat.indexOf("nuoc") !== -1 || normCat.indexOf("tra") !== -1);
       } else if (currentRoleFilter === "EXTENDED") {
-        matchRole = (itemRole === "EXTENDED" || itemCat.includes("mở rộng") || itemCat.includes("fastfood"));
+        matchRole = (itemRole === "EXTENDED" || normCat.indexOf("mo rong") !== -1 || normCat.indexOf("fastfood") !== -1);
       } else {
         matchRole = (itemRole === currentRoleFilter);
       }
@@ -133,7 +194,7 @@ window.TabMenuController = (function() {
       var matchQuery = !query || 
         String(item.name || "").toLowerCase().includes(query) || 
         String(item.code || "").toLowerCase().includes(query) ||
-        String(item.category || "").toLowerCase().includes(query);
+        rawCat.includes(query);
 
       return matchRole && matchQuery;
     });
@@ -162,10 +223,10 @@ window.TabMenuController = (function() {
 
     var htmlBuffer = "";
     items.forEach(function(item) {
-      var price = Number(item.d2cPrice || item.price) || 0;
-      var cogs = Number(item.cogs) || 0;
+      var price = Number(item.d2cPrice || item.price || item.Giá_Bán_D2C_Web) || 0;
+      var cogs = Number(item.cogs || item.Giá_Vốn_COGS) || 0;
       var profit = Math.max(0, price - cogs);
-      var appPrice = Number(item.appPrice) || Math.round((price / (1 - DEFAULT_PLATFORM_FEE_RATE)) / 1000) * 1000;
+      var appPrice = Number(item.appPrice || item.Giá_App) || Math.round((price / (1 - DEFAULT_PLATFORM_FEE_RATE)) / 1000) * 1000;
       var foodCostRate = price > 0 ? (cogs / price) * 100 : 0;
 
       var fcColorClass = "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
@@ -175,7 +236,7 @@ window.TabMenuController = (function() {
         fcColorClass = "text-amber-400 bg-amber-500/10 border-amber-500/30 font-bold";
       }
 
-      var isOutOfStock = (item.status === "OUT_OF_STOCK");
+      var isOutOfStock = (String(item.status || "").toUpperCase() === "OUT_OF_STOCK" || String(item.status || "").indexOf("Hết") !== -1);
       var statusBadge = isOutOfStock
         ? '<button type="button" onclick="window.TabMenuController.toggleItemStock(\'' + item.code + '\', \'ACTIVE\')" class="px-2.5 py-1 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold transition active:scale-95 text-[11px]">🔴 Hết Hàng</button>'
         : '<button type="button" onclick="window.TabMenuController.toggleItemStock(\'' + item.code + '\', \'OUT_OF_STOCK\')" class="px-2.5 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold transition active:scale-95 text-[11px]">🟢 Còn Bán</button>';
@@ -190,8 +251,9 @@ window.TabMenuController = (function() {
         roleBadge = '<span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-purple-500/10 text-purple-400 border border-purple-500/30">Combo D2C</span>';
       }
 
+      var rawCatDisplay = String(item.category || item.Nhóm_Phân_Loại || "Món Cơm");
       var soupBadge = '<span class="text-slate-500 text-[10px] font-mono">--</span>';
-      if (item.isDry || item.boosterSoup || String(item.category).includes("Mì") || String(item.category).includes("Cơm")) {
+      if (item.isDry || item.boosterSoup || rawCatDisplay.indexOf("Mì") !== -1 || rawCatDisplay.indexOf("Cơm") !== -1) {
         var soupName = item.boosterSoup || "Súp Bò Viên/Hoành Thánh";
         soupBadge = '<span class="px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 truncate block max-w-[130px]" title="' + soupName + '">🥣 ' + soupName + '</span>';
       }
@@ -200,17 +262,17 @@ window.TabMenuController = (function() {
         <tr class="menu-data-row hover:bg-slate-800/40 transition">
           <td class="py-2.5 px-3.5 flex items-center gap-2.5">
             <div class="w-10 h-10 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden flex-shrink-0">
-              <img src="${item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'" />
+              <img src="${item.image || item.Link_Ảnh || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'" />
             </div>
             <div class="space-y-0.5 overflow-hidden">
               <div class="flex items-center gap-1.5">
-                <span class="font-mono text-[10px] font-bold text-amber-400">${item.code}</span>
+                <span class="font-mono text-[10px] font-bold text-amber-400">${item.code || item.Mã_Món}</span>
                 ${roleBadge}
               </div>
-              <h4 class="font-bold text-white text-xs leading-tight truncate max-w-[200px]" title="${item.name}">${item.name}</h4>
+              <h4 class="font-bold text-white text-xs leading-tight truncate max-w-[200px]" title="${item.name || item.Tên_Món_Ăn}">${item.name || item.Tên_Món_Ăn}</h4>
             </div>
           </td>
-          <td class="py-2.5 px-3 text-center text-slate-300 font-medium text-[11px]">${item.category || 'Món Cơm'}</td>
+          <td class="py-2.5 px-3 text-center text-slate-300 font-medium text-[11px]">${rawCatDisplay}</td>
           <td class="py-2.5 px-3 text-right font-mono text-slate-400 text-xs">${cogs.toLocaleString('vi-VN')} đ</td>
           <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-400 text-xs">+${profit.toLocaleString('vi-VN')} đ</td>
           <td class="py-2.5 px-3 text-right font-mono font-black text-amber-400 text-xs">${price.toLocaleString('vi-VN')} đ</td>
@@ -224,10 +286,10 @@ window.TabMenuController = (function() {
           <td class="py-2.5 px-3 text-center">${statusBadge}</td>
           <td class="py-2.5 px-3.5 text-center">
             <div class="flex items-center justify-center gap-1">
-              <button type="button" onclick="window.TabMenuController.openDishModal('${item.code}')" class="p-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition active:scale-95" title="Chỉnh sửa món">
+              <button type="button" onclick="window.TabMenuController.openDishModal('${item.code || item.Mã_Món}')" class="p-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition active:scale-95" title="Chỉnh sửa món">
                 <i class="fa-solid fa-pen-to-square text-[11px]"></i>
               </button>
-              <button type="button" onclick="window.TabMenuController.deleteDishItem('${item.code}')" class="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition active:scale-95" title="Xóa món">
+              <button type="button" onclick="window.TabMenuController.deleteDishItem('${item.code || item.Mã_Món}')" class="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition active:scale-95" title="Xóa món">
                 <i class="fa-solid fa-trash text-[11px]"></i>
               </button>
             </div>
@@ -239,7 +301,9 @@ window.TabMenuController = (function() {
 
     tbody.insertAdjacentHTML("beforeend", htmlBuffer);
   }
-
+  /**
+   * CẬP NHẬT CHỈ SỐ 4 THẺ KPI TRÊN ĐẦU TRANG
+   */
   function updateKpiMetrics(items) {
     var total = items.length;
     var activeCount = 0;
@@ -250,12 +314,14 @@ window.TabMenuController = (function() {
     items.forEach(function(i) {
       if (i.status !== "OUT_OF_STOCK" && i.status !== "HIDDEN") activeCount++;
       var r = String(i.role || "").toUpperCase();
-      var c = String(i.category || "").toLowerCase();
-      if (r === "BOOSTER" || r === "BOOSTER_SOUP" || c.includes("súp") || c.includes("đồ uống") || c.includes("uống")) {
+      var rawC = String(i.category || i.Nhóm_Phân_Loại || "").toLowerCase();
+      var normC = rawC.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
+
+      if (r === "BOOSTER" || r === "BOOSTER_SOUP" || normC.includes("sup") || normC.includes("do uong") || normC.includes("uong") || normC.includes("nuoc")) {
         boosterCount++;
       }
-      var p = Number(i.d2cPrice || i.price) || 0;
-      var cg = Number(i.cogs) || 0;
+      var p = Number(i.d2cPrice || i.price || i.Giá_Bán_D2C_Web) || 0;
+      var cg = Number(i.cogs || i.Giá_Vốn_COGS) || 0;
       if (p > 0) {
         totalPrice += p;
         totalCogs += cg;
@@ -275,6 +341,9 @@ window.TabMenuController = (function() {
     if (elBooster) elBooster.innerText = boosterCount;
   }
 
+  /**
+   * TÌM KIẾM VÀ LỌC THEO VAI TRÒ CHIẾN LƯỢC
+   */
   function handleSearch(val) {
     searchKeyword = String(val || "").trim();
     applyFiltersAndRender();
@@ -283,14 +352,22 @@ window.TabMenuController = (function() {
   function filterRole(role, btnEl) {
     currentRoleFilter = role;
     document.querySelectorAll(".menu-role-btn").forEach(function(b) {
-      b.className = "menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition";
+      b.className = "menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition text-[11px]";
     });
-    if (btnEl) btnEl.className = "menu-role-btn px-2.5 py-1 rounded-xl bg-amber-500 text-slate-950 font-bold shadow";
+    if (btnEl) {
+      btnEl.className = "menu-role-btn px-2.5 py-1 rounded-xl bg-amber-500 text-slate-950 font-bold shadow text-[11px]";
+    }
     applyFiltersAndRender();
   }
 
+  /**
+   * BẬT / TẮT TRẠNG THÁI BẾP TỨC THÌ 0MS (OPTIMISTIC UI UPDATE)
+   */
   async function toggleItemStock(code, newStatus) {
-    var target = rawMenuList.find(function(x) { return x.code === code; });
+    var target = rawMenuList.find(function(x) { 
+      var itemCode = String(x.code || x.Mã_Món || "").trim();
+      return itemCode === String(code).trim(); 
+    });
     if (!target) return;
 
     var prevStatus = target.status;
@@ -392,6 +469,7 @@ window.TabMenuController = (function() {
       if (bar) bar.className = "h-full bg-emerald-500 transition-all duration-300";
     }
   }
+
   /**
    * TÍCH HỢP BỘ NÉN ẢNH CANVAS TOÀN CỤC CHO FORM TẠO MÓN
    */
@@ -425,25 +503,28 @@ window.TabMenuController = (function() {
     var isEditInput = document.getElementById("dish-is-edit");
 
     if (editCode) {
-      var item = rawMenuList.find(function(x) { return x.code === editCode; });
+      var item = rawMenuList.find(function(x) { 
+        var c = String(x.code || x.Mã_Món || "").trim();
+        return c === String(editCode).trim(); 
+      });
       if (!item) return;
-      if (title) title.innerText = "Chỉnh Sửa Món: " + item.code;
+      if (title) title.innerText = "Chỉnh Sửa Món: " + (item.code || item.Mã_Món);
       if (isEditInput) isEditInput.value = "true";
-      document.getElementById("dish-code").value = item.code;
+      document.getElementById("dish-code").value = item.code || item.Mã_Món || "";
       document.getElementById("dish-code").readOnly = true;
-      document.getElementById("dish-name").value = item.name || "";
+      document.getElementById("dish-name").value = item.name || item.Tên_Món_Ăn || "";
       
-      renderCategoryDropdownOptions(item.category || "Món Cơm");
+      renderCategoryDropdownOptions(item.category || item.Nhóm_Phân_Loại || "Món Cơm");
 
-      document.getElementById("dish-role").value = item.role || "CORE";
+      document.getElementById("dish-role").value = item.role || item.Tag_Chiến_Lược || "CORE";
       document.getElementById("dish-unit").value = item.unit || "Phần";
-      document.getElementById("dish-cogs").value = item.cogs || "";
-      document.getElementById("dish-price").value = item.d2cPrice || item.price || "";
-      document.getElementById("dish-app-price").value = item.appPrice || "";
-      document.getElementById("dish-image").value = item.image || "";
+      document.getElementById("dish-cogs").value = item.cogs || item.Giá_Vốn_COGS || "";
+      document.getElementById("dish-price").value = item.d2cPrice || item.price || item.Giá_Bán_D2C_Web || "";
+      document.getElementById("dish-app-price").value = item.appPrice || item.Giá_App || "";
+      document.getElementById("dish-image").value = item.image || item.Link_Ảnh || "";
       document.getElementById("dish-status").value = item.status || "ACTIVE";
-      document.getElementById("dish-desc").value = item.description || "";
-      document.getElementById("dish-cross-sell").value = item.crossSell || "";
+      document.getElementById("dish-desc").value = item.description || item.Mô_Tả || "";
+      document.getElementById("dish-cross-sell").value = item.crossSell || item.Bán_Kèm || "";
       document.getElementById("dish-booster-soup").value = item.boosterSoup || "";
       document.getElementById("dish-is-dry").checked = Boolean(item.isDry !== false);
     } else {
@@ -588,17 +669,240 @@ window.TabMenuController = (function() {
   }
 
   /**
-   * MODAL OMNI-INGESTION ĐA KÊNH
+   * MỞ MODAL QUẢN LÝ DANH MỤC ĐA NGÀNH
    */
+  function openCategoryManagerModal() {
+    var modal = document.getElementById("modal-category-manager");
+    if (!modal) {
+      injectCategoryManagerModalToDom();
+      modal = document.getElementById("modal-category-manager");
+    }
+
+    renderCategoryManagerTable();
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.display = "flex";
+      modal.style.zIndex = "10000";
+    }
+  }
+
+  function closeCategoryManagerModal() {
+    var modal = document.getElementById("modal-category-manager");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.style.display = "none";
+    }
+  }
+
+  /**
+   * TỰ ĐỘNG TẠO MODAL QUẢN LÝ DANH MỤC NẾU DOM CHƯA CÓ SẴN (ZERO-DOM-LEAK)
+   */
+  function injectCategoryManagerModalToDom() {
+    if (document.getElementById("modal-category-manager")) return;
+
+    var modalHtml = `
+      <div id="modal-category-manager" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
+        <div class="relative bg-slate-900 border border-slate-800 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200">
+          
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm">
+                <i class="fa-solid fa-tags"></i>
+              </div>
+              <div>
+                <h3 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Quản Lý Danh Mục Đa Ngành</h3>
+                <p class="text-[10px] text-slate-400">Thêm, xóa, đổi Icon và đồng bộ thời gian thực vào Google Sheets</p>
+              </div>
+            </div>
+            <button type="button" onclick="window.TabMenuController.closeCategoryManagerModal()" class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center">
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+          </div>
+
+          <form id="form-quick-category" onsubmit="window.TabMenuController.handleSaveCategory(event)" class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5">
+            <span class="text-[11px] font-bold text-amber-400 block">+ Thêm / Cập Nhật Danh Mục Mới:</span>
+            <div class="grid grid-cols-4 gap-2">
+              <div class="col-span-1">
+                <input type="text" id="cat-inp-icon" placeholder="Icon (🍛)" maxlength="4" class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-2.5 py-1.5 text-center text-sm outline-none transition" />
+              </div>
+              <div class="col-span-2">
+                <input type="text" id="cat-inp-name" required placeholder="Tên danh mục (VD: Cơm Tấm)" class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-1.5 text-xs text-white outline-none transition font-medium" />
+              </div>
+              <div class="col-span-1">
+                <button type="submit" id="btn-submit-save-category" class="w-full py-1.5 px-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black text-xs transition active:scale-95 shadow">
+                  Lưu Danh Mục
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <div class="max-h-56 overflow-y-auto custom-scroll rounded-2xl bg-slate-950 border border-slate-800">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-900 text-slate-400 uppercase font-mono text-[9.5px] sticky top-0">
+                <tr>
+                  <th class="p-2.5 text-center w-12">Icon</th>
+                  <th class="p-2.5">Tên Danh Mục Hiển Thị</th>
+                  <th class="p-2.5 text-center w-24">Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="category-manager-tbody" class="divide-y divide-slate-800/60 font-medium"></tbody>
+            </table>
+          </div>
+
+          <div class="flex justify-end pt-1 border-t border-slate-800">
+            <button type="button" onclick="window.TabMenuController.closeCategoryManagerModal()" class="px-4 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 font-bold transition text-xs">
+              Đóng Cửa Sổ
+            </button>
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML("beforeend", modalHtml);
+  }
+
+  function renderCategoryManagerTable() {
+    var tbody = document.getElementById("category-manager-tbody");
+    if (!tbody) return;
+
+    var htmlBuffer = "";
+    dynamicCategories.forEach(function(cat, idx) {
+      htmlBuffer += `
+        <tr class="hover:bg-slate-900/60 transition">
+          <td class="p-2 text-center text-base">${cat.icon || '🍽️'}</td>
+          <td class="p-2 text-white font-bold">${cat.name}</td>
+          <td class="p-2 text-center">
+            <div class="flex items-center justify-center gap-1">
+              <button type="button" onclick="window.TabMenuController.editCategoryItem(${idx})" class="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-400 border border-slate-800 transition" title="Sửa danh mục">
+                <i class="fa-solid fa-pen text-[10px]"></i>
+              </button>
+              <button type="button" onclick="window.TabMenuController.deleteCategoryItem(${idx})" class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition" title="Xóa danh mục">
+                <i class="fa-solid fa-trash text-[10px]"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    tbody.innerHTML = htmlBuffer;
+  }
+
+  async function handleSaveCategory(e) {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+
+    var inpName = document.getElementById("cat-inp-name");
+    var inpIcon = document.getElementById("cat-inp-icon");
+    var btn = document.getElementById("btn-submit-save-category");
+
+    var nameVal = inpName ? inpName.value.trim() : "";
+    var iconVal = inpIcon ? inpIcon.value.trim() : "🍽️";
+
+    if (!nameVal) {
+      alert("⚠️ Vui lòng nhập tên danh mục!");
+      return;
+    }
+
+    var origBtnText = btn ? btn.innerHTML : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu...';
+    }
+
+    var newCatObj = {
+      id: "CAT_" + Date.now(),
+      name: nameVal,
+      icon: iconVal || "🍽️",
+      slug: nameVal
+    };
+
+    var existingIdx = dynamicCategories.findIndex(function(c) {
+      return c.name.toLowerCase() === nameVal.toLowerCase() || c.slug.toLowerCase() === nameVal.toLowerCase();
+    });
+
+    if (existingIdx !== -1) {
+      dynamicCategories[existingIdx].icon = iconVal;
+      dynamicCategories[existingIdx].name = nameVal;
+    } else {
+      dynamicCategories.push(newCatObj);
+    }
+
+    try {
+      if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+        var res = await window.Thim5API.callGAS("saveMenuCategory", {
+          category: newCatObj,
+          allCategories: dynamicCategories
+        });
+        if (res && res.status === "success") {
+          alert("🎉 Đã lưu danh mục [" + nameVal + "] vào cơ sở dữ liệu Google Sheets thành công!");
+        }
+      }
+    } catch (err) {
+      console.warn("⚠️ Lưu danh mục cục bộ, backend phản hồi:", err.message);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origBtnText || "Lưu Danh Mục";
+      }
+      if (inpName) inpName.value = "";
+      if (inpIcon) inpIcon.value = "";
+
+      renderCategoryManagerTable();
+      renderCategoryDropdownOptions(nameVal);
+    }
+  }
+
+  function editCategoryItem(index) {
+    var target = dynamicCategories[index];
+    if (!target) return;
+
+    var inpName = document.getElementById("cat-inp-name");
+    var inpIcon = document.getElementById("cat-inp-icon");
+    if (inpName) inpName.value = target.name;
+    if (inpIcon) inpIcon.value = target.icon;
+    if (inpName) inpName.focus();
+  }
+
+  async function deleteCategoryItem(index) {
+    var target = dynamicCategories[index];
+    if (!target) return;
+
+    if (confirm("Anh Hải Âu có chắc muốn xóa danh mục [" + target.name + "]? Các món thuộc danh mục này sẽ giữ nguyên tên danh mục.")) {
+      dynamicCategories.splice(index, 1);
+      renderCategoryManagerTable();
+      renderCategoryDropdownOptions();
+
+      try {
+        if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+          await window.Thim5API.callGAS("deleteMenuCategory", {
+            categoryId: target.id,
+            categoryName: target.name,
+            allCategories: dynamicCategories
+          });
+        }
+      } catch (err) {
+        console.warn("⚠️ Lỗi đồng bộ xóa danh mục lên Apps Script:", err);
+      }
+    }
+  }
+
   function openOmniIngestionModal() {
     var modal = document.getElementById("modal-omni-ingestion");
-    if (modal) modal.classList.remove("hidden");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.display = "flex";
+      modal.style.zIndex = "9999";
+    }
     switchIngestChannel("EXCEL");
   }
 
   function closeOmniIngestionModal() {
     var modal = document.getElementById("modal-omni-ingestion");
-    if (modal) modal.classList.add("hidden");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.style.display = "none";
+    }
     clearIngestPreview();
   }
 
@@ -618,7 +922,11 @@ window.TabMenuController = (function() {
   }
 
   function downloadExcelTemplate() {
-    window.open(window.Thim5API.getEndpoint() + "?action=getMenuExcelTemplateStructure", "_blank");
+    if (window.Thim5API && typeof window.Thim5API.getEndpoint === "function") {
+      window.open(window.Thim5API.getEndpoint() + "?action=getMenuExcelTemplateStructure", "_blank");
+    } else {
+      alert("Không tìm thấy đường dẫn máy chủ để tải file mẫu!");
+    }
   }
 
   function handleExcelFileSelect(input) {
@@ -813,7 +1121,7 @@ window.TabMenuController = (function() {
     try {
       var res = await window.Thim5API.callGAS("batchImportMenuItems", { items: stagedIngestItems });
       if (res && res.status === "success") {
-        alert("🎉 " + res.data.message);
+        alert("🎉 " + (res.data && res.data.message ? res.data.message : "Đã nạp thành công các món ăn!"));
         closeOmniIngestionModal();
         init();
       } else {
@@ -852,6 +1160,11 @@ window.TabMenuController = (function() {
     handleParseJson: handleParseJson,
     clearIngestPreview: clearIngestPreview,
     submitBatchIngest: submitBatchIngest,
-    handleSingleImageUpload: handleSingleImageUpload
+    handleSingleImageUpload: handleSingleImageUpload,
+    openCategoryManagerModal: openCategoryManagerModal,
+    closeCategoryManagerModal: closeCategoryManagerModal,
+    handleSaveCategory: handleSaveCategory,
+    editCategoryItem: editCategoryItem,
+    deleteCategoryItem: deleteCategoryItem
   };
 })();
