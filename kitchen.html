@@ -486,123 +486,129 @@
               `;
               return;
           }
+        var html = "";
+        displayOrders.forEach(function(o) {
+            var cleanCode = String(o.code || o.orderCode || '').trim();
+            var stepNum = Number(o.step !== undefined ? o.step : 0);
+            var isCod = (o.method === "COD");
+            var isPaidOnline = !isCod;
+            var isNeedCook = (stepNum === 2);
+            var isPacked = (stepNum === 2.5);
+            var isWaitCod = (stepNum === 0);
+            var isDelivering = (stepNum === 3);
 
-          var html = "";
-          displayOrders.forEach(function(o) {
-              var cleanCode = String(o.code || '').trim();
-              var stepNum = Number(o.step !== undefined ? o.step : 0);
-              var isCod = (o.method === "COD");
-              var isPaidOnline = !isCod;
-              var isNeedCook = (stepNum === 2);
-              var isPacked = (stepNum === 2.5);
-              var isWaitCod = (stepNum === 0);
-              var isDelivering = (stepNum === 3);
+            var assignedShipperName = String(o.shipper || "").trim();
+            var isShipperLocked = (assignedShipperName.length > 0);
 
-              var assignedShipperName = String(o.shipper || "").trim();
-              var isShipperLocked = (assignedShipperName.length > 0);
+            var formattedItemsHtml = (o.items || '').split(" | ").map(function(itemText) {
+                return `<div class="py-1 border-b border-slate-800/80 last:border-none text-slate-200 font-bold">• ${itemText}</div>`;
+            }).join("");
 
-              var formattedItemsHtml = (o.items || '').split(" | ").map(function(itemText) {
-                  return `<div class="py-1 border-b border-slate-800/80 last:border-none text-slate-200 font-bold">• ${itemText}</div>`;
-              }).join("");
+            var shipperOptionsHtml = cachedShippers.map(function(s) {
+                var isSelected = (assignedShipperName.indexOf(s.name) !== -1 || assignedShipperName.indexOf(s.phone) !== -1) ? "selected" : "";
+                return `<option value="${s.name}|${s.phone}" ${isSelected}>🛵 ${s.name} (${s.phone})</option>`;
+            }).join("");
 
-              var shipperOptionsHtml = cachedShippers.map(function(s) {
-                  var isSelected = (assignedShipperName.indexOf(s.name) !== -1 || assignedShipperName.indexOf(s.phone) !== -1) ? "selected" : "";
-                  return `<option value="${s.name}|${s.phone}" ${isSelected}>🛵 ${s.name} (${s.phone})</option>`;
-              }).join("");
+            // CỤM TIMER HẸN GIỜ RA MÓN CHO TÀI XẾ (KIỂM TRA AN TOÀN TRÁNH LỖI UNDEFINED)
+            var timerComponentHtml = (typeof KDSTimerController !== "undefined" && typeof KDSTimerController.buildTimerHtml === "function")
+                ? KDSTimerController.buildTimerHtml(o)
+                : `<span class="text-[10.5px] font-mono text-slate-400">⏰ ${o.time || 'Vừa xong'}</span>`;
 
-              html += `
-                  <div class="p-4 rounded-3xl bg-slate-900 border-2 ${isNeedCook ? 'border-orange-500/80 order-card-urgent' : (isWaitCod ? 'border-amber-500/40 bg-amber-950/10' : 'border-slate-800')} shadow-xl flex flex-col justify-between space-y-3">
-                      <div>
-                          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2">
-                              <span class="font-mono font-black text-amber-400 text-base">${cleanCode}</span>
-                              <span class="text-[10.5px] font-mono text-slate-400">⏰ ${o.time || 'Vừa xong'}</span>
-                          </div>
+            html += `
+                <div class="p-4 rounded-3xl bg-slate-900 border-2 ${isNeedCook ? 'border-orange-500/80 order-card-urgent' : (isWaitCod ? 'border-amber-500/40 bg-amber-950/10' : 'border-slate-800')} shadow-xl flex flex-col justify-between space-y-3">
+                    <div>
+                        <div class="border-b border-slate-800/80 pb-2 mb-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono font-black text-amber-400 text-base">${cleanCode}</span>
+                            </div>
+                            <!-- CẤY TIMER ĐẾM NGƯỢC THAY THẾ CHUỖI TIMESTAMP THÔ -->
+                            ${timerComponentHtml}
+                        </div>
 
-                          <div class="mb-2">
-                              ${isPaidOnline ? `
-                                  <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                      💳 Đã Quét VietQR • Tiền Đã Vào Két • NẤU NGAY
-                                  </span>
-                              ` : `
-                                  <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                      💵 Tiền Mặt COD: Thu ${Number(o.total || 0).toLocaleString('vi-VN')} đ
-                                  </span>
-                              `}
-                          </div>
+                        <div class="mb-2">
+                            ${isPaidOnline ? `
+                                <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                    💳 Đã Quét VietQR • Tiền Đã Vào Két • NẤU NGAY
+                                </span>
+                            ` : `
+                                <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                    💵 Tiền Mặt COD: Thu ${Number(o.total || 0).toLocaleString('vi-VN')} đ
+                                </span>
+                            `}
+                        </div>
 
-                          <div class="text-[11px] text-slate-400 space-y-0.5">
-                              <div>Khách: <strong class="text-white">${o.name || 'Khách vãng lai'}</strong> • SĐT: <strong class="text-slate-200">${o.phone || 'N/A'}</strong></div>
-                              <div class="truncate">Nơi nhận: <strong class="text-slate-300">${o.address || 'Hòa Thành, Tây Ninh'}</strong></div>
-                          </div>
+                        <div class="text-[11px] text-slate-400 space-y-0.5">
+                            <div>Khách: <strong class="text-white">${o.name || 'Khách vãng lai'}</strong> • SĐT: <strong class="text-slate-200">${o.phone || 'N/A'}</strong></div>
+                            <div class="truncate">Nơi nhận: <strong class="text-slate-300">${o.address || 'Hòa Thành, Tây Ninh'}</strong></div>
+                        </div>
 
-                          <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 my-2">
-                              <div class="text-[9.5px] font-black uppercase tracking-widest text-slate-500 mb-1">Món Ăn & Topping Đã Đặt:</div>
-                              <div class="text-xs space-y-0.5 leading-relaxed">${formattedItemsHtml}</div>
-                          </div>
+                        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 my-2">
+                            <div class="text-[9.5px] font-black uppercase tracking-widest text-slate-500 mb-1">Món Ăn & Topping Đã Đặt:</div>
+                            <div class="text-xs space-y-0.5 leading-relaxed">${formattedItemsHtml}</div>
+                        </div>
 
-                          <div class="p-2 rounded-xl bg-orange-500/10 border border-orange-500/30 text-[11px] text-orange-300">
-                              🌶️ <strong>Khẩu vị:</strong> ${o.taste || 'Cay Nhẹ (Chuẩn vị Thím 5)'}
-                          </div>
-                      </div>
+                        <div class="p-2 rounded-xl bg-orange-500/10 border border-orange-500/30 text-[11px] text-orange-300">
+                            🌶️ <strong>Khẩu vị:</strong> ${o.taste || 'Cay Nhẹ (Chuẩn vị Thím 5)'}
+                        </div>
+                    </div>
 
-                      <div class="space-y-1.5 pt-1">
-                          ${isWaitCod ? `
-                              <div class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center font-bold text-amber-300 text-[11px]">
-                                  ⏳ Đơn COD: Chờ Shipper gọi điện chốt đơn mới nấu!
-                              </div>
-                              <button type="button" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 font-bold text-xs border border-slate-700 cursor-not-allowed" disabled>
-                                  🔒 Bếp Khóa (Chờ Shipper Xác Minh)
-                              </button>
-                          ` : (isNeedCook ? `
-                              ${isShipperLocked ? `
-                                  <div class="p-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center text-amber-400 text-[10.5px] font-bold">
-                                      🛵 Đơn đã khóa cứng cho tài xế: <strong>${assignedShipperName}</strong>
-                                  </div>
-                              ` : ''}
-                              <button type="button" id="btn_cook_${cleanCode}" onclick="KitchenKdsController.handleCookDone('${cleanCode}')" class="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-1.5 active:scale-95">
-                                  <i class="fa-solid fa-fire-burner"></i>
-                                  <span>ĐÃ NẤU XONG ➔ ĐÓNG GÓI CHỜ SHIP</span>
-                              </button>
-                          ` : (isPacked ? `
-                              <div class="space-y-1.5">
-                                  ${isShipperLocked ? `
-                                      <div class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center text-emerald-300 text-[11px]">
-                                          📦 Món đã đóng hộp giữ nhiệt! Chờ tài xế bảo hộ:
-                                          <div class="font-black text-amber-400 text-xs mt-0.5">🛵 ${assignedShipperName}</div>
-                                      </div>
-                                      <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', true)" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition active:scale-95 shadow">
-                                          BÀN GIAO CHO ${assignedShipperName.split('(')[0].trim().toUpperCase()}
-                                      </button>
-                                  ` : `
-                                      <div class="p-1.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[10.5px]">
-                                          📦 Đã đóng gói xong! Bếp trưởng chỉ định Shipper:
-                                      </div>
-                                      <div class="flex gap-1.5">
-                                          <select id="ship_select_${cleanCode}" class="flex-1 bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-2 font-bold outline-none">
-                                              ${shipperOptionsHtml}
-                                          </select>
-                                          <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', false)" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition active:scale-95 shadow">
-                                              Gán Giao
-                                          </button>
-                                      </div>
-                                  `}
-                              </div>
-                          ` : (isDelivering ? `
-                              <div class="p-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[11px]">
-                                  🛵 Đang giao bởi: <strong>${assignedShipperName || 'Shipper'}</strong>
-                              </div>
-                          ` : '')))}
+                    <div class="space-y-1.5 pt-1">
+                        ${isWaitCod ? `
+                            <div class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center font-bold text-amber-300 text-[11px]">
+                                ⏳ Đơn COD: Chờ Shipper gọi điện chốt đơn mới nấu!
+                            </div>
+                            <button type="button" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 font-bold text-xs border border-slate-700 cursor-not-allowed" disabled>
+                                🔒 Bếp Khóa (Chờ Shipper Xác Minh)
+                            </button>
+                        ` : (isNeedCook ? `
+                            ${isShipperLocked ? `
+                                <div class="p-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center text-amber-400 text-[10.5px] font-bold">
+                                    🛵 Đơn đã khóa cứng cho tài xế: <strong>${assignedShipperName}</strong>
+                                </div>
+                            ` : ''}
+                            <button type="button" id="btn_cook_${cleanCode}" onclick="KitchenKdsController.handleCookDone('${cleanCode}')" class="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-fire-burner"></i>
+                                <span>ĐÃ NẤU XONG ➔ ĐÓNG GÓI CHỜ SHIP</span>
+                            </button>
+                        ` : (isPacked ? `
+                            <div class="space-y-1.5">
+                                ${isShipperLocked ? `
+                                    <div class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center text-emerald-300 text-[11px]">
+                                        📦 Món đã đóng hộp giữ nhiệt! Chờ tài xế bảo hộ:
+                                        <div class="font-black text-amber-400 text-xs mt-0.5">🛵 ${assignedShipperName}</div>
+                                    </div>
+                                    <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', true)" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition active:scale-95 shadow">
+                                        BÀN GIAO CHO ${assignedShipperName.split('(')[0].trim().toUpperCase()}
+                                    </button>
+                                ` : `
+                                    <div class="p-1.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[10.5px]">
+                                        📦 Đã đóng gói xong! Bếp trưởng chỉ định Shipper:
+                                    </div>
+                                    <div class="flex gap-1.5">
+                                        <select id="ship_select_${cleanCode}" class="flex-1 bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-2 font-bold outline-none">
+                                            ${shipperOptionsHtml}
+                                        </select>
+                                        <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', false)" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition active:scale-95 shadow">
+                                            Gán Giao
+                                        </button>
+                                    </div>
+                                `}
+                            </div>
+                        ` : (isDelivering ? `
+                            <div class="p-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[11px]">
+                                🛵 Đang giao bởi: <strong>${assignedShipperName || 'Shipper'}</strong>
+                            </div>
+                        ` : '')))}
 
-                          <button type="button" onclick="KitchenKdsController.handleKitchenCancel('${cleanCode}')" class="w-full py-1.5 rounded-xl bg-slate-950 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 border border-slate-800 text-[10.5px] font-bold transition">
-                              🚫 Hủy Đơn (Khách Báo Zalo / Hết Nguyên Liệu)
-                          </button>
-                      </div>
+                        <button type="button" onclick="KitchenKdsController.handleKitchenCancel('${cleanCode}')" class="w-full py-1.5 rounded-xl bg-slate-950 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 border border-slate-800 text-[10.5px] font-bold transition">
+                            🚫 Hủy Đơn (Khách Báo Zalo / Hết Nguyên Liệu)
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
 
-                  </div>
-              `;
-          });
-
-          grid.innerHTML = html;
+                   grid.innerHTML = html;
       }
 
       async function handleCookDone(orderCode) {
@@ -707,6 +713,176 @@
   window.onload = function() {
       KitchenKdsController.checkKdsAuth();
   };
+    /**
+     * =========================================================================
+     * BỘ ĐIỀU KHIỂN HẸN GIỜ RA MÓN BẾP KDS (JUST-IN-TIME DISPATCH ENGINE)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * =========================================================================
+     */
+    var KDSTimerController = (function() {
+        var tickInterval = null;
+        var prepTimeOverrides = {}; // Lưu trữ thời gian gia hạn theo mã đơn { [orderCode]: totalMinutes }
+
+        /**
+         * CHUẨN HÓA TIMESTAMP THÀNH GIỜ:PHÚT GỌN GÀNG (LOẠI BỎ GMT RƯỜM RÀ)
+         */
+        function formatOrderShortTime(timestampRaw) {
+            try {
+                var d = new Date(timestampRaw);
+                if (isNaN(d.getTime())) return "Vừa đặt";
+                var hh = String(d.getHours()).padStart(2, '0');
+                var mm = String(d.getMinutes()).padStart(2, '0');
+                return hh + ":" + mm;
+            } catch (e) {
+                return "Vừa đặt";
+            }
+        }
+
+        /**
+         * TÍNH TOÁN THỜI GIAN CHUẨN BỊ MẶC ĐỊNH THEO SỐ LƯỢNG MÓN
+         * 1 tô đơn lẻ = 7 phút | Combo/Nhiều món topping = 10 - 12 phút
+         */
+        function calculateDefaultPrepMinutes(items) {
+            if (!Array.isArray(items) || items.length === 0) return 8;
+            var totalQty = 0;
+            var hasComboOrRice = false;
+
+            items.forEach(function(item) {
+                var q = Number(item.quantity) || 1;
+                totalQty += q;
+                var nameLower = String(item.name || "").toLowerCase();
+                var catLower = String(item.cat || "").toLowerCase();
+                if (nameLower.indexOf("combo") !== -1 || nameLower.indexOf("cơm") !== -1 || catLower === "cơm") {
+                    hasComboOrRice = true;
+                }
+            });
+
+            if (hasComboOrRice || totalQty >= 3) return 12;
+            if (totalQty === 2) return 9;
+            return 7;
+        }
+
+        /**
+         * RENDER CỤM TIMER ĐẾM NGƯỢC THỜI GIAN THỰC CHO TỪNG THẺ CARD ĐƠN HÀNG
+         */
+        function buildTimerHtml(order) {
+            var orderCode = order.orderCode || order.id || "";
+            var createdAt = new Date(order.timestamp || order.createdAt || Date.now()).getTime();
+            
+            // Lấy thời gian cài đặt: nếu bếp đã bấm gia hạn thì ưu tiên, chưa thì tính tự động
+            var prepMinutes = prepTimeOverrides[orderCode] || calculateDefaultPrepMinutes(order.items);
+            var targetReadyMs = createdAt + (prepMinutes * 60 * 1000);
+            var nowMs = Date.now();
+            var diffSecs = Math.floor((targetReadyMs - nowMs) / 1000);
+
+            var shortCreatedTime = formatOrderShortTime(order.timestamp || order.createdAt);
+            var targetDate = new Date(targetReadyMs);
+            var shortTargetTime = String(targetDate.getHours()).padStart(2, '0') + ":" + String(targetDate.getMinutes()).padStart(2, '0');
+
+            var isOverdue = diffSecs < 0;
+            var absSecs = Math.abs(diffSecs);
+            var mm = String(Math.floor(absSecs / 60)).padStart(2, '0');
+            var ss = String(absSecs % 60).padStart(2, '0');
+
+            var statusBadgeClass = "";
+            var statusText = "";
+
+            if (isOverdue) {
+                // ĐƠN QUÁ HẠN: CHỚP ĐỎ CẢNH BÁO KHẨN CẤP
+                statusBadgeClass = "bg-rose-600/20 text-rose-400 border-rose-500/40 animate-pulse";
+                statusText = '<i class="fa-solid fa-triangle-exclamation"></i> <span>TRỄ HẸN +' + mm + ':' + ss + '</span>';
+            } else if (diffSecs <= 180) {
+                // CÒN DƯỚI 3 PHÚT: CẢNH BÁO VÀNG SẮP RA MÓN
+                statusBadgeClass = "bg-amber-500/20 text-amber-300 border-amber-500/40";
+                statusText = '<i class="fa-solid fa-fire text-amber-400"></i> <span>GẤP: CÒN ' + mm + ':' + ss + '</span>';
+            } else {
+                // CÒN DƯ THỜI GIAN: XANH EMERALD AN TOÀN
+                statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+                statusText = '<i class="fa-regular fa-clock"></i> <span>HẸN XONG: ' + mm + ':' + ss + '</span>';
+            }
+
+            return `
+                <div class="mt-2 p-2 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5" id="timer-box-${orderCode}">
+                    <div class="flex items-center justify-between text-[11px]">
+                        <div class="flex items-center gap-1.5 text-slate-400 font-mono">
+                            <span>Vào: <strong class="text-white">${shortCreatedTime}</strong></span>
+                            <span>➔ Ra: <strong class="text-amber-400">${shortTargetTime}</strong></span>
+                        </div>
+                        <div class="px-2 py-0.5 rounded-full border text-[10px] font-mono font-black flex items-center gap-1 shadow-sm ${statusBadgeClass}">
+                            ${statusText}
+                        </div>
+                    </div>
+
+                    <!-- THANH NÚT BẤM GIA HẠN THỜI GIAN DÀNH CHO BẾP TRƯỞNG -->
+                    <div class="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px]">
+                        <span class="text-slate-500 font-mono">Khung giờ: ${prepMinutes}p</span>
+                        <div class="flex items-center gap-1">
+                            <button type="button" 
+                                    onclick="KDSTimerController.extendPrepTime('${orderCode}', 3)" 
+                                    class="px-2 py-0.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white font-mono active:scale-95 transition">
+                                +3p
+                            </button>
+                            <button type="button" 
+                                    onclick="KDSTimerController.extendPrepTime('${orderCode}', 5)" 
+                                    class="px-2 py-0.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white font-mono active:scale-95 transition">
+                                +5p
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * GIA HẠN THÊM THỜI GIAN KHI BẾP BỊ QUÁ TẢI TOÀN HÀNG
+         */
+        function extendPrepTime(orderCode, extraMinutes) {
+            var current = prepTimeOverrides[orderCode] || 10;
+            prepTimeOverrides[orderCode] = current + extraMinutes;
+            
+            // Cập nhật lại giao diện KDS ngay lập tức
+            if (typeof renderKdsOrders === "function") {
+                renderKdsOrders();
+            }
+        }
+
+        /**
+         * VÒNG LẶP DUY NHẤT (SINGLE TICK LOOP) CẬP NHẬT TIMER MỖI GIÂY TRÁNH LAG RAM
+         */
+        function startLoop(ordersGetterFn) {
+            if (tickInterval) clearInterval(tickInterval);
+            tickInterval = setInterval(function() {
+                var orderCards = document.querySelectorAll("[id^='timer-box-']");
+                if (orderCards.length === 0) return;
+
+                // Nếu hàm lấy danh sách đơn tồn tại, kích hoạt cập nhật lại các timer
+                if (typeof ordersGetterFn === "function") {
+                    var orders = ordersGetterFn();
+                    if (Array.isArray(orders)) {
+                        orders.forEach(function(order) {
+                            var code = order.orderCode || order.id;
+                            var box = document.getElementById("timer-box-" + code);
+                            if (box && (order.status === "PENDING" || order.status === "COOKING" || !order.status)) {
+                                box.outerHTML = buildTimerHtml(order);
+                            }
+                        });
+                    }
+                }
+            }, 1000);
+        }
+
+        function stopLoop() {
+            if (tickInterval) clearInterval(tickInterval);
+        }
+
+        return {
+            buildTimerHtml: buildTimerHtml,
+            extendPrepTime: extendPrepTime,
+            startLoop: startLoop,
+            stopLoop: stopLoop,
+            formatOrderShortTime: formatOrderShortTime
+        };
+    })();
   </script>
 </body>
 </html>
