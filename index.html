@@ -1028,39 +1028,61 @@
                 if (modalIos) modalIos.classList.remove("hidden");
             }
         }
-
         /**
-         * RENDER DANH SÁCH MÓN ĂN - CHỐNG CRASH UNDEFINED 100%
+         * RENDER DANH SÁCH MÓN ĂN ĐỘNG TỪ GOOGLE SHEETS - CHỐNG CRASH UNDEFINED 100%
          */
         function renderMenuGrid() {
             var grid = document.getElementById("dish-menu-grid");
             var countLabel = document.getElementById("disp-dish-count-label");
             if (!grid) return;
 
-            var sourceData = (typeof FALLBACK_MENU !== "undefined" && Array.isArray(FALLBACK_MENU)) ? FALLBACK_MENU : [];
+            // ƯU TIÊN LẤY DỮ LIỆU THỰC TỪ GOOGLE SHEETS TRƯỚC, NẾU RỖNG MỚI DÙNG FALLBACK_MENU
+            var sourceData = [];
+            if (typeof appState !== "undefined" && Array.isArray(appState.menuItems) && appState.menuItems.length > 0) {
+                sourceData = appState.menuItems;
+            } else if (typeof FALLBACK_MENU !== "undefined" && Array.isArray(FALLBACK_MENU)) {
+                sourceData = FALLBACK_MENU;
+            }
 
             var list = sourceData.filter(function(item) {
                 if (!item) return false;
 
-                var currentCat = String(appState.currentCategory || "all").toLowerCase().trim();
-                var itemCat = String(item.cat || item.category || "").toLowerCase().trim();
+                // Kiểm tra trạng thái món: loại bỏ món tạm ngưng nếu có
+                var st = String(item.status || item.Trạng_Thái_Bếp || "").trim().toLowerCase();
+                if (st.indexOf("hết") !== -1 || st.indexOf("ngưng") !== -1 || st === "out_of_stock" || st === "off" || st === "false") {
+                    return false;
+                }
 
-                var matchCat = (currentCat === "all");
+                var currentCat = String(appState.currentCategory || "all").toLowerCase().trim();
+                var rawItemCat = String(item.cat || item.category || item.Nhóm_Phân_Loại || "").toLowerCase().trim();
+
+                // Chuẩn hóa danh mục Cơm để so khớp tuyệt đối mọi biến thể (cơm, com, món cơm, mon-com)
+                var isItemCom = (rawItemCat === "cơm" || rawItemCat === "com" || rawItemCat === "món cơm" || rawItemCat === "mon-com" || rawItemCat.indexOf("com") !== -1);
+                var isCurrentCom = (currentCat === "cơm" || currentCat === "com" || currentCat === "món cơm" || currentCat === "mon-com");
+
+                var isItemMi = (rawItemCat === "kho" || rawItemCat === "mì trộn" || rawItemCat === "mi-tron" || rawItemCat.indexOf("mi") !== -1);
+                var isCurrentMi = (currentCat === "kho" || currentCat === "mì trộn" || currentCat === "mi-tron");
+
+                var matchCat = (currentCat === "all" || currentCat === "tat-ca");
                 if (!matchCat) {
-                    if (currentCat === "cơm" || currentCat === "com") {
-                        matchCat = (itemCat === "cơm" || itemCat === "com");
-                    } else if (currentCat === "kho" || currentCat === "mì trộn" || currentCat === "mi-tron") {
-                        matchCat = (itemCat === "kho" || itemCat === "mì trộn" || itemCat === "mi-tron");
+                    if (isCurrentCom) {
+                        matchCat = isItemCom;
+                    } else if (isCurrentMi) {
+                        matchCat = isItemMi;
+                    } else if (currentCat === "combo") {
+                        matchCat = (rawItemCat.indexOf("combo") !== -1);
+                    } else if (currentCat === "nuoc" || currentCat === "giai-khat") {
+                        matchCat = (rawItemCat.indexOf("nuoc") !== -1 || rawItemCat.indexOf("tra") !== -1 || rawItemCat.indexOf("giai-khat") !== -1);
                     } else {
-                        matchCat = (itemCat === currentCat);
+                        matchCat = (rawItemCat === currentCat);
                     }
                 }
 
                 var matchSearch = true;
                 if (appState.searchKeyword) {
                     var kw = String(appState.searchKeyword).toLowerCase().trim();
-                    var itemName = String(item.name || "").toLowerCase();
-                    var itemDesc = String(item.desc || item.description || "").toLowerCase();
+                    var itemName = String(item.name || item.Tên_Món_Ăn || "").toLowerCase();
+                    var itemDesc = String(item.desc || item.description || item.Mô_Tả || "").toLowerCase();
                     matchSearch = (itemName.indexOf(kw) !== -1 || itemDesc.indexOf(kw) !== -1);
                 }
 
@@ -1083,26 +1105,32 @@
             }
 
             grid.innerHTML = list.map(function(dish) {
-                var priceNum = Number(dish.price) || 0;
-                var safeDesc = String(dish.desc || dish.description || "Hương vị đậm đà độc bản Bếp Thím 5.");
-                var safeImg = String(dish.img || dish.image || "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400");
-                var isHotBadge = dish.isHot ? '<span class="px-1.5 py-0.2 rounded-md bg-red-500/20 text-red-400 text-[9px] font-bold border border-red-500/30 shrink-0">Bán Chạy</span>' : '';
+                var dishId = String(dish.id || dish.code || dish.Mã_Món || "");
+                var dishName = String(dish.name || dish.Tên_Món_Ăn || "Món Ngon Thím 5");
+                var priceNum = Number(dish.d2cPrice || dish.price || dish.Giá_Bán_D2C_Web || 0);
+                var safeDesc = String(dish.desc || dish.description || dish.Mô_Tả || "Hương vị đậm đà độc bản Bếp Thím 5.");
+                var safeImg = String(dish.img || dish.image || dish.Link_Ảnh || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400");
+                var safeDishId = dishId.replace(/'/g, "\\'");
+
+                var isHotBadge = (dish.isHot || dish.tag === "Bán Chạy" || String(dish.Tag_Chiến_Lược || "").indexOf("Bán Chạy") !== -1)
+                    ? '<span class="px-1.5 py-0.2 rounded-md bg-red-500/20 text-red-400 text-[9px] font-bold border border-red-500/30 shrink-0">Bán Chạy</span>' 
+                    : '';
 
                 return `
                     <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800/80 hover:border-slate-700 transition flex gap-3 shadow-sm">
-                        <img src="${safeImg}" alt="${dish.name}" class="w-20 h-20 rounded-xl object-cover shrink-0 border border-slate-800" onerror="this.src='https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400'">
+                        <img src="${safeImg}" alt="${dishName}" class="w-20 h-20 rounded-xl object-cover shrink-0 border border-slate-800" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'">
                         <div class="flex-1 flex flex-col justify-between min-w-0">
                             <div>
                                 <div class="flex items-center gap-1.5">
-                                    <h4 class="text-xs font-black text-white truncate">${dish.name}</h4>
+                                    <h4 class="text-xs font-black text-white truncate">${dishName}</h4>
                                     ${isHotBadge}
                                 </div>
-                                <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">${safeDesc}</p>
+                                <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5 leading-relaxed">${safeDesc}</p>
                             </div>
                             <div class="flex items-center justify-between pt-1">
                                 <span class="text-xs font-mono font-black text-amber-400">${priceNum.toLocaleString("vi-VN")} đ</span>
                                 <button type="button" 
-                                        onclick="D2CStoreFrontController.openCustomizerModal('${dish.id}')" 
+                                        onclick="openCustomizerModal('${safeDishId}')" 
                                         class="px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-black uppercase tracking-wider transition shadow flex items-center gap-1 active:scale-95">
                                     <i class="fa-solid fa-plus text-[9px]"></i> Thêm
                                 </button>
@@ -1140,33 +1168,59 @@
             onSearchInput("");
         }
         /**
-         * MỞ MODAL TÙY CHỌN MÓN THÔNG MINH - NO FREE SOUP POLICY
+         * MỞ MODAL TÙY CHỌN MÓN THÔNG MINH - DYNAMIC DISH LOOKUP & NO-FREE-SOUP POLICY
          */
         function openCustomizerModal(dishId) {
-            var dish = FALLBACK_MENU.find(function(d) { return d.id === dishId; });
-            if (!dish) return;
-
-            // 1. NẾU LÀ NƯỚC UỐNG ĐÓNG CHAI -> QUICK ADD KHÔNG HỎI CAY
-            if (dish.cat === "giai-khat" && dish.id === "M10") {
-                appState.cartItems.push({
-                    id: dish.id + "_" + Date.now(),
-                    dishId: dish.id,
-                    name: dish.name,
-                    price: Number(dish.price) || 10000,
-                    quantity: 1,
-                    taste: "Không Cay",
-                    soup: "",
-                    note: "",
-                    toppings: [],
-                    isGift: false
+            // ƯU TIÊN TÌM MÓN TRONG KHO DỮ LIỆU THẬT NẠP TỪ GOOGLE SHEETS (appState.menuItems)
+            var dish = null;
+            if (typeof appState !== "undefined" && Array.isArray(appState.menuItems)) {
+                dish = appState.menuItems.find(function(d) { 
+                    var dId = String(d.id || d.code || d.Mã_Món || "");
+                    return dId === String(dishId); 
                 });
+            }
 
-                updateAovAndCartUI();
-                alert("💧 Đã thêm 1 phần \"" + dish.name + "\" vào giỏ hàng thành công!");
+            // NẾU CHƯA THẤY MỚI TÌM TRONG FALLBACK_MENU
+            if (!dish && typeof FALLBACK_MENU !== "undefined" && Array.isArray(FALLBACK_MENU)) {
+                dish = FALLBACK_MENU.find(function(d) { 
+                    var dId = String(d.id || d.code || "");
+                    return dId === String(dishId); 
+                });
+            }
+
+            if (!dish) {
+                console.warn("⚠️ Không tìm thấy thông tin món ăn có ID:", dishId);
                 return;
             }
 
-            // 2. KHỞI TẠO TRẠNG THÁI CHO MODAL TÙY CHỌN
+            var dishPriceNum = Number(dish.d2cPrice || dish.price || dish.Giá_Bán_D2C_Web || 0);
+            var catLower = String(dish.cat || dish.category || dish.rawCat || "").toLowerCase().trim();
+
+            // 1. NẾU LÀ NƯỚC UỐNG ĐÓNG CHAI HOẶC GIẢI KHÁT -> QUICK ADD KHÔNG HỎI CAY
+            if ((catLower === "giai-khat" || catLower === "nuoc") && String(dish.id) === "M10") {
+                if (typeof appState !== "undefined" && Array.isArray(appState.cartItems)) {
+                    appState.cartItems.push({
+                        id: dish.id + "_" + Date.now(),
+                        dishId: dish.id,
+                        name: dish.name,
+                        price: dishPriceNum || 10000,
+                        quantity: 1,
+                        taste: "Không Cay",
+                        soup: "",
+                        note: "",
+                        toppings: [],
+                        isGift: false
+                    });
+
+                    if (typeof updateAovAndCartUI === "function") {
+                        updateAovAndCartUI();
+                    }
+                    alert("💧 Đã thêm 1 phần \"" + dish.name + "\" vào giỏ hàng thành công!");
+                }
+                return;
+            }
+
+            // 2. KHỞI TẠO TRẠNG THÁI CHO MODAL TÙY CHỌN MÓN ĂN
             appState.currentCustomizingDish = dish;
             appState.customizerQty = 1;
             appState.currentTaste = "Cay Nhẹ"; // Khóa cứng mặc định Cay Nhẹ chuẩn vị Bếp Thím 5
@@ -1184,16 +1238,16 @@
             var boxTopping = document.getElementById("box-topping-selector");
             var noteEl = document.getElementById("cust-dish-note");
 
-            var dishPriceNum = Number(dish.price) || 0;
-            if (elImg) elImg.src = dish.img || dish.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
+            if (elImg) elImg.src = dish.img || dish.image || dish.Link_Ảnh || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
             if (elName) elName.innerText = dish.name;
             if (elBasePrice) elBasePrice.innerText = dishPriceNum.toLocaleString("vi-VN") + " đ";
             if (elQty) elQty.innerText = "1";
             if (noteEl) noteEl.value = "";
 
-            var catLower = String(dish.cat || dish.category || "").toLowerCase().trim();
-
             // 3. ĐIỀU PHỐI HIỂN THỊ PHÂN KHU THEO CHIẾN LƯỢC F&B NO-FREE-SOUP
+            var isCom = (catLower === "cơm" || catLower === "com" || catLower.indexOf("com") !== -1);
+            var isMi = (catLower === "kho" || catLower === "mì trộn" || catLower === "mi-tron" || catLower.indexOf("mi") !== -1);
+
             if (catLower === "giai-khat") {
                 if (elCatBadge) elCatBadge.innerText = "Giải Khát (1L)";
                 if (boxTaste) boxTaste.classList.add("hidden");
@@ -1207,50 +1261,64 @@
                 if (boxSoup) boxSoup.classList.add("hidden");
                 if (boxTopping) boxTopping.classList.remove("hidden");
                 appState.currentSoup = "";
-                selectTaste("Cay Nhẹ");
-                renderCustomizerToppingsList();
+                if (typeof selectTaste === "function") selectTaste("Cay Nhẹ");
+                if (typeof renderCustomizerToppingsList === "function") renderCustomizerToppingsList();
             } else if (catLower === "an-kem") {
                 if (elCatBadge) elCatBadge.innerText = "Món Ăn Kèm";
                 if (boxTaste) boxTaste.classList.remove("hidden");
                 if (boxSoup) boxSoup.classList.add("hidden");
                 if (boxTopping) boxTopping.classList.add("hidden");
-                selectTaste("Cay Nhẹ");
-            } else if (catLower === "cơm" || catLower === "com") {
-                // PHÂN HỆ MÓN CƠM: HIỂN THỊ CHUẨN BADGE VÀ ẨN TUYỆT ĐỐI CHÉN SÚP MIỄN PHÍ
+                if (typeof selectTaste === "function") selectTaste("Cay Nhẹ");
+            } else if (isCom) {
+                // PHÂN HỆ MÓN CƠM (BAO GỒM CẢ CƠM PHỦ TRỨNG GÀ VIÊN): HIỂN THỊ CHUẨN BADGE VÀ ẨN TUYỆT ĐỐI CHÉN SÚP MIỄN PHÍ
                 if (elCatBadge) elCatBadge.innerText = "Món Cơm Đất Thánh";
                 if (boxTaste) boxTaste.classList.remove("hidden");
                 
-                // TRIỆT TIÊU SÚP MIỄN PHÍ ĐỂ BẢO VỆ DOANH THU SÚP BOOSTER
+                // TRIỆT TIÊU SÚP MIỄN PHÍ ĐỂ BẢO VỆ DOANH THU SÚP BOOSTER THU PHÍ (12K - 18K)
                 if (boxSoup) boxSoup.classList.add("hidden");
                 appState.currentSoup = "";
 
                 if (boxTopping) boxTopping.classList.remove("hidden");
-                selectTaste("Cay Nhẹ");
-                renderCustomizerToppingsList();
+                if (typeof selectTaste === "function") selectTaste("Cay Nhẹ");
+                if (typeof renderCustomizerToppingsList === "function") renderCustomizerToppingsList();
             } else {
-                // Mì Trộn Khô & Combo: Hiển thị badge chuẩn và ẩn súp miễn phí
+                // Mì Trộn Khô & Combo: Hiển thị badge chuẩn và ẩn súp free để upsell Súp Booster
                 if (elCatBadge) elCatBadge.innerText = (catLower === "combo") ? "Combo Đại Tiệc" : "Mì Trộn Khô";
                 if (boxTaste) boxTaste.classList.remove("hidden");
                 
-                // Mì Trộn cũng ẩn súp free để upsell Súp Booster thu phí
                 if (boxSoup) boxSoup.classList.add("hidden");
                 appState.currentSoup = "";
 
                 if (boxTopping) boxTopping.classList.remove("hidden");
-                selectTaste("Cay Nhẹ");
-                renderCustomizerToppingsList();
+                if (typeof selectTaste === "function") selectTaste("Cay Nhẹ");
+                if (typeof renderCustomizerToppingsList === "function") renderCustomizerToppingsList();
             }
 
-            updateCustomizerPrice();
+            if (typeof updateCustomizerPrice === "function") {
+                updateCustomizerPrice();
+            }
 
             if (modal) modal.classList.remove("hidden");
         }
 
+        /**
+         * ĐÓNG MODAL TÙY CHỌN MÓN ĂN
+         */
         function closeCustomizerModal() {
             var modal = document.getElementById("modal-dish-customizer");
             if (modal) modal.classList.add("hidden");
         }
 
+        // TỰ ĐỘNG KHỞI CHẠY TẢI THỰC ĐƠN ĐỘNG NGAY KHI TRANG TẢI XONG
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof loadDynamicMenu === "function") {
+                loadDynamicMenu();
+            } else if (typeof renderMenuGrid === "function") {
+                renderMenuGrid();
+            }
+        });
+
+                
         /**
          * VẼ BẢNG TOPPING CHỌN THÊM CÓ TÍNH TIỀN
          */
