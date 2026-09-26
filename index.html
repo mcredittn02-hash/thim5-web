@@ -2384,7 +2384,7 @@
         }
 
         /**
-         * LẤY TỌA ĐỘ GPS VỆ TINH ĐỘ CHÍNH XÁC CAO (TRIỆT TIÊU LỆCH TRẠM MẠNG BTS/IP)
+         * LẤY TỌA ĐỘ GPS VỆ TINH & BỘ LỌC ĐỊA CHỈ THÔNG MINH (TRIỆT TIÊU POI LẠ)
          */
         function detectCustomerGps() {
             if (!navigator.geolocation) {
@@ -2399,29 +2399,26 @@
                 btn.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin text-amber-400"></i> Đang bắt vệ tinh...';
             }
 
-            // Thiết lập cấu hình bắt sóng vệ tinh thực thụ (Bỏ qua cache IP)
             var geoOptions = {
-                enableHighAccuracy: true, // Ép dùng chip GPS thật sự, không dùng mạng di động ước lượng
-                timeout: 15000,           // Cho phép tối đa 15 giây để khóa vệ tinh
-                maximumAge: 0             // Không dùng lại tọa độ cũ trong bộ nhớ đệm
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
             };
 
             navigator.geolocation.getCurrentPosition(
                 async function(pos) {
                     var uLat = Number(pos.coords.latitude);
                     var uLng = Number(pos.coords.longitude);
-                    var accuracy = Math.round(pos.coords.accuracy || 999); // Sai số đo bằng mét
+                    var accuracy = Math.round(pos.coords.accuracy || 999);
 
-                    console.log(`📍 [GPS Debug] Tọa độ: ${uLat}, ${uLng} | Sai số: ±${accuracy}m`);
-
-                    // 1. CẬP NHẬT VÀO STATE HỆ THỐNG
+                    // 1. CẬP NHẬT TRẠNG THÁI HỆ THỐNG
                     appState.customerLocation = {
                         lat: uLat,
                         lng: uLng,
                         accuracy: accuracy
                     };
 
-                    // 2. TÍNH CỰ LY CHUẨN XÁC TỪ TÂM BẾP HÒA THÀNH (11.285267, 106.133347)
+                    // 2. ĐO CỰ LY CHUẨN XÁC TỪ TÂM BẾP HÒA THÀNH (11.285267, 106.133347)
                     var exactDistKm = calculateHaversineDistance(
                         STORE_BASE_CONFIG.coords.lat, STORE_BASE_CONFIG.coords.lng,
                         uLat, uLng
@@ -2429,35 +2426,53 @@
 
                     appState.calculatedDistanceKm = exactDistKm;
 
-                    // 3. THỬ GIẢI MÃ ĐỊA CHỈ THỰC TẾ (REVERSE GEOCODING TỰ ĐỘNG)
                     var addrEl = document.getElementById("chk-customer-address");
-                    var accuracyBadge = (accuracy <= 100) ? `(Chuẩn xác ±${accuracy}m)` : `(Ước tính ±${accuracy}m)`;
-
                     if (addrEl) {
-                        addrEl.value = `Đang xác định tên đường ${accuracyBadge}...`;
+                        addrEl.value = `Đang định vị địa chỉ...`;
                     }
 
+                    // 3. GIẢI MÃ ĐỊA CHỈ THÔNG MINH - CHỈ LẤY TÊN ĐƯỜNG, LOẠI BỎ TÊN POI/NHÀ NGHỈ/NHÀ KHÁCH RÁC
                     try {
-                        // Gọi OpenStreetMap Nominatim phân giải tọa độ ra tên đường Tây Ninh
                         var geoUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${uLat}&lon=${uLng}&accept-language=vi`;
                         var res = await fetch(geoUrl, { headers: { 'User-Agent': 'Thim5D2CApp/2026' } });
                         var data = await res.json();
 
-                        if (data && data.display_name && addrEl) {
-                            var cleanAddr = data.display_name
-                                .replace(/, Việt Nam$/, '')
-                                .replace(/, Tây Ninh$/, '');
-                            addrEl.value = `${cleanAddr} ${accuracyBadge}`;
+                        if (data && data.address && addrEl) {
+                            var a = data.address;
+                            var streetNumber = a.house_number || "";
+                            var road = a.road || "";
+                            var suburb = a.suburb || a.quarter || a.neighbourhood || "";
+                            var ward = a.ward || "";
+                            var cityDistrict = a.city_district || a.district || a.town || a.city || "Tây Ninh";
+
+                            // Tạo chuỗi địa chỉ giao hàng sạch, chỉ hiển thị số nhà, tên đường, phường/xã
+                            var cleanParts = [];
+                            if (streetNumber && road) cleanParts.push(`${streetNumber} ${road}`);
+                            else if (road) cleanParts.push(road);
+                            
+                            if (ward) cleanParts.push(ward);
+                            else if (suburb) cleanParts.push(suburb);
+
+                            if (cityDistrict) cleanParts.push(cityDistrict);
+
+                            var formattedCleanAddress = cleanParts.join(", ");
+
+                            if (formattedCleanAddress.length > 5) {
+                                addrEl.value = `${formattedCleanAddress} (Định vị vệ tinh)`;
+                            } else {
+                                // Fallback nếu dữ liệu đường phố rỗng
+                                addrEl.value = `${data.display_name.split(',').slice(0, 3).join(',')} (Định vị vệ tinh)`;
+                            }
                         } else if (addrEl) {
-                            addrEl.value = `Vị trí GPS: ${uLat.toFixed(5)}, ${uLng.toFixed(5)} ${accuracyBadge} - Hòa Thành, Tây Ninh`;
+                            addrEl.value = `Tọa độ GPS: ${uLat.toFixed(5)}, ${uLng.toFixed(5)} (Khu vực Tây Ninh)`;
                         }
                     } catch (err) {
                         if (addrEl) {
-                            addrEl.value = `Vị trí GPS: ${uLat.toFixed(5)}, ${uLng.toFixed(5)} ${accuracyBadge} - Hòa Thành, Tây Ninh`;
+                            addrEl.value = `Tọa độ GPS: ${uLat.toFixed(5)}, ${uLng.toFixed(5)} (Khu vực Tây Ninh)`;
                         }
                     }
 
-                    // 4. TÍNH LẠI BIỂU PHÍ SHIP VÀ CẬP NHẬT GIAO DIỆN
+                    // 4. TÍNH LẠI CƯỚC SHIP VÀ ĐỒNG BỘ DÒNG TIỀN
                     recalculateShippingFee();
 
                     if (btn) {
@@ -2476,11 +2491,11 @@
 
                     var msg = "Không thể lấy tọa độ vệ tinh!";
                     if (err.code === 1) {
-                        msg = "Quý khách chưa cấp quyền vị trí cho trình duyệt. Vui lòng bật 'Cho phép truy cập vị trí' trong cài đặt!";
+                        msg = "Quý khách chưa cấp quyền vị trí. Vui lòng bật 'Cho phép truy cập vị trí' trên trình duyệt!";
                     } else if (err.code === 2) {
-                        msg = "Tín hiệu GPS yếu hoặc thiết bị đang tắt vị trí. Quý khách vui lòng nhập địa chỉ cụ thể bằng tay!";
+                        msg = "Tín hiệu GPS yếu. Quý khách vui lòng nhập địa chỉ cụ thể bằng tay!";
                     } else if (err.code === 3) {
-                        msg = "Hết thời gian tìm kiếm vệ tinh GPS. Quý khách vui lòng nhập số nhà, tên đường bằng tay!";
+                        msg = "Hết thời gian chờ GPS. Quý khách vui lòng nhập số nhà, tên đường bằng tay!";
                     }
 
                     console.warn("⚠️ [GPS Error]:", err.message);
@@ -2491,30 +2506,41 @@
         }
 
         /**
-         * XỬ LÝ NHẬP ĐỊA CHỈ BẰNG TAY (KHÔNG ÉP CỨNG 1.8KM PHI LÝ)
+         * XỬ LÝ NHẬP ĐỊA CHỈ BẰNG TAY (THIẾT LẬP KHOẢNG CÁCH TƯƠNG ĐỐI TÂY NINH)
          */
         function onAddressInput(val) {
             var text = String(val || "").trim().toLowerCase();
             
-            // Nếu khách tự gõ tay và chưa có GPS vệ tinh
             if (!appState.customerLocation) {
-                // Nhận diện tương đối theo địa bàn Tây Ninh
-                if (text.indexOf("chợ long hoa") !== -1 || text.indexOf("long hoa") !== -1) {
+                if (text.indexOf("ttc") !== -1 || text.indexOf("plaza") !== -1 || text.indexOf("vincom") !== -1) {
+                    appState.calculatedDistanceKm = 5.1; // Cự ly chính xác đến TTC Plaza Tây Ninh
+                } else if (text.indexOf("chợ long hoa") !== -1 || text.indexOf("long hoa") !== -1) {
                     appState.calculatedDistanceKm = 0.8;
                 } else if (text.indexOf("hòa thành") !== -1 || text.indexOf("hoa thanh") !== -1) {
                     appState.calculatedDistanceKm = 1.5;
                 } else if (text.indexOf("tp tây ninh") !== -1 || text.indexOf("thành phố") !== -1) {
-                    appState.calculatedDistanceKm = 5.5;
+                    appState.calculatedDistanceKm = 5.2;
                 } else if (text.indexOf("trảng bàng") !== -1 || text.indexOf("gò dầu") !== -1) {
                     appState.calculatedDistanceKm = 18.0;
                 } else {
-                    appState.calculatedDistanceKm = 2.0; // Mặc định trong bán kính nội ô cơ sở
+                    appState.calculatedDistanceKm = 2.0;
                 }
                 recalculateShippingFee();
             }
         }
         /**
-         * TÍNH TOÁN BIỂU PHÍ SHIP VÀ KHÓA TRẦN TRỢ GIÁ CHUẨN XÁC THEO CƯỚC THỰC TẾ
+         * HÀM LÀM TRÒN CƯỚC SHIP THÂN THIỆN ĐẾN 1.000đ CHẴN (TRIỆT TIÊU SỐ LẺ 26.625đ)
+         */
+        function roundShippingFee(rawFee) {
+            var fee = Number(rawFee) || 0;
+            if (fee <= 0) return 0;
+            // Làm tròn lên mốc 1.000đ gần nhất để thuận tiện cho tài xế thu tiền mặt
+            return Math.ceil(fee / 1000) * 1000;
+        }
+
+        /**
+         * TÍNH TOÁN BIỂU PHÍ SHIP VÀ TRỢ GIÁ THEO MA TRẬN 3 CHIỀU:
+         * [GIÁ TRỊ ĐƠN HÀNG (AOV)] x [KHOẢNG CÁCH (KM)] x [MÓN BIÊN LỢI NHUẬN CAO]
          */
         function recalculateShippingFee() {
             var dist = (appState.calculatedDistanceKm !== undefined && appState.calculatedDistanceKm !== null) 
@@ -2528,9 +2554,12 @@
                 fee += Math.round(extraKm * (Number(STORE_BASE_CONFIG.shipExtraFeePerKm) || 4500));
             }
 
+            // Áp dụng thuật toán làm tròn chẵn số tiền (VD: 26.625đ -> 27.000đ)
+            fee = roundShippingFee(fee);
+
             // 2. PHÂN TÍCH THÀNH PHẦN GIỎ HÀNG & TÍNH TỔNG TIỀN MÓN (SUBTOTAL)
             var subtotal = 0;
-            var hasHighMarginItem = false; // Cờ nhận diện món biên lợi nhuận cao (Nước / Combo)
+            var hasHighMarginItem = false;
 
             appState.cartItems.forEach(function(i) {
                 if (!i.isGift) {
@@ -2538,7 +2567,6 @@
                     var itemQty = Number(i.quantity) || 1;
                     subtotal += (itemPrice * itemQty);
 
-                    // Kiểm tra xem giỏ hàng có Trà Đào (M09), Nước giải khát hoặc Combo hay không
                     var dishId = String(i.dishId || i.id || "");
                     var dishName = String(i.name || "").toLowerCase();
                     if (dishId === "M09" || dishName.indexOf("trà đào") !== -1 || dishName.indexOf("combo") !== -1) {
@@ -2572,7 +2600,6 @@
             var maxAllowedSubsidy = Math.min(fee, Math.round(subtotal * 0.12));
             var appliedSubsidy = Math.min(rawSubsidy, fee);
             
-            // Nếu đơn đạt nấc trợ giá khách xa thì cho phép mức trợ giá đã tính toán
             if (rawSubsidy > maxAllowedSubsidy && (dist >= STORE_BASE_CONFIG.subsidyFarMinDistKm)) {
                 appliedSubsidy = Math.min(rawSubsidy, fee);
             }
@@ -2619,6 +2646,7 @@
 
             updateCheckoutSummary();
         }
+
         /**
          * CẬP NHẬT TỔNG KẾT ĐƠN HÀNG VÀ TỰ ĐỘNG ĐỒNG BỘ MÃ VIETQR KHÓA CỨNG TIỀN
          */
@@ -2704,7 +2732,7 @@
             }
 
             // NẾU KHÁCH CHỌN VIETQR: ĐỒNG BỘ MÃ QR VỚI SỐ TIỀN ĐÃ KHÓA CỨNG
-            if (appState.selectedPaymentMethod === "VIETQR") {
+            if (appState.selectedPaymentMethod === "VIETQR" && typeof renderDynamicVietQr === "function") {
                 renderDynamicVietQr(finalTotal);
             }
         }
@@ -2916,7 +2944,6 @@
                 }
             }
         }
-
         function viewLiveOrderTracking() {
             var codeEl = document.getElementById("disp-success-order-code");
             var code = codeEl ? codeEl.innerText.trim() : "";
