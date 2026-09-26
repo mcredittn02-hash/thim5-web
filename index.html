@@ -915,6 +915,14 @@
         </div>
 
     </div>
+    <!-- ========================================================================= -->
+    <!-- NẠP THƯ VIỆN ĐIỀU PHỐI API TRUNG TÂM THÍM 5 (BẮT BUỘC ĐỂ KẾT NỐI GAS)     -->
+    <!-- ========================================================================= -->
+    <script src="api.js?v=20260918"></script>
+
+    <!-- ========================================================================= -->
+    <!-- 12. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH MẶT TIỀN D2C THÍM 5 (ENTERPRISE CORE)     -->
+    <!-- ========================================================================= -->
     <script>
     /**
      * =========================================================================
@@ -1123,7 +1131,7 @@
         }
 
         /**
-         * RENDER DANH SÁCH MÓN ĂN - TRIỆT TIÊU HOÀN TOÀN LỖI CRASH (FAIL-SAFE 100%)
+         * RENDER DANH SÁCH MÓN ĂN - CHỐNG CRASH UNDEFINED 100%
          */
         function renderMenuGrid() {
             var grid = document.getElementById("dish-menu-grid");
@@ -1135,7 +1143,6 @@
             var list = sourceData.filter(function(item) {
                 if (!item) return false;
 
-                // So khớp danh mục chuẩn xác
                 var currentCat = String(appState.currentCategory || "all").toLowerCase().trim();
                 var itemCat = String(item.cat || item.category || "").toLowerCase().trim();
 
@@ -1150,7 +1157,6 @@
                     }
                 }
 
-                // So khớp tìm kiếm an toàn (chống undefined desc)
                 var matchSearch = true;
                 if (appState.searchKeyword) {
                     var kw = String(appState.searchKeyword).toLowerCase().trim();
@@ -1234,8 +1240,7 @@
             if (inp) inp.value = "";
             onSearchInput("");
         }
-
-              /**
+        /**
          * MỞ MODAL TÙY CHỌN MÓN THÔNG MINH - NO FREE SOUP POLICY
          */
         function openCustomizerModal(dishId) {
@@ -1680,6 +1685,7 @@
                 }
             });
         }
+
         /**
          * ĐỒNG BỘ CẤU HÌNH HỆ THỐNG TỪ BACKEND VÀ KIỂM SOÁT ĐÓNG/MỞ QUÁN ĐỘNG
          */
@@ -2352,7 +2358,7 @@
 
         /**
          * THUẬT TOÁN HAVERSINE ĐO KHOẢNG CÁCH CHÍNH XÁC ĐẾN TỪNG MÉT
-         * Gốc tọa độ Bếp Thím 5: (11.285267, 106.133347)
+         * Gốc tọa độ Bếp Thím 5 Hòa Thành: (11.285267, 106.133347)
          */
         function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
             var R = 6371; // Bán kính trung bình Trái Đất (km)
@@ -2364,7 +2370,7 @@
                     Math.sin(dLon / 2) * Math.sin(dLon / 2);
                     
             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c; // Trả về số km thực tế chính xác
+            return R * c; // Trả về số km thực tế
         }
 
         /**
@@ -2773,255 +2779,6 @@
     document.addEventListener("DOMContentLoaded", function() {
         D2CStoreFrontController.init();
     });
-    </script>
-<!-- ========================================================================= -->
-  <!-- BỘ NÃO JAVASCRIPT ĐIỀU HÀNH SLIDER CAROUSEL & FLASH SALE GIỜ VÀNG         -->
-  <!-- ========================================================================= -->
-  <script>
-    /**
-     * =========================================================================
-     * CONTROLLER: HERO BANNER CAROUSEL & HAPPY HOUR FOMO ENGINE (v2.9 ENTERPRISE)
-     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
-     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
-     * =========================================================================
-     */
-    var HeroBannerController = (function() {
-      var currentIndex = 0;
-      var totalSlides = 0;
-      var autoPlayInterval = null;
-      var countdownInterval = null;
-      var isHappyHourActive = false;
-
-      var touchStartX = 0;
-      var touchEndX = 0;
-
-      /**
-       * KHỞI CHẠY CONTROLLER KHI TRANG NẠP XONG
-       */
-      function init() {
-        checkHappyHourStatus();
-        setupSlidesAndDots();
-        startAutoPlay();
-        initTouchSwipe();
-
-        // Kiểm toán lại trạng thái giờ vàng mỗi 60 giây
-        setInterval(checkHappyHourStatus, 60000);
-      }
-
-      /**
-       * KIỂM TOÁN THỜI GIAN THỰC ĐỂ KÍCH HOẠT KHUNG GIỜ VÀNG
-       * Khung trưa: 11:00 - 13:30 | Khung chiều tối: 17:00 - 19:30
-       */
-      function checkHappyHourStatus() {
-        var now = new Date();
-        var currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-        // 11h00 = 660p, 13h30 = 810p
-        var lunchStart = 11 * 60;
-        var lunchEnd = 13 * 60 + 30;
-
-        // 17h00 = 1020p, 19h30 = 1170p
-        var dinnerStart = 17 * 60;
-        var dinnerEnd = 19 * 60 + 30;
-
-        var slideHappyHour = document.getElementById("slide-happy-hour");
-        var endTarget = null;
-
-        if (currentMinutes >= lunchStart && currentMinutes < lunchEnd) {
-          isHappyHourActive = true;
-          endTarget = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 30, 0);
-        } else if (currentMinutes >= dinnerStart && currentMinutes < dinnerEnd) {
-          isHappyHourActive = true;
-          endTarget = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 19, 30, 0);
-        } else {
-          isHappyHourActive = false;
-        }
-
-        if (slideHappyHour) {
-          if (isHappyHourActive) {
-            slideHappyHour.classList.remove("hidden");
-            startCountdown(endTarget);
-          } else {
-            slideHappyHour.classList.add("hidden");
-            if (countdownInterval) clearInterval(countdownInterval);
-          }
-        }
-
-        setupSlidesAndDots();
-      }
-
-      /**
-       * ĐỒNG HỒ ĐẾM NGƯỢC THỜI GIAN THỰC ĐẾN HẾT GIỜ VÀNG
-       */
-      function startCountdown(targetTime) {
-        if (!targetTime) return;
-        if (countdownInterval) clearInterval(countdownInterval);
-
-        function updateClock() {
-          var remainingSecs = Math.floor((targetTime.getTime() - new Date().getTime()) / 1000);
-          if (remainingSecs <= 0) {
-            clearInterval(countdownInterval);
-            checkHappyHourStatus();
-            return;
-          }
-
-          var h = Math.floor(remainingSecs / 3600);
-          var m = Math.floor((remainingSecs % 3600) / 60);
-          var s = remainingSecs % 60;
-
-          var hEl = document.getElementById("hh-timer-hours");
-          var mEl = document.getElementById("hh-timer-minutes");
-          var sEl = document.getElementById("hh-timer-seconds");
-
-          if (hEl) hEl.innerText = (h < 10 ? "0" + h : h);
-          if (mEl) mEl.innerText = (m < 10 ? "0" + m : m);
-          if (sEl) sEl.innerText = (s < 10 ? "0" + s : s);
-        }
-
-        updateClock();
-        countdownInterval = setInterval(updateClock, 1000);
-      }
-
-      /**
-       * TÍNH TOÁN DANH SÁCH SLIDE KHẢ DỤNG VÀ VẼ THANH DOTS
-       */
-      function setupSlidesAndDots() {
-        var track = document.getElementById("carousel-track");
-        var dotsContainer = document.getElementById("carousel-dots");
-        if (!track || !dotsContainer) return;
-
-        // Lấy danh sách các slide không bị ẩn (display !== none)
-        var slides = Array.from(track.children).filter(function(slide) {
-          return !slide.classList.contains("hidden");
-        });
-
-        totalSlides = slides.length;
-        if (currentIndex >= totalSlides) currentIndex = 0;
-
-        // Sinh động các chấm tròn Navigation Dots
-        dotsContainer.innerHTML = "";
-        for (var i = 0; i < totalSlides; i++) {
-          var dot = document.createElement("button");
-          dot.type = "button";
-          dot.setAttribute("aria-label", "Chuyển tới slide " + (i + 1));
-          dot.className = "w-2 h-2 rounded-full transition-all duration-300 " + (i === currentIndex ? "w-6 bg-amber-400 shadow-sm" : "bg-slate-600 hover:bg-slate-400");
-          (function(index) {
-            dot.onclick = function() { goToSlide(index); };
-          })(i);
-          dotsContainer.appendChild(dot);
-        }
-
-        updateSlidePosition();
-      }
-
-      /**
-       * CẬP NHẬT TỌA ĐỘ DỊCH CHUYỂN TRỤC X CỦA TRACK CAROUSEL
-       */
-      function updateSlidePosition() {
-        var track = document.getElementById("carousel-track");
-        var dotsContainer = document.getElementById("carousel-dots");
-        if (!track) return;
-
-        track.style.transform = "translateX(-" + (currentIndex * 100) + "%)";
-
-        // Cập nhật hiệu ứng Active của các chấm Dots
-        if (dotsContainer) {
-          var dots = dotsContainer.children;
-          for (var d = 0; d < dots.length; d++) {
-            if (d === currentIndex) {
-              dots[d].className = "w-6 h-2 rounded-full bg-amber-400 shadow-sm transition-all duration-300";
-            } else {
-              dots[d].className = "w-2 h-2 rounded-full bg-slate-600 hover:bg-slate-400 transition-all duration-300";
-            }
-          }
-        }
-      }
-
-      function nextSlide() {
-        if (totalSlides <= 1) return;
-        currentIndex = (currentIndex + 1) % totalSlides;
-        updateSlidePosition();
-        resetAutoPlay();
-      }
-
-      function prevSlide() {
-        if (totalSlides <= 1) return;
-        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
-        updateSlidePosition();
-        resetAutoPlay();
-      }
-
-      function goToSlide(index) {
-        currentIndex = index;
-        updateSlidePosition();
-        resetAutoPlay();
-      }
-
-      function startAutoPlay() {
-        if (autoPlayInterval) clearInterval(autoPlayInterval);
-        autoPlayInterval = setInterval(function() {
-          nextSlide();
-        }, 4000); // Tự động chuyển slide sau mỗi 4 giây
-      }
-
-      function resetAutoPlay() {
-        startAutoPlay();
-      }
-
-      /**
-       * BẮT CỬ CHỈ VUỐT CHẠM CẢM ỨNG TRÊN SMARTPHONE
-       */
-      function initTouchSwipe() {
-        var viewport = document.getElementById("carousel-viewport");
-        if (!viewport) return;
-
-        viewport.addEventListener("touchstart", function(e) {
-          touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        viewport.addEventListener("touchend", function(e) {
-          touchEndX = e.changedTouches[0].screenX;
-          handleSwipeGesture();
-        }, { passive: true });
-      }
-
-      function handleSwipeGesture() {
-        var swipeDistance = touchEndX - touchStartX;
-        var threshold = 40; // Ngưỡng vuốt tối thiểu 40px
-
-        if (swipeDistance < -threshold) {
-          nextSlide(); // Vuốt sang trái -> Slide tiếp theo
-        } else if (swipeDistance > threshold) {
-          prevSlide(); // Vuốt sang phải -> Slide trước
-        }
-      }
-
-      /**
-       * CUỘN TRANG MƯỢT MÀ ĐẾN MÓN ĂN HOẶC DANH MỤC TRÊN MENU
-       */
-      function scrollToCategory(catOrItemId) {
-        var targetEl = document.getElementById("item-" + catOrItemId) || 
-                       document.getElementById("category-" + catOrItemId) || 
-                       document.getElementById("menu-catalog-section");
-
-        if (targetEl) {
-          targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else {
-          window.scrollTo({ top: 400, behavior: "smooth" });
-        }
-      }
-
-      // Khởi động khi tải xong DOM
-      window.addEventListener("DOMContentLoaded", init);
-
-      return {
-        nextSlide: nextSlide,
-        prevSlide: prevSlide,
-        goToSlide: goToSlide,
-        scrollToCategory: scrollToCategory
-      };
-    })();
-  </script>
-    
+    </script>    
 </body>
 </html>
