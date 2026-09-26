@@ -273,6 +273,81 @@
                 <span>Cần Khiếu Nại / Hỗ Trợ Đơn Này (0934.220.585)</span>
             </a>
         </div>
+        <!-- ========================================================================= -->
+    <!-- 1. BANNER KÍCH HOẠT VÒNG QUAY KHI ĐƠN HÀNG GIAO XONG (DÙNG TRONG STEP TRACKER) -->
+    <!-- ========================================================================= -->
+    <div id="box-lucky-wheel-trigger" class="hidden mt-4 p-4 rounded-3xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-red-500/20 border-2 border-amber-500/60 shadow-xl text-center space-y-2 animate-in fade-in zoom-in duration-300">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 text-2xl font-black shadow-lg shadow-amber-500/40 animate-bounce">
+            🎁
+        </div>
+        <div>
+            <h3 class="text-sm font-black text-amber-400 uppercase tracking-wider">Đơn Hàng Đã Giao Thành Công!</h3>
+            <p class="text-[11px] text-slate-300">Bếp Thím 5 thân tặng bạn 01 lượt quay may mắn nhận quà tri ân đặc quyền.</p>
+        </div>
+        <button type="button" 
+                id="btn-open-lucky-wheel"
+                onclick="TrackingLuckyWheelEngine.openModal()" 
+                class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/30 transition active:scale-95 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-dharmachakra fa-spin" style="--fa-animation-duration: 4s;"></i>
+            <span>VÀO QUAY MAY MẮN NGAY</span>
+        </button>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 2. POPUP MODAL VÒNG QUAY MAY MẮN TRI ÂN (STACKING CONTEXT Z-50 AN TOÀN)   -->
+    <!-- ========================================================================= -->
+    <div id="modal-tracking-lucky-wheel" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
+        <div class="relative w-full max-w-sm rounded-3xl bg-slate-900 border-2 border-amber-500/50 shadow-2xl p-5 text-center flex flex-col items-center space-y-4">
+            
+            <!-- NÚT ĐÓNG MODAL -->
+            <button type="button" 
+                    onclick="TrackingLuckyWheelEngine.closeModal()" 
+                    class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-90">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <!-- TIÊU ĐỀ POPUP -->
+            <div class="space-y-1 pt-1">
+                <div class="inline-block px-3 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-black text-amber-400 uppercase tracking-widest font-mono">
+                    Tri Ân Khách Quý
+                </div>
+                <h3 class="text-base font-black text-white uppercase tracking-wider">VÒNG QUAY MAY MẮN</h3>
+                <p class="text-[11px] text-slate-400">100% Khách có quà xinh từ Bếp Thím 5</p>
+            </div>
+
+            <!-- KHUNG CANVAS VÒNG QUAY & KIM CHỈ ĐỊNH VỊ -->
+            <div class="relative w-[260px] h-[260px] flex items-center justify-center select-none my-1">
+                <!-- Kim chỉ điểm trúng thưởng ở đỉnh 12h -->
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-rose-500 text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] filter">
+                    <i class="fa-solid fa-location-pin"></i>
+                </div>
+
+                <!-- Canvas vẽ các nan quạt quà tặng -->
+                <canvas id="wheelCanvas" width="260" height="260" class="rounded-full shadow-2xl border-4 border-amber-500/60"></canvas>
+
+                <!-- Trục giữa vòng quay -->
+                <div class="absolute inset-0 m-auto w-12 h-12 rounded-full bg-slate-950 border-2 border-amber-400 shadow-inner flex items-center justify-center z-10">
+                    <span class="text-xs font-black text-amber-400 font-mono">T5</span>
+                </div>
+            </div>
+
+            <!-- NÚT BẤM QUAY NGAY -->
+            <div class="w-full space-y-2">
+                <button type="button" 
+                        id="btn-spin-wheel"
+                        onclick="TrackingLuckyWheelEngine.spin()" 
+                        class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:opacity-95 text-slate-950 font-black text-xs uppercase tracking-widest shadow-lg shadow-orange-500/40 transition active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play"></i>
+                    <span>QUAY NGAY</span>
+                </button>
+
+                <div id="wheel-result-msg" class="hidden p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold space-y-1">
+                    <!-- Kết quả trúng thưởng render tại đây -->
+                </div>
+            </div>
+
+        </div>
+    </div>
 
     </main>
     <!-- Adapter kết nối Headless GAS API v2.9 -->
@@ -711,6 +786,181 @@
     document.addEventListener("DOMContentLoaded", function() {
         OrderTrackingController.init();
     });
+        /**
+     * =========================================================================
+     * BỘ NÃO ĐIỀU KHIỂN VÒNG QUAY MAY MẮN TRI ÂN (TRACKING GAMIFICATION ENGINE)
+     * Kiến trúc: SaaS F&B LongHoaFood Master - Cố vấn: Đu Đủ
+     * =========================================================================
+     */
+    var TrackingLuckyWheelEngine = (function() {
+        var canvas = null;
+        var ctx = null;
+        var isSpinning = false;
+        var currentAngle = 0;
+
+        // 6 Ô QUÀ TẶNG CHIẾN LƯỢC F&B THÍM 5 (TỐI ƯU FOOD COST & TĂNG AOV ĐƠN SAU)
+        var PRIZES = [
+            { label: "Trứng Lòng Đào", color: "#f59e0b", textColor: "#0f172a", code: "GIFT_TRUNG" },
+            { label: "Voucher 10K",    color: "#ef4444", textColor: "#ffffff", code: "VOUCHER_10K" },
+            { label: "Tóp Mỡ Giòn",    color: "#10b981", textColor: "#ffffff", code: "GIFT_TOPMO" },
+            { label: "Thêm May Mắn",   color: "#64748b", textColor: "#ffffff", code: "LUCK_NEXT" },
+            { label: "Trà Đào 1 Ly",   color: "#f97316", textColor: "#0f172a", code: "GIFT_TRADAO" },
+            { label: "Voucher 15K",    color: "#8b5cf6", textColor: "#ffffff", code: "VOUCHER_15K" }
+        ];
+
+        function initCanvas() {
+            canvas = document.getElementById("wheelCanvas");
+            if (!canvas) return;
+            ctx = canvas.getContext("2d");
+            drawWheel(0);
+        }
+
+        function drawWheel(angleOffset) {
+            if (!ctx || !canvas) return;
+            var numPrizes = PRIZES.length;
+            var arcSize = (2 * Math.PI) / numPrizes;
+            var centerX = canvas.width / 2;
+            var centerY = canvas.height / 2;
+            var radius = centerX - 6;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (var i = 0; i < numPrizes; i++) {
+                var prizeAngle = angleOffset + (i * arcSize);
+                
+                // Vẽ từng nan quạt màu
+                ctx.beginPath();
+                ctx.fillStyle = PRIZES[i].color;
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, prizeAngle, prizeAngle + arcSize);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#1e293b";
+                ctx.stroke();
+
+                // Vẽ chữ tên quà tặng
+                ctx.save();
+                ctx.fillStyle = PRIZES[i].textColor;
+                ctx.font = "bold 11px sans-serif";
+                ctx.textAlign = "right";
+                ctx.textBaseline = "middle";
+
+                var textAngle = prizeAngle + (arcSize / 2);
+                ctx.translate(centerX, centerY);
+                ctx.rotate(textAngle);
+                ctx.fillText(PRIZES[i].label, radius - 14, 0);
+                ctx.restore();
+            }
+        }
+
+        function openModal() {
+            var modal = document.getElementById("modal-tracking-lucky-wheel");
+            if (modal) {
+                modal.classList.remove("hidden");
+                initCanvas();
+            }
+        }
+
+        function closeModal() {
+            var modal = document.getElementById("modal-tracking-lucky-wheel");
+            if (modal) modal.classList.add("hidden");
+        }
+
+        function spin() {
+            if (isSpinning) return;
+
+            // Kiểm tra chống quay nhiều lần trên cùng 1 mã đơn hàng
+            var urlParams = new URLSearchParams(window.location.search);
+            var currentOrderCode = urlParams.get("order") || "DH_DEFAULT";
+            var playedKey = "thim5_wheel_played_" + currentOrderCode;
+
+            if (localStorage.getItem(playedKey)) {
+                var prevGift = localStorage.getItem(playedKey);
+                alert("🎉 Đơn hàng này quý khách đã nhận quà: [" + prevGift + "]. Vui lòng chụp màn hình gửi Zalo Quán để nhận quà cho đơn kế tiếp nhé!");
+                return;
+            }
+
+            isSpinning = true;
+            var btnSpin = document.getElementById("btn-spin-wheel");
+            var resultBox = document.getElementById("wheel-result-msg");
+            if (btnSpin) btnSpin.disabled = true;
+            if (resultBox) resultBox.classList.add("hidden");
+
+            // Chọn ngẫu nhiên ô trúng thưởng
+            var prizeIndex = Math.floor(Math.random() * PRIZES.length);
+            var prize = PRIZES[prizeIndex];
+
+            var numPrizes = PRIZES.length;
+            var arcDeg = 360 / numPrizes;
+            // Quay tối thiểu 5 vòng + căn kim định vị ở đỉnh 12h (270 độ)
+            var totalRounds = 5 + Math.floor(Math.random() * 3);
+            var stopDeg = 270 - (prizeIndex * arcDeg) - (arcDeg / 2);
+            var targetRotation = (totalRounds * 360) + stopDeg;
+
+            var startTime = performance.now();
+            var spinDuration = 4500; // Quay trong 4.5 giây mượt mà
+
+            function animate(currentTime) {
+                var elapsed = currentTime - startTime;
+                var progress = Math.min(elapsed / spinDuration, 1);
+
+                // Gia tốc giảm dần mượt mà (Cubic Ease Out)
+                var easeProgress = 1 - Math.pow(1 - progress, 3);
+                var currentDeg = currentAngle + (targetRotation * easeProgress);
+
+                drawWheel(currentDeg * Math.PI / 180);
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isSpinning = false;
+                    currentAngle = currentDeg % 360;
+                    if (btnSpin) btnSpin.disabled = false;
+
+                    // Lưu vết đơn đã quay thưởng thành công
+                    localStorage.setItem(playedKey, prize.label);
+
+                    // Hiển thị phần quà
+                    if (resultBox) {
+                        resultBox.classList.remove("hidden");
+                        resultBox.innerHTML = `
+                            <div class="text-sm font-black text-amber-400">🎉 CHÚC MỪNG QUÝ KHÁCH!</div>
+                            <div>Quý khách đã trúng: <span class="text-white underline font-bold">${prize.label}</span></div>
+                            <div class="text-[10px] text-slate-400">Mã quà: <strong class="text-emerald-400 font-mono">${prize.code}_${currentOrderCode.slice(-4)}</strong> (Áp dụng cho đơn kế tiếp)</div>
+                        `;
+                    }
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        /**
+         * TỰ ĐỘNG BẬT BANNER GỢI Ý KHI ĐƠN HÀNG Ở TRẠNG THÁI GIAO HOÀN TẤT
+         */
+        function checkAndTrigger(order) {
+            if (!order) return;
+            var stepNum = Number(order.step !== undefined ? order.step : 0);
+            var statusStr = String(order.status || "").toUpperCase();
+
+            // Nếu đơn ở bước hoàn thành (step >= 4 hoặc COMPLETED / DELIVERED)
+            if (stepNum >= 4 || statusStr === "COMPLETED" || statusStr === "DELIVERED") {
+                var triggerBox = document.getElementById("box-lucky-wheel-trigger");
+                if (triggerBox) {
+                    triggerBox.classList.remove("hidden");
+                }
+            }
+        }
+
+        return {
+            openModal: openModal,
+            closeModal: closeModal,
+            spin: spin,
+            checkAndTrigger: checkAndTrigger
+        };
+    })();
+        
     </script>
 </body>
 </html>
