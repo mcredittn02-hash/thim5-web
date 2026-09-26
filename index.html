@@ -1014,7 +1014,8 @@
         ];
 
         /**
-         * MỞ MODAL TÙY CHỌN MÓN THÔNG MINH - HỖ TRỢ TRỌN VẸN MÓN CƠM & TOPPING
+         * MỞ MODAL TÙY CHỌN MÓN THÔNG MINH (TRIỆT TIÊU HOÀN TOÀN SÚP FREE CHO MÓN CƠM)
+         * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
          */
         function openCustomizerModal(dishId) {
             var dish = FALLBACK_MENU.find(function(d) { return d.id === dishId; });
@@ -1040,6 +1041,85 @@
                 return;
             }
 
+            // 2. KHỞI TẠO TRẠNG THÁI CHO MODAL TÙY CHỌN
+            appState.currentCustomizingDish = dish;
+            appState.customizerQty = 1;
+            appState.currentTaste = "Cay Nhẹ"; // Khóa cứng mặc định Cay Nhẹ chuẩn vị Bếp Thím 5
+            appState.currentSoup = "";        // Mặc định rỗng, triệt tiêu súp miễn phí ngầm
+            activeCustomizerToppingIds = [];
+
+            var modal = document.getElementById("modal-dish-customizer");
+            var elImg = document.getElementById("cust-dish-img");
+            var elName = document.getElementById("cust-dish-name");
+            var elBasePrice = document.getElementById("cust-dish-base-price");
+            var elCatBadge = document.getElementById("cust-dish-cat-badge");
+            var elQty = document.getElementById("cust-dish-qty");
+            var boxTaste = document.getElementById("box-taste-selector");
+            var boxSoup = document.getElementById("box-soup-selector");
+            var boxTopping = document.getElementById("box-topping-selector");
+            var noteEl = document.getElementById("cust-dish-note");
+
+            var dishPriceNum = Number(dish.price) || 0;
+            if (elImg) elImg.src = dish.img || dish.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
+            if (elName) elName.innerText = dish.name;
+            if (elBasePrice) elBasePrice.innerText = dishPriceNum.toLocaleString("vi-VN") + " đ";
+            if (elQty) elQty.innerText = "1";
+            if (noteEl) noteEl.value = "";
+
+            var catLower = String(dish.cat || dish.category || "").toLowerCase().trim();
+
+            // 3. ĐIỀU PHỐI HIỂN THỊ PHÂN KHU THEO CHIẾN LƯỢC F&B NO-FREE-SOUP
+            if (catLower === "giai-khat") {
+                if (elCatBadge) elCatBadge.innerText = "Giải Khát (1L)";
+                if (boxTaste) boxTaste.classList.add("hidden");
+                if (boxSoup) boxSoup.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.add("hidden");
+                appState.currentTaste = "Không Cay";
+                appState.currentSoup = "";
+            } else if (catLower === "nuoc") {
+                if (elCatBadge) elCatBadge.innerText = "Món Nước Súp";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                if (boxSoup) boxSoup.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.remove("hidden");
+                appState.currentSoup = "";
+                selectTaste("Cay Nhẹ");
+                renderCustomizerToppingsList();
+            } else if (catLower === "an-kem") {
+                if (elCatBadge) elCatBadge.innerText = "Món Ăn Kèm";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                if (boxSoup) boxSoup.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.add("hidden");
+                selectTaste("Cay Nhẹ");
+            } else if (catLower === "cơm" || catLower === "com") {
+                // PHÂN HỆ MÓN CƠM: HIỂN THỊ CHUẨN BADGE VÀ ẨN TUYỆT ĐỐI CHÉN SÚP MIỄN PHÍ
+                if (elCatBadge) elCatBadge.innerText = "Món Cơm Đất Thánh";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                
+                // TRIỆT TIÊU SÚP MIỄN PHÍ ĐỂ BẢO VỆ DOANH THU SÚP BOOSTER
+                if (boxSoup) boxSoup.classList.add("hidden");
+                appState.currentSoup = "";
+
+                if (boxTopping) boxTopping.classList.remove("hidden");
+                selectTaste("Cay Nhẹ");
+                renderCustomizerToppingsList();
+            } else {
+                // Mì Trộn Khô & Combo: Hiển thị badge chuẩn và ẩn súp miễn phí
+                if (elCatBadge) elCatBadge.innerText = (catLower === "combo") ? "Combo Đại Tiệc" : "Mì Trộn Khô";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                
+                // Mì Trộn cũng ẩn súp free để upsell Súp Booster thu phí
+                if (boxSoup) boxSoup.classList.add("hidden");
+                appState.currentSoup = "";
+
+                if (boxTopping) boxTopping.classList.remove("hidden");
+                selectTaste("Cay Nhẹ");
+                renderCustomizerToppingsList();
+            }
+
+            updateCustomizerPrice();
+
+            if (modal) modal.classList.remove("hidden");
+        }
             // 2. KHỞI TẠO TRẠNG THÁI MỚI CHO MODAL TÙY CHỌN MÓN CHÍNH
             appState.currentCustomizingDish = dish;
             appState.customizerQty = 1;
