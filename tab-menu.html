@@ -1,3 +1,7 @@
+<!-- ========================================================================= -->
+<!-- PHÂN HỆ ĐIỀU HÀNH THỰC ĐƠN, BÁN CHÉO & OMNI-INGESTION (v3.0 SAAS)         -->
+<!-- Kiến trúc: Headless SPA Component, Margin Guard, Optimistic Stock Toggle   -->
+<!-- ========================================================================= -->
 <div id="menu-management-container" class="space-y-4 max-w-7xl mx-auto pb-12 select-none text-xs">
 
   <!-- 1. CỤM 4 THẺ KPI CHIẾN LƯỢC FOOD COST & QUẢN TRỊ DANH MỤC D2C -->
@@ -78,30 +82,31 @@
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
         <input type="text" 
                id="search-menu-input" 
-               oninput="TabMenuController.handleSearch(this.value)" 
+               oninput="window.TabMenuController && window.TabMenuController.handleSearch(this.value)" 
                placeholder="Tìm tên món, mã SKU, danh mục..." 
                class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-2xl pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition font-medium" />
       </div>
 
       <!-- Bộ Nút Lọc Theo Vai Trò Chiến Lược Của Món Ăn -->
       <div class="flex flex-wrap items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 text-[11px] font-bold gap-1">
-        <button type="button" onclick="TabMenuController.filterRole('ALL', this)" class="menu-role-btn px-2.5 py-1 rounded-xl bg-amber-500 text-slate-950 shadow">Tất Cả</button>
-        <button type="button" onclick="TabMenuController.filterRole('CORE', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🍜 Mì Chủ Lực</button>
-        <button type="button" onclick="TabMenuController.filterRole('COMBO', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🍱 Combo Độc Quyền</button>
-        <button type="button" onclick="TabMenuController.filterRole('BOOSTER_SOUP', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🥣 Súp Booster</button>
-        <button type="button" onclick="TabMenuController.filterRole('TRAFFIC', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🎯 Món Kéo Khách</button>
-        <button type="button" onclick="TabMenuController.filterRole('DRINKS', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🥤 Nước 1L / Tráng Miệng</button>
-        <button type="button" onclick="TabMenuController.filterRole('EXTENDED', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🍗 Món Mở Rộng</button>
+        <button type="button" onclick="window.TabMenuController && window.TabMenuController.filterRole('ALL', this)" class="menu-role-btn px-2.5 py-1 rounded-xl bg-amber-500 text-slate-950 shadow">Tất Cả</button>
+        <button type="button" onclick="window.TabMenuController && window.TabMenuController.filterRole('CORE', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🍜 Mì Chủ Lực</button>
+        <button type="button" onclick="window.TabMenuController && window.TabMenuController.filterRole('COMBO', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🍱 Combo Độc Quyền</button>
+        <button type="button" onclick="window.TabMenuController && window.TabMenuController.filterRole('BOOSTER_SOUP', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🥣 Súp Booster</button>
+        <button type="button" onclick="window.TabMenuController && window.TabMenuController.filterRole('TRAFFIC', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🎯 Món Kéo Khách</button>
+        <button type="button" onclick="window.TabMenuController && window.TabMenuController.filterRole('DRINKS', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🥤 Nước 1L / Tráng Miệng</button>
+        <button type="button" onclick="window.TabMenuController && window.TabMenuController.filterRole('EXTENDED', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🍗 Món Mở Rộng</button>
       </div>
 
     </div>
 
-    <!-- Cụm Nút Hành Động Nạp Hàng Loạt & Thêm Món Mới -->
+    <!-- Cụm Nút Hành Động Nạp Hàng Loạt & Thêm Món Mới (Bổ sung ID riêng để bắt sự kiện đa tầng) -->
     <div class="flex items-center gap-2">
       
       <!-- Nút 1: Nạp Thực Đơn Đa Kênh (Excel / AI OCR Gemini / Public Link) -->
       <button type="button" 
-              onclick="TabMenuController.openOmniIngestionModal()" 
+              id="btn-open-omni-top" 
+              onclick="window.TabMenuController && window.TabMenuController.openOmniIngestionModal()" 
               class="px-3.5 py-2 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-amber-500/40 text-amber-400 hover:text-amber-300 font-bold transition flex items-center gap-2 active:scale-95 shadow-sm">
         <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
         <span>Nạp Đa Kênh (Excel / AI)</span>
@@ -109,10 +114,11 @@
 
       <!-- Nút 2: Thêm Món Đơn Lẻ hoặc Combo Mới Thủ Công -->
       <button type="button" 
-              onclick="TabMenuController.openDishModal(null)" 
+              id="btn-create-dish-top" 
+              onclick="window.TabMenuController && window.TabMenuController.openDishModal(null)" 
               class="px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-600 hover:opacity-95 text-white font-black uppercase tracking-wider transition flex items-center gap-1.5 active:scale-95 shadow-lg shadow-rose-600/25">
         <i class="fa-solid fa-plus text-xs"></i>
-        <span>Tạo Món / Combo Mới</span>
+        <span>+ TẠO MÓN / COMBO MỚI</span>
       </button>
 
     </div>
@@ -162,10 +168,16 @@
                 <p class="text-[11px] text-slate-500">Mời anh Hải Âu bấm nút bên dưới để thêm món đầu tiên hoặc nạp nhanh qua file Excel / AI OCR.</p>
               </div>
               <div class="flex items-center justify-center gap-2 pt-1">
-                <button type="button" onclick="TabMenuController.openOmniIngestionModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold transition text-xs">
+                <button type="button" 
+                        id="btn-open-omni-empty" 
+                        onclick="window.TabMenuController && window.TabMenuController.openOmniIngestionModal()" 
+                        class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold transition text-xs flex items-center gap-1.5 active:scale-95">
                   <i class="fa-solid fa-file-excel mr-1"></i> Nạp File Excel / AI
                 </button>
-                <button type="button" onclick="TabMenuController.openDishModal(null)" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black transition text-xs">
+                <button type="button" 
+                        id="btn-create-dish-empty" 
+                        onclick="window.TabMenuController && window.TabMenuController.openDishModal(null)" 
+                        class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black transition text-xs flex items-center gap-1 active:scale-95 shadow">
                   + Thêm Món Mới
                 </button>
               </div>
@@ -488,7 +500,7 @@
   <!-- Vai Trò Món Chiến Lược -->
           <div class="space-y-1">
             <label class="font-bold text-slate-300 text-[11px] block">Vai Trò Chiến Lược</label>
-            <select id="dish-role" onchange="TabMenuController.calculateMarginGuard()" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
+            <select id="dish-role" onchange="window.TabMenuController && window.TabMenuController.calculateMarginGuard()" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
               <option value="CORE">Chủ Lực (Core - FC 35-45%)</option>
               <option value="COMBO_EXCLUSIVE">Combo Độc Quyền (AOV Booster)</option>
               <option value="BOOSTER">Súp / Nước Kéo Vé (FC &lt; 20%)</option>
@@ -534,13 +546,13 @@
             <!-- Giá Vốn COGS -->
             <div class="space-y-1">
               <label class="font-bold text-slate-400 text-[10px] block">Giá Vốn COGS (VNĐ) <span class="text-rose-400">*</span></label>
-              <input type="number" id="dish-cogs" required step="500" min="0" placeholder="15000" oninput="TabMenuController.calculateMarginGuard()" class="w-full bg-slate-900 border border-slate-800 focus:border-rose-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-rose-400 outline-none transition" />
+              <input type="number" id="dish-cogs" required step="500" min="0" placeholder="15000" oninput="window.TabMenuController && window.TabMenuController.calculateMarginGuard()" class="w-full bg-slate-900 border border-slate-800 focus:border-rose-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-rose-400 outline-none transition" />
             </div>
 
             <!-- Giá Bán D2C Web -->
             <div class="space-y-1">
               <label class="font-bold text-slate-400 text-[10px] block">Giá Bán D2C Web (VNĐ) <span class="text-amber-400">*</span></label>
-              <input type="number" id="dish-price" required step="1000" min="1000" placeholder="39000" oninput="TabMenuController.calculateMarginGuard()" class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-amber-400 outline-none transition" />
+              <input type="number" id="dish-price" required step="1000" min="1000" placeholder="39000" oninput="window.TabMenuController && window.TabMenuController.calculateMarginGuard()" class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-amber-400 outline-none transition" />
             </div>
 
             <!-- Lợi Nhuận Gộp Dự Kiến (LNR) -->
@@ -574,7 +586,7 @@
             <label class="font-bold text-slate-300 text-[11px] block">Đường Dẫn Ảnh Món Ăn (URL hoặc Tải Lên)</label>
             <div class="flex gap-2">
               <input type="url" id="dish-image" placeholder="https://images.unsplash.com/..." class="flex-1 bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-mono text-[11px] outline-none transition" />
-              <input type="file" id="dish-image-file-input" accept="image/*" onchange="TabMenuController.handleSingleImageUpload(this)" class="hidden" />
+              <input type="file" id="dish-image-file-input" accept="image/*" onchange="window.TabMenuController && window.TabMenuController.handleSingleImageUpload(this)" class="hidden" />
               <button type="button" onclick="document.getElementById('dish-image-file-input').click()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs transition flex items-center gap-1.5 active:scale-95 shadow">
                 <i class="fa-solid fa-camera text-xs"></i>
                 <span class="hidden sm:inline">Nén &amp; Tải</span>
@@ -613,7 +625,7 @@
 
         <!-- Cụm Nút Hành Động Modal Single Dish -->
         <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-          <button type="button" onclick="TabMenuController.closeDishModal()" class="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold transition">
+          <button type="button" onclick="window.TabMenuController && window.TabMenuController.closeDishModal()" class="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold transition">
             Hủy Bỏ
           </button>
           <button type="submit" id="btn-save-dish-submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black uppercase tracking-wider transition active:scale-95 shadow-lg shadow-orange-600/20 flex items-center gap-1.5">
@@ -625,11 +637,10 @@
 
     </div>
   </div>
-
   <!-- ========================================================================= -->
   <!-- 5. MODAL 2: NẠP THỰC ĐƠN ĐA KÊNH OMNI-INGESTION (EXCEL, AI OCR, LINK)     -->
   <!-- ========================================================================= -->
-  <div id="modal-omni-ingestion" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
+  <div id="modal-omni-ingestion" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
     <div class="relative bg-slate-900 border border-slate-800 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200">
       
       <!-- Tiêu Đề Modal Omni-Ingestion -->
@@ -643,23 +654,23 @@
             <p class="text-[10px] text-slate-400">Nạp nhanh 30-50 món chỉ trong vài giây qua Excel, Ảnh chụp Menu hoặc Link công khai</p>
           </div>
         </div>
-        <button type="button" onclick="TabMenuController.closeOmniIngestionModal()" class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center">
+        <button type="button" onclick="window.TabMenuController && window.TabMenuController.closeOmniIngestionModal()" class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center">
           <i class="fa-solid fa-xmark text-xs"></i>
         </button>
       </div>
 
       <!-- 4 Tabs Chuyển Đổi Kênh Nạp Liệu Thông Minh -->
       <div class="flex items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-bold">
-        <button type="button" id="tab-btn-ingest-excel" onclick="TabMenuController.switchIngestChannel('EXCEL')" class="flex-1 py-2 rounded-xl transition bg-amber-500 text-slate-950 font-black shadow">
+        <button type="button" id="tab-btn-ingest-excel" onclick="window.TabMenuController && window.TabMenuController.switchIngestChannel('EXCEL')" class="flex-1 py-2 rounded-xl transition bg-amber-500 text-slate-950 font-black shadow">
           <i class="fa-solid fa-file-excel mr-1 text-xs"></i> File Excel
         </button>
-        <button type="button" id="tab-btn-ingest-ocr" onclick="TabMenuController.switchIngestChannel('OCR')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
+        <button type="button" id="tab-btn-ingest-ocr" onclick="window.TabMenuController && window.TabMenuController.switchIngestChannel('OCR')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
           <i class="fa-solid fa-wand-magic-sparkles mr-1 text-xs text-amber-400"></i> Quét Ảnh / PDF (AI)
         </button>
-        <button type="button" id="tab-btn-ingest-link" onclick="TabMenuController.switchIngestChannel('LINK')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
+        <button type="button" id="tab-btn-ingest-link" onclick="window.TabMenuController && window.TabMenuController.switchIngestChannel('LINK')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
           <i class="fa-solid fa-link mr-1 text-xs text-sky-400"></i> Link Grab/Shopee
         </button>
-        <button type="button" id="tab-btn-ingest-json" onclick="TabMenuController.switchIngestChannel('JSON')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
+        <button type="button" id="tab-btn-ingest-json" onclick="window.TabMenuController && window.TabMenuController.switchIngestChannel('JSON')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
           <i class="fa-solid fa-code mr-1 text-xs text-purple-400"></i> Dán JSON
         </button>
       </div>
@@ -674,12 +685,12 @@
             <p class="text-xs font-bold text-white">Chọn tệp bảng tính thực đơn (.xlsx, .xls, .csv)</p>
             <p class="text-[10.5px] text-slate-500">Kéo thả file vào đây hoặc bấm nút bên dưới để duyệt tệp từ máy tính</p>
           </div>
-          <input type="file" id="input-excel-file" accept=".xlsx, .xls, .csv" onchange="TabMenuController.handleExcelFileSelect(this)" class="hidden" />
+          <input type="file" id="input-excel-file" accept=".xlsx, .xls, .csv" onchange="window.TabMenuController && window.TabMenuController.handleExcelFileSelect(this)" class="hidden" />
           <div class="flex items-center justify-center gap-2 pt-1">
             <button type="button" onclick="document.getElementById('input-excel-file').click()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition active:scale-95 shadow">
               <i class="fa-solid fa-folder-open mr-1"></i> Chọn Tệp Tin
             </button>
-            <button type="button" onclick="TabMenuController.downloadExcelTemplate()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-bold text-xs transition">
+            <button type="button" onclick="window.TabMenuController && window.TabMenuController.downloadExcelTemplate()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-bold text-xs transition">
               <i class="fa-solid fa-download mr-1 text-emerald-400"></i> Tải File Mẫu Chuẩn
             </button>
           </div>
@@ -696,7 +707,7 @@
             <p class="text-xs font-bold text-white">Chụp ảnh menu giấy hoặc tải lên file PDF thực đơn</p>
             <p class="text-[10.5px] text-slate-400">Cỗ máy Canvas AI sẽ tự động nén ảnh và trích xuất bảng giá qua Gemini Flash</p>
           </div>
-          <input type="file" id="input-ocr-file" accept="image/*, application/pdf" onchange="TabMenuController.handleOcrImageSelect(this)" class="hidden" />
+          <input type="file" id="input-ocr-file" accept="image/*, application/pdf" onchange="window.TabMenuController && window.TabMenuController.handleOcrImageSelect(this)" class="hidden" />
           <button type="button" onclick="document.getElementById('input-ocr-file').click()" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold text-xs transition active:scale-95 shadow-md shadow-purple-600/20">
             <i class="fa-solid fa-camera-retro mr-1.5"></i> Chụp / Chọn Ảnh Menu
           </button>
@@ -709,7 +720,7 @@
           <label class="font-bold text-slate-300 text-[11px] block">Dán Đường Link Quán (GrabFood / ShopeeFood / Website)</label>
           <div class="flex gap-2">
             <input type="url" id="input-public-url" placeholder="https://food.grab.com/vn/vi/restaurant/..." class="flex-1 bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition font-mono" />
-            <button type="button" onclick="TabMenuController.handleParseUrl()" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs transition active:scale-95 shadow">
+            <button type="button" onclick="window.TabMenuController && window.TabMenuController.handleParseUrl()" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs transition active:scale-95 shadow">
               Trích Xuất
             </button>
           </div>
@@ -719,7 +730,7 @@
       <!-- VÙNG NỘI DUNG KÊNH 4: DÁN JSON DỰ PHÒNG -->
       <div id="ingest-box-json" class="hidden space-y-2">
         <textarea id="input-raw-json" rows="4" placeholder='[{"itemCode":"MX_01","itemName":"Mì Trộn Xá Xíu","price":39000,"cogs":15000,"category":"Mì Trộn"}]' class="w-full bg-slate-950 border border-slate-800 focus:border-purple-500 rounded-xl p-2.5 font-mono text-[11px] text-amber-400 outline-none transition"></textarea>
-        <button type="button" onclick="TabMenuController.handleParseJson()" class="px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition active:scale-95">
+        <button type="button" onclick="window.TabMenuController && window.TabMenuController.handleParseJson()" class="px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition active:scale-95">
           Kiểm Tra Cú Pháp JSON
         </button>
       </div>
@@ -731,7 +742,7 @@
             <i class="fa-solid fa-list-check"></i>
             <span>Tìm thấy <strong id="preview-total-count" class="font-mono text-white">0</strong> món hợp lệ sẵn sàng nạp:</span>
           </span>
-          <button type="button" onclick="TabMenuController.clearIngestPreview()" class="text-[10.5px] text-rose-400 hover:underline">
+          <button type="button" onclick="window.TabMenuController && window.TabMenuController.clearIngestPreview()" class="text-[10.5px] text-rose-400 hover:underline">
             Xóa danh sách này
           </button>
         </div>
@@ -754,7 +765,7 @@
           </table>
         </div>
 
-        <button type="button" id="btn-confirm-ingest-all" onclick="TabMenuController.submitBatchIngest()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-95 text-slate-950 font-black uppercase text-xs tracking-wider transition active:scale-95 shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+        <button type="button" id="btn-confirm-ingest-all" onclick="window.TabMenuController && window.TabMenuController.submitBatchIngest()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-95 text-slate-950 font-black uppercase text-xs tracking-wider transition active:scale-95 shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
           <i class="fa-solid fa-cloud-arrow-up"></i>
           <span>Xác Nhận Nạp Tất Cả Vào Cơ Sở Dữ Liệu Thực Đơn</span>
         </button>
