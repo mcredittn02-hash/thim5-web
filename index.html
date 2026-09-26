@@ -944,13 +944,23 @@
             bankAccount: "3939388888",
             accountHolder: "NGUYEN HAI AU",
             minAovThreshold: 79000,
-            shipBaseDistanceKm: 2,
-            shipBaseFee: 12000,
-            shipExtraFeePerKm: 4500,
-            subsidyTier1Min: 100000,
-            subsidyTier1Amount: 15000,
-            subsidyTier2Min: 150000,
-            subsidyTier2Amount: 25000
+            
+            // Biểu phí vận chuyển cơ sở
+            shipBaseDistanceKm: 2,        // 2km đầu tiên
+            shipBaseFee: 12000,           // Cước 12.000đ cho 2km đầu
+            shipExtraFeePerKm: 4500,      // Mỗi km tiếp theo cộng 4.500đ
+            
+            // CƠ CHẾ TRỢ GIÁ MỚI - BẢO VỆ BIÊN LỢI NHUẬN & HỖ TRỢ KHÁCH Ở XA > 4KM
+            subsidyTier1MinAov: 89000,    // Đơn từ 89k: Giảm nhẹ 5k cước ship cho mọi cự ly
+            subsidyTier1Amount: 5000,
+            
+            subsidyFarMinDistKm: 3.5,     // Ngưỡng cự ly xa: từ 3.5km trở lên
+            subsidyFarMinAov: 120000,     // Đơn từ 120k ở xa: Trợ giá 10k
+            subsidyFarAmount: 10000,
+            
+            subsidyBoosterMinDistKm: 4.0, // Ngưỡng cự ly xa đặc biệt: từ 4.0km trở lên
+            subsidyBoosterMinAov: 149000, // Đơn từ 149k HOẶC có món nước/combo: Trợ giá tối đa 15k
+            subsidyBoosterAmount: 15000
         };
 
         // BỘ NHỚ ĐỆM TRẠNG THÁI ỨNG DỤNG (STATE)
@@ -2357,28 +2367,28 @@
         }
 
         /**
-         * THUẬT TOÁN HAVERSINE ĐO KHOẢNG CÁCH CHÍNH XÁC ĐẾN TỪNG MÉT
-         * Gốc tọa độ Bếp Thím 5 Hòa Thành: (11.285267, 106.133347)
+         * THUẬT TOÁN HAVERSINE ĐO KHOẢNG CÁCH HÌNH CẦU CHÍNH XÁC ĐẾN TỪNG MÉT
+         * Tọa độ gốc Bếp Thím 5 Hòa Thành: (11.285267, 106.133347)
          */
         function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-            var R = 6371; // Bán kính trung bình Trái Đất (km)
+            var R = 6371; // Bán kính Trái Đất theo chuẩn trắc địa WGS-84 (km)
             var dLat = (lat2 - lat1) * (Math.PI / 180);
             var dLon = (lon2 - lon1) * (Math.PI / 180);
-            
+
             var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                     Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
                     Math.sin(dLon / 2) * Math.sin(dLon / 2);
-                    
+
             var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c; // Trả về số km thực tế
+            return Number((R * c).toFixed(2)); // Trả về số km thực tế làm tròn 2 chữ số thập phân
         }
 
         /**
-         * LẤY VỊ TRÍ GPS HIỆN TẠI VÀ ÉP CẬP NHẬT GIAO DIỆN TỨC THÌ
+         * LẤY TỌA ĐỘ GPS VỆ TINH ĐỘ CHÍNH XÁC CAO (TRIỆT TIÊU LỆCH TRẠM MẠNG BTS/IP)
          */
         function detectCustomerGps() {
             if (!navigator.geolocation) {
-                alert("⚠️ Thiết bị của quý khách không hỗ trợ tính năng định vị GPS!");
+                alert("⚠️ Thiết bị của quý khách không hỗ trợ cảm biến định vị GPS!");
                 return;
             }
 
@@ -2386,18 +2396,32 @@
             var origText = btn ? btn.innerHTML : "";
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang bắt tọa độ...';
+                btn.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin text-amber-400"></i> Đang bắt vệ tinh...';
             }
 
+            // Thiết lập cấu hình bắt sóng vệ tinh thực thụ (Bỏ qua cache IP)
+            var geoOptions = {
+                enableHighAccuracy: true, // Ép dùng chip GPS thật sự, không dùng mạng di động ước lượng
+                timeout: 15000,           // Cho phép tối đa 15 giây để khóa vệ tinh
+                maximumAge: 0             // Không dùng lại tọa độ cũ trong bộ nhớ đệm
+            };
+
             navigator.geolocation.getCurrentPosition(
-                function(pos) {
+                async function(pos) {
                     var uLat = Number(pos.coords.latitude);
                     var uLng = Number(pos.coords.longitude);
+                    var accuracy = Math.round(pos.coords.accuracy || 999); // Sai số đo bằng mét
 
-                    // Cập nhật vị trí khách hàng vào State
-                    appState.customerLocation = { lat: uLat, lng: uLng };
+                    console.log(`📍 [GPS Debug] Tọa độ: ${uLat}, ${uLng} | Sai số: ±${accuracy}m`);
 
-                    // Đo cự ly chính xác từ tâm Bếp Thím 5 Hòa Thành
+                    // 1. CẬP NHẬT VÀO STATE HỆ THỐNG
+                    appState.customerLocation = {
+                        lat: uLat,
+                        lng: uLng,
+                        accuracy: accuracy
+                    };
+
+                    // 2. TÍNH CỰ LY CHUẨN XÁC TỪ TÂM BẾP HÒA THÀNH (11.285267, 106.133347)
                     var exactDistKm = calculateHaversineDistance(
                         STORE_BASE_CONFIG.coords.lat, STORE_BASE_CONFIG.coords.lng,
                         uLat, uLng
@@ -2405,19 +2429,43 @@
 
                     appState.calculatedDistanceKm = exactDistKm;
 
+                    // 3. THỬ GIẢI MÃ ĐỊA CHỈ THỰC TẾ (REVERSE GEOCODING TỰ ĐỘNG)
                     var addrEl = document.getElementById("chk-customer-address");
+                    var accuracyBadge = (accuracy <= 100) ? `(Chuẩn xác ±${accuracy}m)` : `(Ước tính ±${accuracy}m)`;
+
                     if (addrEl) {
-                        addrEl.value = `Định vị GPS (${uLat.toFixed(5)}, ${uLng.toFixed(5)}) - Hòa Thành, Tây Ninh`;
+                        addrEl.value = `Đang xác định tên đường ${accuracyBadge}...`;
                     }
 
+                    try {
+                        // Gọi OpenStreetMap Nominatim phân giải tọa độ ra tên đường Tây Ninh
+                        var geoUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${uLat}&lon=${uLng}&accept-language=vi`;
+                        var res = await fetch(geoUrl, { headers: { 'User-Agent': 'Thim5D2CApp/2026' } });
+                        var data = await res.json();
+
+                        if (data && data.display_name && addrEl) {
+                            var cleanAddr = data.display_name
+                                .replace(/, Việt Nam$/, '')
+                                .replace(/, Tây Ninh$/, '');
+                            addrEl.value = `${cleanAddr} ${accuracyBadge}`;
+                        } else if (addrEl) {
+                            addrEl.value = `Vị trí GPS: ${uLat.toFixed(5)}, ${uLng.toFixed(5)} ${accuracyBadge} - Hòa Thành, Tây Ninh`;
+                        }
+                    } catch (err) {
+                        if (addrEl) {
+                            addrEl.value = `Vị trí GPS: ${uLat.toFixed(5)}, ${uLng.toFixed(5)} ${accuracyBadge} - Hòa Thành, Tây Ninh`;
+                        }
+                    }
+
+                    // 4. TÍNH LẠI BIỂU PHÍ SHIP VÀ CẬP NHẬT GIAO DIỆN
                     recalculateShippingFee();
 
                     if (btn) {
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> Đã Lấy Vị Trí';
+                        btn.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Đã Có Vị Trí';
                         setTimeout(function() {
                             if (btn) btn.innerHTML = origText;
-                        }, 2500);
+                        }, 3000);
                     }
                 },
                 function(err) {
@@ -2425,56 +2473,117 @@
                         btn.disabled = false;
                         btn.innerHTML = origText;
                     }
-                    console.warn("Lỗi GPS:", err.message);
-                    alert("❌ Không thể lấy tọa độ GPS tự động (" + err.message + ").\nQuý khách vui lòng nhập địa chỉ cụ thể bằng tay!");
+
+                    var msg = "Không thể lấy tọa độ vệ tinh!";
+                    if (err.code === 1) {
+                        msg = "Quý khách chưa cấp quyền vị trí cho trình duyệt. Vui lòng bật 'Cho phép truy cập vị trí' trong cài đặt!";
+                    } else if (err.code === 2) {
+                        msg = "Tín hiệu GPS yếu hoặc thiết bị đang tắt vị trí. Quý khách vui lòng nhập địa chỉ cụ thể bằng tay!";
+                    } else if (err.code === 3) {
+                        msg = "Hết thời gian tìm kiếm vệ tinh GPS. Quý khách vui lòng nhập số nhà, tên đường bằng tay!";
+                    }
+
+                    console.warn("⚠️ [GPS Error]:", err.message);
+                    alert("❌ " + msg);
                 },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                geoOptions
             );
         }
 
+        /**
+         * XỬ LÝ NHẬP ĐỊA CHỈ BẰNG TAY (KHÔNG ÉP CỨNG 1.8KM PHI LÝ)
+         */
         function onAddressInput(val) {
+            var text = String(val || "").trim().toLowerCase();
+            
+            // Nếu khách tự gõ tay và chưa có GPS vệ tinh
             if (!appState.customerLocation) {
-                appState.calculatedDistanceKm = 1.8;
+                // Nhận diện tương đối theo địa bàn Tây Ninh
+                if (text.indexOf("chợ long hoa") !== -1 || text.indexOf("long hoa") !== -1) {
+                    appState.calculatedDistanceKm = 0.8;
+                } else if (text.indexOf("hòa thành") !== -1 || text.indexOf("hoa thanh") !== -1) {
+                    appState.calculatedDistanceKm = 1.5;
+                } else if (text.indexOf("tp tây ninh") !== -1 || text.indexOf("thành phố") !== -1) {
+                    appState.calculatedDistanceKm = 5.5;
+                } else if (text.indexOf("trảng bàng") !== -1 || text.indexOf("gò dầu") !== -1) {
+                    appState.calculatedDistanceKm = 18.0;
+                } else {
+                    appState.calculatedDistanceKm = 2.0; // Mặc định trong bán kính nội ô cơ sở
+                }
                 recalculateShippingFee();
             }
         }
-
         /**
          * TÍNH TOÁN BIỂU PHÍ SHIP VÀ KHÓA TRẦN TRỢ GIÁ CHUẨN XÁC THEO CƯỚC THỰC TẾ
          */
         function recalculateShippingFee() {
             var dist = (appState.calculatedDistanceKm !== undefined && appState.calculatedDistanceKm !== null) 
-                       ? appState.calculatedDistanceKm 
+                       ? Number(appState.calculatedDistanceKm) 
                        : 1.8;
 
-            var fee = STORE_BASE_CONFIG.shipBaseFee; // Mặc định nấc 2km đầu là 12.000đ
-
+            // 1. TÍNH CƯỚC PHÍ SHIP GỐC DỰA TRÊN KHOẢNG CÁCH THỰC TẾ
+            var fee = Number(STORE_BASE_CONFIG.shipBaseFee) || 12000;
             if (dist > STORE_BASE_CONFIG.shipBaseDistanceKm) {
                 var extraKm = dist - STORE_BASE_CONFIG.shipBaseDistanceKm;
-                fee += Math.round(extraKm * STORE_BASE_CONFIG.shipExtraFeePerKm);
+                fee += Math.round(extraKm * (Number(STORE_BASE_CONFIG.shipExtraFeePerKm) || 4500));
             }
 
+            // 2. PHÂN TÍCH THÀNH PHẦN GIỎ HÀNG & TÍNH TỔNG TIỀN MÓN (SUBTOTAL)
             var subtotal = 0;
+            var hasHighMarginItem = false; // Cờ nhận diện món biên lợi nhuận cao (Nước / Combo)
+
             appState.cartItems.forEach(function(i) {
                 if (!i.isGift) {
-                    subtotal += (i.price * i.quantity);
+                    var itemPrice = Number(i.price) || 0;
+                    var itemQty = Number(i.quantity) || 1;
+                    subtotal += (itemPrice * itemQty);
+
+                    // Kiểm tra xem giỏ hàng có Trà Đào (M09), Nước giải khát hoặc Combo hay không
+                    var dishId = String(i.dishId || i.id || "");
+                    var dishName = String(i.name || "").toLowerCase();
+                    if (dishId === "M09" || dishName.indexOf("trà đào") !== -1 || dishName.indexOf("combo") !== -1) {
+                        hasHighMarginItem = true;
+                    }
                 }
             });
 
+            // 3. TÍNH MỨC TRỢ GIÁ TỐI ƯU DÒNG TIỀN (DYNAMIC SUBSIDY LOGIC)
             var rawSubsidy = 0;
-            if (subtotal >= STORE_BASE_CONFIG.subsidyTier2Min) {
-                rawSubsidy = STORE_BASE_CONFIG.subsidyTier2Amount;
-            } else if (subtotal >= STORE_BASE_CONFIG.subsidyTier1Min) {
-                rawSubsidy = STORE_BASE_CONFIG.subsidyTier1Amount;
+            var subsidyReason = "";
+
+            // NẤC 3: KHÁCH Ở XA (>4KM) CÓ ĐƠN LỚN HOẶC CÓ MÓN BIÊN LÃI CAO (TRÀ ĐÀO/COMBO)
+            if (dist >= STORE_BASE_CONFIG.subsidyBoosterMinDistKm && (subtotal >= STORE_BASE_CONFIG.subsidyBoosterMinAov || (subtotal >= 110000 && hasHighMarginItem))) {
+                rawSubsidy = STORE_BASE_CONFIG.subsidyBoosterAmount; // Giảm tối đa 15.000đ
+                subsidyReason = "Hỗ trợ khách xa > 4km (Đơn giá trị cao)";
+            }
+            // NẤC 2: KHÁCH Ở XA (>3.5KM) ĐƠN TỪ 120K
+            else if (dist >= STORE_BASE_CONFIG.subsidyFarMinDistKm && subtotal >= STORE_BASE_CONFIG.subsidyFarMinAov) {
+                rawSubsidy = STORE_BASE_CONFIG.subsidyFarAmount; // Giảm 10.000đ
+                subsidyReason = "Hỗ trợ ship đường xa > 3.5km";
+            }
+            // NẤC 1: ĐƠN TIÊU CHUẨN TỪ 89K (MỌI CỰ LY)
+            else if (subtotal >= STORE_BASE_CONFIG.subsidyTier1MinAov) {
+                rawSubsidy = STORE_BASE_CONFIG.subsidyTier1Amount; // Giảm nhẹ 5.000đ
+                subsidyReason = "Ưu đãi đơn từ 89k";
             }
 
-            // KHÓA TRẦN TRỢ GIÁ KHÔNG VƯỢT QUÁ PHÍ SHIP THỰC TẾ
-            var appliedSubsidy = Math.min(fee, rawSubsidy);
+            // 4. RÀO CHẮN BẢO VỆ DÒNG TIỀN:
+            // Khóa trần không vượt quá phí ship thực tế và không vượt quá 12% tổng đơn hàng
+            var maxAllowedSubsidy = Math.min(fee, Math.round(subtotal * 0.12));
+            var appliedSubsidy = Math.min(rawSubsidy, fee);
+            
+            // Nếu đơn đạt nấc trợ giá khách xa thì cho phép mức trợ giá đã tính toán
+            if (rawSubsidy > maxAllowedSubsidy && (dist >= STORE_BASE_CONFIG.subsidyFarMinDistKm)) {
+                appliedSubsidy = Math.min(rawSubsidy, fee);
+            }
+
             var actualShip = Math.max(0, fee - appliedSubsidy);
 
             appState.shippingFee = fee;
             appState.shippingSubsidy = appliedSubsidy;
+            appState.subsidyReason = subsidyReason;
 
+            // 5. HIỂN THỊ TRỰC QUAN LÊN GIAO DIỆN
             var txtDist = document.getElementById("txt-calc-distance");
             var txtFee = document.getElementById("txt-calc-shipping-fee");
             var tagSubsidy = document.getElementById("txt-calc-subsidy-tag");
@@ -2510,19 +2619,32 @@
 
             updateCheckoutSummary();
         }
-
+        /**
+         * CẬP NHẬT TỔNG KẾT ĐƠN HÀNG VÀ TỰ ĐỘNG ĐỒNG BỘ MÃ VIETQR KHÓA CỨNG TIỀN
+         */
         function updateCheckoutSummary() {
             var subtotal = 0;
+            var hasHighMarginItem = false;
+
             appState.cartItems.forEach(function(i) {
                 if (!i.isGift) {
-                    subtotal += (i.price * i.quantity);
+                    var itemPrice = Number(i.price) || 0;
+                    var itemQty = Number(i.quantity) || 1;
+                    subtotal += (itemPrice * itemQty);
+
+                    var dishId = String(i.dishId || i.id || "");
+                    var dishName = String(i.name || "").toLowerCase();
+                    if (dishId === "M09" || dishName.indexOf("trà đào") !== -1 || dishName.indexOf("combo") !== -1) {
+                        hasHighMarginItem = true;
+                    }
                 }
             });
 
-            var fee = appState.shippingFee;
-            var sub = appState.shippingSubsidy;
+            var fee = Number(appState.shippingFee) || 0;
+            var sub = Number(appState.shippingSubsidy) || 0;
             var actualShip = Math.max(0, fee - sub);
             var finalTotal = subtotal + actualShip;
+            var dist = Number(appState.calculatedDistanceKm) || 1.8;
 
             var elSub = document.getElementById("chk-summary-subtotal");
             var elFee = document.getElementById("chk-summary-shipping-fee");
@@ -2534,10 +2656,11 @@
 
             if (elSubTag) {
                 if (sub > 0) {
+                    var reasonText = appState.subsidyReason ? ` (${appState.subsidyReason})` : "";
                     if (actualShip === 0) {
-                        elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ (Freeship)";
+                        elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ (Freeship" + reasonText + ")";
                     } else {
-                        elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ";
+                        elSubTag.innerText = "-" + sub.toLocaleString("vi-VN") + " đ" + reasonText;
                     }
                 } else {
                     elSubTag.innerText = "-0 đ";
@@ -2546,11 +2669,75 @@
 
             if (elFinal) elFinal.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
 
+            // HIỂN THỊ BANNER GỢI Ý THÊM MÓN BIÊN LÃI CAO (UP-SELL THÔNG MINH CHO KHÁCH Ở XA)
+            var upSellBox = document.getElementById("box-shipping-upsell-hint");
+            if (!upSellBox) {
+                var summaryContainer = document.getElementById("chk-summary-final-total") 
+                    ? document.getElementById("chk-summary-final-total").closest(".space-y-1\\.5") 
+                    : null;
+                if (summaryContainer) {
+                    var newBox = document.createElement("div");
+                    newBox.id = "box-shipping-upsell-hint";
+                    summaryContainer.parentNode.insertBefore(newBox, summaryContainer);
+                    upSellBox = newBox;
+                }
+            }
+
+            if (upSellBox) {
+                if (dist >= 3.5 && !hasHighMarginItem && sub < 15000 && subtotal > 0) {
+                    upSellBox.className = "p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[10.5px] text-amber-300 flex items-center justify-between gap-2 animate-in fade-in";
+                    upSellBox.innerHTML = `
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="text-sm">🍹</span>
+                            <span class="truncate">Khách ở xa >3.5km: Thêm <strong>Trà Đào 1L (25k)</strong> để nhận ngay trợ giá ship <strong>-15.000đ</strong>!</span>
+                        </div>
+                        <button type="button" 
+                                onclick="D2CStoreFrontController.quickAddDrinkAndRefresh()" 
+                                class="px-2 py-1 rounded-lg bg-amber-500 text-slate-950 font-black uppercase text-[9.5px] shrink-0 active:scale-95 transition">
+                            + Thêm
+                        </button>
+                    `;
+                } else {
+                    upSellBox.className = "hidden";
+                    upSellBox.innerHTML = "";
+                }
+            }
+
+            // NẾU KHÁCH CHỌN VIETQR: ĐỒNG BỘ MÃ QR VỚI SỐ TIỀN ĐÃ KHÓA CỨNG
             if (appState.selectedPaymentMethod === "VIETQR") {
                 renderDynamicVietQr(finalTotal);
             }
         }
 
+        /**
+         * HÀM THÊM NHANH TRÀ ĐÀO ĐỂ HƯỞNG TRỢ GIÁ KHÁCH Ở XA
+         */
+        function quickAddDrinkAndRefresh() {
+            var drinkItem = FALLBACK_MENU.find(function(d) { return d.id === "M09"; });
+            if (!drinkItem) return;
+
+            appState.cartItems.push({
+                id: drinkItem.id + "_" + Date.now(),
+                dishId: drinkItem.id,
+                name: drinkItem.name,
+                basePrice: Number(drinkItem.price) || 25000,
+                price: Number(drinkItem.price) || 25000,
+                quantity: 1,
+                taste: "Không Cay",
+                soup: "",
+                note: "",
+                toppings: [],
+                toppingSummary: "",
+                isGift: false
+            });
+
+            updateAovAndCartUI();
+            recalculateShippingFee();
+        }
+
+        /**
+         * VẼ MÃ VIETQR ĐỘNG KHÓA CỨNG SỐ TIỀN THANH TOÁN
+         */
         function renderDynamicVietQr(amount) {
             var memoCode = "T5_" + Date.now().toString().slice(-6);
             var bankBin = STORE_BASE_CONFIG.bankBin;
@@ -2597,7 +2784,6 @@
         }
 
         function proceedToCheckoutModal() {
-            // RÀO CHẮN NGHIỆP VỤ: NẾU QUÁN ĐANG ĐÓNG CỬA THÌ CHẶN MỞ FORM CHECKOUT
             if (appState.storeStatus === "CLOSED") {
                 var msg = appState.closedMessage || "Bếp Thím 5 hiện đang tạm dừng nhận đơn!";
                 alert("⛔ THÔNG BÁO TỪ BẾP THÍM 5:\n\n" + msg + "\n\nQuý khách vui lòng quay lại sau nhé!");
@@ -2657,7 +2843,7 @@
             var subtotal = 0;
             appState.cartItems.forEach(function(i) { 
                 if (!i.isGift) {
-                    subtotal += (i.price * i.quantity); 
+                    subtotal += ((Number(i.price) || 0) * (Number(i.quantity) || 1)); 
                 }
             });
             var finalTotal = subtotal + Math.max(0, appState.shippingFee - appState.shippingSubsidy);
@@ -2682,8 +2868,9 @@
                 subtotal: subtotal,
                 shippingFee: appState.shippingFee,
                 shippingSubsidy: appState.shippingSubsidy,
+                subsidyReason: appState.subsidyReason || "",
                 finalTotal: finalTotal,
-                paymentMethod: appState.selectedPaymentMethod, // "COD" hoặc "VIETQR"
+                paymentMethod: appState.selectedPaymentMethod,
                 note: "",
                 timestamp: now.toISOString()
             };
