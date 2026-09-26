@@ -51,7 +51,7 @@
 <body class="min-h-screen bg-slate-950 text-slate-100 p-2.5 sm:p-4 text-xs select-none">
 
   <!-- ========================================================================= -->
-  <!-- 1. MÀN HÌNH KHÓA PIN QUẢN TRỊ TRẠM BẾP (KDS PIN AUTH OVERLAY)            -->
+  <!-- 1. MÀN HÌNH KHÓA PIN QUẢN TRỊ TRẠM BẾP (AUTO-LOGIN PERSISTENT)             -->
   <!-- ========================================================================= -->
   <div id="kdsAuthOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 sm:p-8 text-center space-y-4 shadow-2xl max-w-sm w-full animate-in zoom-in-95 duration-200">
@@ -61,7 +61,7 @@
       
       <div class="space-y-1">
         <h2 class="text-base sm:text-lg font-black text-white uppercase tracking-wider">Trạm Bếp KDS Thím 5</h2>
-        <p class="text-[11px] text-slate-400">Nhập mã PIN Quản lý (1985) để mở trạm điều phối chảo:</p>
+        <p class="text-[11px] text-slate-400">Nhập mã PIN Quản lý (1985) đúng 1 lần để lưu phiên vĩnh viễn:</p>
       </div>
 
       <div class="pt-2">
@@ -109,18 +109,157 @@
         </div>
       </div>
 
-      <!-- Cụm Điều Khiển: Chuông báo, Đồng hồ LED, Khóa màn hình -->
+      <!-- Cụm Điều Khiển: Chuông báo đa năng, Đồng hồ LED, Khóa màn hình -->
       <div class="flex items-center gap-2 shrink-0">
-        <!-- Nút Bật/Tắt Âm Thanh -->
+        <!-- NÚT MỞ BẢNG ĐIỀU KHIỂN & CHỌN ÂM BÁO KDS -->
         <button type="button" 
                 id="btnSoundToggle" 
-                onclick="KitchenKdsController.toggleSound()" 
-                class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 active:scale-95">
+                onclick="KitchenKdsController.openSoundConfigModal()" 
+                class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-sm">
           <i id="soundIcon" class="fa-solid fa-bell"></i>
-          <span id="soundLabel">Âm Báo: BẬT</span>
+          <span id="soundLabel">Âm Báo: Zalo (BẬT)</span>
+          <i class="fa-solid fa-sliders text-[10px] text-emerald-400/80 ml-0.5"></i>
         </button>
 
         <!-- Đồng hồ thời gian thực Bếp -->
+        <div id="kdsLiveClock" class="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 font-mono font-black text-amber-400 text-xs sm:text-sm tracking-wider shadow-inner">
+          00:00:00
+        </div>
+
+        <!-- Nút Khóa Màn Hình Bếp (Khi muốn đổi ca hoặc bảo mật) -->
+        <button type="button" 
+                onclick="KitchenKdsController.handleKdsLockOut()" 
+                class="w-9 h-9 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 flex items-center justify-center text-xs transition active:scale-95" 
+                title="Khóa trạm Bếp">
+          <i class="fa-solid fa-lock"></i>
+        </button>
+      </div>
+
+    </header>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL CẤU HÌNH & CHỌN ÂM BÁO TRẠM BẾP KDS (SOUND SETTINGS POPUP)          -->
+  <!-- ========================================================================= -->
+  <div id="modalKdsSoundConfig" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div class="relative w-full max-w-sm rounded-3xl bg-slate-900 border-2 border-amber-500/40 shadow-2xl p-5 space-y-4">
+      
+      <!-- NÚT ĐÓNG MODAL -->
+      <button type="button" 
+              onclick="KitchenKdsController.closeSoundConfigModal()" 
+              class="absolute top-4 right-4 w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-90">
+        <i class="fa-solid fa-xmark text-xs"></i>
+      </button>
+
+      <!-- TIÊU ĐỀ -->
+      <div class="space-y-1">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-black text-amber-400 uppercase font-mono">
+          <i class="fa-solid fa-volume-high"></i> Cảnh Báo Trạm Bếp
+        </div>
+        <h3 class="text-sm sm:text-base font-black text-white uppercase tracking-wider">Cấu Hình Chuông Báo Đơn</h3>
+        <p class="text-[11px] text-slate-400">Chọn kiểu chuông to rõ để không bỏ lỡ đơn nóng hổi khi Bếp ồn ào:</p>
+      </div>
+
+      <!-- CÔNG TẮC BẬT / TẮT TỔNG -->
+      <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-200">Trạng Thái Chuông:</span>
+          <span id="cfgSoundStatusBadge" class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300">ĐANG BẬT</span>
+        </div>
+        <button type="button" 
+                onclick="KitchenKdsController.toggleSoundMaster()" 
+                class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-white transition active:scale-95">
+          Bật/Tắt
+        </button>
+      </div>
+
+      <!-- DANH SÁCH CÁC KIỂU CHUÔNG HẤP DẪN -->
+      <div class="space-y-2">
+        <label class="text-[11px] font-black text-slate-300 uppercase tracking-wider block">
+          Chọn Kiểu Âm Báo:
+        </label>
+
+        <!-- Kiểu 1: Zalo Ting Ting -->
+        <label class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/40 cursor-pointer transition select-none">
+          <div class="flex items-center gap-2.5">
+            <input type="radio" name="kdsSoundChoice" value="zalo" class="accent-amber-500" checked onchange="KitchenKdsController.onSoundChoiceChange('zalo')" />
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>💬 Âm Tin Nhắn Zalo</span>
+                <span class="px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 text-[9px] font-mono">Quen Thuộc</span>
+              </div>
+              <div class="text-[10px] text-slate-400">Tiếng Ting Ting nhẹ bén, dễ nhận diện</div>
+            </div>
+          </div>
+          <button type="button" onclick="KitchenKdsController.testPlaySound('zalo')" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold transition active:scale-95 shrink-0">
+            <i class="fa-solid fa-play"></i> Thử
+          </button>
+        </label>
+
+        <!-- Kiểu 2: Ding Dong Đơn Mới (Grab/Shopee) -->
+        <label class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/40 cursor-pointer transition select-none">
+          <div class="flex items-center gap-2.5">
+            <input type="radio" name="kdsSoundChoice" value="dingdong" class="accent-amber-500" onchange="KitchenKdsController.onSoundChoiceChange('dingdong')" />
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>🔔 Ding Dong Đơn Mới</span>
+                <span class="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-mono">Bắt Tai</span>
+              </div>
+              <div class="text-[10px] text-slate-400">Chuông Pos chuẩn F&B vang ngân 2 hồi</div>
+            </div>
+          </div>
+          <button type="button" onclick="KitchenKdsController.testPlaySound('dingdong')" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold transition active:scale-95 shrink-0">
+            <i class="fa-solid fa-play"></i> Thử
+          </button>
+        </label>
+
+        <!-- Kiểu 3: Chuông Điện Thoại Bàn Reo Gấp -->
+        <label class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/40 cursor-pointer transition select-none">
+          <div class="flex items-center gap-2.5">
+            <input type="radio" name="kdsSoundChoice" value="phone" class="accent-amber-500" onchange="KitchenKdsController.onSoundChoiceChange('phone')" />
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>☎️ Chuông Điện Thoại Reo</span>
+                <span class="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 text-[9px] font-mono">Khẩn Cấp</span>
+              </div>
+              <div class="text-[10px] text-slate-400">Reng liên hồi, cực kỳ to, trị ngủ gật</div>
+            </div>
+          </div>
+          <button type="button" onclick="KitchenKdsController.testPlaySound('phone')" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold transition active:scale-95 shrink-0">
+            <i class="fa-solid fa-play"></i> Thử
+          </button>
+        </label>
+
+        <!-- Kiểu 4: Bíp Kép Điện Tử (Mặc định) -->
+        <label class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/40 cursor-pointer transition select-none">
+          <div class="flex items-center gap-2.5">
+            <input type="radio" name="kdsSoundChoice" value="beep" class="accent-amber-500" onchange="KitchenKdsController.onSoundChoiceChange('beep')" />
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>📻 Bíp Điện Tử Tần Số Cao</span>
+              </div>
+              <div class="text-[10px] text-slate-400">Tiếng bíp đơn âm gốc của Bếp Thím 5</div>
+            </div>
+          </div>
+          <button type="button" onclick="KitchenKdsController.testPlaySound('beep')" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold transition active:scale-95 shrink-0">
+            <i class="fa-solid fa-play"></i> Thử
+          </button>
+        </label>
+      </div>
+
+      <!-- NÚT LƯU VÀ XÁC NHẬN -->
+      <div class="pt-2">
+        <button type="button" 
+                onclick="KitchenKdsController.saveSoundConfig()" 
+                class="w-full py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/30 transition active:scale-95">
+          Áp Dụng Cho Trạm Bếp
+        </button>
+      </div>
+
+    </div>
+  </div>
+  
+
+              <!-- Đồng hồ thời gian thực Bếp -->
         <div id="kdsLiveClock" class="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 font-mono font-black text-amber-400 text-xs sm:text-sm tracking-wider shadow-inner">
           00:00:00
         </div>
@@ -180,16 +319,17 @@
   <script src="api.js?v=20260917"></script>
 
   <script>
-  /**
+    /**
    * =========================================================================
    * CONTROLLER: KITCHEN DISPLAY SYSTEM (TRẠM BẾP KDS THÍM 5 v2.9 ENTERPRISE)
    * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
    * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
-   * Kiến trúc: Headless GAS API, Adaptive Polling, Web Audio API Native
+   * Kiến trúc: Headless GAS API, Persistent Auto-Login, Web Audio API Native
    * =========================================================================
    */
   var KitchenKdsController = (function() {
       var isSoundEnabled = true;
+      var currentSoundType = "zalo"; // "zalo" | "dingdong" | "phone" | "beep"
       var audioCtx = null;
       var knownOrderCodes = [];
       var isInitialLoad = true;
@@ -230,14 +370,28 @@
           });
       }
 
+      /**
+       * KIỂM TRA ĐĂNG NHẬP TỰ ĐỘNG (AUTO-LOGIN PERSISTENT & BYPASS ADMIN)
+       */
       function checkKdsAuth() {
+          var urlParams = new URLSearchParams(window.location.search);
+          var authParam = urlParams.get("auth");
           var savedPin = localStorage.getItem("thim5_kds_auth");
           var overlay = document.getElementById("kdsAuthOverlay");
-          if (savedPin === "1985" || savedPin === "2026") {
-              if (overlay) overlay.style.display = "none";
+
+          // Tự động vượt qua màn hình PIN nếu truy cập từ Admin hoặc đã lưu PIN trước đó
+          if (authParam === "1985" || authParam === "2026" || savedPin === "1985" || savedPin === "2026") {
+              if (authParam) {
+                  localStorage.setItem("thim5_kds_auth", authParam);
+              }
+              if (overlay) {
+                  overlay.style.display = "none";
+              }
               initKDS();
           } else {
-              if (overlay) overlay.style.display = "flex";
+              if (overlay) {
+                  overlay.style.display = "flex";
+              }
               var pinInput = document.getElementById("kdsPinInput");
               if (pinInput) {
                   pinInput.value = "";
@@ -249,31 +403,56 @@
           }
       }
 
+      /**
+       * XỬ LÝ MỞ TRẠM BẾP: LƯU PHIÊN VĨNH VIỄN & MỞ KHÓA GIAO DIỆN NGAY LẬP TỨC
+       */
       function handleKdsAuthLogin() {
           var pinInput = document.getElementById("kdsPinInput");
           var pin = pinInput ? pinInput.value.trim() : "";
           var err = document.getElementById("kdsAuthError");
           var overlay = document.getElementById("kdsAuthOverlay");
+
           if (err) err.style.display = "none";
 
           if (pin === "1985" || pin === "2026") {
               localStorage.setItem("thim5_kds_auth", pin);
-              if (overlay) overlay.style.display = "none";
-              try { initAudioContext(); } catch(e) {}
+              
+              // Ẩn overlay ngay lập tức, không để bất kỳ lỗi nào chặn lại
+              if (overlay) {
+                  overlay.style.display = "none";
+              }
+
+              // Mở khóa âm thanh an toàn
+              try { 
+                  initAudioContext(); 
+                  playToneSynthesis("zalo"); 
+              } catch(e) {
+                  console.warn("⚠️ [Audio Unlock Warn]:", e);
+              }
+
               initKDS();
           } else {
               if (err) {
                   err.innerText = "❌ Sai mã PIN Bếp! Vui lòng nhập đúng PIN Quản lý (1985).";
                   err.style.display = "block";
               }
+              if (pinInput) {
+                  pinInput.value = "";
+                  pinInput.focus();
+              }
           }
       }
 
+      /**
+       * KHÓA MÀN HÌNH BẾP (KHI MUỐN ĐỔI CA HOẶC BẢO MẬT)
+       */
       function handleKdsLockOut() {
           if (confirm("Khóa màn hình trạm Bếp KDS?")) {
               localStorage.removeItem("thim5_kds_auth");
-              if (kdsPollingTimer) clearInterval(kdsPollingTimer);
-              kdsPollingTimer = null;
+              if (kdsPollingTimer) {
+                  clearInterval(kdsPollingTimer);
+                  kdsPollingTimer = null;
+              }
               var pinInput = document.getElementById("kdsPinInput");
               if (pinInput) pinInput.value = "";
               var overlay = document.getElementById("kdsAuthOverlay");
@@ -281,9 +460,13 @@
           }
       }
 
+      /**
+       * KHỞI CHẠY BẾP KDS & BẮT ĐẦU VÒNG LẶP POLLING ĐỒNG BỘ ĐƠN HÀNG
+       */
       function initKDS() {
           updateLiveClock();
           setInterval(updateLiveClock, 1000);
+          loadSoundSettingsFromStorage();
           loadKitchenOrders();
           
           if (!kdsPollingTimer) {
@@ -291,6 +474,7 @@
                   loadKitchenOrders(true);
               }, 10000);
           }
+
           document.body.addEventListener('click', function() {
               try { initAudioContext(); } catch(e) {}
           }, { once: true });
@@ -317,17 +501,213 @@
           if (el) el.innerText = h + ":" + m + ":" + s;
       }
 
-      function toggleSound() {
+      /**
+       * BỘ NÃO TỔNG HỢP ÂM THANH NATIVE (WEB AUDIO API SYNTHESIS ENGINE)
+       */
+      function playToneSynthesis(type) {
+          if (!isSoundEnabled) return;
+          try {
+              initAudioContext();
+              if (!audioCtx) return;
+
+              var now = audioCtx.currentTime;
+
+              if (type === "zalo") {
+                  // ÂM BÁO ZALO: 2 nốt Ting Ting thanh thoát (A6 -> E7)
+                  var osc1 = audioCtx.createOscillator();
+                  var gain1 = audioCtx.createGain();
+                  osc1.type = 'sine';
+                  osc1.frequency.setValueAtTime(1760, now);
+                  gain1.gain.setValueAtTime(0.35, now);
+                  gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                  osc1.connect(gain1);
+                  gain1.connect(audioCtx.destination);
+                  osc1.start(now);
+                  osc1.stop(now + 0.15);
+
+                  var osc2 = audioCtx.createOscillator();
+                  var gain2 = audioCtx.createGain();
+                  osc2.type = 'sine';
+                  osc2.frequency.setValueAtTime(2637, now + 0.12);
+                  gain2.gain.setValueAtTime(0.4, now + 0.12);
+                  gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                  osc2.connect(gain2);
+                  gain2.connect(audioCtx.destination);
+                  osc2.start(now + 0.12);
+                  osc2.stop(now + 0.45);
+
+              } else if (type === "dingdong") {
+                  // ÂM BÁO DING-DONG POS: 2 hồi ngân vang (D5 -> A5)
+                  var oscD1 = audioCtx.createOscillator();
+                  var gainD1 = audioCtx.createGain();
+                  oscD1.type = 'triangle';
+                  oscD1.frequency.setValueAtTime(587.33, now);
+                  gainD1.gain.setValueAtTime(0.45, now);
+                  gainD1.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                  oscD1.connect(gainD1);
+                  gainD1.connect(audioCtx.destination);
+                  oscD1.start(now);
+                  oscD1.stop(now + 0.35);
+
+                  var oscD2 = audioCtx.createOscillator();
+                  var gainD2 = audioCtx.createGain();
+                  oscD2.type = 'sine';
+                  oscD2.frequency.setValueAtTime(880, now + 0.28);
+                  gainD2.gain.setValueAtTime(0.5, now + 0.28);
+                  gainD2.gain.exponentialRampToValueAtTime(0.005, now + 0.85);
+                  oscD2.connect(gainD2);
+                  gainD2.connect(audioCtx.destination);
+                  oscD2.start(now + 0.28);
+                  oscD2.stop(now + 0.85);
+
+              } else if (type === "phone") {
+                  // ÂM BÁO ĐIỆN THOẠI REO GẤP: Hợp âm kép liên hồi (853Hz + 960Hz)
+                  for (var pulse = 0; pulse < 3; pulse++) {
+                      var pulseStart = now + (pulse * 0.14);
+                      var oA = audioCtx.createOscillator();
+                      var oB = audioCtx.createOscillator();
+                      var gP = audioCtx.createGain();
+
+                      oA.type = 'square';
+                      oB.type = 'sine';
+                      oA.frequency.setValueAtTime(853, pulseStart);
+                      oB.frequency.setValueAtTime(960, pulseStart);
+
+                      gP.gain.setValueAtTime(0.18, pulseStart);
+                      gP.gain.exponentialRampToValueAtTime(0.01, pulseStart + 0.1);
+
+                      oA.connect(gP);
+                      oB.connect(gP);
+                      gP.connect(audioCtx.destination);
+
+                      oA.start(pulseStart);
+                      oB.start(pulseStart);
+                      oA.stop(pulseStart + 0.1);
+                      oB.stop(pulseStart + 0.1);
+                  }
+
+              } else {
+                  // MẶC ĐỊNH BÍP ĐIỆN TỬ
+                  var oscB1 = audioCtx.createOscillator();
+                  var gainB1 = audioCtx.createGain();
+                  oscB1.type = 'sine';
+                  oscB1.frequency.setValueAtTime(880, now);
+                  gainB1.gain.setValueAtTime(0.3, now);
+                  gainB1.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+                  oscB1.connect(gainB1);
+                  gainB1.connect(audioCtx.destination);
+                  oscB1.start(now);
+                  oscB1.stop(now + 0.22);
+
+                  var oscB2 = audioCtx.createOscillator();
+                  var gainB2 = audioCtx.createGain();
+                  oscB2.type = 'sine';
+                  oscB2.frequency.setValueAtTime(1174.66, now + 0.18);
+                  gainB2.gain.setValueAtTime(0.3, now + 0.18);
+                  gainB2.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                  oscB2.connect(gainB2);
+                  gainB2.connect(audioCtx.destination);
+                  oscB2.start(now + 0.18);
+                  oscB2.stop(now + 0.45);
+              }
+          } catch(e) {
+              console.warn("⚠️ [KDS Sound Synthesis Error]:", e);
+          }
+      }
+
+      function playNewOrderAlert() {
+          var targetType = currentSoundType || localStorage.getItem("thim5_kds_sound_type") || "zalo";
+          playToneSynthesis(targetType);
+      }
+
+      function openSoundConfigModal() {
+          initAudioContext();
+          var modal = document.getElementById("modalKdsSoundConfig");
+          if (modal) modal.classList.remove("hidden");
+          syncSoundModalUI();
+      }
+
+      function closeSoundConfigModal() {
+          var modal = document.getElementById("modalKdsSoundConfig");
+          if (modal) modal.classList.add("hidden");
+      }
+
+      function toggleSoundMaster() {
           isSoundEnabled = !isSoundEnabled;
+          localStorage.setItem("thim5_kds_sound_enabled", isSoundEnabled ? "true" : "false");
+          syncSoundModalUI();
+          updateTopbarSoundButton();
+          if (isSoundEnabled) {
+              playNewOrderAlert();
+          }
+      }
+
+      function onSoundChoiceChange(val) {
+          currentSoundType = String(val || "zalo").trim();
+      }
+
+      function testPlaySound(val) {
+          initAudioContext();
+          var t = String(val || currentSoundType || "zalo").trim();
+          playToneSynthesis(t);
+      }
+
+      function saveSoundConfig() {
+          var radios = document.querySelectorAll("input[name='kdsSoundChoice']");
+          radios.forEach(function(r) {
+              if (r.checked) currentSoundType = r.value;
+          });
+          localStorage.setItem("thim5_kds_sound_type", currentSoundType);
+          localStorage.setItem("thim5_kds_sound_enabled", isSoundEnabled ? "true" : "false");
+          updateTopbarSoundButton();
+          closeSoundConfigModal();
+          playNewOrderAlert();
+      }
+
+      function loadSoundSettingsFromStorage() {
+          var savedEnabled = localStorage.getItem("thim5_kds_sound_enabled");
+          if (savedEnabled !== null) {
+              isSoundEnabled = (savedEnabled === "true");
+          }
+          var savedType = localStorage.getItem("thim5_kds_sound_type");
+          if (savedType) {
+              currentSoundType = savedType;
+          }
+          updateTopbarSoundButton();
+      }
+
+      function syncSoundModalUI() {
+          var badge = document.getElementById("cfgSoundStatusBadge");
+          if (badge) {
+              if (isSoundEnabled) {
+                  badge.className = "px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300";
+                  badge.innerText = "ĐANG BẬT";
+              } else {
+                  badge.className = "px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-rose-500/20 text-rose-300";
+                  badge.innerText = "ĐÃ TẮT";
+              }
+          }
+          var radio = document.querySelector(`input[name='kdsSoundChoice'][value='${currentSoundType}']`);
+          if (radio) radio.checked = true;
+      }
+
+      function updateTopbarSoundButton() {
           var btn = document.getElementById("btnSoundToggle");
           var label = document.getElementById("soundLabel");
           var icon = document.getElementById("soundIcon");
 
+          var soundNameMap = {
+              zalo: "Zalo",
+              dingdong: "DingDong",
+              phone: "Chuông ĐT",
+              beep: "Bíp Kép"
+          };
+          var curName = soundNameMap[currentSoundType] || "Zalo";
+
           if (isSoundEnabled) {
-              if (btn) btn.className = "px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 active:scale-95";
-              if (label) label.innerText = "Âm Báo: BẬT";
+              if (btn) btn.className = "px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-sm";
+              if (label) label.innerText = "Âm Báo: " + curName + " (BẬT)";
               if (icon) icon.className = "fa-solid fa-bell";
-              playBeepSound();
           } else {
               if (btn) btn.className = "px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 active:scale-95";
               if (label) label.innerText = "Âm Báo: TẮT";
@@ -335,42 +715,6 @@
           }
       }
 
-      function playBeepSound() {
-          if (!isSoundEnabled) return;
-          try {
-              initAudioContext();
-              if (!audioCtx) return;
-
-              var osc1 = audioCtx.createOscillator();
-              var gain1 = audioCtx.createGain();
-              osc1.type = 'sine';
-              osc1.frequency.setValueAtTime(880, audioCtx.currentTime);
-              gain1.gain.setValueAtTime(0.3, audioCtx.currentTime);
-              gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-              osc1.connect(gain1);
-              gain1.connect(audioCtx.destination);
-              osc1.start();
-              osc1.stop(audioCtx.currentTime + 0.25);
-
-              setTimeout(function() {
-                  if (!audioCtx) return;
-                  var osc2 = audioCtx.createOscillator();
-                  var gain2 = audioCtx.createGain();
-                  osc2.type = 'sine';
-                  osc2.frequency.setValueAtTime(1174.66, audioCtx.currentTime);
-                  gain2.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                  gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-                  osc2.connect(gain2);
-                  gain2.connect(audioCtx.destination);
-                  osc2.start();
-                  osc2.stop(audioCtx.currentTime + 0.35);
-              }, 180);
-          } catch(e) {}
-      }
-
-      /**
-       * BÓC TÁCH MẢNG ĐƠN HÀNG AN TOÀN TỪ MỌI CẤU TRÚC PHẢN HỒI CỦA GAS
-       */
       function unwrapOrdersArray(res) {
           if (!res) return [];
           if (Array.isArray(res)) return res;
@@ -469,7 +813,7 @@
           if (!isInitialLoad) {
               var hasNewOrder = currentCodes.some(function(code) { return knownOrderCodes.indexOf(code) === -1; });
               if (hasNewOrder) {
-                  playBeepSound();
+                  playNewOrderAlert();
               }
           } else {
               isInitialLoad = false;
@@ -489,7 +833,7 @@
 
           var html = "";
           displayOrders.forEach(function(o) {
-              var cleanCode = String(o.code || '').trim();
+              var cleanCode = String(o.code || o.orderCode || '').trim();
               var stepNum = Number(o.step !== undefined ? o.step : 0);
               var isCod = (o.method === "COD");
               var isPaidOnline = !isCod;
@@ -510,12 +854,18 @@
                   return `<option value="${s.name}|${s.phone}" ${isSelected}>🛵 ${s.name} (${s.phone})</option>`;
               }).join("");
 
+              var timerComponentHtml = (typeof KDSTimerController !== "undefined" && typeof KDSTimerController.buildTimerHtml === "function")
+                  ? KDSTimerController.buildTimerHtml(o)
+                  : `<span class="text-[10.5px] font-mono text-slate-400">⏰ ${o.time || 'Vừa xong'}</span>`;
+
               html += `
                   <div class="p-4 rounded-3xl bg-slate-900 border-2 ${isNeedCook ? 'border-orange-500/80 order-card-urgent' : (isWaitCod ? 'border-amber-500/40 bg-amber-950/10' : 'border-slate-800')} shadow-xl flex flex-col justify-between space-y-3">
                       <div>
-                          <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-2">
-                              <span class="font-mono font-black text-amber-400 text-base">${cleanCode}</span>
-                              <span class="text-[10.5px] font-mono text-slate-400">⏰ ${o.time || 'Vừa xong'}</span>
+                          <div class="border-b border-slate-800/80 pb-2 mb-2">
+                              <div class="flex items-center justify-between">
+                                  <span class="font-mono font-black text-amber-400 text-base">${cleanCode}</span>
+                              </div>
+                              ${timerComponentHtml}
                           </div>
 
                           <div class="mb-2">
@@ -597,7 +947,6 @@
                               🚫 Hủy Đơn (Khách Báo Zalo / Hết Nguyên Liệu)
                           </button>
                       </div>
-
                   </div>
               `;
           });
@@ -696,7 +1045,12 @@
           checkKdsAuth: checkKdsAuth,
           handleKdsAuthLogin: handleKdsAuthLogin,
           handleKdsLockOut: handleKdsLockOut,
-          toggleSound: toggleSound,
+          openSoundConfigModal: openSoundConfigModal,
+          closeSoundConfigModal: closeSoundConfigModal,
+          toggleSoundMaster: toggleSoundMaster,
+          onSoundChoiceChange: onSoundChoiceChange,
+          testPlaySound: testPlaySound,
+          saveSoundConfig: saveSoundConfig,
           changeFilter: changeFilter,
           handleCookDone: handleCookDone,
           handleAssignShipper: handleAssignShipper,
@@ -707,6 +1061,176 @@
   window.onload = function() {
       KitchenKdsController.checkKdsAuth();
   };
+      /**
+     * =========================================================================
+     * BỘ ĐIỀU KHIỂN HẸN GIỜ RA MÓN BẾP KDS (JUST-IN-TIME DISPATCH ENGINE)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * =========================================================================
+     */
+    var KDSTimerController = (function() {
+        var tickInterval = null;
+        var prepTimeOverrides = {}; // Lưu trữ thời gian gia hạn theo mã đơn { [orderCode]: totalMinutes }
+
+        /**
+         * CHUẨN HÓA TIMESTAMP THÀNH GIỜ:PHÚT GỌN GÀNG (LOẠI BỎ GMT RƯỜM RÀ)
+         */
+        function formatOrderShortTime(timestampRaw) {
+            try {
+                var d = new Date(timestampRaw);
+                if (isNaN(d.getTime())) return "Vừa đặt";
+                var hh = String(d.getHours()).padStart(2, '0');
+                var mm = String(d.getMinutes()).padStart(2, '0');
+                return hh + ":" + mm;
+            } catch (e) {
+                return "Vừa đặt";
+            }
+        }
+
+        /**
+         * TÍNH TOÁN THỜI GIAN CHUẨN BỊ MẶC ĐỊNH THEO SỐ LƯỢNG MÓN
+         * 1 tô đơn lẻ = 7 phút | Combo/Nhiều món topping = 10 - 12 phút
+         */
+        function calculateDefaultPrepMinutes(items) {
+            if (!Array.isArray(items) || items.length === 0) return 8;
+            var totalQty = 0;
+            var hasComboOrRice = false;
+
+            items.forEach(function(item) {
+                var q = Number(item.quantity) || 1;
+                totalQty += q;
+                var nameLower = String(item.name || "").toLowerCase();
+                var catLower = String(item.cat || "").toLowerCase();
+                if (nameLower.indexOf("combo") !== -1 || nameLower.indexOf("cơm") !== -1 || catLower === "cơm") {
+                    hasComboOrRice = true;
+                }
+            });
+
+            if (hasComboOrRice || totalQty >= 3) return 12;
+            if (totalQty === 2) return 9;
+            return 7;
+        }
+
+        /**
+         * RENDER CỤM TIMER ĐẾM NGƯỢC THỜI GIAN THỰC CHO TỪNG THẺ CARD ĐƠN HÀNG
+         */
+        function buildTimerHtml(order) {
+            var orderCode = order.orderCode || order.id || "";
+            var createdAt = new Date(order.timestamp || order.createdAt || Date.now()).getTime();
+            
+            // Lấy thời gian cài đặt: nếu bếp đã bấm gia hạn thì ưu tiên, chưa thì tính tự động
+            var prepMinutes = prepTimeOverrides[orderCode] || calculateDefaultPrepMinutes(order.items);
+            var targetReadyMs = createdAt + (prepMinutes * 60 * 1000);
+            var nowMs = Date.now();
+            var diffSecs = Math.floor((targetReadyMs - nowMs) / 1000);
+
+            var shortCreatedTime = formatOrderShortTime(order.timestamp || order.createdAt);
+            var targetDate = new Date(targetReadyMs);
+            var shortTargetTime = String(targetDate.getHours()).padStart(2, '0') + ":" + String(targetDate.getMinutes()).padStart(2, '0');
+
+            var isOverdue = diffSecs < 0;
+            var absSecs = Math.abs(diffSecs);
+            var mm = String(Math.floor(absSecs / 60)).padStart(2, '0');
+            var ss = String(absSecs % 60).padStart(2, '0');
+
+            var statusBadgeClass = "";
+            var statusText = "";
+
+            if (isOverdue) {
+                // ĐƠN QUÁ HẠN: CHỚP ĐỎ CẢNH BÁO KHẨN CẤP
+                statusBadgeClass = "bg-rose-600/20 text-rose-400 border-rose-500/40 animate-pulse";
+                statusText = '<i class="fa-solid fa-triangle-exclamation"></i> <span>TRỄ HẸN +' + mm + ':' + ss + '</span>';
+            } else if (diffSecs <= 180) {
+                // CÒN DƯỚI 3 PHÚT: CẢNH BÁO VÀNG SẮP RA MÓN
+                statusBadgeClass = "bg-amber-500/20 text-amber-300 border-amber-500/40";
+                statusText = '<i class="fa-solid fa-fire text-amber-400"></i> <span>GẤP: CÒN ' + mm + ':' + ss + '</span>';
+            } else {
+                // CÒN DƯ THỜI GIAN: XANH EMERALD AN TOÀN
+                statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+                statusText = '<i class="fa-regular fa-clock"></i> <span>HẸN XONG: ' + mm + ':' + ss + '</span>';
+            }
+
+            return `
+                <div class="mt-2 p-2 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5" id="timer-box-${orderCode}">
+                    <div class="flex items-center justify-between text-[11px]">
+                        <div class="flex items-center gap-1.5 text-slate-400 font-mono">
+                            <span>Vào: <strong class="text-white">${shortCreatedTime}</strong></span>
+                            <span>➔ Ra: <strong class="text-amber-400">${shortTargetTime}</strong></span>
+                        </div>
+                        <div class="px-2 py-0.5 rounded-full border text-[10px] font-mono font-black flex items-center gap-1 shadow-sm ${statusBadgeClass}">
+                            ${statusText}
+                        </div>
+                    </div>
+
+                    <!-- THANH NÚT BẤM GIA HẠN THỜI GIAN DÀNH CHO BẾP TRƯỞNG -->
+                    <div class="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px]">
+                        <span class="text-slate-500 font-mono">Khung giờ: ${prepMinutes}p</span>
+                        <div class="flex items-center gap-1">
+                            <button type="button" 
+                                    onclick="KDSTimerController.extendPrepTime('${orderCode}', 3)" 
+                                    class="px-2 py-0.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white font-mono active:scale-95 transition">
+                                +3p
+                            </button>
+                            <button type="button" 
+                                    onclick="KDSTimerController.extendPrepTime('${orderCode}', 5)" 
+                                    class="px-2 py-0.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white font-mono active:scale-95 transition">
+                                +5p
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /**
+         * GIA HẠN THÊM THỜI GIAN KHI BẾP BỊ QUÁ TẢI TOÀN HÀNG
+         */
+        function extendPrepTime(orderCode, extraMinutes) {
+            var current = prepTimeOverrides[orderCode] || 10;
+            prepTimeOverrides[orderCode] = current + extraMinutes;
+            
+            // Cập nhật lại giao diện KDS ngay lập tức
+            if (typeof renderKdsOrders === "function") {
+                renderKdsOrders();
+            }
+        }
+
+        /**
+         * VÒNG LẶP DUY NHẤT (SINGLE TICK LOOP) CẬP NHẬT TIMER MỖI GIÂY TRÁNH LAG RAM
+         */
+        function startLoop(ordersGetterFn) {
+            if (tickInterval) clearInterval(tickInterval);
+            tickInterval = setInterval(function() {
+                var orderCards = document.querySelectorAll("[id^='timer-box-']");
+                if (orderCards.length === 0) return;
+
+                // Nếu hàm lấy danh sách đơn tồn tại, kích hoạt cập nhật lại các timer
+                if (typeof ordersGetterFn === "function") {
+                    var orders = ordersGetterFn();
+                    if (Array.isArray(orders)) {
+                        orders.forEach(function(order) {
+                            var code = order.orderCode || order.id;
+                            var box = document.getElementById("timer-box-" + code);
+                            if (box && (order.status === "PENDING" || order.status === "COOKING" || !order.status)) {
+                                box.outerHTML = buildTimerHtml(order);
+                            }
+                        });
+                    }
+                }
+            }, 1000);
+        }
+
+        function stopLoop() {
+            if (tickInterval) clearInterval(tickInterval);
+        }
+
+        return {
+            buildTimerHtml: buildTimerHtml,
+            extendPrepTime: extendPrepTime,
+            startLoop: startLoop,
+            stopLoop: stopLoop,
+            formatOrderShortTime: formatOrderShortTime
+        };
+    })();
   </script>
 </body>
 </html>

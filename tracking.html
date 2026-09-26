@@ -545,6 +545,9 @@
         /**
          * RENDER TOÀN BỘ GIAO DIỆN TRACKING TỪ DỮ LIỆU THẬT
          */
+        /**
+         * RENDER TOÀN BỘ GIAO DIỆN TRACKING TỪ DỮ LIỆU THẬT & KÍCH HOẠT VÒNG QUAY
+         */
         function renderOrderUI(order) {
             if (!order) return;
 
@@ -555,7 +558,7 @@
             var mappedKey = "RECEIVED";
             if (rawStatus === "CANCELLED" || rawStatus === "ĐÃ HỦY" || stepNum === -1) {
                 mappedKey = "CANCELLED";
-            } else if (rawStatus === "COMPLETED" || rawStatus === "HOÀN TẤT" || stepNum === 4) {
+            } else if (rawStatus === "COMPLETED" || rawStatus === "HOÀN TẤT" || rawStatus === "DELIVERED" || stepNum === 4) {
                 mappedKey = "COMPLETED";
             } else if (rawStatus === "DELIVERING" || rawStatus === "ĐANG GIAO" || stepNum === 3) {
                 mappedKey = "DELIVERING";
@@ -567,7 +570,17 @@
                 mappedKey = "RECEIVED";
             }
 
-            var statusCfg = STATUS_DEFINITIONS[mappedKey] || STATUS_DEFINITIONS["RECEIVED"];
+            var statusCfg = (typeof STATUS_DEFINITIONS !== "undefined" && STATUS_DEFINITIONS[mappedKey]) 
+                ? STATUS_DEFINITIONS[mappedKey] 
+                : {
+                    step: 1,
+                    subtag: "TIẾP NHẬN",
+                    headline: "Đơn hàng đã được ghi nhận",
+                    subtext: "Bếp Thím 5 đang chuẩn bị nấu cho bạn",
+                    eta: "~25 phút",
+                    icon: "fa-receipt",
+                    percent: "15%"
+                };
 
             // 1. Cập nhật thẻ trạng thái Banner
             var subtagEl = document.getElementById("disp-status-subtag");
@@ -597,16 +610,23 @@
                 var label = node.querySelector("span");
 
                 if (i < statusCfg.step) {
-                    circle.className = "w-7 h-7 rounded-full bg-emerald-500 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300";
-                    circle.innerHTML = '<i class="fa-solid fa-check"></i>';
-                    label.className = "text-[9px] font-bold text-slate-300";
+                    if (circle) {
+                        circle.className = "w-7 h-7 rounded-full bg-emerald-500 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300";
+                        circle.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    }
+                    if (label) label.className = "text-[9px] font-bold text-slate-300";
                 } else if (i === statusCfg.step) {
-                    circle.className = "w-7 h-7 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-950 shadow step-active-pulse transition-all duration-300";
-                    circle.innerHTML = '<i class="fa-solid ' + statusCfg.icon + '"></i>';
-                    label.className = "text-[9px] font-black text-amber-400";
+                    if (circle) {
+                        circle.className = "w-7 h-7 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-950 shadow step-active-pulse transition-all duration-300";
+                        circle.innerHTML = '<i class="fa-solid ' + statusCfg.icon + '"></i>';
+                    }
+                    if (label) label.className = "text-[9px] font-black text-amber-400";
                 } else {
-                    circle.className = "w-7 h-7 rounded-full bg-slate-800 text-slate-500 font-bold text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300";
-                    label.className = "text-[9px] font-medium text-slate-500";
+                    if (circle) {
+                        circle.className = "w-7 h-7 rounded-full bg-slate-800 text-slate-500 font-bold text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300";
+                        circle.innerHTML = '<i class="fa-solid fa-circle text-[6px]"></i>';
+                    }
+                    if (label) label.className = "text-[9px] font-medium text-slate-500";
                 }
             }
 
@@ -731,15 +751,14 @@
                 }
             }
 
-            // 6. KIỂM TOÁN VÒNG QUAY CRM DÀNH CHO ĐƠN >= 79K CHƯA SỬ DỤNG
-            var spinBanner = document.getElementById("box-unused-spin-banner");
-            if (spinBanner) {
-                var isEligibleAov = (subtotal >= 79000 || finalTotal >= 79000);
-                var hasUsedGift = (order.gift && order.gift.name);
-                if (isEligibleAov && !hasUsedGift) {
-                    spinBanner.classList.remove("hidden");
-                } else {
-                    spinBanner.classList.add("hidden");
+            // 6. KÍCH HOẠT VÒNG QUAY MAY MẮN TRI ÂN (TRACKING GAMIFICATION TRIGGER)
+            if (typeof TrackingLuckyWheelEngine !== "undefined" && typeof TrackingLuckyWheelEngine.checkAndTrigger === "function") {
+                TrackingLuckyWheelEngine.checkAndTrigger(order);
+            } else {
+                // Fallback nếu Engine chưa tải xong
+                var triggerBox = document.getElementById("box-lucky-wheel-trigger");
+                if (triggerBox && (mappedKey === "COMPLETED" || stepNum >= 4)) {
+                    triggerBox.classList.remove("hidden");
                 }
             }
 
@@ -749,7 +768,6 @@
                 returnHomeBtnTxt.innerText = "🎉 Đã Nhận Món • Đặt Đơn Mới";
             }
         }
-
         function renderNotFoundState(msg) {
             var main = document.querySelector("main");
             if (main) {
