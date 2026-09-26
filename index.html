@@ -736,39 +736,55 @@
                     </div>
                 </div>
 
-                <!-- Địa Chỉ & GPS Haversine Bếp Tây Ninh -->
-                <div class="space-y-2 pt-1 border-t border-slate-800/80">
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-                            <i class="fa-solid fa-location-dot text-red-500"></i> Địa Chỉ Giao Hàng:
-                        </span>
-                        <button type="button" 
-                                onclick="D2CStoreFrontController.detectCustomerGps()" 
-                                id="btn-detect-gps"
-                                class="px-2.5 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[10px] font-bold flex items-center gap-1 transition">
-                            <i class="fa-solid fa-crosshairs"></i>
-                            <span>Lấy Vị Trí Hiện Tại</span>
-                        </button>
-                    </div>
-
-                    <textarea id="chk-customer-address" 
-                              rows="2" 
-                              placeholder="Nhập số nhà, tên đường, ấp/khu phố, phường/xã..." 
-                              oninput="D2CStoreFrontController.onAddressInput(this.value)"
-                              class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition resize-none"></textarea>
-                    
-                    <div id="box-shipping-calc-status" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-[11px]">
-                        <div class="flex items-center gap-1.5 text-slate-400">
-                            <i class="fa-solid fa-route text-amber-400"></i>
-                            <span id="txt-calc-distance">Cự ly: Đang xác định</span>
+                <!-- KHỐI ĐỊA CHỈ GIAO HÀNG TÌM KIẾM ĐỊA DANH ĐỘNG (KHÔNG CỐ ĐỊNH) -->
+                    <div class="space-y-1.5 pt-1 border-t border-slate-800/80 relative">
+                        <div class="flex items-center justify-between">
+                            <label class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-location-dot text-rose-500"></i> Địa Chỉ Giao Hàng:
+                            </label>
+                            <button type="button" 
+                                    id="btn-detect-gps"
+                                    onclick="D2CStoreFrontController.detectCustomerGps()" 
+                                    class="px-2.5 py-1 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[10.5px] font-bold transition flex items-center gap-1 active:scale-95">
+                                <i class="fa-solid fa-crosshairs"></i> Lấy Vị Trí Hiện Tại
+                            </button>
                         </div>
-                        <div class="font-mono text-right">
-                            <span id="txt-calc-shipping-fee" class="text-white font-bold">12.000 đ</span>
-                            <span id="txt-calc-subsidy-tag" class="hidden text-emerald-400 font-bold ml-1 text-[10px]">(-12.000đ)</span>
+
+                        <!-- Ô NHẬP TỰ DO: HỖ TRỢ TÊN ĐƯỜNG, QUÁN XÁ, CÔNG TY, TRƯỜNG HỌC -->
+                        <div class="relative">
+                            <input type="text" 
+                                   id="chk-customer-address" 
+                                   oninput="D2CStoreFrontController.onAddressInput(this.value)" 
+                                   onfocus="D2CStoreFrontController.onAddressFocus()"
+                                   autocomplete="off"
+                                   placeholder="Gõ tên quán, cửa hàng, công ty hoặc số nhà, tên đường..." 
+                                   class="w-full px-3.5 py-2.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 font-bold focus:border-amber-500 focus:outline-none transition pr-8">
+                            <div id="addr-search-spinner" class="hidden absolute right-3 top-3 text-amber-400 text-xs">
+                                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                            </div>
+                        </div>
+
+                        <!-- DROPDOWN SỔ XUỐNG KẾT QUẢ ĐỊA ĐIỂM / HÀNG QUÁN THỜI GIAN THỰC -->
+                        <div id="address-suggestions-box" 
+                             class="hidden absolute left-0 right-0 top-full mt-1.5 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-800/80">
+                            <!-- Danh sách địa điểm tìm được sẽ hiển thị động tại đây -->
+                        </div>
+
+                        <div class="flex items-center justify-between text-[10px] text-slate-500 px-1">
+                            <span>💡 Gợi ý: Gõ tên hàng quán hoặc địa điểm gần bạn để định vị nhanh</span>
+                        </div>
+
+                        <!-- KHUNG HIỂN THỊ CỰ LY & CƯỚC SHIP ĐÃ LÀM TRÒN CHẴN -->
+                        <div class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 text-xs">
+                            <span class="text-slate-400 flex items-center gap-1.5 font-bold" id="txt-calc-distance">
+                                <i class="fa-solid fa-route text-amber-400"></i> Cự ly: ~1.8 km
+                            </span>
+                            <div class="flex items-center gap-1.5 font-mono">
+                                <span class="font-black text-white" id="txt-calc-shipping-fee">12.000 đ</span>
+                                <span class="text-[10px] text-emerald-400 font-bold hidden" id="txt-calc-subsidy-tag"></span>
+                            </div>
                         </div>
                     </div>
-                </div>
-
                 <!-- Phương Thức Thanh Toán (ƯU TIÊN COD MẶC ĐỊNH ĐỂ SHIPPER GỌI XÁC MINH) -->
                 <div class="space-y-2 pt-1 border-t border-slate-800/80">
                     <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
@@ -2504,37 +2520,162 @@
                 geoOptions
             );
         }
+        var addressDebounceTimer = null;
 
         /**
-         * XỬ LÝ NHẬP ĐỊA CHỈ BẰNG TAY (THIẾT LẬP KHOẢNG CÁCH TƯƠNG ĐỐI TÂY NINH)
+         * XỬ LÝ NHẬP ĐỊA CHỈ TỰ DO & TÌM KIẾM MỌI ĐỊA DANH / HÀNG QUÁN / POI KHÔNG CỐ ĐỊNH
          */
         function onAddressInput(val) {
-            var text = String(val || "").trim().toLowerCase();
-            
-            if (!appState.customerLocation) {
-                if (text.indexOf("ttc") !== -1 || text.indexOf("plaza") !== -1 || text.indexOf("vincom") !== -1) {
-                    appState.calculatedDistanceKm = 5.1; // Cự ly chính xác đến TTC Plaza Tây Ninh
-                } else if (text.indexOf("chợ long hoa") !== -1 || text.indexOf("long hoa") !== -1) {
-                    appState.calculatedDistanceKm = 0.8;
-                } else if (text.indexOf("hòa thành") !== -1 || text.indexOf("hoa thanh") !== -1) {
-                    appState.calculatedDistanceKm = 1.5;
-                } else if (text.indexOf("tp tây ninh") !== -1 || text.indexOf("thành phố") !== -1) {
-                    appState.calculatedDistanceKm = 5.2;
-                } else if (text.indexOf("trảng bàng") !== -1 || text.indexOf("gò dầu") !== -1) {
-                    appState.calculatedDistanceKm = 18.0;
-                } else {
-                    appState.calculatedDistanceKm = 2.0;
+            var query = String(val || "").trim();
+            var box = document.getElementById("address-suggestions-box");
+            var spinner = document.getElementById("addr-search-spinner");
+
+            if (addressDebounceTimer) clearTimeout(addressDebounceTimer);
+
+            if (query.length < 2) {
+                if (box) {
+                    box.classList.add("hidden");
+                    box.innerHTML = "";
                 }
-                recalculateShippingFee();
+                if (spinner) spinner.classList.add("hidden");
+                return;
+            }
+
+            if (spinner) spinner.classList.remove("hidden");
+
+            // Debounce 350ms: Giảm tải tần suất gọi mạng khi khách đang gõ chữ
+            addressDebounceTimer = setTimeout(async function() {
+                try {
+                    // Tận dụng Photon API mã nguồn mở (OpenStreetMap) với tâm neo vị trí Bếp Tây Ninh
+                    // Tọa độ Bếp Thím 5: lat=11.285267, lon=106.133347
+                    var searchUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(query + ' Tây Ninh')}&lat=11.285267&lon=106.133347&lang=vi&limit=6`;
+                    var res = await fetch(searchUrl);
+                    var data = await res.json();
+
+                    if (spinner) spinner.classList.add("hidden");
+
+                    if (data && data.features && data.features.length > 0) {
+                        renderAddressSuggestions(data.features);
+                    } else {
+                        if (box) {
+                            box.classList.remove("hidden");
+                            box.innerHTML = `
+                                <div class="p-3 text-center text-slate-500 text-xs font-bold">
+                                    Không tìm thấy hàng quán hoặc địa điểm phù hợp quanh Tây Ninh. Quý khách có thể nhập địa chỉ chi tiết bằng tay.
+                                </div>
+                            `;
+                        }
+                    }
+                } catch (err) {
+                    if (spinner) spinner.classList.add("hidden");
+                    console.warn("⚠️ [Address Search Error]:", err);
+                }
+            }, 350);
+        }
+
+        /**
+         * RENDER DANH SÁCH GỢI Ý ĐỊA ĐIỂM / HÀNG QUÁN ĐA DẠNG LÊN DROPDOWN
+         */
+        function renderAddressSuggestions(features) {
+            var box = document.getElementById("address-suggestions-box");
+            if (!box) return;
+
+            var itemsHtml = features.map(function(item) {
+                var props = item.properties || {};
+                var coords = item.geometry ? item.geometry.coordinates : null; // [kinh độ, vĩ độ]
+
+                if (!coords || coords.length < 2) return "";
+
+                var lon = Number(coords[0]);
+                var lat = Number(coords[1]);
+
+                // Bóc tách tên địa điểm (quán cafe, nhà thuốc, siêu thị, trường học, cơ quan, v.v.)
+                var mainName = props.name || props.street || "Địa điểm tại Tây Ninh";
+                var detailParts = [];
+                if (props.housenumber && props.street) detailParts.push(`${props.housenumber} ${props.street}`);
+                else if (props.street && props.street !== mainName) detailParts.push(props.street);
+                
+                if (props.district) detailParts.push(props.district);
+                if (props.city && props.city !== props.district) detailParts.push(props.city);
+                if (props.state) detailParts.push(props.state);
+
+                var detailText = detailParts.join(", ") || "Tây Ninh, Việt Nam";
+                var safeEscapedName = mainName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                var safeEscapedDetail = detailText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+                return `
+                    <div onclick="D2CStoreFrontController.selectSuggestedAddress('${safeEscapedName}', '${safeEscapedDetail}', ${lat}, ${lon})" 
+                         class="p-2.5 hover:bg-slate-800/90 cursor-pointer transition flex items-start gap-2.5 select-none">
+                        <i class="fa-solid fa-store text-amber-400 text-xs mt-1 shrink-0"></i>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-bold text-white truncate">${mainName}</div>
+                            <div class="text-[10px] text-slate-400 truncate">${detailText}</div>
+                        </div>
+                    </div>
+                `;
+            }).filter(Boolean).join("");
+
+            if (itemsHtml.length > 0) {
+                box.innerHTML = itemsHtml;
+                box.classList.remove("hidden");
+            } else {
+                box.classList.add("hidden");
             }
         }
+
         /**
-         * HÀM LÀM TRÒN CƯỚC SHIP THÂN THIỆN ĐẾN 1.000đ CHẴN (TRIỆT TIÊU SỐ LẺ 26.625đ)
+         * CHỌN MỘT ĐỊA ĐIỂM TỪ DANH SÁCH GỢI Ý & TÍNH KHOẢNG CÁCH CHÍNH XÁC
+         */
+        function selectSuggestedAddress(mainName, detailText, lat, lng) {
+            var addrEl = document.getElementById("chk-customer-address");
+            var box = document.getElementById("address-suggestions-box");
+
+            var fullAddress = `${mainName} (${detailText})`;
+            if (addrEl) addrEl.value = fullAddress;
+            if (box) {
+                box.classList.add("hidden");
+                box.innerHTML = "";
+            }
+
+            // Ghi nhận tọa độ địa điểm vào State hệ thống
+            appState.customerLocation = {
+                lat: Number(lat),
+                lng: Number(lng),
+                accuracy: 10
+            };
+
+            // Đo cự ly chính xác từ tâm Bếp Thím 5 Hòa Thành
+            var exactDistKm = calculateHaversineDistance(
+                STORE_BASE_CONFIG.coords.lat, STORE_BASE_CONFIG.coords.lng,
+                Number(lat), Number(lng)
+            );
+
+            appState.calculatedDistanceKm = exactDistKm;
+            recalculateShippingFee();
+        }
+
+        function onAddressFocus() {
+            var addrEl = document.getElementById("chk-customer-address");
+            if (addrEl && addrEl.value.trim().length >= 2) {
+                onAddressInput(addrEl.value);
+            }
+        }
+
+        // TỰ ĐỘNG ĐÓNG HỘP GỢI Ý KHI KHÁCH CLICK RA NGOÀI MÀN HÌNH
+        document.addEventListener("click", function(e) {
+            var box = document.getElementById("address-suggestions-box");
+            var input = document.getElementById("chk-customer-address");
+            if (box && input && !box.contains(e.target) && e.target !== input) {
+                box.classList.add("hidden");
+            }
+        });
+
+        /**
+         * HÀM LÀM TRÒN CƯỚC SHIP THÂN THIỆN ĐẾN 1.000đ CHẴN (TRIỆT TIÊU SỐ LẺ)
          */
         function roundShippingFee(rawFee) {
             var fee = Number(rawFee) || 0;
             if (fee <= 0) return 0;
-            // Làm tròn lên mốc 1.000đ gần nhất để thuận tiện cho tài xế thu tiền mặt
             return Math.ceil(fee / 1000) * 1000;
         }
 
@@ -2697,7 +2838,6 @@
 
             if (elFinal) elFinal.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
 
-            // HIỂN THỊ BANNER GỢI Ý THÊM MÓN BIÊN LÃI CAO (UP-SELL THÔNG MINH CHO KHÁCH Ở XA)
             var upSellBox = document.getElementById("box-shipping-upsell-hint");
             if (!upSellBox) {
                 var summaryContainer = document.getElementById("chk-summary-final-total") 
@@ -2731,15 +2871,11 @@
                 }
             }
 
-            // NẾU KHÁCH CHỌN VIETQR: ĐỒNG BỘ MÃ QR VỚI SỐ TIỀN ĐÃ KHÓA CỨNG
             if (appState.selectedPaymentMethod === "VIETQR" && typeof renderDynamicVietQr === "function") {
                 renderDynamicVietQr(finalTotal);
             }
         }
 
-        /**
-         * HÀM THÊM NHANH TRÀ ĐÀO ĐỂ HƯỞNG TRỢ GIÁ KHÁCH Ở XA
-         */
         function quickAddDrinkAndRefresh() {
             var drinkItem = FALLBACK_MENU.find(function(d) { return d.id === "M09"; });
             if (!drinkItem) return;
@@ -2763,9 +2899,6 @@
             recalculateShippingFee();
         }
 
-        /**
-         * VẼ MÃ VIETQR ĐỘNG KHÓA CỨNG SỐ TIỀN THANH TOÁN
-         */
         function renderDynamicVietQr(amount) {
             var memoCode = "T5_" + Date.now().toString().slice(-6);
             var bankBin = STORE_BASE_CONFIG.bankBin;
@@ -2831,11 +2964,10 @@
         function closeCheckoutModal() {
             var modal = document.getElementById("modal-checkout-order");
             if (modal) modal.classList.add("hidden");
+            var box = document.getElementById("address-suggestions-box");
+            if (box) box.classList.add("hidden");
         }
 
-        /**
-         * GỬI ĐƠN HÀNG VỀ MÁY CHỦ BẾP (ZERO-SILENT-FAIL ARCHITECTURE)
-         */
         async function submitFinalOrder() {
             var nameEl = document.getElementById("chk-customer-name");
             var phoneEl = document.getElementById("chk-customer-phone");
@@ -2858,7 +2990,7 @@
             }
 
             if (!addr) {
-                alert("⚠️ Quý khách vui lòng nhập Địa Chỉ Giao Hàng hoặc bấm 'Lấy Vị Trí Hiện Tại'!");
+                alert("⚠️ Quý khách vui lòng nhập Địa Chỉ Giao Hàng hoặc chọn địa điểm gợi ý!");
                 if (addrEl) addrEl.focus();
                 return;
             }
@@ -2944,6 +3076,7 @@
                 }
             }
         }
+
         function viewLiveOrderTracking() {
             var codeEl = document.getElementById("disp-success-order-code");
             var code = codeEl ? codeEl.innerText.trim() : "";
@@ -2979,6 +3112,9 @@
             openLuckyWheelModal: openLuckyWheelModal,
             detectCustomerGps: detectCustomerGps,
             onAddressInput: onAddressInput,
+            onAddressFocus: onAddressFocus,
+            selectSuggestedAddress: selectSuggestedAddress,
+            quickAddDrinkAndRefresh: quickAddDrinkAndRefresh,
             selectPaymentMethod: selectPaymentMethod,
             copyBankAcc: copyBankAcc,
             proceedToCheckoutModal: proceedToCheckoutModal,
@@ -2993,6 +3129,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         D2CStoreFrontController.init();
     });
-    </script>    
-</body>
+    </script>
+
+        </body>
 </html>
