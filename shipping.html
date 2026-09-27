@@ -145,7 +145,7 @@
         </div>
       </div>
 
-          <!-- KPI THU NHẬP HÔM NAY -->
+      <!-- KPI THU NHẬP HÔM NAY -->
       <div class="grid grid-cols-2 gap-2.5">
         <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800 shadow-sm">
           <span class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400 block">Đơn Hoàn Tất Hôm Nay</span>
@@ -205,13 +205,14 @@
     </div>
 
   </div>
-  <!-- Adapter kết nối Headless GAS API v2.9 -->
-  <script src="api.js?v=20260917"></script>
+
+  <!-- Adapter kết nối Headless GAS API v3.0 Master (Tự nạp thim5-master-dictionary.js) -->
+  <script src="api.js?v=20260927"></script>
 
   <script>
-    /**
+  /**
    * =========================================================================
-   * CONTROLLER: SHIPPER DISPATCH PORTAL (TRẠM ĐIỀU PHỐI TÀI XẾ THÍM 5 v2.9 ENTERPRISE)
+   * CONTROLLER: SHIPPER DISPATCH PORTAL (TRẠM ĐIỀU PHỐI TÀI XẾ THÍM 5 v3.0 MASTER)
    * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
    * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
    * Kiến trúc: Headless GAS API, Adaptive Polling, Native Web Audio Alert Engine
@@ -230,35 +231,10 @@
       var audioCtx = null;
 
       var SHIPPER_PRESETS = {
-          "0585": { name: "Nguyễn Hải Âu", phone: "0934.220.585", rawPhone: "0934220585" },
-          "4693": { name: "Nguyễn Hải Âu", phone: "0969.004.693", rawPhone: "0969004693" },
-          "2862": { name: "Trần Minh Nam", phone: "0968.222.862", rawPhone: "0968222862" }
+          "0585": { id: "SHIP_01", name: "Nguyễn Hải Âu", phone: "0934.220.585", rawPhone: "0934220585" },
+          "4693": { id: "SHIP_02", name: "Nguyễn Hải Âu", phone: "0969.004.693", rawPhone: "0969004693" },
+          "2862": { id: "SHIP_03", name: "Trần Minh Nam", phone: "0968.222.862", rawPhone: "0968222862" }
       };
-
-      function isRunningInsideGAS() {
-          return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
-      }
-
-      function callBackend(gasFunctionName, gasArgsArray, apiActionName, apiPayloadObj) {
-          return new Promise(function(resolve, reject) {
-              if (isRunningInsideGAS()) {
-                  var runner = google.script.run
-                      .withSuccessHandler(function(res) { resolve(res); })
-                      .withFailureHandler(function(err) { reject(err); });
-                  if (typeof runner[gasFunctionName] === 'function') {
-                      runner[gasFunctionName].apply(runner, gasArgsArray || []);
-                  } else {
-                      reject(new Error("Hàm " + gasFunctionName + " không tồn tại trong GAS"));
-                  }
-              } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-                  window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
-                      .then(function(res) { resolve(res); })
-                      .catch(function(err) { reject(err); });
-              } else {
-                  reject(new Error("Không tìm thấy cổng kết nối Thim5API!"));
-              }
-          });
-      }
 
       /**
        * TỰ ĐỘNG KHỞI TẠO VÀ MỞ KHÓA AUDIO CONTEXT TRÌNH DUYỆT (UNLOCK AUTOPLAY)
@@ -364,6 +340,7 @@
           localStorage.setItem("thim5_shipper_last4", currentLast4);
 
           var shipperData = SHIPPER_PRESETS[currentLast4] || {
+              id: "SHIP_" + currentLast4,
               name: "Tài Xế (" + currentLast4 + ")",
               phone: "09xx.xxx." + currentLast4
           };
@@ -408,7 +385,6 @@
               }
           }
       }
-
       function toggleSoundAlert() {
           isSoundEnabled = !isSoundEnabled;
           localStorage.setItem("thim5_shipper_sound_enabled", isSoundEnabled ? "true" : "false");
@@ -479,7 +455,38 @@
                   { last4: currentLast4 }
               );
               
-              cachedOrdersList = unwrapOrdersArray(res);
+              var rawList = unwrapOrdersArray(res);
+
+              // CHUẨN HÓA DỮ LIỆU ĐƠN HÀNG QUA TỪ ĐIỂN T5_DICT NẾU CÓ
+              cachedOrdersList = rawList.map(function(item) {
+                  if (typeof window !== "undefined" && window.T5_DICT && typeof window.T5_DICT.normalizeOrderEntity === "function") {
+                      var norm = window.T5_DICT.normalizeOrderEntity(item);
+                      return {
+                          code: norm.orderId,
+                          orderId: norm.orderId,
+                          time: norm.createdAt,
+                          status: norm.opsStatus,
+                          step: norm.step,
+                          name: norm.customer.name,
+                          phone: norm.customer.phone,
+                          address: norm.customer.address,
+                          dist: norm.customer.distanceKm,
+                          items: norm.itemsFormattedText,
+                          taste: norm.customer.taste,
+                          method: norm.payment.method,
+                          total: norm.payment.finalTotal,
+                          subtotal: norm.payment.subtotal,
+                          shipFee: norm.payment.baseShipFee,
+                          shippingSubsidy: norm.payment.shippingSubsidy,
+                          finalShipFee: norm.payment.customerShipFee,
+                          collectFromCustomer: norm.payment.collectFromCustomer,
+                          storeGpsUrl: norm.logistics.storeNavUrl,
+                          customerGpsUrl: norm.logistics.customerNavUrl,
+                          assignedShipper: norm.logistics.shipperInfo
+                      };
+                  }
+                  return item;
+              });
 
               var shipperObj = (res && res.shipper) ? res.shipper : ((res && res.data && res.data.shipper) ? res.data.shipper : null);
               if (shipperObj) {
@@ -490,9 +497,9 @@
               }
 
               // KIỂM TOÁN VÀ KÍCH HOẠT CHUÔNG BÁO CUỐC XE MỚI
-              var currentCodes = cachedOrdersList.map(function(o) { return String(o.code || "").trim(); });
+              var currentCodes = cachedOrdersList.map(function(o) { return String(o.code || o.orderId || "").trim(); });
               var newPendingOrders = cachedOrdersList.filter(function(o) {
-                  var code = String(o.code || "").trim();
+                  var code = String(o.code || o.orderId || "").trim();
                   var stepNum = Number(o.step !== undefined ? o.step : 0);
                   var isNewCode = (knownOrderCodes.indexOf(code) === -1);
                   var isActionable = (stepNum === 0 || stepNum === 2 || stepNum === 2.5);
@@ -501,7 +508,7 @@
 
               if (!isInitialLoad && newPendingOrders.length > 0) {
                   var urgentOrder = newPendingOrders[0];
-                  var urgentCode = String(urgentOrder.code || "DH_MỚI");
+                  var urgentCode = String(urgentOrder.code || urgentOrder.orderId || "DH_MỚI");
                   triggerNewOrderModal(urgentCode, urgentOrder);
               } else {
                   isInitialLoad = false;
@@ -526,7 +533,7 @@
           if (codeEl) codeEl.innerText = orderCode;
           if (infoEl && orderObj) {
               var addr = orderObj.address || "Hòa Thành, Tây Ninh";
-              var total = Number(orderObj.total || 0).toLocaleString("vi-VN") + "đ";
+              var total = Number(orderObj.total || orderObj.collectFromCustomer || 0).toLocaleString("vi-VN") + "đ";
               infoEl.innerText = "Giao đến: " + addr + " • Thu: " + total;
           }
 
@@ -612,7 +619,7 @@
 
           var html = "";
           displayList.forEach(function(o) {
-              var cleanCode = String(o.code || "").trim();
+              var cleanCode = String(o.code || o.orderId || "").trim();
               var stepNum = Number(o.step !== undefined ? o.step : 0);
               var isStep0 = (stepNum === 0 || o.status === "RECEIVED");
               var isDelivering = (stepNum === 3 || o.status === "DELIVERING");
@@ -736,7 +743,7 @@
       }
 
       /**
-       * HÀNH ĐỘNG 1: XÁC MINH ĐƠN COD VÀ BÁO BẾP NẤU NGAY
+       * HÀNH ĐỘNG 1: XÁC MINH ĐƠN COD VÀ BÁO BẾP NẤU NGAY (CHUẨN HÓA API CONTRACT)
        */
       async function verifyCodOrder(orderCode) {
           var cleanCode = String(orderCode || "").trim();
@@ -748,12 +755,15 @@
               btn.disabled = true;
           }
 
+          var shipperData = SHIPPER_PRESETS[currentLast4] || { name: "Tài Xế (" + currentLast4 + ")" };
+          var shipperLabel = shipperData.name + (shipperData.phone ? (" (" + shipperData.phone + ")") : "");
+
           try {
               await callBackend(
-                  "shipperUpdateStatus", 
-                  [cleanCode, "CONFIRMED_COOK", ""], 
-                  "shipperUpdateStatus", 
-                  { orderCode: cleanCode, action: "CONFIRMED_COOK" }
+                  "shipperVerifyCodOrder", 
+                  [cleanCode, shipperLabel], 
+                  "shipperVerifyCodOrder", 
+                  { orderCode: cleanCode, shipperInfo: shipperLabel }
               );
               alert("✅ Đã báo Bếp nấu đơn " + cleanCode + " ngay!");
               loadShipperOrders();
@@ -767,7 +777,7 @@
       }
 
       /**
-       * HÀNH ĐỘNG 2: TÀI XẾ NHẬN CUỐC VÀ LẤY HỘP TẠI BẾP
+       * HÀNH ĐỘNG 2: TÀI XẾ NHẬN CUỐC VÀ LẤY HỘP TẠI BẾP (CHUYỂN STEP 3)
        */
       async function takeOrder(orderCode) {
           var cleanCode = String(orderCode || "").trim();
@@ -777,12 +787,14 @@
               btn.disabled = true;
           }
 
+          var shipperData = SHIPPER_PRESETS[currentLast4] || { name: "Tài Xế" };
+
           try {
               await callBackend(
-                  "shipperUpdateStatus", 
-                  [cleanCode, "PICKED_UP", ""], 
-                  "shipperUpdateStatus", 
-                  { orderCode: cleanCode, action: "PICKED_UP" }
+                  "shipperUpdateStep", 
+                  [cleanCode, shipperData.name, 3], 
+                  "shipperUpdateStep", 
+                  { orderCode: cleanCode, shipperName: shipperData.name, stepNumber: 3 }
               );
               loadShipperOrders();
           } catch (e) {
@@ -795,7 +807,7 @@
       }
 
       /**
-       * HÀNH ĐỘNG 3: GIAO XONG TẬN TAY VÀ THU TIỀN HOÀN TẤT
+       * HÀNH ĐỘNG 3: GIAO XONG TẬN TAY VÀ THU TIỀN HOÀN TẤT (CHUYỂN STEP 4)
        */
       async function completeOrder(orderCode) {
           var cleanCode = String(orderCode || "").trim();
@@ -807,12 +819,14 @@
               btn.disabled = true;
           }
 
+          var shipperData = SHIPPER_PRESETS[currentLast4] || { name: "Tài Xế" };
+
           try {
               await callBackend(
-                  "shipperUpdateStatus", 
-                  [cleanCode, "DELIVERED_DONE", ""], 
-                  "shipperUpdateStatus", 
-                  { orderCode: cleanCode, action: "DELIVERED_DONE" }
+                  "shipperUpdateStep", 
+                  [cleanCode, shipperData.name, 4], 
+                  "shipperUpdateStep", 
+                  { orderCode: cleanCode, shipperName: shipperData.name, stepNumber: 4 }
               );
               alert("🎉 Chúc mừng bác tài hoàn tất cuốc xe " + cleanCode + "!");
               loadShipperOrders();
@@ -826,7 +840,7 @@
       }
 
       /**
-       * HÀNH ĐỘNG 4: BÁO HỎNG XE / TRẢ ĐƠN VỀ BẾP
+       * HÀNH ĐỘNG 4: BÁO HỎNG XE / TRẢ ĐƠN VỀ BẾP (NHẢ ĐƠN VỀ STEP 2 BẾP ĐIỀU PHỐI LẠI)
        */
       async function cancelOrder(orderCode) {
           var cleanCode = String(orderCode || "").trim();
@@ -835,10 +849,10 @@
 
           try {
               await callBackend(
-                  "shipperUpdateStatus", 
-                  [cleanCode, "CANCEL_RETURN", reason], 
-                  "shipperUpdateStatus", 
-                  { orderCode: cleanCode, action: "CANCEL_RETURN", note: reason }
+                  "shipperReleaseOrder", 
+                  [cleanCode, reason], 
+                  "shipperReleaseOrder", 
+                  { orderCode: cleanCode, reason: reason }
               );
               alert("⚠️ Đã trả đơn " + cleanCode + " về điều phối Bếp!");
               loadShipperOrders();
