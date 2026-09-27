@@ -1,5 +1,5 @@
 <!-- MODULE: TRUNG TÂM ĐIỀU PHỐI ĐƠN HÀNG, BẾP & SHIPPING [ORDERS_D2C] -->
-<div class="max-w-7xl mx-auto space-y-6 pb-12">
+<div class="max-w-7xl mx-auto space-y-6 pb-12 select-none text-xs">
 
     <!-- 1. THANH CHỈ SỐ VẬN HÀNH & CÔNG TẮC CHẾ ĐỘ MƯA (TOP OPS STRIP) -->
     <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl shadow-lg flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -7,36 +7,36 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
             <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
                 <span class="text-[11px] text-slate-400 font-medium block">Tổng Đơn Hôm Nay</span>
-                <span class="text-xl font-bold text-white mt-0.5 block" id="metric-total-orders">0</span>
+                <span class="text-xl font-bold text-white mt-0.5 block font-mono" id="metric-total-orders">0</span>
                 <span class="text-[10px] text-emerald-400" id="metric-completed-count">0 đơn giao thành công</span>
             </div>
             <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
                 <span class="text-[11px] text-slate-400 font-medium block">Đang Chờ Xử Lý</span>
-                <span class="text-xl font-bold text-amber-400 mt-0.5 block" id="metric-pending-orders">0</span>
+                <span class="text-xl font-bold text-amber-400 mt-0.5 block font-mono" id="metric-pending-orders">0</span>
                 <span class="text-[10px] text-slate-400">Cần gán ship / duyệt tiền</span>
             </div>
             <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
                 <span class="text-[11px] text-slate-400 font-medium block">Đang Giao Trên Đường</span>
-                <span class="text-xl font-bold text-purple-400 mt-0.5 block" id="metric-shipping-orders">0</span>
-                <span class="text-[10px] text-purple-300">Đã thu tiền ứng tại quán</span>
+                <span class="text-xl font-bold text-purple-400 mt-0.5 block font-mono" id="metric-shipping-orders">0</span>
+                <span class="text-[10px] text-purple-300">Đã bàn giao cho tài xế</span>
             </div>
             <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
                 <span class="text-[11px] text-slate-400 font-medium block">Doanh Thu Thực Thu</span>
                 <span class="text-xl font-bold text-emerald-400 mt-0.5 block font-mono" id="metric-revenue-today">0 đ</span>
-                <span class="text-[10px] text-slate-400">Không tính cước ship</span>
+                <span class="text-[10px] text-slate-400">Đã đối trừ cước bù ship</span>
             </div>
         </div>
 
         <!-- Công Tắc Chế Độ Mưa & Nút Làm Mới -->
         <div class="flex items-center gap-3 shrink-0 self-end lg:self-center">
             <!-- Nút Gạt Chế Độ Mưa (Rain Surcharge) -->
-            <button onclick="OrdersController.toggleRainMode()" id="btn-rain-mode" class="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-xs font-bold transition-all flex items-center gap-2 shadow-lg">
+            <button type="button" onclick="OrdersController.toggleRainMode()" id="btn-rain-mode" class="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-xs font-bold transition-all flex items-center gap-2 shadow-lg">
                 <i class="fa-solid fa-cloud-showers-heavy text-slate-500 text-sm" id="icon-rain"></i>
                 <span id="txt-rain-status">Chế Độ Mưa: TẮT</span>
             </button>
 
             <!-- Tải Lại Dữ Liệu -->
-            <button onclick="OrdersController.loadOrders()" id="btn-reload-orders" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition flex items-center gap-1">
+            <button type="button" onclick="OrdersController.loadOrders()" id="btn-reload-orders" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition flex items-center gap-1 active:scale-95" title="Tải lại đơn hàng">
                 <i class="fa-solid fa-rotate"></i>
             </button>
         </div>
@@ -47,22 +47,22 @@
         <div class="flex items-center gap-2 flex-1 min-w-[280px]">
             <div class="relative w-full max-w-xs">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
-                <input type="text" id="order-search-input" onkeyup="OrdersController.applyFilters()" placeholder="Tìm theo Mã đơn, SĐT hoặc Tên khách..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500">
+                <input type="text" id="order-search-input" onkeyup="OrdersController.applyFilters()" placeholder="Tìm theo Mã đơn, SĐT hoặc Tên khách..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 font-medium">
             </div>
-            <select id="filter-payment-method" onchange="OrdersController.applyFilters()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-red-500">
+            <select id="filter-payment-method" onchange="OrdersController.applyFilters()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-red-500 font-medium">
                 <option value="ALL">Tất cả Thanh Toán</option>
                 <option value="VIETQR">Chuyển Khoản VietQR</option>
                 <option value="COD">Tiền Mặt (COD)</option>
             </select>
-            <select id="filter-shipper-type" onchange="OrdersController.applyFilters()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-red-500">
+            <select id="filter-shipper-type" onchange="OrdersController.applyFilters()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-red-500 font-medium">
                 <option value="ALL">Tất cả Shipper</option>
-                <option value="INTERNAL">Shipper Nội Bộ</option>
-                <option value="EXTERNAL">Ship Ngoài (Grab/Xanh/Vill)</option>
+                <option value="INTERNAL">Shipper Quán</option>
+                <option value="EXTERNAL">Ship Ngoài (Grab/Vill/Xanh)</option>
             </select>
         </div>
-        <div class="text-xs text-slate-400 flex items-center gap-2">
+        <div class="text-xs text-slate-400 flex items-center gap-2 font-mono">
             <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Tự động cập nhật mỗi 10 giây</span>
+            <span>Tự động đồng bộ mỗi 10 giây</span>
         </div>
     </div>
 
@@ -76,7 +76,7 @@
                     <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
                     <h4 class="font-bold text-xs text-amber-400 uppercase tracking-wider">1. Chờ Xử Lý / Tiền</h4>
                 </div>
-                <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold" id="badge-count-lane1">0</span>
+                <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-bold font-mono" id="badge-count-lane1">0</span>
             </div>
             <div class="p-3 space-y-3 overflow-y-auto flex-1 custom-scroll" id="lane-pending">
                 <!-- Smart Order Cards sẽ được render tại đây -->
@@ -90,7 +90,7 @@
                     <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
                     <h4 class="font-bold text-xs text-blue-400 uppercase tracking-wider">2. Bếp Đang Nấu</h4>
                 </div>
-                <span class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold" id="badge-count-lane2">0</span>
+                <span class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-bold font-mono" id="badge-count-lane2">0</span>
             </div>
             <div class="p-3 space-y-3 overflow-y-auto flex-1 custom-scroll" id="lane-cooking">
                 <!-- Smart Order Cards sẽ được render tại đây -->
@@ -104,7 +104,7 @@
                     <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
                     <h4 class="font-bold text-xs text-purple-400 uppercase tracking-wider">3. Đang Giao Hàng</h4>
                 </div>
-                <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold" id="badge-count-lane3">0</span>
+                <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold font-mono" id="badge-count-lane3">0</span>
             </div>
             <div class="p-3 space-y-3 overflow-y-auto flex-1 custom-scroll" id="lane-shipping">
                 <!-- Smart Order Cards sẽ được render tại đây -->
@@ -118,7 +118,7 @@
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                     <h4 class="font-bold text-xs text-emerald-400 uppercase tracking-wider">4. Đã Hoàn Tất</h4>
                 </div>
-                <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold" id="badge-count-lane4">0</span>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold font-mono" id="badge-count-lane4">0</span>
             </div>
             <div class="p-3 space-y-3 overflow-y-auto flex-1 custom-scroll" id="lane-completed">
                 <!-- Smart Order Cards sẽ được render tại đây -->
@@ -129,13 +129,13 @@
 </div>
 
 <!-- 4. MODAL GÁN SHIPPER & TÍNH CƯỚC TỰ ĐỘNG CHỐNG BÙ SHIP -->
-<div id="modal-assign-shipper" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 my-8">
+<div id="modal-assign-shipper" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 overflow-y-auto select-none">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 my-8 text-xs">
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
             <h4 class="font-bold text-sm text-white flex items-center gap-2">
-                <i class="fa-solid fa-motorcycle text-red-500"></i> Điều Phối Vận Chuyển: <span id="modal-ship-order-id" class="text-red-400 font-mono">T5-XXXX</span>
+                <i class="fa-solid fa-motorcycle text-red-500"></i> Điều Phối Vận Chuyển: <span id="modal-ship-order-id" class="text-red-400 font-mono">DH...</span>
             </h4>
-            <button onclick="OrdersController.closeAssignModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" onclick="OrdersController.closeAssignModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <!-- Khối Thông Tin Cự Ly & Cước Thu Khách -->
@@ -157,7 +157,7 @@
                 <label class="block text-xs font-semibold text-slate-300 mb-1">Phương thức Giao Hàng:</label>
                 <div class="grid grid-cols-2 gap-3">
                     <button type="button" onclick="OrdersController.selectShipperChannel('INTERNAL')" id="btn-chan-internal" class="p-2.5 rounded-xl border border-red-500/50 bg-red-600/10 text-red-300 text-xs font-bold transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-id-badge"></i> Shipper Nội Bộ
+                        <i class="fa-solid fa-id-badge"></i> Shipper Quán
                     </button>
                     <button type="button" onclick="OrdersController.selectShipperChannel('EXTERNAL')" id="btn-chan-external" class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold hover:text-white transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-cube"></i> Gọi Sàn Ngoài
@@ -168,10 +168,8 @@
             <!-- Khu Vực Shipper Nội Bộ -->
             <div id="section-internal-shipper" class="space-y-2">
                 <label class="block text-xs font-medium text-slate-300">Chọn Tài Xế Nội Bộ (Khóa cứng ID):</label>
-                <select id="select-internal-driver" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500">
-                    <option value="SHIP_01 - Tuấn Tài Xế (Đang cầm: 1 đơn)">Tuấn Tài Xế (0912.345.678) - Đang cầm: 1 đơn</option>
-                    <option value="SHIP_02 - Hoàng Shipper (Đang cầm: 0 đơn)">Hoàng Shipper (0988.765.432) - Đang rảnh</option>
-                    <option value="SHIP_03 - Minh Minh (Đang cầm: 2 đơn)">Minh Minh (0933.111.222) - Đang cầm: 2 đơn</option>
+                <select id="select-internal-driver" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500 font-medium">
+                    <option value="">-- Đang nạp danh sách tài xế --</option>
                 </select>
                 <span class="text-[10px] text-slate-500 block">Tự động cộng dồn mốc chạy trong ngày để tính thưởng tích lũy.</span>
             </div>
@@ -180,21 +178,21 @@
             <div id="section-external-shipper" class="hidden space-y-2.5">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Hãng Ship Ngoài</label>
-                        <select id="select-external-provider" onchange="OrdersController.calculateSubsidyPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500">
+                        <label class="block text-[11px] text-slate-400 mb-1 font-bold">Hãng Ship Ngoài</label>
+                        <select id="select-external-provider" onchange="OrdersController.calculateSubsidyPreview()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-red-500 font-medium">
                             <option value="GRAB">GrabExpress</option>
+                            <option value="VILL">VillShip</option>
+                            <option value="AHAMOVE">Ahamove</option>
                             <option value="XANH_SM">Xanh SM Bike</option>
-                            <option value="VILL">Vill Ship</option>
-                            <option value="BE">Be Delivery</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Mã Chuyến / SĐT Tài Xế</label>
+                        <label class="block text-[11px] text-slate-400 mb-1 font-bold">Mã Chuyến / SĐT Tài Xế</label>
                         <input type="text" id="input-external-tracking" placeholder="VD: GRAB-8823" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-red-500">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[11px] text-slate-400 mb-1">Cước Sàn Báo Thực Tế (VNĐ)</label>
+                    <label class="block text-[11px] text-slate-400 mb-1 font-bold">Cước Sàn Báo Thực Tế (VNĐ)</label>
                     <input type="number" id="input-external-cost" oninput="OrdersController.calculateSubsidyPreview()" placeholder="VD: 18000" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-amber-400 font-mono font-bold focus:outline-none focus:border-amber-500">
                 </div>
                 <div class="p-2.5 rounded-lg bg-red-950/20 border border-red-900/40 text-[11px] text-slate-300 flex justify-between">
@@ -205,17 +203,17 @@
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-            <button onclick="OrdersController.closeAssignModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700 transition">Hủy</button>
-            <button onclick="OrdersController.executeAssignShipper()" id="btn-confirm-assign" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/30 transition flex items-center gap-2">
-                <i class="fa-solid fa-lock"></i> Khóa Đơn & Đẩy Bếp
+            <button type="button" onclick="OrdersController.closeAssignModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700 transition">Hủy</button>
+            <button type="button" onclick="OrdersController.executeAssignShipper()" id="btn-confirm-assign" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold shadow-lg shadow-red-600/30 transition flex items-center gap-2">
+                <i class="fa-solid fa-lock"></i> Khóa Đơn &amp; Đẩy Bếp
             </button>
         </div>
     </div>
 </div>
 
 <!-- 5. MODAL DUYỆT THANH TOÁN KHẨN CẤP (PIN LEVEL 1) -->
-<div id="modal-approve-payment" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl shadow-2xl p-6 space-y-4">
+<div id="modal-approve-payment" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 select-none">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl shadow-2xl p-6 space-y-4 text-xs">
         <div class="flex items-center gap-3 text-amber-400">
             <i class="fa-solid fa-shield-halved text-xl"></i>
             <h4 class="font-bold text-sm text-white">Duyệt Thanh Toán Khẩn Cấp</h4>
@@ -228,61 +226,58 @@
             <input type="text" id="input-payment-override-note" placeholder="Khách quét mã tại quầy..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500">
         </div>
         <div>
-            <label class="block text-xs font-semibold text-red-400 mb-1">Mã PIN Quản Lý Ca (Level 1):</label>
+            <label class="block text-xs font-semibold text-red-400 mb-1">Mã PIN Quản Lý Ca (Level 1 / 2):</label>
             <input type="password" id="input-manager-pin" maxlength="6" class="w-full bg-slate-950 border border-red-500/50 rounded-xl px-4 py-2 text-center text-lg font-mono tracking-widest text-white focus:outline-none focus:border-red-500" placeholder="••••">
             <span id="pin-error-orders" class="hidden text-[11px] text-red-400 mt-1 block">Mã PIN không đúng!</span>
         </div>
         <div class="flex items-center justify-end gap-3 pt-2">
-            <button onclick="OrdersController.closeApproveModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700 transition">Hủy</button>
-            <button onclick="OrdersController.executeApprovePayment()" id="btn-execute-approve" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center gap-2">
+            <button type="button" onclick="OrdersController.closeApproveModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-medium hover:bg-slate-700 transition">Hủy</button>
+            <button type="button" onclick="OrdersController.executeApprovePayment()" id="btn-execute-approve" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center gap-2">
                 <i class="fa-solid fa-check"></i> Xác Nhận Duyệt
             </button>
         </div>
     </div>
 </div>
+
 <script>
 /**
  * =========================================================================
- * CONTROLLER: ORDERS & LOGISTICS CONTROLLER (SAAS ENTERPRISE v2.6)
- * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống
- * Vai trò:
- *   - Quản trị Bảng Kanban 4 làn điều phối thời gian thực.
- *   - Thuật toán Haversine tính cự ly GPS & cước ship đa tầng chống bù lỗ.
- *   - Quản lý công tắc Chế Độ Mưa & phụ thu thời tiết tự động.
- *   - Cổng thu tiền ứng Bếp (Cash Handover Gate) cho đơn COD.
- *   - Đồng hồ giám sát SLA cảnh báo đỏ khi đơn ngâm quá 15 phút.
+ * CONTROLLER: ORDERS & LOGISTICS CONTROLLER (SAAS ENTERPRISE v3.0 MASTER)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+ * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
  * =========================================================================
  */
-const OrdersController = (function() {
-    // Tọa độ Bếp Trung Tâm Thím 5 (Hòa Thành, Tây Ninh)
-    const STORE_COORDS = { lat: 10.9825, lng: 106.1265 };
+var OrdersController = (function() {
+    // Tọa độ Bếp Trung Tâm Thím 5 Hòa Thành chuẩn hóa từ Từ Điển SSOT
+    var STORE_COORDS = (typeof window !== "undefined" && window.T5_DICT && window.T5_DICT.CONSTANTS && window.T5_DICT.CONSTANTS.HEAD_KITCHEN_LOCATION)
+        ? { lat: window.T5_DICT.CONSTANTS.HEAD_KITCHEN_LOCATION.LAT, lng: window.T5_DICT.CONSTANTS.HEAD_KITCHEN_LOCATION.LNG }
+        : { lat: 11.285267, lng: 106.133347 };
 
-    let rawOrders = [];
-    let isRainMode = false;
-    let pollingTimer = null;
-    let slaTimer = null;
-    let selectedOrderId = null;
-    let selectedShipperChannel = "INTERNAL";
-    let activeCustomerFee = 12000;
+    var rawOrders = [];
+    var isRainMode = false;
+    var pollingTimer = null;
+    var slaTimer = null;
+    var selectedOrderId = null;
+    var selectedShipperChannel = "INTERNAL";
+    var activeCustomerFee = 12000;
 
     /**
      * Khởi động Controller & Thiết lập Vòng lặp giám sát
      */
     async function init() {
-        // Khôi phục trạng thái Chế độ Mưa từ LocalStorage
         isRainMode = localStorage.getItem("T5_RAIN_MODE") === "TRUE";
         updateRainModeUI();
 
-        // Tải danh sách đơn hàng ban đầu
+        // Tự động nạp danh sách tài xế vào select modal
+        populateShipperOptions();
+
         await loadOrders();
 
-        // Kích hoạt nhịp chạy đồng hồ SLA mỗi giây
         if (slaTimer) clearInterval(slaTimer);
         slaTimer = setInterval(updateAllSLATimers, 1000);
 
-        // Kích hoạt Polling chu kỳ 10 giây (Tự động tạm dừng khi ẩn tab)
         if (pollingTimer) clearInterval(pollingTimer);
-        pollingTimer = setInterval(() => {
+        pollingTimer = setInterval(function() {
             if (!document.hidden) {
                 loadOrders(true);
             }
@@ -290,17 +285,81 @@ const OrdersController = (function() {
     }
 
     /**
-     * Tải dữ liệu đơn hàng từ Backend qua Middleware api.js
+     * Tự động đổ dữ liệu tài xế vào Modal
      */
-    async function loadOrders(isSilent = false) {
-        const reloadBtn = document.getElementById("btn-reload-orders");
+    function populateShipperOptions() {
+        var sel = document.getElementById("select-internal-driver");
+        if (!sel) return;
+
+        var defaultShippers = [
+            { id: "SHIP_01", name: "Nguyễn Hải Âu (0934.220.585)" },
+            { id: "SHIP_02", name: "Nguyễn Hải Âu (0969.004.693)" },
+            { id: "SHIP_03", name: "Trần Minh Nam (0968.222.862)" }
+        ];
+
+        if (typeof window !== "undefined" && window.T5_DICT && window.T5_DICT.SHIPPER_PRESETS) {
+            var presets = window.T5_DICT.SHIPPER_PRESETS;
+            defaultShippers = Object.keys(presets).map(function(k) {
+                return { id: presets[k].id, name: presets[k].name + " (" + presets[k].phone + ")" };
+            });
+        }
+
+        sel.innerHTML = defaultShippers.map(function(s) {
+            return `<option value="${s.name}">${s.name}</option>`;
+        }).join("");
+    }
+
+    /**
+     * Tải dữ liệu đơn hàng từ Backend qua Adapter api.js
+     */
+    async function loadOrders(isSilent) {
+        var reloadBtn = document.getElementById("btn-reload-orders");
         if (!isSilent && reloadBtn) {
             reloadBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
         }
 
         try {
-            const data = await Thim5API.callGAS("getOrdersList");
-            rawOrders = Array.isArray(data) ? data : [];
+            var data = null;
+            if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+                data = await window.Thim5API.callGAS("getOrdersList", {});
+            }
+
+            var unwrapList = [];
+            if (Array.isArray(data)) unwrapList = data;
+            else if (data && Array.isArray(data.orders)) unwrapList = data.orders;
+            else if (data && data.data && Array.isArray(data.data.orders)) unwrapList = data.data.orders;
+            else if (data && data.data && Array.isArray(data.data)) unwrapList = data.data;
+
+            // CHUẨN HÓA MỌI ĐƠN HÀNG QUA TỪ ĐIỂN T5_DICT NẾU CÓ
+            rawOrders = unwrapList.map(function(item) {
+                if (typeof window !== "undefined" && window.T5_DICT && typeof window.T5_DICT.normalizeOrderEntity === "function") {
+                    var norm = window.T5_DICT.normalizeOrderEntity(item);
+                    return {
+                        orderId: norm.orderId,
+                        operationalStatus: norm.opsStatus,
+                        step: norm.step,
+                        createdAt: norm.createdAt,
+                        customerInfo: norm.customer.name + " | " + norm.customer.phone + " | " + norm.customer.address,
+                        customerName: norm.customer.name,
+                        customerPhone: norm.customer.phone,
+                        customerAddress: norm.customer.address,
+                        gps: norm.customer.gpsLocation || "",
+                        items: norm.items,
+                        paymentMethod: norm.payment.method,
+                        paymentStatus: norm.payment.status,
+                        totalAmount: norm.payment.finalTotal,
+                        subtotal: norm.payment.subtotal,
+                        customerShipFee: norm.payment.customerShipFee,
+                        shippingFee: norm.payment.baseShipFee,
+                        shippingSubsidy: norm.payment.shippingSubsidy,
+                        shipperInfo: norm.logistics.shipperInfo,
+                        shipperType: norm.logistics.deliveryChannel,
+                        handoverCollected: Boolean(item.handoverCollected || norm.payment.status === "PAID_SPEAKER" || norm.payment.status === "PAID_CASH")
+                    };
+                }
+                return item;
+            });
+
             updateTopMetrics();
             applyFilters();
         } catch (error) {
@@ -319,63 +378,93 @@ const OrdersController = (function() {
      * Cập nhật số liệu tổng quan trên thanh Header Strip
      */
     function updateTopMetrics() {
-        const total = rawOrders.length;
-        const completedOrders = rawOrders.filter(o => o.operationalStatus === "COMPLETED");
-        const pendingOrders = rawOrders.filter(o => o.operationalStatus === "NEW" || o.operationalStatus === "PENDING");
-        const shippingOrders = rawOrders.filter(o => o.operationalStatus === "SHIPPING");
-
-        let totalRevenue = 0;
-        completedOrders.forEach(o => {
-            totalRevenue += (Number(o.totalAmount) || 0);
+        var total = rawOrders.length;
+        var completedOrders = rawOrders.filter(function(o) { 
+            return o.operationalStatus === "COMPLETED" || Number(o.step) === 4; 
+        });
+        var pendingOrders = rawOrders.filter(function(o) { 
+            var st = String(o.operationalStatus || "").toUpperCase();
+            return st === "NEW" || st === "PENDING" || st === "RECEIVED" || Number(o.step) === 0; 
+        });
+        var shippingOrders = rawOrders.filter(function(o) { 
+            var st = String(o.operationalStatus || "").toUpperCase();
+            return st === "SHIPPING" || st === "DELIVERING" || Number(o.step) === 3; 
         });
 
-        document.getElementById("metric-total-orders").innerText = total;
-        document.getElementById("metric-completed-count").innerText = `${completedOrders.length} đơn giao thành công`;
-        document.getElementById("metric-pending-orders").innerText = pendingOrders.length;
-        document.getElementById("metric-shipping-orders").innerText = shippingOrders.length;
-        document.getElementById("metric-revenue-today").innerText = formatCurrency(totalRevenue);
+        var totalRevenue = 0;
+        completedOrders.forEach(function(o) {
+            totalRevenue += (Number(o.totalAmount || o.subtotal) || 0);
+        });
+
+        var elTot = document.getElementById("metric-total-orders");
+        var elComp = document.getElementById("metric-completed-count");
+        var elPend = document.getElementById("metric-pending-orders");
+        var elShip = document.getElementById("metric-shipping-orders");
+        var elRev = document.getElementById("metric-revenue-today");
+
+        if (elTot) elTot.innerText = total;
+        if (elComp) elComp.innerText = completedOrders.length + " đơn giao thành công";
+        if (elPend) elPend.innerText = pendingOrders.length;
+        if (elShip) elShip.innerText = shippingOrders.length;
+        if (elRev) elRev.innerText = formatCurrency(totalRevenue);
     }
 
     /**
      * Phân loại và kết xuất dữ liệu vào 4 làn Kanban
      */
     function applyFilters() {
-        const searchTxt = (document.getElementById("order-search-input").value || "").toLowerCase().trim();
-        const payFilter = document.getElementById("filter-payment-method").value;
-        const shipFilter = document.getElementById("filter-shipper-type").value;
+        var searchInput = document.getElementById("order-search-input");
+        var searchTxt = (searchInput ? searchInput.value : "").toLowerCase().trim();
+        var payFilterEl = document.getElementById("filter-payment-method");
+        var payFilter = payFilterEl ? payFilterEl.value : "ALL";
+        var shipFilterEl = document.getElementById("filter-shipper-type");
+        var shipFilter = shipFilterEl ? shipFilterEl.value : "ALL";
 
-        const filtered = rawOrders.filter(order => {
-            const matchSearch = order.orderId.toLowerCase().includes(searchTxt) ||
-                                (order.customerInfo || "").toLowerCase().includes(searchTxt);
-            const matchPay = (payFilter === "ALL") || (order.paymentMethod === payFilter);
-            const matchShip = (shipFilter === "ALL") || (order.shipperType === shipFilter);
+        var filtered = rawOrders.filter(function(order) {
+            var idStr = String(order.orderId || "").toLowerCase();
+            var custStr = String(order.customerInfo || "").toLowerCase();
+            var matchSearch = !searchTxt || idStr.indexOf(searchTxt) !== -1 || custStr.indexOf(searchTxt) !== -1;
+            
+            var pMethod = String(order.paymentMethod || "COD").toUpperCase();
+            var matchPay = (payFilter === "ALL") || (pMethod === payFilter);
+            
+            var sType = String(order.shipperType || "INTERNAL").toUpperCase();
+            var matchShip = (shipFilter === "ALL") || (sType === shipFilter);
+            
             return matchSearch && matchPay && matchShip;
         });
 
-        const lanes = {
-            lane1: [], // NEW / PENDING
-            lane2: [], // COOKING / READY
-            lane3: [], // SHIPPING
-            lane4: []  // COMPLETED
+        var lanes = {
+            lane1: [], // NEW / PENDING / RECEIVED (Step 0)
+            lane2: [], // COOKING / READY / PACKED (Step 2, 2.5)
+            lane3: [], // SHIPPING / DELIVERING (Step 3)
+            lane4: []  // COMPLETED (Step 4)
         };
 
-        filtered.forEach(order => {
-            const status = (order.operationalStatus || "NEW").toUpperCase();
-            if (status === "NEW" || status === "PENDING") {
+        filtered.forEach(function(order) {
+            var status = String(order.operationalStatus || "NEW").toUpperCase();
+            var stepNum = Number(order.step !== undefined ? order.step : 0);
+
+            if (status === "NEW" || status === "PENDING" || status === "RECEIVED" || stepNum === 0) {
                 lanes.lane1.push(order);
-            } else if (status === "COOKING" || status === "READY") {
+            } else if (status === "COOKING" || status === "READY" || status === "PACKED" || stepNum === 2 || stepNum === 2.5) {
                 lanes.lane2.push(order);
-            } else if (status === "SHIPPING") {
+            } else if (status === "SHIPPING" || status === "DELIVERING" || stepNum === 3) {
                 lanes.lane3.push(order);
-            } else if (status === "COMPLETED") {
+            } else if (status === "COMPLETED" || stepNum === 4) {
                 lanes.lane4.push(order);
             }
         });
 
-        document.getElementById("badge-count-lane1").innerText = lanes.lane1.length;
-        document.getElementById("badge-count-lane2").innerText = lanes.lane2.length;
-        document.getElementById("badge-count-lane3").innerText = lanes.lane3.length;
-        document.getElementById("badge-count-lane4").innerText = lanes.lane4.length;
+        var b1 = document.getElementById("badge-count-lane1");
+        var b2 = document.getElementById("badge-count-lane2");
+        var b3 = document.getElementById("badge-count-lane3");
+        var b4 = document.getElementById("badge-count-lane4");
+
+        if (b1) b1.innerText = lanes.lane1.length;
+        if (b2) b2.innerText = lanes.lane2.length;
+        if (b3) b3.innerText = lanes.lane3.length;
+        if (b4) b4.innerText = lanes.lane4.length;
 
         renderLane("lane-pending", lanes.lane1);
         renderLane("lane-cooking", lanes.lane2);
@@ -384,15 +473,16 @@ const OrdersController = (function() {
 
         updateAllSLATimers();
     }
-
-    /**
+/**
      * Kết xuất thẻ đơn hàng (Smart Order Card) cho từng làn
      */
     function renderLane(laneElemId, orders) {
-        const container = document.getElementById(laneElemId);
+        var container = document.getElementById(laneElemId);
+        if (!container) return;
+
         if (!orders || orders.length === 0) {
             container.innerHTML = `
-                <div class="h-32 flex flex-col items-center justify-center text-slate-500 text-xs">
+                <div class="h-32 flex flex-col items-center justify-center text-slate-500 text-xs select-none">
                     <i class="fa-regular fa-folder-open text-base mb-1 text-slate-600"></i>
                     <span>Không có đơn hàng</span>
                 </div>
@@ -400,25 +490,29 @@ const OrdersController = (function() {
             return;
         }
 
-        let html = "";
-        orders.forEach(order => {
-            const isVietQR = order.paymentMethod === "VIETQR";
-            const isPaid = (order.paymentStatus === "PAID" || order.paymentStatus === "PAID_MANUAL");
-            const customerParts = (order.customerInfo || "").split("|").map(s => s.trim());
-            const custName = customerParts[0] || "Khách Vãng Lai";
-            const custPhone = customerParts[1] || "";
-            const custAddr = customerParts[2] || "Tại quán";
+        var html = "";
+        orders.forEach(function(order) {
+            var isVietQR = (order.paymentMethod === "VIETQR");
+            var isPaid = (order.paymentStatus === "PAID" || order.paymentStatus === "PAID_MANUAL" || order.paymentStatus === "PAID_VIETQR" || order.paymentStatus === "PAID_SPEAKER");
+            
+            var custName = order.customerName || "Khách Vãng Lai";
+            var custPhone = order.customerPhone || "";
+            var custAddr = order.customerAddress || "Tại quán";
 
             // Danh sách món ăn
-            let itemsSummary = "";
+            var itemsSummary = "";
             if (Array.isArray(order.items)) {
-                order.items.forEach(it => {
-                    itemsSummary += `<div class="text-[11px] text-slate-300"><span class="font-bold text-red-400 font-mono">${it.qty || 1}x</span> ${it.name}</div>`;
+                order.items.forEach(function(it) {
+                    var itQty = it.qty || it.quantity || 1;
+                    var itName = it.name || "Món ăn";
+                    itemsSummary += `<div class="text-[11px] text-slate-300"><span class="font-bold text-red-400 font-mono">${itQty}x</span> ${itName}</div>`;
                 });
+            } else if (order.itemsFormattedText) {
+                itemsSummary = `<div class="text-[11px] text-slate-300">${order.itemsFormattedText}</div>`;
             }
 
             // Huy hiệu thanh toán
-            let paymentBadge = "";
+            var paymentBadge = "";
             if (isVietQR) {
                 paymentBadge = isPaid 
                     ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"><i class="fa-solid fa-check mr-1"></i>VIETQR ĐÃ TT</span>'
@@ -428,41 +522,41 @@ const OrdersController = (function() {
             }
 
             // Các nút thao tác nghiệp vụ theo từng trạng thái
-            let actionButtons = "";
-            const opStatus = (order.operationalStatus || "NEW").toUpperCase();
+            var actionButtons = "";
+            var opStatus = String(order.operationalStatus || "NEW").toUpperCase();
+            var stepNum = Number(order.step !== undefined ? order.step : 0);
 
-            if (opStatus === "NEW" || opStatus === "PENDING") {
+            if (opStatus === "NEW" || opStatus === "PENDING" || opStatus === "RECEIVED" || stepNum === 0) {
                 if (isVietQR && !isPaid) {
                     actionButtons += `
-                        <button onclick="OrdersController.openApproveModal('${order.orderId}')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-bold border border-amber-500/40 transition">
+                        <button type="button" onclick="OrdersController.openApproveModal('${order.orderId}')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-bold border border-amber-500/40 transition">
                             <i class="fa-solid fa-shield-halved mr-1"></i>Duyệt Tiền Lv1
                         </button>
                     `;
                 }
                 actionButtons += `
-                    <button onclick="OrdersController.openAssignModal('${order.orderId}')" class="flex-1 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold shadow transition flex items-center justify-center gap-1">
-                        <i class="fa-solid fa-motorcycle"></i>Gán Shipper & Đẩy Bếp
+                    <button type="button" onclick="OrdersController.openAssignModal('${order.orderId}')" class="flex-1 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold shadow transition flex items-center justify-center gap-1 active:scale-95">
+                        <i class="fa-solid fa-motorcycle"></i>Gán Shipper &amp; Đẩy Bếp
                     </button>
                 `;
-            } else if (opStatus === "COOKING" || opStatus === "READY") {
-                // Rào chắn Bếp bàn giao & Thu tiền ứng
-                const needCollectCash = (!isVietQR && !order.handoverCollected);
+            } else if (opStatus === "COOKING" || opStatus === "READY" || opStatus === "PACKED" || stepNum === 2 || stepNum === 2.5) {
+                var needCollectCash = (!isVietQR && !order.handoverCollected);
                 if (needCollectCash) {
                     actionButtons += `
-                        <button onclick="OrdersController.confirmHandover('${order.orderId}')" class="w-full px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-bold shadow-lg shadow-amber-600/30 transition flex items-center justify-center gap-1.5 animate-pulse">
+                        <button type="button" onclick="OrdersController.confirmHandover('${order.orderId}')" class="w-full px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-bold shadow-lg shadow-amber-600/30 transition flex items-center justify-center gap-1.5 animate-pulse active:scale-95">
                             <i class="fa-solid fa-hand-holding-dollar"></i>XÁC NHẬN THU TIỀN ỨNG BẾP (${formatCurrency(order.totalAmount)})
                         </button>
                     `;
                 } else {
                     actionButtons += `
-                        <button onclick="OrdersController.confirmHandover('${order.orderId}')" class="w-full px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold shadow transition flex items-center justify-center gap-1">
+                        <button type="button" onclick="OrdersController.confirmHandover('${order.orderId}')" class="w-full px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold shadow transition flex items-center justify-center gap-1 active:scale-95">
                             <i class="fa-solid fa-box-check"></i>Bàn Giao Món Cho Shipper
                         </button>
                     `;
                 }
-            } else if (opStatus === "SHIPPING") {
+            } else if (opStatus === "SHIPPING" || opStatus === "DELIVERING" || stepNum === 3) {
                 actionButtons += `
-                    <button onclick="OrdersController.completeOrder('${order.orderId}')" class="w-full px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-1">
+                    <button type="button" onclick="OrdersController.completeOrder('${order.orderId}')" class="w-full px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-1 active:scale-95">
                         <i class="fa-solid fa-circle-check"></i>Xác Nhận Giao Thành Công
                     </button>
                 `;
@@ -487,7 +581,7 @@ const OrdersController = (function() {
                                 <a href="tel:${custPhone}" class="text-blue-400 hover:text-blue-300 p-1" title="Gọi điện cho khách">
                                     <i class="fa-solid fa-phone text-xs"></i>
                                 </a>
-                                <button onclick="OrdersController.copyLiveTracking('${order.orderId}')" class="text-purple-400 hover:text-purple-300 p-1" title="Copy Link Live Tracking D2C">
+                                <button type="button" onclick="OrdersController.copyLiveTracking('${order.orderId}')" class="text-purple-400 hover:text-purple-300 p-1" title="Copy Link Live Tracking D2C">
                                     <i class="fa-solid fa-location-arrow text-xs"></i>
                                 </button>
                             </div>
@@ -523,23 +617,22 @@ const OrdersController = (function() {
      * Cập nhật thời gian SLA cho toàn bộ thẻ đơn hàng
      */
     function updateAllSLATimers() {
-        const timerBadges = document.querySelectorAll(".sla-timer");
-        const now = Date.now();
+        var timerBadges = document.querySelectorAll(".sla-timer");
+        var now = Date.now();
 
-        timerBadges.forEach(badge => {
-            const createdStr = badge.getAttribute("data-time");
+        timerBadges.forEach(function(badge) {
+            var createdStr = badge.getAttribute("data-time");
             if (!createdStr) return;
 
-            const createdMs = new Date(createdStr).getTime();
+            var createdMs = new Date(createdStr).getTime();
             if (isNaN(createdMs)) return;
 
-            const elapsedSec = Math.floor((now - createdMs) / 1000);
-            const mins = Math.floor(elapsedSec / 60);
-            const secs = elapsedSec % 60;
-            const displayTxt = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            var elapsedSec = Math.floor((now - createdMs) / 1000);
+            var mins = Math.floor(elapsedSec / 60);
+            var secs = elapsedSec % 60;
+            var displayTxt = String(mins).padStart(2, '0') + ":" + String(secs).padStart(2, '0');
             badge.innerText = displayTxt;
 
-            // Cảnh báo đỏ nếu ngâm đơn quá 15 phút
             if (mins >= 15) {
                 badge.className = "sla-timer font-mono text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 border border-red-500/40 text-red-400 font-bold animate-pulse";
             } else {
@@ -559,18 +652,18 @@ const OrdersController = (function() {
     }
 
     function updateRainModeUI() {
-        const btn = document.getElementById("btn-rain-mode");
-        const icon = document.getElementById("icon-rain");
-        const txt = document.getElementById("txt-rain-status");
+        var btn = document.getElementById("btn-rain-mode");
+        var icon = document.getElementById("icon-rain");
+        var txt = document.getElementById("txt-rain-status");
 
         if (isRainMode) {
-            btn.className = "px-4 py-2.5 rounded-xl border border-blue-500/40 bg-blue-600/20 text-blue-300 text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/10";
-            icon.className = "fa-solid fa-cloud-showers-heavy text-blue-400 text-sm animate-bounce";
-            txt.innerText = "Chế Độ Mưa: BẬT (+1k/km)";
+            if (btn) btn.className = "px-4 py-2.5 rounded-xl border border-blue-500/40 bg-blue-600/20 text-blue-300 text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-blue-500/10";
+            if (icon) icon.className = "fa-solid fa-cloud-showers-heavy text-blue-400 text-sm animate-bounce";
+            if (txt) txt.innerText = "Chế Độ Mưa: BẬT (+1k/km)";
         } else {
-            btn.className = "px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-xs font-bold transition-all flex items-center gap-2 shadow-lg";
-            icon.className = "fa-solid fa-cloud-showers-heavy text-slate-500 text-sm";
-            txt.innerText = "Chế Độ Mưa: TẮT";
+            if (btn) btn.className = "px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 text-xs font-bold transition-all flex items-center gap-2 shadow-lg";
+            if (icon) icon.className = "fa-solid fa-cloud-showers-heavy text-slate-500 text-sm";
+            if (txt) txt.innerText = "Chế Độ Mưa: TẮT";
         }
     }
 
@@ -578,13 +671,16 @@ const OrdersController = (function() {
      * Thuật toán Haversine tính cự ly giữa 2 tọa độ GPS (Đơn vị: km)
      */
     function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Bán kính Trái Đất (km)
-        const dLat = (lat2 - lat1) * (Math.PI / 180);
-        const dLon = (lon2 - lon1) * (Math.PI / 180);
-        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                  Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        if (typeof window !== "undefined" && window.T5_DICT && typeof window.T5_DICT.calculateHaversineDistance === "function") {
+            return window.T5_DICT.calculateHaversineDistance(lat1, lon1, lat2, lon2);
+        }
+        var R = 6371;
+        var dLat = (lat2 - lat1) * (Math.PI / 180);
+        var dLon = (lon2 - lon1) * (Math.PI / 180);
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return Math.round((R * c) * 10) / 10;
     }
 
@@ -593,18 +689,22 @@ const OrdersController = (function() {
      */
     function openAssignModal(orderId) {
         selectedOrderId = orderId;
-        const order = rawOrders.find(o => o.orderId === orderId);
+        var order = rawOrders.find(function(o) { return o.orderId === orderId; });
         if (!order) return;
 
-        document.getElementById("modal-ship-order-id").innerText = order.orderId;
+        var idEl = document.getElementById("modal-ship-order-id");
+        if (idEl) idEl.innerText = order.orderId;
+
         selectShipperChannel("INTERNAL");
         calculateShippingFees(order);
 
-        document.getElementById("modal-assign-shipper").classList.remove("hidden");
+        var modal = document.getElementById("modal-assign-shipper");
+        if (modal) modal.classList.remove("hidden");
     }
 
     function closeAssignModal() {
-        document.getElementById("modal-assign-shipper").classList.add("hidden");
+        var modal = document.getElementById("modal-assign-shipper");
+        if (modal) modal.classList.add("hidden");
         selectedOrderId = null;
     }
 
@@ -612,71 +712,82 @@ const OrdersController = (function() {
      * Tính toán cước thu khách và xem trước số tiền bù ship
      */
     function calculateShippingFees(orderObj) {
-        const order = orderObj || rawOrders.find(o => o.orderId === selectedOrderId);
-        let distanceKm = 1.5; // Cự ly mặc định nếu không có GPS
+        var order = orderObj || rawOrders.find(function(o) { return o.orderId === selectedOrderId; });
+        var distanceKm = 1.5;
 
         if (order && order.gps && order.gps.includes(",")) {
-            const parts = order.gps.split(",");
-            const custLat = parseFloat(parts[0]);
-            const custLng = parseFloat(parts[1]);
+            var parts = order.gps.split(",");
+            var custLat = parseFloat(parts[0]);
+            var custLng = parseFloat(parts[1]);
             if (!isNaN(custLat) && !isNaN(custLng)) {
                 distanceKm = calculateHaversineDistance(STORE_COORDS.lat, STORE_COORDS.lng, custLat, custLng);
             }
+        } else if (order && order.distanceKm) {
+            distanceKm = Number(order.distanceKm);
         }
 
-        // Áp dụng công thức cước đa tầng của chuỗi
-        let fee = 12000;
+        var fee = 12000;
         if (distanceKm > 2) {
             fee += Math.ceil(distanceKm - 2) * 4500;
         }
 
-        // Phụ thu thời tiết nếu bật Mưa (+1k/km)
-        let rainSurcharge = 0;
+        var rainSurcharge = 0;
         if (isRainMode) {
             rainSurcharge = Math.ceil(distanceKm) * 1000;
             fee += rainSurcharge;
         }
 
         activeCustomerFee = fee;
-        document.getElementById("modal-ship-distance").innerText = `${distanceKm} km`;
-        document.getElementById("modal-ship-customer-fee").innerText = formatCurrency(fee);
-        document.getElementById("modal-ship-fee-note").innerText = isRainMode 
-            ? `Cơ bản + Phụ phí mưa: +${formatCurrency(rainSurcharge)}`
-            : "Chính sách chuẩn: <2km 12k, mỗi km sau +4.5k";
+
+        var distEl = document.getElementById("modal-ship-distance");
+        var feeEl = document.getElementById("modal-ship-customer-fee");
+        var noteEl = document.getElementById("modal-ship-fee-note");
+
+        if (distEl) distEl.innerText = distanceKm + " km";
+        if (feeEl) feeEl.innerText = formatCurrency(fee);
+        if (noteEl) {
+            noteEl.innerText = isRainMode 
+                ? "Cơ bản + Phụ phí mưa: +" + formatCurrency(rainSurcharge)
+                : "Chính sách chuẩn: <2km 12k, mỗi km sau +4.5k";
+        }
 
         calculateSubsidyPreview();
     }
 
     function selectShipperChannel(channel) {
         selectedShipperChannel = channel;
-        const btnInternal = document.getElementById("btn-chan-internal");
-        const btnExternal = document.getElementById("btn-chan-external");
-        const secInternal = document.getElementById("section-internal-shipper");
-        const secExternal = document.getElementById("section-external-shipper");
+        var btnInternal = document.getElementById("btn-chan-internal");
+        var btnExternal = document.getElementById("btn-chan-external");
+        var secInternal = document.getElementById("section-internal-shipper");
+        var secExternal = document.getElementById("section-external-shipper");
 
         if (channel === "INTERNAL") {
-            btnInternal.className = "p-2.5 rounded-xl border border-red-500/50 bg-red-600/10 text-red-300 text-xs font-bold transition flex items-center justify-center gap-2";
-            btnExternal.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold hover:text-white transition flex items-center justify-center gap-2";
-            secInternal.classList.remove("hidden");
-            secExternal.classList.add("hidden");
+            if (btnInternal) btnInternal.className = "p-2.5 rounded-xl border border-red-500/50 bg-red-600/10 text-red-300 text-xs font-bold transition flex items-center justify-center gap-2";
+            if (btnExternal) btnExternal.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold hover:text-white transition flex items-center justify-center gap-2";
+            if (secInternal) secInternal.classList.remove("hidden");
+            if (secExternal) secExternal.classList.add("hidden");
         } else {
-            btnInternal.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold hover:text-white transition flex items-center justify-center gap-2";
-            btnExternal.className = "p-2.5 rounded-xl border border-red-500/50 bg-red-600/10 text-red-300 text-xs font-bold transition flex items-center justify-center gap-2";
-            secInternal.classList.add("hidden");
-            secExternal.classList.remove("hidden");
+            if (btnInternal) btnInternal.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 text-xs font-semibold hover:text-white transition flex items-center justify-center gap-2";
+            if (btnExternal) btnExternal.className = "p-2.5 rounded-xl border border-red-500/50 bg-red-600/10 text-red-300 text-xs font-bold transition flex items-center justify-center gap-2";
+            if (secInternal) secInternal.classList.add("hidden");
+            if (secExternal) secExternal.classList.remove("hidden");
         }
         calculateSubsidyPreview();
     }
 
     function calculateSubsidyPreview() {
+        var subsidyEl = document.getElementById("preview-subsidy-cost");
+        if (!subsidyEl) return;
+
         if (selectedShipperChannel === "INTERNAL") {
-            document.getElementById("preview-subsidy-cost").innerText = "0 đ (Shipper nội bộ)";
+            subsidyEl.innerText = "0 đ (Shipper quán)";
             return;
         }
 
-        const externalCost = parseFloat(document.getElementById("input-external-cost").value) || 0;
-        const subsidy = Math.max(0, externalCost - activeCustomerFee);
-        document.getElementById("preview-subsidy-cost").innerText = formatCurrency(subsidy);
+        var costInput = document.getElementById("input-external-cost");
+        var externalCost = parseFloat(costInput ? costInput.value : 0) || 0;
+        var subsidy = Math.max(0, externalCost - activeCustomerFee);
+        subsidyEl.innerText = formatCurrency(subsidy);
     }
 
     /**
@@ -684,29 +795,44 @@ const OrdersController = (function() {
      */
     async function executeAssignShipper() {
         if (!selectedOrderId) return;
-        const btn = document.getElementById("btn-confirm-assign");
+        var btn = document.getElementById("btn-confirm-assign");
 
-        let shipperInfo = "";
-        let trackingCode = "";
+        var shipperInfo = "";
+        var trackingCode = "";
+        var externalCost = 0;
 
         if (selectedShipperChannel === "INTERNAL") {
-            shipperInfo = document.getElementById("select-internal-driver").value;
+            var driverSelect = document.getElementById("select-internal-driver");
+            shipperInfo = driverSelect ? driverSelect.value : "";
         } else {
-            const provider = document.getElementById("select-external-provider").value;
-            trackingCode = document.getElementById("input-external-tracking").value.trim();
-            shipperInfo = `${provider} (${trackingCode || "Chưa có mã"})`;
+            var providerSelect = document.getElementById("select-external-provider");
+            var trackingInput = document.getElementById("input-external-tracking");
+            var costInput = document.getElementById("input-external-cost");
+
+            var provider = providerSelect ? providerSelect.value : "GRAB";
+            trackingCode = trackingInput ? trackingInput.value.trim() : "";
+            externalCost = parseFloat(costInput ? costInput.value : 0) || 0;
+            shipperInfo = provider + " (" + (trackingCode || "Chưa có mã") + ")";
         }
 
-        const payload = {
+        var subsidizedFee = (selectedShipperChannel === "EXTERNAL") ? Math.max(0, externalCost - activeCustomerFee) : 0;
+
+        var payload = {
             orderId: selectedOrderId,
+            orderCode: selectedOrderId,
             shipperType: selectedShipperChannel,
+            deliveryChannel: selectedShipperChannel,
             shipperInfo: shipperInfo,
-            trackingCode: trackingCode
+            trackingCode: trackingCode,
+            externalShipFee: externalCost,
+            subsidizedShipFee: subsidizedFee
         };
 
         try {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang khóa đơn...';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang khóa đơn...';
+            }
 
             await Thim5API.callGAS("assignShipper", payload);
             closeAssignModal();
@@ -714,8 +840,10 @@ const OrdersController = (function() {
         } catch (error) {
             alert("❌ Lỗi gán Shipper: " + error.message);
         } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-lock"></i> Khóa Đơn & Đẩy Bếp';
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-lock"></i> Khóa Đơn &amp; Đẩy Bếp';
+            }
         }
     }
 
@@ -723,17 +851,23 @@ const OrdersController = (function() {
      * Cổng Bàn Giao & Thu Tiền Ứng Tại Bếp (Handover Gate)
      */
     async function confirmHandover(orderId) {
-        const order = rawOrders.find(o => o.orderId === orderId);
+        var order = rawOrders.find(function(o) { return o.orderId === orderId; });
         if (!order) return;
 
-        const isVietQR = order.paymentMethod === "VIETQR";
+        var isVietQR = (order.paymentMethod === "VIETQR");
         if (!isVietQR) {
-            const ok = confirm(`⚠️ XÁC NHẬN DÒNG TIỀN:\nBếp/Thu ngân đã thu đủ số tiền ứng ${formatCurrency(order.totalAmount)} từ Shipper chưa?`);
+            var ok = confirm("⚠️ XÁC NHẬN DÒNG TIỀN:\nBếp/Thu ngân đã thu đủ số tiền ứng " + formatCurrency(order.totalAmount) + " từ Shipper chưa?");
             if (!ok) return;
         }
 
         try {
-            await Thim5API.callGAS("confirmKitchenHandover", { orderId: orderId, staffName: "Bếp Trưởng Thím 5" });
+            await Thim5API.callGAS("confirmKitchenHandover", { 
+                orderId: orderId, 
+                orderCode: orderId,
+                staffName: "Bếp Trưởng Thím 5",
+                settlementType: isVietQR ? "PAID_TRANSFER" : "PAID_CASH",
+                amountPaid: isVietQR ? 0 : Number(order.totalAmount || 0)
+            });
             loadOrders();
         } catch (error) {
             alert("❌ Lỗi bàn giao món: " + error.message);
@@ -744,11 +878,11 @@ const OrdersController = (function() {
      * Hoàn tất đơn hàng (Kích hoạt trừ kho BOM & CRM)
      */
     async function completeOrder(orderId) {
-        const ok = confirm(`Xác nhận đơn hàng ${orderId} đã được giao thành công cho khách?`);
+        var ok = confirm("Xác nhận đơn hàng " + orderId + " đã được giao thành công cho khách?");
         if (!ok) return;
 
         try {
-            await Thim5API.callGAS("completeOrder", { orderId: orderId });
+            await Thim5API.callGAS("completeOrder", { orderId: orderId, orderCode: orderId, stepNumber: 4 });
             loadOrders();
         } catch (error) {
             alert("❌ Lỗi hoàn tất đơn: " + error.message);
@@ -756,37 +890,50 @@ const OrdersController = (function() {
     }
 
     /**
-     * Mở Modal Duyệt Thanh Toán Khẩn Cấp (PIN Lv1)
+     * Mở Modal Duyệt Thanh Toán Khẩn Cấp (PIN Lv1 / Lv2)
      */
     function openApproveModal(orderId) {
         selectedOrderId = orderId;
-        document.getElementById("input-payment-override-note").value = "";
-        document.getElementById("input-manager-pin").value = "";
-        document.getElementById("pin-error-orders").classList.add("hidden");
-        document.getElementById("modal-approve-payment").classList.remove("hidden");
+        var noteInput = document.getElementById("input-payment-override-note");
+        var pinInput = document.getElementById("input-manager-pin");
+        var errEl = document.getElementById("pin-error-orders");
+        var modal = document.getElementById("modal-approve-payment");
+
+        if (noteInput) noteInput.value = "";
+        if (pinInput) pinInput.value = "";
+        if (errEl) errEl.classList.add("hidden");
+        if (modal) modal.classList.remove("hidden");
     }
 
     function closeApproveModal() {
-        document.getElementById("modal-approve-payment").classList.add("hidden");
+        var modal = document.getElementById("modal-approve-payment");
+        if (modal) modal.classList.add("hidden");
         selectedOrderId = null;
     }
 
     async function executeApprovePayment() {
-        const pin = document.getElementById("input-manager-pin").value.trim();
-        const note = document.getElementById("input-payment-override-note").value.trim();
-        const btn = document.getElementById("btn-execute-approve");
+        var pinInput = document.getElementById("input-manager-pin");
+        var noteInput = document.getElementById("input-payment-override-note");
+        var btn = document.getElementById("btn-execute-approve");
+        var errEl = document.getElementById("pin-error-orders");
+
+        var pin = pinInput ? pinInput.value.trim() : "";
+        var note = noteInput ? noteInput.value.trim() : "";
 
         if (!pin) {
-            document.getElementById("pin-error-orders").classList.remove("hidden");
+            if (errEl) errEl.classList.remove("hidden");
             return;
         }
 
         try {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang duyệt...';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang duyệt...';
+            }
 
             await Thim5API.callGAS("manualApprovePayment", {
                 orderId: selectedOrderId,
+                orderCode: selectedOrderId,
                 pin: pin,
                 managerName: "Quản Lý Ca",
                 note: note || "Duyệt tiền mặt tại quầy"
@@ -798,8 +945,10 @@ const OrdersController = (function() {
         } catch (error) {
             alert("❌ " + error.message);
         } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> Xác Nhận Duyệt';
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Xác Nhận Duyệt';
+            }
         }
     }
 
@@ -807,13 +956,17 @@ const OrdersController = (function() {
      * Sao chép đường link Live Tracking 5 bước gửi cho khách
      */
     function copyLiveTracking(orderId) {
-        const host = window.location.origin;
-        const trackingUrl = `${host}/tracking.html?order=${orderId}`;
-        navigator.clipboard.writeText(trackingUrl).then(() => {
-            alert(`🔗 Đã copy Link Live Tracking cho đơn ${orderId}:\n${trackingUrl}`);
-        }).catch(() => {
+        var host = window.location.origin;
+        var trackingUrl = host + "/tracking.html?order=" + encodeURIComponent(orderId);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(trackingUrl).then(function() {
+                alert("🔗 Đã copy Link Live Tracking cho đơn " + orderId + ":\n" + trackingUrl);
+            }).catch(function() {
+                prompt("Copy link gửi khách:", trackingUrl);
+            });
+        } else {
             prompt("Copy link gửi khách:", trackingUrl);
-        });
+        }
     }
 
     function formatCurrency(num) {
