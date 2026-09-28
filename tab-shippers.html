@@ -1,16 +1,16 @@
-<!-- PHÂN HỆ ĐIỀU HÀNH ĐỘI XE & SHIPPER (v3.0 SAAS MASTER) -->
+<!-- MODULE: ĐIỀU PHỐI ĐỘI TÀI XẾ & SỔ CÁI NỢ TẠM SHIPPER (v3.0 SAAS MASTER) -->
 <div id="shipper-management-container" class="space-y-4 max-w-7xl mx-auto pb-12 select-none text-xs">
 
   <!-- 1. CỤM 4 THẺ KPI ĐIỀU HÀNH VẬN HÀNH ĐỘI TÀI XẾ & DÒNG TIỀN COD -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
     
-    <!-- KPI 1: Đội xe đang trực ca sẵn sàng nhận đơn -->
+    <!-- KPI 1: Đội Xe Trực Ca -->
     <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
       <div class="space-y-1">
         <span class="text-[10.5px] font-medium text-slate-400">Đội Xe Trực Ca</span>
         <div class="flex items-baseline gap-1.5">
-          <span id="kpi-online-shippers" class="text-xl font-black text-emerald-400 font-mono">0</span>
-          <span id="kpi-total-shippers" class="text-xs text-slate-500 font-mono">/ 0 tài xế</span>
+          <span id="kpi-online-shippers" class="text-xl font-black text-emerald-400 font-mono">3</span>
+          <span id="kpi-total-shippers" class="text-xs text-slate-500 font-mono">/ 3 tài xế</span>
         </div>
         <span class="text-[9.5px] text-slate-400 flex items-center gap-1">
           Sẵn sàng nhận cuốc tại Bếp
@@ -35,7 +35,7 @@
       </div>
     </div>
 
-    <!-- KPI 3: Cảnh báo tài xế vượt hạn mức nợ -->
+    <!-- KPI 3: Cảnh Báo Vượt Trần Nợ -->
     <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
       <div class="space-y-1">
         <span class="text-[10.5px] font-medium text-slate-400">Cảnh Báo Vượt Trần Nợ</span>
@@ -98,8 +98,9 @@
         <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-500"></i>
       </a>
 
-      <!-- Nút Mở Modal Thêm Shipper Mới (Chính sách phân quyền mở cho cả Level 2) -->
+      <!-- Nút Mở Modal Thêm Shipper Mới (Hỗ trợ mở Portal an toàn) -->
       <button type="button" 
+              id="btn-trigger-add-shipper"
               onclick="ShipperManagerController.openShipperModal(null)" 
               class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black uppercase tracking-wider transition flex items-center gap-2 active:scale-95 shadow-lg shadow-orange-500/20">
         <i class="fa-solid fa-user-plus text-xs"></i>
@@ -127,15 +128,15 @@
         </thead>
         <tbody id="shippers-table-body" class="divide-y divide-slate-800/60 font-sans">
           
-          <!-- Hàng Loading Mặc Định Khi Tải Dữ Liệu -->
-          <tr id="shippers-loading-row">
+          <!-- Hàng Loading Khi Đang Nạp Dữ Liệu -->
+          <tr id="shippers-loading-row" class="hidden">
             <td colspan="8" class="py-12 text-center text-slate-400 space-y-2">
               <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
               <p class="text-xs font-medium">Đang đồng bộ dữ liệu đội xe từ Google Sheets [DATA_SHIPPERS]...</p>
             </td>
           </tr>
 
-          <!-- Hàng Thông Báo Khi Chưa Có Tài Xế (Khớp đúng giao diện ảnh chụp) -->
+          <!-- Hàng Thông Báo Khi Chưa Có Tài Xế -->
           <tr id="shippers-empty-row" class="hidden">
             <td colspan="8" class="py-16 text-center text-slate-400 space-y-3">
               <div class="w-14 h-14 rounded-3xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600 text-2xl mx-auto shadow-inner">
@@ -162,10 +163,10 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 4. MODAL THÊM / CHỈNH SỬA THÔNG TIN SHIPPER MỚI (POPUP FORM DIALOG)       -->
+  <!-- 4. MODAL THÊM / CHỈNH SỬA THÔNG TIN SHIPPER MỚI (PORTAL DIALOG)           -->
   <!-- ========================================================================= -->
-  <div id="modal-shipper-form" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
-    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200">
+  <div id="modal-shipper-form" class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
+    <div class="relative bg-slate-900 border-2 border-slate-700 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200">
       
       <!-- Header Modal -->
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -243,7 +244,7 @@
         </div>
 
         <p class="text-[10px] text-slate-500 italic">
-          * Sau khi thêm, tài xế có thể mở app <code>shipping.html</code> và gõ 4 số cuối SĐT để tự động vào ca nhận đơn ngay lập tức.
+          * Sau khi thêm, tài xế có thể mở app <code>shipping.html</code> và gõ 4 số cuối SĐT để tự động vào ca nhận đơn ngay lập tức[cite: 3].
         </p>
 
         <!-- Cụm Nút Lưu & Hủy -->
@@ -274,7 +275,7 @@
  * CONTROLLER: SHIPPER MANAGEMENT & DISPATCH (v3.0 SAAS ENTERPRISE MASTER)
  * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
  * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
- * Kiến trúc: Headless GAS Adapter, Kiểm soát nợ tạm 300k, Đồng bộ DATA_SHIPPERS
+ * Kiến trúc: Headless GAS Adapter, Portal Teleport Pattern, Đồng bộ DATA_SHIPPERS
  * =========================================================================
  */
 var ShipperManagerController = (function() {
@@ -283,13 +284,24 @@ var ShipperManagerController = (function() {
   var debtLedgerMap = {};
   var searchKeyword = "";
   var isLoading = false;
-  var MAX_DEBT_CAP = 300000; // Trần nợ COD tối đa 300.000đ
+  var MAX_DEBT_CAP = 300000; // Hạn mức ôm nợ COD tối đa 300.000đ
 
   /**
    * KHỞI CHẠY TẢI DỮ LIỆU ĐỘI XE VÀ SỔ CÁI NỢ TẠM
    */
   async function init() {
+    teleportModalToBody();
     await loadShippersData();
+  }
+
+  /**
+   * GIẢI PHÓNG MODAL RA NGOÀI THẺ BODY ĐỂ KHÔNG BỊ KẸT BỞI STACKING CONTEXT CON
+   */
+  function teleportModalToBody() {
+    var modal = document.getElementById("modal-shipper-form");
+    if (modal && modal.parentNode !== document.body) {
+      document.body.appendChild(modal);
+    }
   }
 
   /**
@@ -323,7 +335,7 @@ var ShipperManagerController = (function() {
       } else if (Array.isArray(shippersRes)) {
         rawShippersList = shippersRes;
       } else {
-        // Fallback danh sách hạt giống nếu bảng chưa có dòng
+        // Danh sách fallback chuẩn hóa ban đầu
         rawShippersList = [
           { code: "SHIP_01", name: "Nguyễn Hải Âu", phone: "0934220585", bikePlate: "70-B1 123.45", status: "ACTIVE", last4: "0585" },
           { code: "SHIP_02", name: "Nguyễn Hải Âu", phone: "0969004693", bikePlate: "70-F1 678.90", status: "ACTIVE", last4: "4693" },
@@ -410,7 +422,7 @@ var ShipperManagerController = (function() {
     var htmlBuffer = "";
     shippers.forEach(function(s) {
       var phone = String(s.phone || "").trim();
-      var last4 = s.last4 || phone.slice(-4) || "••••";
+      var last4 = s.last4 || (phone.length >= 4 ? phone.slice(-4) : "••••");
       var isOnline = (String(s.status || "ACTIVE").toUpperCase() === "ACTIVE");
 
       // Đối soát nợ tạm theo tên tài xế
@@ -499,9 +511,6 @@ var ShipperManagerController = (function() {
     applyFiltersAndRender();
   }
 
-  /**
-   * TỰ ĐỘNG CẮT 4 SỐ CUỐI SĐT ĐỂ HIỂN THỊ MÃ PIN TRỰC QUAN
-   */
   function onPhoneInputChange(val) {
     var cleanPhone = String(val || "").replace(/\D/g, "");
     var last4Box = document.getElementById("inp-shipper-last4");
@@ -511,9 +520,10 @@ var ShipperManagerController = (function() {
   }
 
   /**
-   * MỞ MODAL THÊM / CHỈNH SỬA SHIPPER (Z-INDEX 50 PHỦ TOÀN DIỆN)
+   * MỞ MODAL THÊM / CHỈNH SỬA SHIPPER (BẬT LÊN LỚP CAO NHẤT Z-INDEX 99999)
    */
   function openShipperModal(shipperCode) {
+    teleportModalToBody();
     var modal = document.getElementById("modal-shipper-form");
     var title = document.getElementById("modal-shipper-title");
     var codeInput = document.getElementById("inp-shipper-code");
@@ -609,7 +619,7 @@ var ShipperManagerController = (function() {
         alert("⛔ Máy chủ từ chối: " + (res && res.message ? res.message : "Không thể lưu thông tin"));
       }
     } catch (err) {
-      alert("❌ Lỗi mạng: " + err.message);
+      alert("❌ Lỗi: " + err.message);
     } finally {
       if (btn) {
         btn.disabled = false;
@@ -645,10 +655,11 @@ var ShipperManagerController = (function() {
     }
   }
 
-  // Khởi tạo ngay khi component nạp vào DOM
+  // Khởi chạy ngay khi DOM sẵn sàng
   init();
 
-  return {
+  // Đăng ký toàn cục lên window để chống lỗi ReferenceError trong kiến trúc SPA
+  var exportedModule = {
     init: init,
     loadShippersData: loadShippersData,
     handleSearch: handleSearch,
@@ -658,6 +669,12 @@ var ShipperManagerController = (function() {
     handleSaveShipper: handleSaveShipper,
     toggleShift: toggleShift
   };
+
+  if (typeof window !== "undefined") {
+    window.ShipperManagerController = exportedModule;
+  }
+
+  return exportedModule;
 })();
 </script>
 </div>
