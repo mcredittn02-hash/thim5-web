@@ -1,13 +1,13 @@
 /**
  * =============================================================================
- * TÊN FILE: api.js (PHIÊN BẢN ENTERPRISE SaaS v3.0 MASTER ADAPTER)
+ * TÊN FILE: api.js (PHIÊN BẢN ENTERPRISE SaaS v3.0 MASTER DUAL-GATEWAY)
  * BẢN QUYỀN: BẾP MÌ TRỘN THÍM 5 & LONGHOAFOOD MASTER (NĂM 2026)
  * KIẾN TRÚC SƯ TRƯỞNG: ĐU ĐỦ (CỐ VẤN CHIẾN LƯỢC F&B CHO ANH HẢI ÂU)
  * VAI TRÒ:
  *   - AUTO-LOADER GUARD: Tự động phát hiện và nạp tức thì 'thim5-master-dictionary.js'.
- *   - HEADLESS API GATEWAY CLIENT: Đón nhận 100% cuộc gọi từ Client và chuyển tiếp
- *     chuẩn xác về CoreRouter.gs trên Google Apps Script Runtime.
- *   - CHỐNG RACE CONDITION: Hàng đợi Blocking Promise Queue bảo vệ toàn vẹn dữ liệu.
+ *   - DUAL-ENDPOINT ROUTER: Tự động nhận diện domain test.anngonlonghoa.com.vn để
+ *     điều hướng chính xác vào Apps Script Staging Endpoint.
+ *   - RUNTIME ADAPTER: Hỗ trợ linh hoạt cả Web App độc lập và Google Apps Script.
  * =============================================================================
  */
 
@@ -56,7 +56,6 @@ function ensureMasterDictionaryLoaded() {
 
     scriptEl.onerror = function(err) {
       console.warn('⚠️ [API Auto-Loader Warning] Không tìm thấy thim5-master-dictionary.js ở cùng cấp thư mục, kiểm tra thư mục /js:', err);
-      // Fallback tìm kiếm trong thư mục con js/
       var fallbackScript = document.createElement('script');
       fallbackScript.src = 'js/thim5-master-dictionary.js?v=' + Date.now();
       fallbackScript.async = false;
@@ -65,7 +64,7 @@ function ensureMasterDictionaryLoaded() {
       };
       fallbackScript.onerror = function(fallbackErr) {
         console.error('❌ [API Auto-Loader Error] Thất bại nạp Từ Điển Master:', fallbackErr);
-        resolve(null); // Không chặn luồng ứng dụng nếu rớt mạng
+        resolve(null);
       };
       document.head.appendChild(fallbackScript);
     };
@@ -82,15 +81,67 @@ if (typeof window !== 'undefined') {
 }
 
 // =============================================================================
-// 2. KHỞI TẠO BỘ ADAPTER TRUNG TÂM THIM5API (ENTERPRISE API GATEWAY ADAPTER)
+// 2. KHỞI TẠO BỘ ADAPTER TRUNG TÂM THIM5API (ENTERPRISE DUAL-GATEWAY ADAPTER)
 // =============================================================================
 var Thim5API = (function() {
   'use strict';
 
-  // ENDPOINT TRIỂN KHAI GOOGLE APPS SCRIPT WEB APP CỦA HỆ THỐNG CHUỖI
-  var GAS_WEBAPP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbw6H3p85-vQ2mX2fW812qfX9q9p17p6u3m29-84jXk/exec';
+  // ---------------------------------------------------------------------------
+  // CẤU HÌNH ĐƯỜNG DẪN WEB APP APPS SCRIPT CHO MÔI TRƯỜNG STAGING & PRODUCTION
+  // ---------------------------------------------------------------------------
+  // 1. ENDPOINT STAGING (Dành riêng cho nhánh test / test.anngonlonghoa.com.vn)
+  var STAGING_GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx6ZrlsN-vodh5UwjPPbFin9rWyg6GRV4fVQJkcayMR5uScTsvheJUDniRCPKMhlFsO/exec';
+
+  // 2. ENDPOINT PRODUCTION (Dành cho domain chạy thật anngonlonghoa.com.vn)
+  var PRODUCTION_GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwZZoE51LGSlZbE85BH_sB2bzWwB_omtZaPFI_vevlAh56bs8CrpGTPMfdg2FfzadcY/exec';
 
   var REQUEST_TIMEOUT_MS = 25000; // Timeout 25 giây bảo vệ trải nghiệm khách hàng
+
+  /**
+   * TỰ ĐỘNG PHÂN GIẢI ENDPOINT DỰA TRÊN MÔI TRƯỜNG HOSTNAME HIỆN HÀNH
+   * Ưu tiên: URL Parameter (?gas_endpoint=) > localStorage > Hostname Auto-Detect
+   */
+  function resolveActiveEndpoint() {
+    if (typeof window === 'undefined') {
+      return STAGING_GAS_ENDPOINT;
+    }
+
+    // 1. Kiểm tra tham số ghi đè trực tiếp trên URL: ?gas_endpoint=https://script.google.com/...
+    try {
+      var urlParams = new URLSearchParams(window.location.search);
+      var queryEndpoint = urlParams.get('gas_endpoint');
+      if (queryEndpoint && queryEndpoint.startsWith('https://script.google.com/')) {
+        localStorage.setItem('thim5_custom_api_endpoint', queryEndpoint.trim());
+        console.log('🔗 [Thim5API Override] Đã cấu hình Endpoint mới từ URL Parameter:', queryEndpoint);
+        return queryEndpoint.trim();
+      }
+    } catch (eParam) {}
+
+    // 2. Kiểm tra bộ nhớ đệm LocalStorage đã lưu trước đó
+    try {
+      var cachedEndpoint = localStorage.getItem('thim5_custom_api_endpoint');
+      if (cachedEndpoint && cachedEndpoint.startsWith('https://script.google.com/')) {
+        return cachedEndpoint.trim();
+      }
+    } catch (eStorage) {}
+
+    // 3. Tự động nhận diện theo tên miền (Hostname Routing)
+    var currentHost = (window.location && window.location.hostname) ? window.location.hostname.toLowerCase() : '';
+
+    // Nếu chạy trên domain test, staging hoặc localhost -> Chọn Staging Endpoint
+    if (
+      currentHost.indexOf('test.') !== -1 ||
+      currentHost.indexOf('staging') !== -1 ||
+      currentHost === 'localhost' ||
+      currentHost === '127.0.0.1' ||
+      window.location.href.indexOf('staging') !== -1
+    ) {
+      return STAGING_GAS_ENDPOINT;
+    }
+
+    // Mặc định cho production hoặc các domain chính thức
+    return PRODUCTION_GAS_ENDPOINT;
+  }
 
   /**
    * KIỂM TRA MÔI TRƯỜNG THỰC THI (CONTAINER-BOUND GAS VS HEADLESS WEB)
@@ -108,27 +159,36 @@ var Thim5API = (function() {
    * LẤY ĐƯỜNG DẪN ENDPOINT HIỆN HÀNH
    */
   function getEndpoint() {
-    if (typeof localStorage !== 'undefined') {
-      var customEndpoint = localStorage.getItem('thim5_custom_api_endpoint');
-      if (customEndpoint && customEndpoint.startsWith('https://script.google.com/')) {
-        return customEndpoint.trim();
-      }
-    }
-    return GAS_WEBAPP_ENDPOINT;
+    return resolveActiveEndpoint();
   }
 
   /**
-   * THIẾT LẬP LẠI ĐƯỜNG DẪN ENDPOINT KHI THAY ĐỔI TRIỂN KHAI BACKEND
+   * THIẾT LẬP LẠI ĐƯỜNG DẪN ENDPOINT (DÙNG ĐỂ ĐỔI NHANH QUA CONSOLE HOẶC ADMIN UI)
+   * 
+   * @param {string} newEndpointUrl - Đường link Web App Exec mới của Google Apps Script
+   * @returns {boolean} Kết quả cập nhật
    */
   function setEndpoint(newEndpointUrl) {
-    if (newEndpointUrl && typeof newEndpointUrl === 'string' && newEndpointUrl.startsWith('https://')) {
-      GAS_WEBAPP_ENDPOINT = newEndpointUrl.trim();
+    if (newEndpointUrl && typeof newEndpointUrl === 'string' && newEndpointUrl.startsWith('https://script.google.com/')) {
+      var cleanUrl = newEndpointUrl.trim();
       if (typeof localStorage !== 'undefined') {
-        localStorage.setItem('thim5_custom_api_endpoint', GAS_WEBAPP_ENDPOINT);
+        localStorage.setItem('thim5_custom_api_endpoint', cleanUrl);
       }
+      console.log('✅ [Thim5API] Đã lưu thành công Endpoint máy chủ mới:', cleanUrl);
       return true;
     }
+    console.warn('⛔ [Thim5API] Đường link Web App không hợp lệ! Bắt buộc bắt đầu bằng https://script.google.com/');
     return false;
+  }
+
+  /**
+   * XÓA ENDPOINT TÙY BIẾN ĐỂ QUAY VỀ MẶC ĐỊNH THEO HOSTNAME
+   */
+  function resetEndpointToDefault() {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('thim5_custom_api_endpoint');
+    }
+    console.log('🔄 [Thim5API] Đã khôi phục Endpoint mặc định theo môi trường:', resolveActiveEndpoint());
   }
 
   /**
@@ -319,7 +379,7 @@ var Thim5API = (function() {
     var targetAction = apiActionName || gasFunctionName;
     var targetPayload = apiPayloadObj || {};
 
-    // Nếu truyền mảng đối số kiểu cũ, tự động đóng gói vào payload
+    // Nếu truyền mảng đối số kiểu cũ, tự động đóng gói vào payload phẳng
     if (Array.isArray(gasArgsArray) && gasArgsArray.length > 0 && Object.keys(targetPayload).length === 0) {
       targetPayload._args = gasArgsArray;
       if (gasArgsArray[0] && typeof gasArgsArray[0] === 'object') {
@@ -336,13 +396,15 @@ var Thim5API = (function() {
     callBackend: callBackend,
     getEndpoint: getEndpoint,
     setEndpoint: setEndpoint,
+    resolveActiveEndpoint: resolveActiveEndpoint,
+    resetEndpointToDefault: resetEndpointToDefault,
     systemHeartbeatPing: systemHeartbeatPing,
     ensureMasterDictionaryLoaded: ensureMasterDictionaryLoaded
   };
 
 })();
 
-// Đăng ký alias toàn cục để tương thích 100% với các mã nguồn cũ
+// Đăng ký alias toàn cục để tương thích 100% với các mã nguồn cũ trên hệ thống
 if (typeof window !== 'undefined') {
   window.Thim5API = Thim5API;
   window.callBackend = Thim5API.callBackend;
