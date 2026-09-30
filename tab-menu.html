@@ -1,189 +1,228 @@
-<!-- ========================================================================= -->
-<!-- PHÂN HỆ ĐIỀU HÀNH THỰC ĐƠN, BÁN CHÉO & OMNI-INGESTION (v3.0 SAAS ENTERPRISE)-->
-<!-- ========================================================================= -->
-<div id="menu-management-container" class="space-y-4 max-w-7xl mx-auto pb-12 select-none text-xs">
+<!-- KHUNG QUẢN TRỊ THỰC ĐƠN & BÁN CHÉO (tab-menu.html) - DATA-DRIVEN SSOT -->
+<div id="tab-menu-workspace" class="space-y-4 max-w-7xl mx-auto pb-12 select-none text-xs">
 
-  <!-- 1. CỤM 4 THẺ KPI CHIẾN LƯỢC FOOD COST & QUẢN TRỊ DANH MỤC D2C -->
+  <!-- 1. BẢNG CHỈ SỐ KPI VẬN HÀNH BẾP & FOOD COST REVERSE-PRICING -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-    
-    <!-- KPI 1: Tổng số món đang mở bán tại bếp -->
+    <!-- Card 1: Trạng thái bếp -->
     <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
       <div class="space-y-1">
-        <span class="text-[10.5px] font-medium text-slate-400">Trạng Thái Bếp Phục Vụ</span>
-        <div class="flex items-baseline gap-1.5">
-          <span id="kpi-active-items" class="text-xl font-black text-white font-mono">0</span>
-          <span id="kpi-total-items" class="text-xs text-slate-500 font-mono">/ 0 món</span>
+        <span class="text-[10.5px] font-medium text-slate-400 block">Trạng Thái Bếp Phục Vụ</span>
+        <div class="flex items-baseline gap-1.5 font-mono">
+          <strong id="kpi-active-dishes" class="text-base sm:text-lg text-white font-black">0</strong>
+          <span class="text-xs text-slate-500">/ <span id="kpi-total-dishes">0</span> món</span>
         </div>
-        <span class="text-[9.5px] text-emerald-400 font-bold flex items-center gap-1">
-          <i class="fa-solid fa-circle-check text-[8px]"></i> Sẵn sàng lên đơn D2C
-        </span>
+        <p class="text-[9.5px] text-emerald-400 flex items-center gap-1 font-medium">
+          <i class="fa-solid fa-circle-check text-[9px]"></i> Sẵn sàng lên đơn D2C
+        </p>
       </div>
-      <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base">
+      <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm shadow-inner">
         <i class="fa-solid fa-utensils"></i>
       </div>
     </div>
 
-    <!-- KPI 2: Food Cost Trung Bình Toàn Quán -->
+    <!-- Card 2: Food Cost trung bình -->
     <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
       <div class="space-y-1">
-        <span class="text-[10.5px] font-medium text-slate-400">Food Cost Trung Bình</span>
-        <div class="flex items-baseline gap-1">
-          <span id="kpi-avg-foodcost" class="text-xl font-black text-amber-400 font-mono">0.0%</span>
-        </div>
-        <span class="text-[9.5px] text-slate-500 font-mono">Mục tiêu chuỗi: 32% - 38%</span>
+        <span class="text-[10.5px] font-medium text-slate-400 block">Food Cost Trung Bình</span>
+        <strong id="kpi-avg-fc" class="text-base sm:text-lg text-amber-400 font-mono font-black block">0.0%</strong>
+        <p class="text-[9.5px] text-slate-500 font-medium">Mục tiêu chuỗi: 32% - 38%</p>
       </div>
-      <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base">
+      <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm shadow-inner">
         <i class="fa-solid fa-chart-pie"></i>
       </div>
     </div>
 
-    <!-- KPI 3: Tỷ Lệ Món Bán Chéo / Booster Soups & Đồ Uống 1L -->
+    <!-- Card 3: Booster & Nước kéo vé -->
     <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
       <div class="space-y-1">
-        <span class="text-[10.5px] font-medium text-slate-400">Súp Booster &amp; Nước 1L</span>
-        <div class="flex items-baseline gap-1">
-          <span id="kpi-booster-count" class="text-xl font-black text-emerald-400 font-mono">0</span>
-          <span class="text-xs text-slate-500 font-mono">món mồi vé</span>
+        <span class="text-[10.5px] font-medium text-slate-400 block">Súp Booster, Nước &amp; Topping</span>
+        <div class="flex items-baseline gap-1 font-mono">
+          <strong id="kpi-booster-count" class="text-base sm:text-lg text-emerald-400 font-black">0</strong>
+          <span class="text-xs text-slate-500">món mồi vé</span>
         </div>
-        <span class="text-[9.5px] text-emerald-400 font-bold flex items-center gap-1">
-          <i class="fa-solid fa-bolt text-[8px]"></i> Đòn bẩy kéo AOV &gt; 70k
-        </span>
+        <p class="text-[9.5px] text-emerald-400 font-medium flex items-center gap-1">
+          <i class="fa-solid fa-bolt text-[9px]"></i> Đòn bẩy kéo AOV &gt; 70k
+        </p>
       </div>
-      <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-base">
-        <i class="fa-solid fa-bowl-food"></i>
+      <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm shadow-inner">
+        <i class="fa-solid fa-bowl-rice"></i>
       </div>
     </div>
 
-    <!-- KPI 4: Chốt Chặn Khóa Trần Food Cost (Margin Guard) -->
+    <!-- Card 4: Trần Food Cost cho phép -->
     <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
       <div class="space-y-1">
-        <span class="text-[10.5px] font-medium text-slate-400">Trần Food Cost Cho Phép</span>
-        <div class="flex items-baseline gap-1">
-          <span class="text-xl font-black text-rose-400 font-mono">45.0%</span>
-        </div>
-        <span class="text-[9.5px] text-rose-400/80 font-bold">Chặn đứng âm dòng tiền</span>
+        <span class="text-[10.5px] font-medium text-slate-400 block">Trần Food Cost Cho Phép</span>
+        <strong class="text-base sm:text-lg text-rose-400 font-mono font-black block">45.0%</strong>
+        <p class="text-[9.5px] text-slate-500 font-medium">Chặn đứng âm dòng tiền</p>
       </div>
-      <div class="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-base">
+      <div class="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-sm shadow-inner">
         <i class="fa-solid fa-shield-halved"></i>
       </div>
     </div>
-
   </div>
 
-  <!-- 2. THANH CÔNG CỤ TÌM KIẾM, BỘ LỌC ĐA NGÀNH & CỤM NÚT HÀNH ĐỘNG CHIẾN LƯỢC -->
+  <!-- 2. THANH TÌM KIẾM, CỤM NÚT DANH MỤC & NẠP ĐA KÊNH -->
   <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex flex-wrap items-center justify-between gap-3">
     
-    <!-- Bộ Lọc Tìm Kiếm & Tabs Phân Loại Món (ĐÃ BỔ SUNG NÚT MÓN CƠM) -->
-    <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[300px]">
-      
-      <!-- Ô Tìm Kiếm Nhanh Tên / Mã Món / Topping -->
-      <div class="relative min-w-[180px] sm:min-w-[220px]">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-        <input type="text" 
-               id="search-menu-input" 
-               oninput="window.TabMenuController.handleSearch(this.value)" 
-               placeholder="Tìm tên món, mã SKU, danh mục..." 
-               class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-2xl pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition font-medium" />
-      </div>
-
-      <!-- Bộ Nút Lọc Danh Mục Đa Ngành (Đầy đủ Cơm, Mì, Combo, Súp, Nước) -->
-      <div class="flex flex-wrap items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 text-[11px] font-bold gap-1">
-        <button type="button" onclick="window.TabMenuController.filterRole('ALL', this)" class="menu-role-btn px-2.5 py-1 rounded-xl bg-amber-500 text-slate-950 shadow">Tất Cả</button>
-        <button type="button" onclick="window.TabMenuController.filterRole('RICE', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🍛 Món Cơm</button>
-        <button type="button" onclick="window.TabMenuController.filterRole('CORE', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🍜 Mì Chủ Lực</button>
-        <button type="button" onclick="window.TabMenuController.filterRole('COMBO', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🍱 Combo Độc Quyền</button>
-        <button type="button" onclick="window.TabMenuController.filterRole('BOOSTER_SOUP', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🥣 Súp Booster</button>
-        <button type="button" onclick="window.TabMenuController.filterRole('DRINKS', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🥤 Nước 1L</button>
-        <button type="button" onclick="window.TabMenuController.filterRole('EXTENDED', this)" class="menu-role-btn px-2.5 py-1 rounded-xl text-slate-400 hover:text-white transition">🍗 Món Mở Rộng</button>
-      </div>
-
+    <!-- Ô Tìm Kiếm Nhanh -->
+    <div class="relative flex-1 min-w-[240px] sm:min-w-[320px]">
+      <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+      <input type="text" 
+             id="tab-search-input" 
+             oninput="TabMenuController.handleSearch(this.value)" 
+             placeholder="Tìm tên món, mã SKU, danh mục, topping..." 
+             class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-2xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 outline-none transition font-medium" />
     </div>
 
-    <!-- Cụm Nút Hành Động: Quản Lý Danh Mục, Nạp Đa Kênh & Tạo Món Mới -->
+    <!-- Cụm Nút Hành Động Quản Trị -->
     <div class="flex items-center gap-2 flex-wrap">
-      
-      <!-- Nút Quản Lý Danh Mục Đa Ngành -->
       <button type="button" 
-              onclick="window.TabMenuController.openCategoryManagerModal()" 
-              class="px-3 py-2 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-amber-400 font-bold transition flex items-center gap-1.5 active:scale-95 shadow-sm">
-        <i class="fa-solid fa-tags text-xs text-amber-400"></i>
+              onclick="TabMenuController.openCategoriesModal()" 
+              class="px-3.5 py-2.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white font-bold transition flex items-center gap-1.5 active:scale-95 shadow-sm">
+        <i class="fa-solid fa-tags text-amber-400 text-xs"></i>
         <span>Quản Lý Danh Mục</span>
       </button>
 
-      <!-- Nút Nạp Thực Đơn Đa Kênh -->
       <button type="button" 
-              onclick="window.TabMenuController.openOmniIngestionModal()" 
-              class="px-3.5 py-2 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-amber-500/40 text-amber-400 hover:text-amber-300 font-bold transition flex items-center gap-2 active:scale-95 shadow-sm">
-        <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+              onclick="TabMenuController.openOmniIngestionModal()" 
+              class="px-3.5 py-2.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white font-bold transition flex items-center gap-1.5 active:scale-95 shadow-sm">
+        <i class="fa-solid fa-cloud-arrow-up text-sky-400 text-xs"></i>
         <span>Nạp Đa Kênh (Excel / AI)</span>
       </button>
 
-      <!-- Nút Tạo Món / Combo Mới -->
       <button type="button" 
-              onclick="window.TabMenuController.openDishModal(null)" 
-              class="px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-600 hover:opacity-95 text-white font-black uppercase tracking-wider transition flex items-center gap-1.5 active:scale-95 shadow-lg shadow-rose-600/25">
+              onclick="TabMenuController.openDishModal(null)" 
+              class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-red-600 via-amber-600 to-orange-500 hover:opacity-95 text-white font-black uppercase tracking-wider transition flex items-center gap-2 active:scale-95 shadow-lg shadow-orange-500/20">
         <i class="fa-solid fa-plus text-xs"></i>
-        <span>+ Tạo Món / Combo Mới</span>
+        <span>+ TẠO MÓN / COMBO MỚI</span>
       </button>
-
     </div>
 
   </div>
 
-  <!-- 3. BẢNG MA TRẬN THỰC ĐƠN & CHIẾN LƯỢC ĐỊNH GIÁ D2C (DATA TABLE) -->
+  <!-- 3. THANH CUỘN BỘ LỌC TABS DANH MỤC ĐỘNG (HOÀN TOÀN TỰ ĐỘNG, CHỨA ĐỦ TOPPING) -->
+  <div id="category-filter-tabs" class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
+    <!-- Nút Tất Cả mặc định -->
+    <button type="button" 
+            onclick="TabMenuController.filterByCategory('ALL', this)" 
+            class="cat-filter-tab-btn active px-4 py-2 rounded-2xl bg-amber-500 text-slate-950 font-black text-xs transition shadow flex items-center gap-1.5 shrink-0">
+      <span>Tất Cả</span>
+      <span id="badge-total-all" class="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-slate-950 text-white font-bold">0</span>
+    </button>
+    <!-- Các nút danh mục con: Món Cơm, Mì, Combo, Súp, Nước, Topping / Ăn Kèm... sẽ được tự động vẽ vào đây -->
+  </div>
+
+  <!-- 4. BẢNG MA TRẬN THỰC ĐƠN 13 CỘT REVERSE-PRICING -->
   <div class="rounded-3xl bg-slate-900 border border-slate-800 shadow-xl overflow-hidden">
     <div class="overflow-x-auto custom-scroll">
-      <table id="table-menu-list" class="w-full text-left border-collapse text-xs">
-        
+      <table class="w-full text-left border-collapse text-xs">
         <thead>
-          <tr class="bg-slate-950/80 border-b border-slate-800 text-[10.5px] font-mono uppercase text-slate-400 tracking-wider">
+          <tr class="bg-slate-950/80 border-b border-slate-800 text-[10px] font-mono uppercase text-slate-400 tracking-wider">
             <th class="py-3 px-3.5">Món Ăn &amp; Phân Loại</th>
             <th class="py-3 px-3 text-center">Danh Mục</th>
             <th class="py-3 px-3 text-right">Giá Vốn (COGS)</th>
             <th class="py-3 px-3 text-right">Lợi Nhuận Gộp (LNR)</th>
-            <th class="py-3 px-3 text-right text-amber-400">Giá Bán D2C</th>
-            <th class="py-3 px-3 text-right text-slate-400">Giá Bán App (+25%)</th>
+            <th class="py-3 px-3 text-right text-amber-400 font-bold">Giá Bán D2C</th>
+            <th class="py-3 px-3 text-right text-slate-400">Giá Bán App</th>
             <th class="py-3 px-3 text-center">Food Cost</th>
-            <th class="py-3 px-3 text-center">Súp Booster Kèm</th>
+            <th class="py-3 px-3 text-center">Bán Kèm</th>
             <th class="py-3 px-3 text-center">Trạng Thái Bếp</th>
             <th class="py-3 px-3.5 text-center">Thao Tác</th>
           </tr>
         </thead>
-
-        <tbody id="menu-table-body" class="divide-y divide-slate-800/60 font-sans">
-          
-          <tr id="menu-loading-row">
+        <tbody id="tab-dishes-table-body" class="divide-y divide-slate-800/60 font-sans">
+          <tr id="tab-dishes-loading">
             <td colspan="10" class="py-12 text-center text-slate-400 space-y-2">
               <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
-              <p class="text-xs font-medium">Đang đồng bộ Ma Trận Thực Đơn từ cơ sở dữ liệu Google Sheets...</p>
+              <p class="text-xs font-medium">Đang nạp thực đơn và danh mục Topping từ Google Sheets...</p>
             </td>
           </tr>
-
-          <tr id="menu-empty-row" class="hidden">
-            <td colspan="10" class="py-12 text-center text-slate-400 space-y-3">
-              <div class="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600 text-xl mx-auto">
-                <i class="fa-solid fa-bowl-food"></i>
+          <tr id="tab-dishes-empty" class="hidden">
+            <td colspan="10" class="py-16 text-center text-slate-400 space-y-3">
+              <div class="w-14 h-14 rounded-3xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600 text-2xl mx-auto shadow-inner">
+                <i class="fa-solid fa-utensils"></i>
               </div>
               <div class="space-y-1">
-                <p class="text-xs font-bold text-white">Chưa có món ăn nào trong danh mục lọc hiện tại!</p>
+                <h4 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Chưa có món ăn hoặc topping nào trong danh mục lọc!</h4>
                 <p class="text-[11px] text-slate-500">Mời anh Hải Âu bấm nút bên dưới để thêm món đầu tiên hoặc chọn tab "Tất Cả".</p>
               </div>
-              <div class="flex items-center justify-center gap-2 pt-1">
-                <button type="button" onclick="window.TabMenuController.openDishModal(null)" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black transition text-xs">
-                  + Thêm Món Mới
+              <div class="pt-2">
+                <button type="button" 
+                        onclick="TabMenuController.openDishModal(null)" 
+                        class="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider transition active:scale-95 shadow-lg shadow-amber-500/20 inline-flex items-center gap-2">
+                  <i class="fa-solid fa-plus text-xs"></i>
+                  <span>+ Thêm Món Mới</span>
                 </button>
               </div>
             </td>
           </tr>
-
         </tbody>
-
       </table>
     </div>
   </div>
 
-  <!-- 4. MODAL THÊM / CHỈNH SỬA MÓN ĂN (DUY NHẤT 1 BỘ FORM - REVERSE PRICING 2 CHIỀU) -->
-  <div id="modal-single-dish" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
+  <!-- 5. MODAL QUẢN LÝ DANH MỤC ĐA NGÀNH (SYS_CATEGORIES) -->
+  <div id="modal-tab-categories" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
+    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm">
+            <i class="fa-solid fa-tags"></i>
+          </div>
+          <div>
+            <h3 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Quản Trị Danh Mục &amp; Topping Đa Ngành</h3>
+            <p class="text-[10px] text-slate-400">Đồng bộ trực tiếp 2 chiều về Sheet [SYS_CATEGORIES]</p>
+          </div>
+        </div>
+        <button type="button" onclick="TabMenuController.closeCategoriesModal()" class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center active:scale-90">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Form Thêm Danh Mục -->
+      <form id="form-tab-category" onsubmit="TabMenuController.handleSaveCategory(event)" class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-xs">
+        <input type="hidden" id="tab-cat-id" value="" />
+        <div class="space-y-1">
+          <label class="text-[10px] text-slate-400 block font-bold">Icon/Emoji *</label>
+          <input type="text" id="tab-cat-icon" required placeholder="🍛, 🥓, 🥤" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-center text-white outline-none focus:border-amber-500" />
+        </div>
+        <div class="space-y-1 sm:col-span-2">
+          <label class="text-[10px] text-slate-400 block font-bold">Tên Danh Mục *</label>
+          <input type="text" id="tab-cat-name" required placeholder="VD: Topping / Ăn Kèm" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-white outline-none focus:border-amber-500 font-medium" />
+        </div>
+        <div class="space-y-1">
+          <label class="text-[10px] text-slate-400 block font-bold">Mã Slug D2C *</label>
+          <input type="text" id="tab-cat-slug" required placeholder="VD: an-kem" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-amber-400 font-mono outline-none focus:border-amber-500" />
+        </div>
+        <div class="sm:col-span-4 flex justify-end gap-2 pt-1">
+          <button type="button" onclick="document.getElementById('form-tab-category').reset()" class="px-3 py-1.5 rounded-xl bg-slate-900 text-slate-400 hover:text-white font-bold text-xs transition">Làm lại</button>
+          <button type="submit" class="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider transition active:scale-95 shadow">Lưu Danh Mục</button>
+        </div>
+      </form>
+
+      <!-- Bảng Danh Mục -->
+      <div class="max-h-56 overflow-y-auto custom-scroll rounded-2xl bg-slate-950 border border-slate-800">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900 text-slate-400 font-mono uppercase text-[9.5px] sticky top-0">
+            <tr>
+              <th class="p-2.5 text-center w-12">Icon</th>
+              <th class="p-2.5">Tên Danh Mục</th>
+              <th class="p-2.5">Slug D2C</th>
+              <th class="p-2.5 text-center w-24">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="tab-categories-list-tbody" class="divide-y divide-slate-800/60 font-medium"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+  <!-- ========================================================================= -->
+  <!-- 6. MODAL THÊM / CHỈNH SỬA MÓN ĂN & TOPPING 13 CỘT (REVERSE-PRICING)      -->
+  <!-- ========================================================================= -->
+  <div id="modal-tab-dish-editor" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
     <div class="relative bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200">
       
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -192,185 +231,140 @@
             <i class="fa-solid fa-utensils"></i>
           </div>
           <div>
-            <h3 id="modal-dish-title" class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Thêm Món Ăn / Combo Mới</h3>
-            <p class="text-[10px] text-slate-400">Kiểm toán giá vốn Reverse-Pricing 2 chiều, tỷ suất LNR &amp; Upsell Booster</p>
+            <h3 id="tab-modal-dish-title" class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Thêm Món / Topping Mới</h3>
+            <p class="text-[10px] text-slate-400">Kiểm toán Reverse-Pricing 13 Cột • Margin Guard • Direct CDN</p>
           </div>
         </div>
-        <button type="button" onclick="window.TabMenuController.closeDishModal()" class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center">
+        <button type="button" onclick="TabMenuController.closeDishModal()" class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center active:scale-90">
           <i class="fa-solid fa-xmark text-xs"></i>
         </button>
       </div>
 
-      <form id="form-single-dish" onsubmit="window.TabMenuController.handleSaveDish(event)" class="space-y-4 text-xs">
-        <input type="hidden" id="dish-is-edit" value="false" />
+      <form id="form-tab-dish" onsubmit="TabMenuController.handleSaveDish(event)" class="space-y-3.5 text-xs block">
+        <input type="hidden" id="tab-dish-is-edit" value="false" />
 
+        <!-- HÀNG 1: Mã SKU & Tên Món -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="space-y-1">
-            <label class="font-bold text-slate-300 text-[11px] block">Mã Món (Item SKU) <span class="text-rose-400">*</span></label>
-            <input type="text" id="dish-code" required placeholder="C_01" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 font-mono font-bold text-amber-400 uppercase outline-none transition" />
+            <label class="font-bold text-slate-300 text-[11px] block">Mã SKU <span class="text-rose-400">*</span></label>
+            <input type="text" id="tab-dish-code" required placeholder="VD: MI_01 hoặc TOP_TRUNG" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 font-mono font-bold text-amber-400 uppercase outline-none transition" />
           </div>
-
           <div class="sm:col-span-2 space-y-1">
-            <label class="font-bold text-slate-300 text-[11px] block">Tên Món Ăn / Combo Độc Quyền <span class="text-rose-400">*</span></label>
-            <input type="text" id="dish-name" required placeholder="Cơm phủ trứng gà viên Thím 5" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-medium outline-none transition" />
+            <label class="font-bold text-slate-300 text-[11px] block">Tên Món Ăn / Topping <span class="text-rose-400">*</span></label>
+            <input type="text" id="tab-dish-name" required placeholder="VD: Mì Trộn Xá Xíu Tóp Mỡ hoặc Trứng Lòng Đào" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-medium outline-none transition" />
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <!-- HÀNG 2: Danh Mục Đa Ngành & Tag Chiến Lược -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="space-y-1">
-            <label class="font-bold text-slate-300 text-[11px] block">Danh Mục Đa Ngành</label>
-            <select id="dish-category" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
-              <!-- Render động từ TabMenuController -->
+            <label class="font-bold text-slate-300 text-[11px] block">Danh Mục Đa Ngành <span class="text-rose-400">*</span></label>
+            <select id="tab-dish-category" required class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium"></select>
+          </div>
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Tag Chiến Lược</label>
+            <select id="tab-dish-tag" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
+              <option value="CORE">📦 Món Phục Vụ Hằng Ngày (Core)</option>
+              <option value="BEST_SELLER">⭐ Bán Chạy Nhất (Best Seller)</option>
+              <option value="BOOSTER">🚀 Đẩy Vé Đơn Hàng (Ticket Booster)</option>
+              <option value="CROSS_SELL">🔄 Món Gợi Ý Mua Kèm (Cross-Sell)</option>
+              <option value="NEW">✨ Món Mới Lên Sóng</option>
             </select>
           </div>
-
-          <div class="space-y-1">
-            <label class="font-bold text-slate-300 text-[11px] block">Vai Trò Chiến Lược</label>
-            <select id="dish-role" onchange="window.TabMenuController.calculateMarginGuard('D2C')" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
-              <option value="CORE">Chủ Lực (Core - FC 35-45%)</option>
-              <option value="COMBO_EXCLUSIVE">Combo Độc Quyền (AOV Booster)</option>
-              <option value="BOOSTER">Súp / Nước Kéo Vé (FC &lt; 20%)</option>
-              <option value="TRAFFIC">Món Kéo Khách (Traffic - FC 50-55%)</option>
-            </select>
-          </div>
-
-          <div class="space-y-1">
-            <label class="font-bold text-slate-300 text-[11px] block">Đơn Vị Tính</label>
-            <input type="text" id="dish-unit" placeholder="Phần" value="Phần" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white outline-none transition font-medium" />
-          </div>
         </div>
 
-        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
-          <div class="space-y-0.5">
-            <span class="text-[11px] font-bold text-amber-400 flex items-center gap-1.5">
-              <i class="fa-solid fa-fire"></i>
-              <span>Cấu Hình Bắt Buộc Món Khô (No Free Soup Policy)</span>
-            </span>
-            <p class="text-[10px] text-slate-400">Món khô tự động kích hoạt gợi ý Súp Bò Viên Gân / Hoành Thánh (12k - 18k), không tặng miễn phí</p>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="dish-is-dry" class="sr-only peer" checked>
-            <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
-          </label>
-        </div>
-
-        <!-- CỖ MÁY REVERSE-PRICING 2 CHIỀU -->
+        <!-- HÀNG 3: CƠ CẤU GIÁ REVERSE-PRICING & BẢO VỆ LỢI NHUẬN RÒNG -->
         <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
           <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
             <span class="text-[10.5px] font-bold text-amber-400 flex items-center gap-1.5">
               <i class="fa-solid fa-calculator"></i>
-              <span>Cỗ Máy Kiểm Soát Biên Lợi Nhuận (Margin Guard 2 Chiều)</span>
+              <span>Cơ Cấu Giá Reverse-Pricing &amp; Quỹ Đệm D2C 15%</span>
             </span>
-            <span id="dish-margin-badge" class="px-2 py-0.5 rounded-lg text-[9.5px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            <span id="tab-dish-margin-badge" class="px-2 py-0.5 rounded-lg text-[9.5px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
               Food Cost An Toàn
             </span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div class="space-y-1">
-              <label class="font-bold text-slate-400 text-[10px] block">Giá Vốn COGS (VNĐ) <span class="text-rose-400">*</span></label>
-              <input type="number" 
-                     id="dish-cogs" 
-                     required 
-                     step="500" 
-                     min="0" 
-                     placeholder="15000" 
-                     oninput="window.TabMenuController.calculateMarginGuard('COGS')" 
-                     class="w-full bg-slate-900 border border-slate-800 focus:border-rose-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-rose-400 outline-none transition" />
+              <label class="font-bold text-slate-400 text-[10px] block">Giá App Niêm Yết <span class="text-rose-400">*</span></label>
+              <input type="number" id="tab-dish-app-price" required step="1000" min="0" placeholder="49000" oninput="TabMenuController.calculateReversePricingUI()" class="w-full bg-slate-900 border border-slate-800 focus:border-sky-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-sky-400 outline-none transition" />
             </div>
-
             <div class="space-y-1">
-              <label class="font-bold text-slate-400 text-[10px] block">Giá Bán D2C Web (VNĐ) <span class="text-amber-400">*</span></label>
-              <input type="number" 
-                     id="dish-price" 
-                     required 
-                     step="1000" 
-                     min="1000" 
-                     placeholder="39000" 
-                     oninput="window.TabMenuController.calculateMarginGuard('D2C')" 
-                     class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-amber-400 outline-none transition" />
+              <label class="font-bold text-slate-400 text-[10px] block">% Giảm Web D2C</label>
+              <input type="number" id="tab-dish-discount-percent" step="0.5" min="0" max="50" value="10" placeholder="10" oninput="TabMenuController.calculateReversePricingUI()" class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-amber-400 outline-none transition" />
             </div>
-
             <div class="space-y-1">
-              <label class="font-bold text-slate-400 text-[10px] block">Lợi Nhuận Gộp (LNR)</label>
-              <input type="text" 
-                     id="dish-profit" 
-                     readonly 
-                     value="0 đ" 
-                     class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-2.5 py-1.5 font-mono font-bold text-emerald-400 outline-none select-none" />
+              <label class="font-bold text-slate-400 text-[10px] block">Giá Bán Web D2C</label>
+              <input type="number" id="tab-dish-price" readonly placeholder="44000" class="w-full bg-slate-900/80 border border-slate-800 rounded-xl px-2.5 py-1.5 font-mono font-black text-amber-400 outline-none select-none" />
             </div>
-
             <div class="space-y-1">
-              <div class="flex items-center justify-between">
-                <label class="font-bold text-slate-400 text-[10px] block">Giá App (+25% Phí Sàn)</label>
-                <span class="text-[9px] font-mono text-sky-400 font-bold">Chiết khấu 20%</span>
-              </div>
-              <input type="number" 
-                     id="dish-app-price" 
-                     step="1000" 
-                     placeholder="49000" 
-                     oninput="window.TabMenuController.calculateMarginGuard('APP')" 
-                     class="w-full bg-slate-900 border border-slate-800 focus:border-sky-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-sky-400 outline-none transition" />
+              <label class="font-bold text-slate-400 text-[10px] block">Giá Vốn (COGS) <span class="text-rose-400">*</span></label>
+              <input type="number" id="tab-dish-cogs" required step="500" min="0" placeholder="15000" oninput="TabMenuController.calculateReversePricingUI()" class="w-full bg-slate-900 border border-slate-800 focus:border-rose-500 rounded-xl px-2.5 py-1.5 font-mono font-bold text-rose-400 outline-none transition" />
             </div>
           </div>
 
-          <div class="space-y-1 pt-1">
-            <div class="flex justify-between text-[10px] font-mono">
-              <span class="text-slate-400">Tỷ lệ Food Cost: <strong id="dish-foodcost-percent" class="text-white">0.0%</strong></span>
-              <span id="dish-foodcost-advice" class="text-emerald-400">Biên lợi nhuận tối ưu</span>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 border-t border-slate-900 text-center font-mono">
+            <div class="p-1.5 rounded-xl bg-slate-900/60">
+              <span class="text-[9px] text-slate-400 block">Quỹ Đệm D2C (15%):</span>
+              <strong id="tab-preview-buffer" class="text-xs text-slate-300 font-bold">0 đ</strong>
             </div>
-            <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
-              <div id="dish-foodcost-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 0%;"></div>
+            <div class="p-1.5 rounded-xl bg-slate-900/60">
+              <span class="text-[9px] text-slate-400 block">Lợi Nhuận Ròng (LNR):</span>
+              <strong id="tab-preview-lnr" class="text-xs text-emerald-400 font-black">0 đ</strong>
             </div>
+            <div class="p-1.5 rounded-xl bg-slate-900/60 col-span-2 sm:col-span-1">
+              <span class="text-[9px] text-slate-400 block">Food Cost D2C:</span>
+              <strong id="tab-dish-foodcost-percent" class="text-xs text-white font-black">0.0%</strong>
+            </div>
+          </div>
+
+          <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+            <div id="tab-dish-foodcost-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width: 0%;"></div>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="sm:col-span-2 space-y-1.5">
-            <label class="font-bold text-slate-300 text-[11px] block">Đường Dẫn Ảnh Món Ăn (URL hoặc Tải Lên)</label>
-            <div class="flex gap-2">
-              <input type="url" id="dish-image" placeholder="https://images.unsplash.com/..." class="flex-1 bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-mono text-[11px] outline-none transition" />
-              <input type="file" id="dish-image-file-input" accept="image/*" onchange="window.TabMenuController.handleSingleImageUpload(this)" class="hidden" />
-              <button type="button" onclick="document.getElementById('dish-image-file-input').click()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs transition flex items-center gap-1.5 active:scale-95 shadow">
-                <i class="fa-solid fa-camera text-xs"></i>
-                <span class="hidden sm:inline">Nén &amp; Tải</span>
-              </button>
-            </div>
-          </div>
-          <div class="space-y-1">
-            <label class="font-bold text-slate-300 text-[11px] block">Trạng Thái Kho Bếp</label>
-            <select id="dish-status" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
-              <option value="ACTIVE">🟢 Đang Bán (Sẵn Sàng)</option>
-              <option value="OUT_OF_STOCK">🔴 Tạm Hết Hàng</option>
-              <option value="HIDDEN">⚫ Ẩn Khỏi Menu D2C</option>
-            </select>
+        <!-- HÀNG 4: HÌNH ẢNH MÓN & NÉN CANVAS DIRECT CDN -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Hình Ảnh Món Ăn (Google Drive Direct CDN)</label>
+          <div class="flex gap-2 items-center">
+            <input type="url" id="tab-dish-image" placeholder="https://lh3.googleusercontent.com/d/..." class="flex-1 bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-mono text-[11px] outline-none transition" />
+            <input type="file" id="tab-dish-file-inp" accept="image/*" onchange="TabMenuController.handleSingleImageUpload(this)" class="hidden" />
+            <button type="button" id="tab-btn-upload-img" onclick="document.getElementById('tab-dish-file-inp').click()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs transition flex items-center gap-1.5 active:scale-95 shadow shrink-0">
+              <i class="fa-solid fa-camera text-xs"></i>
+              <span>Nén &amp; Tải Lên</span>
+            </button>
           </div>
         </div>
 
+        <!-- HÀNG 5: Trạng Thái Phục Vụ & Món Bán Chéo -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="space-y-1">
-            <label class="font-bold text-slate-300 text-[11px] block">Món Bán Chéo Tự Động (Cross-Sell SKU)</label>
-            <input type="text" id="dish-cross-sell" placeholder="TRA_DAO_1L" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-mono text-xs uppercase outline-none transition" />
+            <label class="font-bold text-slate-300 text-[11px] block">Trạng Thái Bếp</label>
+            <select id="tab-dish-status" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
+              <option value="ACTIVE">🟢 Đang Bán (Sẵn Sàng Phục Vụ)</option>
+              <option value="OUT_OF_STOCK">🔴 Tạm Hết Hàng (Khóa Trên Web)</option>
+            </select>
           </div>
-
           <div class="space-y-1">
-            <label class="font-bold text-slate-300 text-[11px] block">Mã Súp Booster Thu Phí (Booster Soup SKU)</label>
-            <input type="text" id="dish-booster-soup" placeholder="SUP_BO_VIEN_GAN" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-mono text-xs uppercase outline-none transition" />
+            <label class="font-bold text-slate-300 text-[11px] block">Mã Món Bán Chéo (Cross-Sell SKU)</label>
+            <input type="text" id="tab-dish-cross-sell" placeholder="VD: TRA_DAO_1L" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-mono text-xs uppercase outline-none transition" />
           </div>
         </div>
 
+        <!-- HÀNG 6: Mô Tả Chi Tiết -->
         <div class="space-y-1">
-          <label class="font-bold text-slate-300 text-[11px] block">Mô Tả Món Ăn &amp; Thành Phần Hương Vị</label>
-          <textarea id="dish-desc" rows="2" placeholder="Hạt cơm dẻo thơm, sườn nướng mật ong thảo mộc, chả trứng hấp béo ngậy..." class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl p-2.5 text-white outline-none transition resize-none"></textarea>
+          <label class="font-bold text-slate-300 text-[11px] block">Mô Tả &amp; Topping Đi Kèm</label>
+          <textarea id="tab-dish-desc" rows="2" placeholder="VD: Kèm súp tóp mỡ hành lá, trứng lòng đào dẻo ngậy..." class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl p-2.5 text-white outline-none transition resize-none"></textarea>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-          <button type="button" onclick="window.TabMenuController.closeDishModal()" class="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold transition">
+        <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-800">
+          <button type="button" onclick="TabMenuController.closeDishModal()" class="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold transition">
             Hủy Bỏ
           </button>
-          <button type="submit" id="btn-save-dish-submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black uppercase tracking-wider transition active:scale-95 shadow-lg shadow-orange-600/20 flex items-center gap-1.5">
+          <button type="submit" id="tab-btn-save-dish-submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-red-600 via-amber-600 to-orange-500 hover:opacity-95 text-white font-black uppercase tracking-wider transition active:scale-95 shadow-lg shadow-orange-500/20 flex items-center gap-1.5">
             <i class="fa-solid fa-floppy-disk"></i>
-            <span>Lưu Món Vào Thực Đơn</span>
+            <span>Lưu Vào CSDL DATA_MENU</span>
           </button>
         </div>
       </form>
@@ -378,143 +372,583 @@
     </div>
   </div>
 
-  <!-- NẠP SCRIPT ĐIỀU HÀNH THUẦN JAVASCRIPT TỪ TAB-MENU.JS -->
-  <script src="tab-menu.js?v=20260920"></script>
-</div>
-    <!-- ========================================================================= -->
-  <!-- 5. MODAL 2: NẠP THỰC ĐƠN ĐA KÊNH OMNI-INGESTION (EXCEL, AI OCR, LINK)     -->
+  <!-- CANVAS ẨN NÉN ẢNH -->
+  <canvas id="tab-canvas-compressor" class="hidden"></canvas>
+
   <!-- ========================================================================= -->
-  <div id="modal-omni-ingestion" class="hidden fixed inset-0 z-50 items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
-    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200">
-      
-      <!-- Tiêu Đề Modal Omni-Ingestion -->
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 text-sm font-black shadow-md shadow-amber-500/20">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-          </div>
-          <div>
-            <h3 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Cỗ Máy Nạp Thực Đơn Đa Kênh (Omni-Ingestion)</h3>
-            <p class="text-[10px] text-slate-400">Nạp nhanh 30-50 món chỉ trong vài giây qua Excel, Ảnh chụp Menu hoặc Link công khai</p>
-          </div>
-        </div>
-        <button type="button" onclick="window.TabMenuController && window.TabMenuController.closeOmniIngestionModal()" class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center">
-          <i class="fa-solid fa-xmark text-xs"></i>
-        </button>
-      </div>
+  <!-- BỘ NÃO JAVASCRIPT CONTROLLER ĐIỀU HÀNH THỰC ĐƠN & DANH MỤC ĐỘNG          -->
+  <!-- ========================================================================= -->
+  <script>
+  window.TabMenuController = (function() {
+    var rawDishes = [];
+    var categories = [];
+    var currentSearchKw = "";
+    var currentCatFilter = "ALL";
+    var isLoading = false;
 
-      <!-- 4 Tabs Chuyển Đổi Kênh Nạp Liệu Thông Minh -->
-      <div class="flex items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-bold">
-        <button type="button" id="tab-btn-ingest-excel" onclick="window.TabMenuController && window.TabMenuController.switchIngestChannel('EXCEL')" class="flex-1 py-2 rounded-xl transition bg-amber-500 text-slate-950 font-black shadow">
-          <i class="fa-solid fa-file-excel mr-1 text-xs"></i> File Excel
-        </button>
-        <button type="button" id="tab-btn-ingest-ocr" onclick="window.TabMenuController && window.TabMenuController.switchIngestChannel('OCR')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
-          <i class="fa-solid fa-wand-magic-sparkles mr-1 text-xs text-amber-400"></i> Quét Ảnh / PDF (AI)
-        </button>
-        <button type="button" id="tab-btn-ingest-link" onclick="window.TabMenuController && window.TabMenuController.switchIngestChannel('LINK')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
-          <i class="fa-solid fa-link mr-1 text-xs text-sky-400"></i> Link Grab/Shopee
-        </button>
-        <button type="button" id="tab-btn-ingest-json" onclick="window.TabMenuController && window.TabMenuController.switchIngestChannel('JSON')" class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white">
-          <i class="fa-solid fa-code mr-1 text-xs text-purple-400"></i> Dán JSON
-        </button>
-      </div>
+    /**
+     * KHỞI CHẠY TẢI TOÀN BỘ THỰC ĐƠN & DANH MỤC TỪ GOOGLE SHEETS
+     */
+    async function init() {
+      await loadCatalogData();
+      renderAll();
+    }
 
-      <!-- VÙNG NỘI DUNG KÊNH 1: TẢI LÊN FILE EXCEL / CSV -->
-      <div id="ingest-box-excel" class="space-y-3">
-        <div class="p-4 rounded-2xl bg-slate-950 border-2 border-dashed border-slate-800 hover:border-amber-500/50 text-center space-y-2.5 transition">
-          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base mx-auto">
-            <i class="fa-solid fa-file-arrow-up"></i>
-          </div>
-          <div class="space-y-0.5">
-            <p class="text-xs font-bold text-white">Chọn tệp bảng tính thực đơn (.xlsx, .xls, .csv)</p>
-            <p class="text-[10.5px] text-slate-500">Kéo thả file vào đây hoặc bấm nút bên dưới để duyệt tệp từ máy tính</p>
-          </div>
-          <input type="file" id="input-excel-file" accept=".xlsx, .xls, .csv" onchange="window.TabMenuController && window.TabMenuController.handleExcelFileSelect(this)" class="hidden" />
-          <div class="flex items-center justify-center gap-2 pt-1">
-            <button type="button" onclick="document.getElementById('input-excel-file').click()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition active:scale-95 shadow">
-              <i class="fa-solid fa-folder-open mr-1"></i> Chọn Tệp Tin
-            </button>
-            <button type="button" onclick="window.TabMenuController && window.TabMenuController.downloadExcelTemplate()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-bold text-xs transition">
-              <i class="fa-solid fa-download mr-1 text-emerald-400"></i> Tải File Mẫu Chuẩn
-            </button>
-          </div>
-        </div>
-      </div>
+    /**
+     * NẠP DỮ LIỆU BỌC THÉP TỪ BACKEND
+     */
+    async function loadCatalogData() {
+      if (isLoading) return;
+      isLoading = true;
 
-      <!-- VÙNG NỘI DUNG KÊNH 2: GEMINI AI OCR QUÉT ẢNH TỜ RƠI / MENU GIẤY -->
-      <div id="ingest-box-ocr" class="hidden space-y-3">
-        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2.5 text-center">
-          <div class="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-base mx-auto">
-            <i class="fa-solid fa-camera"></i>
-          </div>
-          <div class="space-y-0.5">
-            <p class="text-xs font-bold text-white">Chụp ảnh menu giấy hoặc tải lên file PDF thực đơn</p>
-            <p class="text-[10.5px] text-slate-400">Cỗ máy Canvas AI sẽ tự động nén ảnh và trích xuất bảng giá qua Gemini Flash</p>
-          </div>
-          <input type="file" id="input-ocr-file" accept="image/*, application/pdf" onchange="window.TabMenuController && window.TabMenuController.handleOcrImageSelect(this)" class="hidden" />
-          <button type="button" onclick="document.getElementById('input-ocr-file').click()" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold text-xs transition active:scale-95 shadow-md shadow-purple-600/20">
-            <i class="fa-solid fa-camera-retro mr-1.5"></i> Chụp / Chọn Ảnh Menu
+      var loadingEl = document.getElementById("dishes-loading-spinner");
+      if (loadingEl) loadingEl.classList.remove("hidden");
+
+      try {
+        if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+          var res = await window.Thim5API.callGAS("getAdminMenuCatalog", {});
+          if (res && res.status === "success" && res.data) {
+            // Bóc tách an toàn 2 tầng
+            if (Array.isArray(res.data.items)) {
+              rawDishes = res.data.items;
+            } else if (Array.isArray(res.data)) {
+              rawDishes = res.data;
+            }
+
+            if (Array.isArray(res.data.categories) && res.data.categories.length > 0) {
+              categories = res.data.categories;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("⚠️ [TabMenu] Lỗi nạp catalog từ GAS:", err);
+      } finally {
+        isLoading = false;
+        if (loadingEl) loadingEl.classList.add("hidden");
+
+        // Đảm bảo luôn có danh mục Topping nếu database chưa tạo kịp
+        ensureToppingCategoryExists();
+      }
+    }
+
+    function ensureToppingCategoryExists() {
+      var hasTopping = categories.some(function(c) {
+        var slug = String(c.slug || "").toLowerCase();
+        var code = String(c.code || "").toUpperCase();
+        return slug === "an-kem" || slug === "topping" || code === "CAT_TOPPING";
+      });
+
+      if (!hasTopping) {
+        categories.push({
+          code: "CAT_TOPPING",
+          icon: "🍳",
+          name: "Topping / Ăn Kèm",
+          slug: "an-kem",
+          maxFcPercent: 25
+        });
+      }
+    }
+
+    function renderAll() {
+      renderKpis();
+      renderCategoryTabs();
+      renderCategoryModalList();
+      renderDishesTable();
+    }
+
+    /**
+     * TÍNH TOÁN VÀ CẬP NHẬT 4 KPI VẬN HÀNH BẾP
+     */
+    function renderKpis() {
+      var total = rawDishes.length;
+      var activeCount = 0;
+      var totalFc = 0;
+      var boosterCount = 0;
+
+      rawDishes.forEach(function(d) {
+        var isAvail = (String(d.status || "").toUpperCase() === "ACTIVE");
+        if (isAvail) activeCount++;
+
+        var price = Number(d.d2cPrice || d.price || 0);
+        var cost = Number(d.cogs || d.cost || 0);
+        if (price > 0) {
+          totalFc += (cost / price) * 100;
+        }
+
+        var cat = String(d.category || d.categorySlug || "").toLowerCase();
+        var tag = String(d.tag || "").toUpperCase();
+        if (cat === "booster" || cat === "nuoc" || cat === "giai-khat" || cat === "an-kem" || cat === "topping" || tag === "BOOSTER") {
+          boosterCount++;
+        }
+      });
+
+      var avgFc = total > 0 ? (totalFc / total).toFixed(1) : "0.0";
+
+      var elActive = document.getElementById("kpi-active-dishes");
+      var elTotal = document.getElementById("kpi-total-dishes");
+      var elAvgFc = document.getElementById("kpi-avg-fc");
+      var elBooster = document.getElementById("kpi-booster-count");
+
+      if (elActive) elActive.innerText = activeCount;
+      if (elTotal) elTotal.innerText = total;
+      if (elAvgFc) elAvgFc.innerText = avgFc + "%";
+      if (elBooster) elBooster.innerText = boosterCount;
+    }
+
+    /**
+     * VẼ THANH TAB DANH MỤC ĐỘNG 100% (HIỆN RÕ TOPPING / ĂN KÈM)
+     */
+    function renderCategoryTabs() {
+      var container = document.getElementById("category-filter-tabs");
+      if (!container) return;
+
+      var totalAll = rawDishes.length;
+      var html = `
+        <button type="button" 
+                onclick="TabMenuController.filterByCategory('ALL', this)" 
+                class="cat-filter-tab-btn ${currentCatFilter === 'ALL' ? 'active bg-amber-500 text-slate-950 font-black' : 'bg-slate-950 text-slate-300 font-bold border border-slate-800'} px-4 py-2 rounded-2xl text-xs transition shadow flex items-center gap-1.5 shrink-0 active:scale-95">
+          <span>Tất Cả</span>
+          <span id="badge-total-all" class="text-[10px] font-mono px-1.5 py-0.5 rounded-full ${currentCatFilter === 'ALL' ? 'bg-slate-950 text-white' : 'bg-slate-800 text-amber-400'} font-bold">${totalAll}</span>
+        </button>
+      `;
+
+      categories.forEach(function(c) {
+        var slug = String(c.slug || c.code || "").trim();
+        var icon = c.icon || "🍽️";
+        var name = c.name || "Danh mục";
+        var isActive = (currentCatFilter.toLowerCase() === slug.toLowerCase());
+
+        // Đếm số lượng món thuộc danh mục này
+        var itemCount = rawDishes.filter(function(d) {
+          var dCat = String(d.category || d.categorySlug || "").toLowerCase();
+          var dCode = String(d.category || "").toUpperCase();
+          return dCat === slug.toLowerCase() || dCode === String(c.code || "").toUpperCase();
+        }).length;
+
+        var btnClass = isActive 
+          ? "active bg-amber-500 text-slate-950 font-black shadow" 
+          : "bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 font-bold";
+
+        var badgeClass = isActive 
+          ? "bg-slate-950 text-white" 
+          : "bg-slate-800 text-amber-400";
+
+        html += `
+          <button type="button" 
+                  onclick="TabMenuController.filterByCategory('${slug}', this)" 
+                  class="cat-filter-tab-btn ${btnClass} px-3.5 py-2 rounded-2xl text-xs transition flex items-center gap-1.5 shrink-0 active:scale-95">
+            <span>${icon} ${name}</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded-full ${badgeClass} font-bold">${itemCount}</span>
           </button>
-        </div>
-      </div>
+        `;
+      });
 
-      <!-- VÙNG NỘI DUNG KÊNH 3: BÓC TÁCH TỪ PUBLIC LINK -->
-      <div id="ingest-box-link" class="hidden space-y-2.5">
-        <div class="space-y-1">
-          <label class="font-bold text-slate-300 text-[11px] block">Dán Đường Link Quán (GrabFood / ShopeeFood / Website)</label>
-          <div class="flex gap-2">
-            <input type="url" id="input-public-url" placeholder="https://food.grab.com/vn/vi/restaurant/..." class="flex-1 bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs text-white outline-none transition font-mono" />
-            <button type="button" onclick="window.TabMenuController && window.TabMenuController.handleParseUrl()" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs transition active:scale-95 shadow">
-              Trích Xuất
-            </button>
-          </div>
-        </div>
-      </div>
+      container.innerHTML = html;
+    }
 
-      <!-- VÙNG NỘI DUNG KÊNH 4: DÁN JSON DỰ PHÒNG -->
-      <div id="ingest-box-json" class="hidden space-y-2">
-        <textarea id="input-raw-json" rows="4" placeholder='[{"itemCode":"MX_01","itemName":"Mì Trộn Xá Xíu","price":39000,"cogs":15000,"category":"Mì Trộn"}]' class="w-full bg-slate-950 border border-slate-800 focus:border-purple-500 rounded-xl p-2.5 font-mono text-[11px] text-amber-400 outline-none transition"></textarea>
-        <button type="button" onclick="window.TabMenuController && window.TabMenuController.handleParseJson()" class="px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition active:scale-95">
-          Kiểm Tra Cú Pháp JSON
-        </button>
-      </div>
+    /**
+     * BỘ LỌC THEO DANH MỤC
+     */
+    function filterByCategory(slug, btnEl) {
+      currentCatFilter = slug;
+      renderCategoryTabs();
+      renderDishesTable();
+    }
 
-      <!-- BẢNG XEM TRƯỚC VÀ KIỂM DUYỆT HÀNG LOẠT TRƯỚC KHI LƯU (PREVIEW MATRIX) -->
-      <div id="ingest-preview-container" class="hidden space-y-2 pt-2 border-t border-slate-800">
-        <div class="flex items-center justify-between">
-          <span class="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
-            <i class="fa-solid fa-list-check"></i>
-            <span>Tìm thấy <strong id="preview-total-count" class="font-mono text-white">0</strong> món hợp lệ sẵn sàng nạp:</span>
-          </span>
-          <button type="button" onclick="window.TabMenuController && window.TabMenuController.clearIngestPreview()" class="text-[10.5px] text-rose-400 hover:underline">
-            Xóa danh sách này
-          </button>
-        </div>
+    function handleSearch(kw) {
+      currentSearchKw = String(kw || "").toLowerCase().trim();
+      renderDishesTable();
+    }
 
-        <div class="max-h-48 overflow-y-auto custom-scroll rounded-2xl bg-slate-950 border border-slate-800">
-          <table class="w-full text-left text-[11px]">
-            <thead class="bg-slate-900 text-slate-400 uppercase font-mono text-[9.5px] sticky top-0">
-              <tr>
-                <th class="p-2">Mã SKU</th>
-                <th class="p-2">Tên Món</th>
-                <th class="p-2">Danh Mục</th>
-                <th class="p-2 text-right">Giá Vốn</th>
-                <th class="p-2 text-right">Giá Bán</th>
-                <th class="p-2 text-center">Food Cost</th>
-              </tr>
-            </thead>
-            <tbody id="ingest-preview-tbody" class="divide-y divide-slate-800/60 font-mono">
-              <!-- Render động danh sách món xem trước -->
-            </tbody>
-          </table>
-        </div>
+    /**
+     * VẼ BẢNG MA TRẬN MÓN ĂN & TOPPING
+     */
+    function renderDishesTable() {
+      var tbody = document.getElementById("dishes-table-body");
+      var emptyRow = document.getElementById("dishes-empty-state");
+      if (!tbody) return;
 
-        <button type="button" id="btn-confirm-ingest-all" onclick="window.TabMenuController && window.TabMenuController.submitBatchIngest()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-95 text-slate-950 font-black uppercase text-xs tracking-wider transition active:scale-95 shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up"></i>
-          <span>Xác Nhận Nạp Tất Cả Vào Cơ Sở Dữ Liệu Thực Đơn</span>
-        </button>
-      </div>
+      var filtered = rawDishes.filter(function(d) {
+        var nameStr = String(d.name || "").toLowerCase();
+        var codeStr = String(d.code || "").toLowerCase();
+        var dCat = String(d.category || d.categorySlug || "").toLowerCase();
 
-    </div>
-  </div>
-  
+        var matchKw = !currentSearchKw || nameStr.includes(currentSearchKw) || codeStr.includes(currentSearchKw);
+        var matchCat = (currentCatFilter === "ALL") || (dCat === currentCatFilter.toLowerCase());
+
+        return matchKw && matchCat;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = "";
+        if (emptyRow) emptyRow.classList.remove("hidden");
+        return;
+      }
+
+      if (emptyRow) emptyRow.classList.add("hidden");
+
+      tbody.innerHTML = filtered.map(function(d) {
+        var appPrice = Number(d.appPrice || d.priceApp || 0);
+        var d2cPrice = Number(d.d2cPrice || d.priceD2c || d.price || 0);
+        var cogs = Number(d.cogs || d.cost || 0);
+        var netProfit = Number(d.netProfit || 0);
+
+        if (d2cPrice === 0 && appPrice > 0) {
+          d2cPrice = Math.round((appPrice * 0.9) / 1000) * 1000;
+          netProfit = Math.max(0, d2cPrice - cogs - Math.round(d2cPrice * 0.15));
+        }
+
+        var fc = d2cPrice > 0 ? (cogs / d2cPrice) * 100 : 0;
+        var fcClass = "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
+        if (fc > 45) fcClass = "text-rose-400 bg-rose-500/10 border-rose-500/30 animate-pulse font-black";
+        else if (fc > 38) fcClass = "text-amber-400 bg-amber-500/10 border-amber-500/30 font-bold";
+
+        var isOutOfStock = (String(d.status || "").toUpperCase() === 'OUT_OF_STOCK');
+        var statusBadge = isOutOfStock 
+          ? '<span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">🔴 Hết Hàng</span>' 
+          : '<span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">🟢 Đang Bán</span>';
+
+        var imgUrl = d.imageUrl || d.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100';
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-2.5 px-3.5 flex items-center gap-2.5">
+              <img src="${imgUrl}" class="w-10 h-10 rounded-xl object-cover border border-slate-800 shrink-0" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'"/>
+              <div class="overflow-hidden">
+                <span class="font-mono text-[10px] text-amber-400 font-bold block">${d.code}</span>
+                <h4 class="font-bold text-white text-xs truncate max-w-[170px]" title="${d.name}">${d.name}</h4>
+              </div>
+            </td>
+            <td class="py-2.5 px-3 text-center text-slate-300 font-medium">${d.category || d.categorySlug || 'CORE'}</td>
+            <td class="py-2.5 px-3 text-right font-mono text-rose-400 font-bold">${cogs.toLocaleString('vi-VN')} đ</td>
+            <td class="py-2.5 px-3 text-right font-mono font-black text-emerald-400">+${netProfit.toLocaleString('vi-VN')} đ</td>
+            <td class="py-2.5 px-3 text-right font-mono font-black text-amber-400">${d2cPrice.toLocaleString('vi-VN')} đ</td>
+            <td class="py-2.5 px-3 text-right font-mono text-slate-400">${appPrice.toLocaleString('vi-VN')} đ</td>
+            <td class="py-2.5 px-3 text-center">
+              <span class="px-2 py-0.5 rounded-lg font-mono text-[10.5px] border ${fcClass}">${fc.toFixed(1)}%</span>
+            </td>
+            <td class="py-2.5 px-3 text-center font-mono text-slate-400 text-[11px]">${d.crossSellSuggest || d.crossSell || '--'}</td>
+            <td class="py-2.5 px-3 text-center">${statusBadge}</td>
+            <td class="py-2.5 px-3.5 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <button type="button" onclick="TabMenuController.openDishModal('${d.code}')" class="p-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition active:scale-95" title="Sửa món"><i class="fa-solid fa-pen text-[11px]"></i></button>
+                <button type="button" onclick="TabMenuController.deleteDish('${d.code}')" class="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition active:scale-95" title="Xóa món"><i class="fa-solid fa-trash text-[11px]"></i></button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    /**
+     * CÔNG CỤ TÍNH REVERSE-PRICING UI CHO MODAL FORM
+     */
+    function calculateReversePricingUI() {
+      var appPrice = Number(document.getElementById("tab-dish-app-price").value) || 0;
+      var discountPercent = Number(document.getElementById("tab-dish-discount-percent").value) || 10;
+      var cogs = Number(document.getElementById("tab-dish-cogs").value) || 0;
+
+      var rawD2c = appPrice * (1 - (discountPercent / 100));
+      var d2cPrice = Math.round(rawD2c / 1000) * 1000;
+      var buffer = Math.round(d2cPrice * 0.15);
+      var netProfit = Math.max(0, d2cPrice - cogs - buffer);
+      var fcPercent = d2cPrice > 0 ? ((cogs / d2cPrice) * 100).toFixed(1) : "0.0";
+
+      document.getElementById("tab-dish-price").value = d2cPrice;
+      document.getElementById("tab-preview-buffer").innerText = buffer.toLocaleString("vi-VN") + " đ";
+      document.getElementById("tab-preview-lnr").innerText = "+" + netProfit.toLocaleString("vi-VN") + " đ";
+      document.getElementById("tab-dish-foodcost-percent").innerText = fcPercent + "%";
+
+      var barEl = document.getElementById("tab-dish-foodcost-bar");
+      if (barEl) barEl.style.width = Math.min(100, Number(fcPercent)) + "%";
+    }
+
+    /**
+     * NÉN ẢNH CANVAS CLIENT-SIDE VỀ WEBP
+     */
+    async function compressImageWithCanvas(file, maxWidth, quality) {
+      return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function(event) {
+          var img = new Image();
+          img.src = event.target.result;
+          img.onload = function() {
+            var canvas = document.getElementById("tab-canvas-compressor") || document.createElement("canvas");
+            var targetWidth = img.width;
+            var targetHeight = img.height;
+
+            if (targetWidth > maxWidth) {
+              targetHeight = Math.round((targetHeight * maxWidth) / targetWidth);
+              targetWidth = maxWidth;
+            }
+
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+            var base64 = canvas.toDataURL("image/webp", quality || 0.8);
+            resolve(base64);
+          };
+          img.onerror = reject;
+        };
+        reader.onerror = reject;
+      });
+    }
+
+    async function handleSingleImageUpload(input) {
+      var file = input.files[0];
+      if (!file) return;
+
+      var btn = document.getElementById("tab-btn-upload-img");
+      var origText = btn ? btn.innerHTML : "";
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang nén...';
+      }
+
+      try {
+        var compressedBase64 = await compressImageWithCanvas(file, 800, 0.8);
+        var itemCode = (document.getElementById("tab-dish-code") ? document.getElementById("tab-dish-code").value : "").trim() || "ITEM";
+
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up fa-spin"></i> Đang tải lên Drive...';
+
+        var res = await window.Thim5API.callGAS("uploadDishMediaImage", {
+          base64Data: compressedBase64,
+          fileName: itemCode + "_" + Date.now() + ".webp",
+          itemCode: itemCode
+        });
+
+        if (res && res.status === "success" && res.data && res.data.directCdnUrl) {
+          document.getElementById("tab-dish-image").value = res.data.directCdnUrl;
+          alert("📸 Đã nén ảnh WebP và lưu vào Google Drive CDN thành công!");
+        } else {
+          alert("⛔ Lỗi: " + (res && res.message ? res.message : "Không nhận được link CDN"));
+        }
+      } catch (err) {
+        alert("❌ Lỗi tải ảnh: " + err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origText;
+        }
+      }
+    }
+
+    /**
+     * MODAL THÊM / SỬA MÓN
+     */
+    function openDishModal(code) {
+      var modal = document.getElementById("modal-tab-dish-editor");
+      if (!modal) return;
+      modal.classList.remove("hidden");
+
+      var selCat = document.getElementById("tab-dish-category");
+      if (selCat) {
+        selCat.innerHTML = "";
+        categories.forEach(function(c) {
+          var slugVal = String(c.slug || c.code || "").toUpperCase();
+          selCat.innerHTML += `<option value="${slugVal}">${c.icon || '🍽️'} ${c.name}</option>`;
+        });
+      }
+
+      if (code) {
+        var d = rawDishes.find(function(x) { return x.code === code; });
+        if (!d) return;
+        document.getElementById("tab-modal-dish-title").innerText = "Chỉnh Sửa Món: " + d.code;
+        document.getElementById("tab-dish-is-edit").value = "true";
+        document.getElementById("tab-dish-code").value = d.code;
+        document.getElementById("tab-dish-code").readOnly = true;
+        document.getElementById("tab-dish-name").value = d.name || "";
+        document.getElementById("tab-dish-category").value = String(d.category || d.categorySlug || "").toUpperCase();
+        document.getElementById("tab-dish-tag").value = d.tag || "CORE";
+        document.getElementById("tab-dish-app-price").value = d.appPrice || d.priceApp || "";
+        document.getElementById("tab-dish-discount-percent").value = (d.discountPercent !== undefined && d.discountPercent !== null) ? d.discountPercent : 10;
+        document.getElementById("tab-dish-price").value = d.d2cPrice || d.price || "";
+        document.getElementById("tab-dish-cogs").value = d.cogs || d.cost || "";
+        document.getElementById("tab-dish-image").value = d.imageUrl || d.image || "";
+        document.getElementById("tab-dish-status").value = d.status || "ACTIVE";
+        document.getElementById("tab-dish-cross-sell").value = d.crossSellSuggest || d.crossSell || "";
+        document.getElementById("tab-dish-desc").value = d.description || d.desc || "";
+      } else {
+        document.getElementById("tab-modal-dish-title").innerText = "Thêm Món / Topping Mới";
+        document.getElementById("form-tab-dish").reset();
+        document.getElementById("tab-dish-is-edit").value = "false";
+        document.getElementById("tab-dish-code").readOnly = false;
+        document.getElementById("tab-dish-code").value = "ITEM_" + (rawDishes.length + 1).toString().padStart(2, "0");
+        document.getElementById("tab-dish-discount-percent").value = 10;
+      }
+
+      calculateReversePricingUI();
+    }
+
+    function closeDishModal() {
+      var modal = document.getElementById("modal-tab-dish-editor");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    async function handleSaveDish(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      var btn = document.getElementById("tab-btn-save-dish-submit");
+      var origText = btn ? btn.innerHTML : "";
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu 13 Cột...';
+      }
+
+      var payload = {
+        code: document.getElementById("tab-dish-code").value.trim().toUpperCase(),
+        name: document.getElementById("tab-dish-name").value.trim(),
+        category: document.getElementById("tab-dish-category").value,
+        appPrice: Number(document.getElementById("tab-dish-app-price").value) || 0,
+        discountPercent: Number(document.getElementById("tab-dish-discount-percent").value) || 10,
+        d2cPrice: Number(document.getElementById("tab-dish-price").value) || 0,
+        cogs: Number(document.getElementById("tab-dish-cogs").value) || 0,
+        cost: Number(document.getElementById("tab-dish-cogs").value) || 0,
+        status: document.getElementById("tab-dish-status").value,
+        imageUrl: document.getElementById("tab-dish-image").value.trim(),
+        crossSellSuggest: document.getElementById("tab-dish-cross-sell").value.trim().toUpperCase(),
+        tag: document.getElementById("tab-dish-tag").value,
+        description: document.getElementById("tab-dish-desc").value.trim()
+      };
+
+      try {
+        var res = await window.Thim5API.callGAS("saveOrUpdateMenuItem", payload);
+        if (res && res.status === "success") {
+          alert("🎉 Đã lưu thành công món [" + payload.name + "] vào Google Sheets!");
+          closeDishModal();
+          await loadCatalogData();
+          renderAll();
+        } else {
+          alert("⛔ Lỗi: " + (res && res.message ? res.message : "Không lưu được"));
+        }
+      } catch (err) {
+        alert("❌ Lỗi mạng: " + err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origText;
+        }
+      }
+    }
+
+    async function deleteDish(code) {
+      if (confirm("Anh Hải Âu có chắc muốn xóa món [" + code + "] khỏi thực đơn?")) {
+        try {
+          var res = await window.Thim5API.callGAS("deleteMenuItem", { itemCode: code });
+          if (res && res.status === "success") {
+            alert("🗑️ Đã xóa món thành công!");
+            await loadCatalogData();
+            renderAll();
+          }
+        } catch (e) {
+          alert("❌ Lỗi: " + e.message);
+        }
+      }
+    }
+
+    /**
+     * QUẢN TRỊ DANH MỤC MODAL
+     */
+    function openCategoriesModal() {
+      var modal = document.getElementById("modal-tab-categories");
+      if (modal) modal.classList.remove("hidden");
+      renderCategoryModalList();
+    }
+
+    function closeCategoriesModal() {
+      var modal = document.getElementById("modal-tab-categories");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function renderCategoryModalList() {
+      var tbody = document.getElementById("tab-categories-list-tbody");
+      if (!tbody) return;
+
+      tbody.innerHTML = categories.map(function(c, idx) {
+        return `
+          <tr class="hover:bg-slate-900/60 transition">
+            <td class="p-2.5 text-center text-base">${c.icon || '🍽️'}</td>
+            <td class="p-2.5 text-white font-bold">${c.name}</td>
+            <td class="p-2.5 font-mono text-amber-400">${c.slug || ''}</td>
+            <td class="p-2.5 text-center">
+              <button type="button" onclick="TabMenuController.deleteCategory(${idx})" class="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30" title="Xóa"><i class="fa-solid fa-trash text-[10px]"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function handleSaveCategory(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      var icon = document.getElementById("tab-cat-icon").value.trim() || "🍽️";
+      var name = document.getElementById("tab-cat-name").value.trim();
+      var slug = document.getElementById("tab-cat-slug").value.trim() || name.toLowerCase();
+
+      var newCat = {
+        code: "CAT_" + Date.now().toString().slice(-4),
+        icon: icon,
+        name: name,
+        slug: slug,
+        maxFcPercent: 35
+      };
+
+      try {
+        var res = await window.Thim5API.callGAS("saveMenuCategory", { category: newCat });
+        if (res && res.status === "success") {
+          alert("🎉 Đã thêm danh mục [" + name + "] thành công!");
+          document.getElementById("form-tab-category").reset();
+          await loadCatalogData();
+          renderAll();
+        }
+      } catch (err) {
+        alert("❌ Lỗi: " + err.message);
+      }
+    }
+
+    async function deleteCategory(idx) {
+      var c = categories[idx];
+      if (!c) return;
+      if (confirm("Anh có chắc muốn xóa danh mục [" + c.name + "]?")) {
+        try {
+          var res = await window.Thim5API.callGAS("deleteMenuCategory", { categoryId: c.code || c.id });
+          if (res && res.status === "success") {
+            alert("🗑️ Đã xóa danh mục!");
+            await loadCatalogData();
+            renderAll();
+          }
+        } catch (e) {
+          alert("❌ Lỗi: " + e.message);
+        }
+      }
+    }
+
+    function openOmniIngestionModal() {
+      if (typeof window.open === "function") {
+        window.open("menu-manager.html", "_blank");
+      }
+    }
+
+    // Khởi động khi tải xong DOM
+    document.addEventListener("DOMContentLoaded", init);
+
+    return {
+      init: init,
+      handleSearch: handleSearch,
+      filterByCategory: filterByCategory,
+      openDishModal: openDishModal,
+      closeDishModal: closeDishModal,
+      handleSaveDish: handleSaveDish,
+      deleteDish: deleteDish,
+      calculateReversePricingUI: calculateReversePricingUI,
+      handleSingleImageUpload: handleSingleImageUpload,
+      openCategoriesModal: openCategoriesModal,
+      closeCategoriesModal: closeCategoriesModal,
+      handleSaveCategory: handleSaveCategory,
+      deleteCategory: deleteCategory,
+      openOmniIngestionModal: openOmniIngestionModal
+    };
+  })();
+  </script>
+</div>
