@@ -3,7 +3,7 @@
  * MODULE: TAB MENU & OMNI-INGESTION PIPELINE (v3.0 SAAS ENTERPRISE)
  * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
  * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
- * Tệp tin: tab-menu.js (Thuần JavaScript 100% - Chuẩn SSOT 13 Cột Data-Driven)
+ * Tệp tin: tab-menu.js (Thuần JavaScript 100% - Cứu hộ hiển thị & Auto-Mount)
  * =========================================================================
  */
 window.TabMenuController = (function() {
@@ -16,15 +16,27 @@ window.TabMenuController = (function() {
   var stagedIngestItems = [];
   var isLoading = false;
   var DEFAULT_PLATFORM_FEE_RATE = 0.20; // 20% chiết khấu sàn mặc định
+  var initRetryCount = 0;
 
   /**
-   * KHỞI CHẠY TẢI THỰC ĐƠN VÀ DANH MỤC TỪ GOOGLE SHEETS
+   * KHỞI CHẠY TẢI THỰC ĐƠN VÀ DANH MỤC VỚI CƠ CHẾ CHỜ DOM (AUTO-MOUNT)
    */
   async function init() {
+    // 1. Kiểm tra xem DOM của tab-menu.html đã được nhúng vào admin-shell chưa
+    var tableBody = document.getElementById("menu-table-body");
+    var tabContainer = document.getElementById("category-filter-tabs");
+    
+    if ((!tableBody || !tabContainer) && initRetryCount < 10) {
+      initRetryCount++;
+      setTimeout(init, 60);
+      return;
+    }
+
     showTableLoading(true);
+
     try {
       if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
-        throw new Error("Không tìm thấy kết nối Thim5API adapter!");
+        throw new Error("Chưa kết nối Thim5API adapter!");
       }
 
       var actionCatalog = (window.T5_DICT && window.T5_DICT.ACTIONS && window.T5_DICT.ACTIONS.GET_ADMIN_MENU_CATALOG)
@@ -43,29 +55,11 @@ window.TabMenuController = (function() {
       var menuRes = results[0].status === "fulfilled" ? results[0].value : null;
       var catRes = results[1].status === "fulfilled" ? results[1].value : null;
 
-      // 1. Bóc tách an toàn 2 tầng cho danh sách món ăn
-      if (menuRes && menuRes.status === "success" && menuRes.data) {
-        if (Array.isArray(menuRes.data.items)) {
-          rawMenuList = menuRes.data.items;
-        } else if (Array.isArray(menuRes.data)) {
-          rawMenuList = menuRes.data;
-        } else {
-          rawMenuList = [];
-        }
+      // 2. BÓC TÁCH DỮ LIỆU ĐA TẦNG (MULTI-LAYER EXTRACTION) CHỐNG MẤT MÓN
+      rawMenuList = extractDishesFromResponse(menuRes);
 
-        if (Array.isArray(menuRes.data.categories) && menuRes.data.categories.length > 0) {
-          dynamicCategories = menuRes.data.categories;
-        }
-      } else if (menuRes && Array.isArray(menuRes)) {
-        rawMenuList = menuRes;
-      } else {
-        rawMenuList = [];
-      }
-
-      // 2. Bóc tách danh mục từ API chuyên trách nếu có
-      if (catRes && catRes.status === "success" && Array.isArray(catRes.data) && catRes.data.length > 0) {
-        dynamicCategories = catRes.data;
-      }
+      // 3. Bóc tách danh mục từ phản hồi catalog hoặc API danh mục
+      dynamicCategories = extractCategoriesFromResponse(menuRes, catRes);
 
     } catch (err) {
       console.warn("⚠️ [TabMenu] Lỗi nạp dữ liệu từ máy chủ, kích hoạt danh mục chuẩn SSOT:", err);
@@ -75,6 +69,54 @@ window.TabMenuController = (function() {
       ensureToppingCategoryExists();
       renderAll();
     }
+  }
+
+  /**
+   * CỖ MÁY BÓC TÁCH DANH SÁCH MÓN ĂN VƯỢT MỌI CẤU TRÚC PHẢN HỒI
+   * @param {Object|Array} res - Phản hồi từ backend
+   * @returns {Array} Mảng các món ăn chuẩn hóa
+   */
+  function extractDishesFromResponse(res) {
+    if (!res) return [];
+
+    // Trường hợp 1: Phản hồi chuẩn bọc trong res.data.items
+    if (res.data && Array.isArray(res.data.items)) {
+      return res.data.items;
+    }
+
+    // Trường hợp 2: res.data trực tiếp là một mảng
+    if (res.data && Array.isArray(res.data)) {
+      return res.data;
+    }
+
+    // Trường hợp 3: api.js đã unwrap và đưa về res.items
+    if (Array.isArray(res.items)) {
+      return res.items;
+    }
+
+    // Trường hợp 4: res chính là mảng món ăn
+    if (Array.isArray(res)) {
+      return res;
+    }
+
+    return [];
+  }
+
+  /**
+   * CỖ MÁY BÓC TÁCH DANH MỤC TỪ CÁC NGUỒN PHẢN HỒI
+   */
+  function extractCategoriesFromResponse(menuRes, catRes) {
+    // Ưu tiên 1: Đọc từ API danh mục chuyên trách
+    if (catRes && catRes.status === "success" && Array.isArray(catRes.data) && catRes.data.length > 0) {
+      return catRes.data;
+    }
+
+    // Ưu tiên 2: Đọc từ trường categories gộp trong menuRes
+    if (menuRes && menuRes.data && Array.isArray(menuRes.data.categories) && menuRes.data.categories.length > 0) {
+      return menuRes.data.categories;
+    }
+
+    return [];
   }
 
   /**
@@ -134,7 +176,7 @@ window.TabMenuController = (function() {
   }
 
   /**
-   * VẼ THANH TAB BỘ LỌC DANH MỤC ĐỘNG (TỰ ĐỘNG SINH TAB TOPPING)
+   * VẼ THANH TAB BỘ LỌC DANH MỤC ĐỘNG 100% (TỰ ĐỘNG SINH TAB TOPPING)
    */
   function renderCategoryTabs() {
     var container = document.getElementById("category-filter-tabs");
@@ -160,7 +202,11 @@ window.TabMenuController = (function() {
       var itemCount = rawMenuList.filter(function(item) {
         var itemCat = String(item.category || item.categorySlug || "").toLowerCase();
         var itemCode = String(item.category || "").toUpperCase();
-        return itemCat === slug.toLowerCase() || itemCode === String(cat.code || "").toUpperCase();
+        var filterSlug = slug.toLowerCase();
+        
+        return (itemCat === filterSlug) || 
+               (itemCode === String(cat.code || "").toUpperCase()) ||
+               (filterSlug === "an-kem" && (itemCat.includes("topping") || itemCat.includes("ăn kèm") || itemCat.includes("an-kem")));
       }).length;
 
       var btnClass = isActive 
