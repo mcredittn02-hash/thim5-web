@@ -315,752 +315,1035 @@
     </main>
 
   </div>
+  <!-- ========================================================================= -->
+  <!-- MODAL ĐIỀU PHỐI GIAO HÀNG & MỞ KHÓA BẾP NẤU (DUAL VERIFICATION GATE)        -->
+  <!-- Tích hợp chuẩn hóa theo T5_DICT: Hỗ trợ Shipper Quán hoặc Gọi Grab / Vill -->
+  <!-- ========================================================================= -->
+  <div id="dispatchModalOverlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 select-none">
+    <div class="relative bg-slate-900 border-2 border-amber-500/50 w-full max-w-md rounded-3xl shadow-2xl p-5 sm:p-6 space-y-4 animate-in zoom-in-95 duration-200 text-xs">
+      
+      <!-- Tiêu Đề Modal -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base shrink-0">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-white uppercase tracking-wider">Bếp Duyệt Nấu &amp; Điều Phối Ship</h3>
+            <p class="text-[10px] text-slate-400">Mở khóa đơn COD tức thì • Tính phí bù ship minh bạch</p>
+          </div>
+        </div>
+        <button type="button" 
+                onclick="KitchenKdsController.closeDispatchModal()" 
+                class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-90">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="modalOrderId" value="">
+      <input type="hidden" id="modalCustomerShipFee" value="0">
+      <input type="hidden" id="modalSubtotal" value="0">
+
+      <!-- Thông Tin Đơn Hàng Tóm Tắt -->
+      <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400 text-[11px]">Mã Đơn Hàng:</span>
+          <span id="modalDisplayOrderId" class="font-mono font-black text-amber-400 text-xs">-</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400 text-[11px]">Khách Hàng:</span>
+          <span id="modalDisplayCustomer" class="font-bold text-white text-xs truncate max-w-[200px]">-</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400 text-[11px]">Cước Quán Đã Thu Khách:</span>
+          <span id="modalDisplayCustomerShip" class="font-mono font-bold text-emerald-400 text-xs">0 đ</span>
+        </div>
+        <div class="flex justify-between items-center pt-1 border-t border-slate-900">
+          <span class="text-slate-300 font-bold text-[11px]">Tổng Tiền COD Thu Khách:</span>
+          <span id="modalDisplayCodAmount" class="font-mono font-black text-amber-300 text-sm">0 đ</span>
+        </div>
+      </div>
+
+      <!-- Tùy Chọn Kênh Vận Chuyển -->
+      <div class="space-y-2">
+        <label class="font-bold text-slate-300 text-[11px] block">Chọn Phương Thức Vận Chuyển:</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" 
+                  id="btnModalTypeInternal" 
+                  onclick="KitchenKdsController.selectDeliveryChannel('INTERNAL')" 
+                  class="py-2.5 px-3 rounded-xl border border-amber-500 bg-amber-500/10 text-amber-400 font-bold text-xs transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-motorcycle"></i>
+            <span>Shipper Quán</span>
+          </button>
+          <button type="button" 
+                  id="btnModalTypeExternal" 
+                  onclick="KitchenKdsController.selectDeliveryChannel('EXTERNAL')" 
+                  class="py-2.5 px-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold text-xs hover:text-white transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-cube"></i>
+            <span>Gọi Grab / Vill</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Phân Hệ 1: Shipper Nội Bộ -->
+      <div id="sectionModalInternal" class="space-y-2">
+        <label class="font-bold text-slate-400 text-[10.5px] block">Chỉ Định Tài Xế Phụ Trách:</label>
+        <select id="modalSelectShipper" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 text-xs font-bold outline-none focus:border-amber-500 transition">
+          <option value="">-- Chưa chỉ định (Mở cho toàn đội nhận) --</option>
+        </select>
+        <span class="text-[10px] text-slate-500 block">Tài xế nhận đơn sẽ chịu trách nhiệm thu tiền và bàn giao lại cho Bếp.</span>
+      </div>
+
+      <!-- Phân Hệ 2: Đẩy App Ngoài (Grab / Vill / Ahamove) -->
+      <div id="sectionModalExternal" class="hidden space-y-2.5">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-bold text-slate-400 text-[10.5px] block mb-1">Đơn Vị App Ngoài:</label>
+            <select id="modalExternalProvider" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-slate-200 text-xs font-bold outline-none focus:border-amber-500">
+              <option value="GRAB">GrabExpress</option>
+              <option value="VILL">VillShip</option>
+              <option value="AHAMOVE">Ahamove</option>
+              <option value="XANH_SM">Xanh SM Bike</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-bold text-slate-400 text-[10.5px] block mb-1">Mã Chuyến Xe:</label>
+            <input type="text" 
+                   id="modalExternalTracking" 
+                   placeholder="VD: GR-8892" 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white font-mono uppercase focus:border-amber-500 outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="font-bold text-slate-400 text-[10.5px] block mb-1">Cước Sàn Báo Thực Tế (VNĐ):</label>
+          <input type="number" 
+                 id="modalExternalFee" 
+                 oninput="KitchenKdsController.calculateModalSubsidy()" 
+                 placeholder="VD: 25000" 
+                 class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-amber-400 focus:border-amber-500 outline-none">
+        </div>
+
+        <!-- Cảnh Báo Tài Chính Phí Bù Ship -->
+        <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-between text-[11px]">
+          <span class="text-rose-300 font-medium">Quán phải bù tiền ship:</span>
+          <strong id="modalDisplaySubsidyFee" class="font-mono font-black text-rose-400 text-xs">0 đ</strong>
+        </div>
+      </div>
+
+      <!-- Cụm Nút Hành Động -->
+      <div class="pt-2 border-t border-slate-800 flex items-center gap-2">
+        <button type="button" 
+                onclick="KitchenKdsController.closeDispatchModal()" 
+                class="flex-1 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold transition">
+          Đóng
+        </button>
+        <button type="button" 
+                id="btnModalConfirmCook" 
+                onclick="KitchenKdsController.executeVerifyAndCook()" 
+                class="flex-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black uppercase tracking-wider transition active:scale-95 shadow-lg shadow-orange-600/20 flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-fire-burner"></i>
+          <span>Xác Nhận &amp; Nấu Ngay</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
   <!-- Adapter kết nối Headless GAS API v2.9 -->
   <script src="api.js?v=20260917"></script>
 
   <script>
     /**
-   * =========================================================================
-   * CONTROLLER: KITCHEN DISPLAY SYSTEM (TRẠM BẾP KDS THÍM 5 v2.9 ENTERPRISE)
-   * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
-   * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
-   * Kiến trúc: Headless GAS API, Persistent Auto-Login, Web Audio API Native
-   * =========================================================================
-   */
-  var KitchenKdsController = (function() {
-      var isSoundEnabled = true;
-      var currentSoundType = "zalo"; // "zalo" | "dingdong" | "phone" | "beep"
-      var audioCtx = null;
-      var knownOrderCodes = [];
-      var isInitialLoad = true;
-      var rawOrdersCache = [];
-      var currentFilter = 'all';
-      var kdsPollingTimer = null;
-      var isCallingApi = false;
-      var localCancelledOrders = [];
-
-      var cachedShippers = [
-          { name: "Nguyễn Hải Âu", phone: "0934220585" },
-          { name: "Nguyễn Hải Âu", phone: "0969004693" },
-          { name: "Trần Minh Nam", phone: "0968222862" }
-      ];
-
-      function isRunningInsideGAS() {
-          return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
-      }
-
-      function callBackend(gasFunctionName, gasArgsArray, apiActionName, apiPayloadObj) {
-          return new Promise(function(resolve, reject) {
-              if (isRunningInsideGAS()) {
-                  var runner = google.script.run
-                      .withSuccessHandler(function(res) { resolve(res); })
-                      .withFailureHandler(function(err) { reject(err); });
-                  if (typeof runner[gasFunctionName] === 'function') {
-                      runner[gasFunctionName].apply(runner, gasArgsArray || []);
-                  } else {
-                      reject(new Error("Hàm " + gasFunctionName + " không tồn tại"));
-                  }
-              } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
-                  window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
-                      .then(function(res) { resolve(res); })
-                      .catch(function(err) { reject(err); });
-              } else {
-                  reject(new Error("Không tìm thấy cổng kết nối Thim5API!"));
-              }
-          });
-      }
-
-      /**
-       * KIỂM TRA ĐĂNG NHẬP TỰ ĐỘNG (AUTO-LOGIN PERSISTENT & BYPASS ADMIN)
-       */
-      function checkKdsAuth() {
-          var urlParams = new URLSearchParams(window.location.search);
-          var authParam = urlParams.get("auth");
-          var savedPin = localStorage.getItem("thim5_kds_auth");
-          var overlay = document.getElementById("kdsAuthOverlay");
-
-          // Tự động vượt qua màn hình PIN nếu truy cập từ Admin hoặc đã lưu PIN trước đó
-          if (authParam === "1985" || authParam === "2026" || savedPin === "1985" || savedPin === "2026") {
-              if (authParam) {
-                  localStorage.setItem("thim5_kds_auth", authParam);
-              }
-              if (overlay) {
-                  overlay.style.display = "none";
-              }
-              initKDS();
-          } else {
-              if (overlay) {
-                  overlay.style.display = "flex";
-              }
-              var pinInput = document.getElementById("kdsPinInput");
-              if (pinInput) {
-                  pinInput.value = "";
-                  pinInput.focus();
-                  pinInput.onkeydown = function(e) {
-                      if (e.key === "Enter") handleKdsAuthLogin();
-                  };
-              }
-          }
-      }
-
-      /**
-       * XỬ LÝ MỞ TRẠM BẾP: LƯU PHIÊN VĨNH VIỄN & MỞ KHÓA GIAO DIỆN NGAY LẬP TỨC
-       */
-      function handleKdsAuthLogin() {
-          var pinInput = document.getElementById("kdsPinInput");
-          var pin = pinInput ? pinInput.value.trim() : "";
-          var err = document.getElementById("kdsAuthError");
-          var overlay = document.getElementById("kdsAuthOverlay");
-
-          if (err) err.style.display = "none";
-
-          if (pin === "1985" || pin === "2026") {
-              localStorage.setItem("thim5_kds_auth", pin);
-              
-              // Ẩn overlay ngay lập tức, không để bất kỳ lỗi nào chặn lại
-              if (overlay) {
-                  overlay.style.display = "none";
-              }
-
-              // Mở khóa âm thanh an toàn
-              try { 
-                  initAudioContext(); 
-                  playToneSynthesis("zalo"); 
-              } catch(e) {
-                  console.warn("⚠️ [Audio Unlock Warn]:", e);
-              }
-
-              initKDS();
-          } else {
-              if (err) {
-                  err.innerText = "❌ Sai mã PIN Bếp! Vui lòng nhập đúng PIN Quản lý (1985).";
-                  err.style.display = "block";
-              }
-              if (pinInput) {
-                  pinInput.value = "";
-                  pinInput.focus();
-              }
-          }
-      }
-
-      /**
-       * KHÓA MÀN HÌNH BẾP (KHI MUỐN ĐỔI CA HOẶC BẢO MẬT)
-       */
-      function handleKdsLockOut() {
-          if (confirm("Khóa màn hình trạm Bếp KDS?")) {
-              localStorage.removeItem("thim5_kds_auth");
-              if (kdsPollingTimer) {
-                  clearInterval(kdsPollingTimer);
-                  kdsPollingTimer = null;
-              }
-              var pinInput = document.getElementById("kdsPinInput");
-              if (pinInput) pinInput.value = "";
-              var overlay = document.getElementById("kdsAuthOverlay");
-              if (overlay) overlay.style.display = "flex";
-          }
-      }
-
-      /**
-       * KHỞI CHẠY BẾP KDS & BẮT ĐẦU VÒNG LẶP POLLING ĐỒNG BỘ ĐƠN HÀNG
-       */
-      function initKDS() {
-          updateLiveClock();
-          setInterval(updateLiveClock, 1000);
-          loadSoundSettingsFromStorage();
-          loadKitchenOrders();
-          
-          if (!kdsPollingTimer) {
-              kdsPollingTimer = setInterval(function() {
-                  loadKitchenOrders(true);
-              }, 10000);
-          }
-
-          document.body.addEventListener('click', function() {
-              try { initAudioContext(); } catch(e) {}
-          }, { once: true });
-      }
-
-      function initAudioContext() {
-          try {
-              if (!audioCtx) {
-                  var AudioContext = window.AudioContext || window.webkitAudioContext;
-                  if (AudioContext) audioCtx = new AudioContext();
-              }
-              if (audioCtx && audioCtx.state === 'suspended') {
-                  audioCtx.resume();
-              }
-          } catch(e) {}
-      }
-
-      function updateLiveClock() {
-          var now = new Date();
-          var h = String(now.getHours()).padStart(2, '0');
-          var m = String(now.getMinutes()).padStart(2, '0');
-          var s = String(now.getSeconds()).padStart(2, '0');
-          var el = document.getElementById("kdsLiveClock");
-          if (el) el.innerText = h + ":" + m + ":" + s;
-      }
-
-      /**
-       * BỘ NÃO TỔNG HỢP ÂM THANH NATIVE (WEB AUDIO API SYNTHESIS ENGINE)
-       */
-      function playToneSynthesis(type) {
-          if (!isSoundEnabled) return;
-          try {
-              initAudioContext();
-              if (!audioCtx) return;
-
-              var now = audioCtx.currentTime;
-
-              if (type === "zalo") {
-                  // ÂM BÁO ZALO: 2 nốt Ting Ting thanh thoát (A6 -> E7)
-                  var osc1 = audioCtx.createOscillator();
-                  var gain1 = audioCtx.createGain();
-                  osc1.type = 'sine';
-                  osc1.frequency.setValueAtTime(1760, now);
-                  gain1.gain.setValueAtTime(0.35, now);
-                  gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                  osc1.connect(gain1);
-                  gain1.connect(audioCtx.destination);
-                  osc1.start(now);
-                  osc1.stop(now + 0.15);
-
-                  var osc2 = audioCtx.createOscillator();
-                  var gain2 = audioCtx.createGain();
-                  osc2.type = 'sine';
-                  osc2.frequency.setValueAtTime(2637, now + 0.12);
-                  gain2.gain.setValueAtTime(0.4, now + 0.12);
-                  gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-                  osc2.connect(gain2);
-                  gain2.connect(audioCtx.destination);
-                  osc2.start(now + 0.12);
-                  osc2.stop(now + 0.45);
-
-              } else if (type === "dingdong") {
-                  // ÂM BÁO DING-DONG POS: 2 hồi ngân vang (D5 -> A5)
-                  var oscD1 = audioCtx.createOscillator();
-                  var gainD1 = audioCtx.createGain();
-                  oscD1.type = 'triangle';
-                  oscD1.frequency.setValueAtTime(587.33, now);
-                  gainD1.gain.setValueAtTime(0.45, now);
-                  gainD1.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-                  oscD1.connect(gainD1);
-                  gainD1.connect(audioCtx.destination);
-                  oscD1.start(now);
-                  oscD1.stop(now + 0.35);
-
-                  var oscD2 = audioCtx.createOscillator();
-                  var gainD2 = audioCtx.createGain();
-                  oscD2.type = 'sine';
-                  oscD2.frequency.setValueAtTime(880, now + 0.28);
-                  gainD2.gain.setValueAtTime(0.5, now + 0.28);
-                  gainD2.gain.exponentialRampToValueAtTime(0.005, now + 0.85);
-                  oscD2.connect(gainD2);
-                  gainD2.connect(audioCtx.destination);
-                  oscD2.start(now + 0.28);
-                  oscD2.stop(now + 0.85);
-
-              } else if (type === "phone") {
-                  // ÂM BÁO ĐIỆN THOẠI REO GẤP: Hợp âm kép liên hồi (853Hz + 960Hz)
-                  for (var pulse = 0; pulse < 3; pulse++) {
-                      var pulseStart = now + (pulse * 0.14);
-                      var oA = audioCtx.createOscillator();
-                      var oB = audioCtx.createOscillator();
-                      var gP = audioCtx.createGain();
-
-                      oA.type = 'square';
-                      oB.type = 'sine';
-                      oA.frequency.setValueAtTime(853, pulseStart);
-                      oB.frequency.setValueAtTime(960, pulseStart);
-
-                      gP.gain.setValueAtTime(0.18, pulseStart);
-                      gP.gain.exponentialRampToValueAtTime(0.01, pulseStart + 0.1);
-
-                      oA.connect(gP);
-                      oB.connect(gP);
-                      gP.connect(audioCtx.destination);
-
-                      oA.start(pulseStart);
-                      oB.start(pulseStart);
-                      oA.stop(pulseStart + 0.1);
-                      oB.stop(pulseStart + 0.1);
-                  }
-
-              } else {
-                  // MẶC ĐỊNH BÍP ĐIỆN TỬ
-                  var oscB1 = audioCtx.createOscillator();
-                  var gainB1 = audioCtx.createGain();
-                  oscB1.type = 'sine';
-                  oscB1.frequency.setValueAtTime(880, now);
-                  gainB1.gain.setValueAtTime(0.3, now);
-                  gainB1.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-                  oscB1.connect(gainB1);
-                  gainB1.connect(audioCtx.destination);
-                  oscB1.start(now);
-                  oscB1.stop(now + 0.22);
-
-                  var oscB2 = audioCtx.createOscillator();
-                  var gainB2 = audioCtx.createGain();
-                  oscB2.type = 'sine';
-                  oscB2.frequency.setValueAtTime(1174.66, now + 0.18);
-                  gainB2.gain.setValueAtTime(0.3, now + 0.18);
-                  gainB2.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
-                  oscB2.connect(gainB2);
-                  gainB2.connect(audioCtx.destination);
-                  oscB2.start(now + 0.18);
-                  oscB2.stop(now + 0.45);
-              }
-          } catch(e) {
-              console.warn("⚠️ [KDS Sound Synthesis Error]:", e);
-          }
-      }
-
-      function playNewOrderAlert() {
-          var targetType = currentSoundType || localStorage.getItem("thim5_kds_sound_type") || "zalo";
-          playToneSynthesis(targetType);
-      }
-
-      function openSoundConfigModal() {
-          initAudioContext();
-          var modal = document.getElementById("modalKdsSoundConfig");
-          if (modal) modal.classList.remove("hidden");
-          syncSoundModalUI();
-      }
-
-      function closeSoundConfigModal() {
-          var modal = document.getElementById("modalKdsSoundConfig");
-          if (modal) modal.classList.add("hidden");
-      }
-
-      function toggleSoundMaster() {
-          isSoundEnabled = !isSoundEnabled;
-          localStorage.setItem("thim5_kds_sound_enabled", isSoundEnabled ? "true" : "false");
-          syncSoundModalUI();
-          updateTopbarSoundButton();
-          if (isSoundEnabled) {
-              playNewOrderAlert();
-          }
-      }
-
-      function onSoundChoiceChange(val) {
-          currentSoundType = String(val || "zalo").trim();
-      }
-
-      function testPlaySound(val) {
-          initAudioContext();
-          var t = String(val || currentSoundType || "zalo").trim();
-          playToneSynthesis(t);
-      }
-
-      function saveSoundConfig() {
-          var radios = document.querySelectorAll("input[name='kdsSoundChoice']");
-          radios.forEach(function(r) {
-              if (r.checked) currentSoundType = r.value;
-          });
-          localStorage.setItem("thim5_kds_sound_type", currentSoundType);
-          localStorage.setItem("thim5_kds_sound_enabled", isSoundEnabled ? "true" : "false");
-          updateTopbarSoundButton();
-          closeSoundConfigModal();
-          playNewOrderAlert();
-      }
-
-      function loadSoundSettingsFromStorage() {
-          var savedEnabled = localStorage.getItem("thim5_kds_sound_enabled");
-          if (savedEnabled !== null) {
-              isSoundEnabled = (savedEnabled === "true");
-          }
-          var savedType = localStorage.getItem("thim5_kds_sound_type");
-          if (savedType) {
-              currentSoundType = savedType;
-          }
-          updateTopbarSoundButton();
-      }
-
-      function syncSoundModalUI() {
-          var badge = document.getElementById("cfgSoundStatusBadge");
-          if (badge) {
-              if (isSoundEnabled) {
-                  badge.className = "px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300";
-                  badge.innerText = "ĐANG BẬT";
-              } else {
-                  badge.className = "px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-rose-500/20 text-rose-300";
-                  badge.innerText = "ĐÃ TẮT";
-              }
-          }
-          var radio = document.querySelector(`input[name='kdsSoundChoice'][value='${currentSoundType}']`);
-          if (radio) radio.checked = true;
-      }
-
-      function updateTopbarSoundButton() {
-          var btn = document.getElementById("btnSoundToggle");
-          var label = document.getElementById("soundLabel");
-          var icon = document.getElementById("soundIcon");
-
-          var soundNameMap = {
-              zalo: "Zalo",
-              dingdong: "DingDong",
-              phone: "Chuông ĐT",
-              beep: "Bíp Kép"
-          };
-          var curName = soundNameMap[currentSoundType] || "Zalo";
-
-          if (isSoundEnabled) {
-              if (btn) btn.className = "px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-sm";
-              if (label) label.innerText = "Âm Báo: " + curName + " (BẬT)";
-              if (icon) icon.className = "fa-solid fa-bell";
-          } else {
-              if (btn) btn.className = "px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 active:scale-95";
-              if (label) label.innerText = "Âm Báo: TẮT";
-              if (icon) icon.className = "fa-solid fa-bell-slash";
-          }
-      }
-
-      function unwrapOrdersArray(res) {
-          if (!res) return [];
-          if (Array.isArray(res)) return res;
-          if (Array.isArray(res.orders)) return res.orders;
-          if (res.data) {
-              if (Array.isArray(res.data)) return res.data;
-              if (Array.isArray(res.data.orders)) return res.data.orders;
-          }
-          return [];
-      }
-
-      async function loadKitchenOrders(isSilent) {
-          if (isCallingApi) return;
-          isCallingApi = true;
-
-          try {
-              var res = await callBackend("getKitchenKdsOrders", [], "getKitchenKdsOrders", {});
-              var orders = unwrapOrdersArray(res);
-
-              rawOrdersCache = orders.filter(function(o) {
-                  var code = String(o.code || "").trim();
-                  var isCancelledStatus = (o.status === "CANCELLED" || o.status === "Đã Hủy" || Number(o.step) === -1);
-                  var isLocallyCancelled = (localCancelledOrders.indexOf(code) !== -1);
-                  return !isCancelledStatus && !isLocallyCancelled;
-              });
-
-              updateFilterCounts(rawOrdersCache);
-              renderKitchenUI();
-          } catch (err) {
-              console.error("❌ Lỗi nạp Bếp KDS:", err);
-          } finally {
-              isCallingApi = false;
-          }
-      }
-
-      function updateFilterCounts(orders) {
-          var activeOrders = (orders || []).filter(function(o) {
-              var stepVal = Number(o.step !== undefined ? o.step : 0);
-              return o.status !== "CANCELLED" && o.status !== "Đã Hủy" && stepVal >= 0 && stepVal <= 3;
-          });
-
-          var cNeed = 0, cPacked = 0, cWait = 0;
-          activeOrders.forEach(function(o) {
-              var st = Number(o.step !== undefined ? o.step : 0);
-              if (st === 2) cNeed++;
-              else if (st === 2.5) cPacked++;
-              else if (st === 0) cWait++;
-          });
-
-          var elAll = document.getElementById("countAll");
-          var elNeed = document.getElementById("countNeedCook");
-          var elPacked = document.getElementById("countPacked");
-          var elWait = document.getElementById("countWaitCod");
-          var elDisp = document.getElementById("dispOrderCount");
-
-          if (elAll) elAll.innerText = activeOrders.length;
-          if (elNeed) elNeed.innerText = cNeed;
-          if (elPacked) elPacked.innerText = cPacked;
-          if (elWait) elWait.innerText = cWait;
-          if (elDisp) elDisp.innerText = activeOrders.length + " ĐƠN ĐANG XỬ LÝ";
-      }
-
-      function changeFilter(filterKey, btnElement) {
-          currentFilter = filterKey;
-          document.querySelectorAll(".kds-filter-tab").forEach(function(b) {
-              b.className = "kds-filter-tab px-3.5 py-2 rounded-xl font-bold text-[11px] transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white shrink-0";
-          });
-          if (btnElement) {
-              btnElement.className = "kds-filter-tab px-3.5 py-2 rounded-xl font-bold text-[11px] transition bg-amber-500 text-slate-950 shrink-0 shadow active";
-          }
-          renderKitchenUI();
-      }
-
-      function renderKitchenUI() {
-          var grid = document.getElementById("kitchenOrdersGrid");
-          if (!grid) return;
-
-          var activeOrders = (rawOrdersCache || []).filter(function(o) {
-              var code = String(o.code || "").trim();
-              var stepVal = Number(o.step !== undefined ? o.step : 0);
-              var isCancelledStatus = (o.status === "CANCELLED" || o.status === "Đã Hủy" || stepVal === -1);
-              var isLocallyCancelled = (localCancelledOrders.indexOf(code) !== -1);
-              return !isCancelledStatus && !isLocallyCancelled && stepVal >= 0 && stepVal <= 3;
-          });
-
-          var displayOrders = activeOrders;
-          if (currentFilter === 'need_cook') {
-              displayOrders = activeOrders.filter(function(o) { return Number(o.step) === 2; });
-          } else if (currentFilter === 'packed') {
-              displayOrders = activeOrders.filter(function(o) { return Number(o.step) === 2.5; });
-          } else if (currentFilter === 'wait_cod') {
-              displayOrders = activeOrders.filter(function(o) { return Number(o.step) === 0; });
-          }
-
-          var currentCodes = activeOrders.map(function(o) { return String(o.code || '').trim(); });
-          if (!isInitialLoad) {
-              var hasNewOrder = currentCodes.some(function(code) { return knownOrderCodes.indexOf(code) === -1; });
-              if (hasNewOrder) {
-                  playNewOrderAlert();
-              }
-          } else {
-              isInitialLoad = false;
-          }
-          knownOrderCodes = currentCodes;
-
-          if (displayOrders.length === 0) {
-              grid.innerHTML = `
-                  <div class="col-span-full p-12 rounded-3xl bg-slate-900/60 border border-slate-800 text-center text-slate-400 space-y-2 select-none">
-                      <div class="text-4xl">🎉</div>
-                      <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider">Không Có Đơn Nào Trong Mục Này</h3>
-                      <p class="text-[11px] text-slate-500">Bếp KDS đang tự động lắng nghe đơn hàng mới từ Web D2C...</p>
-                  </div>
-              `;
-              return;
-          }
-
-          var html = "";
-          displayOrders.forEach(function(o) {
-              var cleanCode = String(o.code || o.orderCode || '').trim();
-              var stepNum = Number(o.step !== undefined ? o.step : 0);
-              var isCod = (o.method === "COD");
-              var isPaidOnline = !isCod;
-              var isNeedCook = (stepNum === 2);
-              var isPacked = (stepNum === 2.5);
-              var isWaitCod = (stepNum === 0);
-              var isDelivering = (stepNum === 3);
-
-              var assignedShipperName = String(o.shipper || "").trim();
-              var isShipperLocked = (assignedShipperName.length > 0);
-
-              var formattedItemsHtml = (o.items || '').split(" | ").map(function(itemText) {
-                  return `<div class="py-1 border-b border-slate-800/80 last:border-none text-slate-200 font-bold">• ${itemText}</div>`;
-              }).join("");
-
-              var shipperOptionsHtml = cachedShippers.map(function(s) {
-                  var isSelected = (assignedShipperName.indexOf(s.name) !== -1 || assignedShipperName.indexOf(s.phone) !== -1) ? "selected" : "";
-                  return `<option value="${s.name}|${s.phone}" ${isSelected}>🛵 ${s.name} (${s.phone})</option>`;
-              }).join("");
-
-              var timerComponentHtml = (typeof KDSTimerController !== "undefined" && typeof KDSTimerController.buildTimerHtml === "function")
-                  ? KDSTimerController.buildTimerHtml(o)
-                  : `<span class="text-[10.5px] font-mono text-slate-400">⏰ ${o.time || 'Vừa xong'}</span>`;
-
-              html += `
-                  <div class="p-4 rounded-3xl bg-slate-900 border-2 ${isNeedCook ? 'border-orange-500/80 order-card-urgent' : (isWaitCod ? 'border-amber-500/40 bg-amber-950/10' : 'border-slate-800')} shadow-xl flex flex-col justify-between space-y-3">
-                      <div>
-                          <div class="border-b border-slate-800/80 pb-2 mb-2">
-                              <div class="flex items-center justify-between">
-                                  <span class="font-mono font-black text-amber-400 text-base">${cleanCode}</span>
-                              </div>
-                              ${timerComponentHtml}
-                          </div>
-
-                          <div class="mb-2">
-                              ${isPaidOnline ? `
-                                  <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                      💳 Đã Quét VietQR • Tiền Đã Vào Két • NẤU NGAY
-                                  </span>
-                              ` : `
-                                  <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                      💵 Tiền Mặt COD: Thu ${Number(o.total || 0).toLocaleString('vi-VN')} đ
-                                  </span>
-                              `}
-                          </div>
-
-                          <div class="text-[11px] text-slate-400 space-y-0.5">
-                              <div>Khách: <strong class="text-white">${o.name || 'Khách vãng lai'}</strong> • SĐT: <strong class="text-slate-200">${o.phone || 'N/A'}</strong></div>
-                              <div class="truncate">Nơi nhận: <strong class="text-slate-300">${o.address || 'Hòa Thành, Tây Ninh'}</strong></div>
-                          </div>
-
-                          <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 my-2">
-                              <div class="text-[9.5px] font-black uppercase tracking-widest text-slate-500 mb-1">Món Ăn & Topping Đã Đặt:</div>
-                              <div class="text-xs space-y-0.5 leading-relaxed">${formattedItemsHtml}</div>
-                          </div>
-
-                          <div class="p-2 rounded-xl bg-orange-500/10 border border-orange-500/30 text-[11px] text-orange-300">
-                              🌶️ <strong>Khẩu vị:</strong> ${o.taste || 'Cay Nhẹ (Chuẩn vị Thím 5)'}
-                          </div>
-                      </div>
-
-                      <div class="space-y-1.5 pt-1">
-                          ${isWaitCod ? `
-                              <div class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center font-bold text-amber-300 text-[11px]">
-                                  ⏳ Đơn COD: Chờ Shipper gọi điện chốt đơn mới nấu!
-                              </div>
-                              <button type="button" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 font-bold text-xs border border-slate-700 cursor-not-allowed" disabled>
-                                  🔒 Bếp Khóa (Chờ Shipper Xác Minh)
-                              </button>
-                          ` : (isNeedCook ? `
-                              ${isShipperLocked ? `
-                                  <div class="p-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center text-amber-400 text-[10.5px] font-bold">
-                                      🛵 Đơn đã khóa cứng cho tài xế: <strong>${assignedShipperName}</strong>
-                                  </div>
-                              ` : ''}
-                              <button type="button" id="btn_cook_${cleanCode}" onclick="KitchenKdsController.handleCookDone('${cleanCode}')" class="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-1.5 active:scale-95">
-                                  <i class="fa-solid fa-fire-burner"></i>
-                                  <span>ĐÃ NẤU XONG ➔ ĐÓNG GÓI CHỜ SHIP</span>
-                              </button>
-                          ` : (isPacked ? `
-                              <div class="space-y-1.5">
-                                  ${isShipperLocked ? `
-                                      <div class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center text-emerald-300 text-[11px]">
-                                          📦 Món đã đóng hộp giữ nhiệt! Chờ tài xế bảo hộ:
-                                          <div class="font-black text-amber-400 text-xs mt-0.5">🛵 ${assignedShipperName}</div>
-                                      </div>
-                                      <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', true)" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition active:scale-95 shadow">
-                                          BÀN GIAO CHO ${assignedShipperName.split('(')[0].trim().toUpperCase()}
-                                      </button>
-                                  ` : `
-                                      <div class="p-1.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[10.5px]">
-                                          📦 Đã đóng gói xong! Bếp trưởng chỉ định Shipper:
-                                      </div>
-                                      <div class="flex gap-1.5">
-                                          <select id="ship_select_${cleanCode}" class="flex-1 bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-2 font-bold outline-none">
-                                              ${shipperOptionsHtml}
-                                          </select>
-                                          <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', false)" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition active:scale-95 shadow">
-                                              Gán Giao
-                                          </button>
-                                      </div>
-                                  `}
-                              </div>
-                          ` : (isDelivering ? `
-                              <div class="p-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[11px]">
-                                  🛵 Đang giao bởi: <strong>${assignedShipperName || 'Shipper'}</strong>
-                              </div>
-                          ` : '')))}
-
-                          <button type="button" onclick="KitchenKdsController.handleKitchenCancel('${cleanCode}')" class="w-full py-1.5 rounded-xl bg-slate-950 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 border border-slate-800 text-[10.5px] font-bold transition">
-                              🚫 Hủy Đơn (Khách Báo Zalo / Hết Nguyên Liệu)
-                          </button>
-                      </div>
-                  </div>
-              `;
-          });
-
-          grid.innerHTML = html;
-      }
-
-      async function handleCookDone(orderCode) {
-          var cleanCode = String(orderCode || "").trim();
-          var btn = document.getElementById("btn_cook_" + cleanCode);
-          if (btn) {
-              btn.innerText = "⏳ Đang cập nhật trạng thái đóng gói...";
-              btn.disabled = true;
-          }
-
-          try {
-              await callBackend(
-                  "kitchenUpdateStatus", 
-                  [cleanCode, "COOK_DONE", ""], 
-                  "kitchenUpdateStatus", 
-                  { orderCode: cleanCode, action: "COOK_DONE", note: "" }
-              );
-              loadKitchenOrders();
-          } catch (err) {
-              alert("❌ Lỗi cập nhật Bếp: " + err.message);
-              if (btn) {
-                  btn.innerText = "ĐÃ NẤU XONG ➔ ĐÓNG GÓI CHỜ SHIP";
-                  btn.disabled = false;
-              }
-          }
-      }
-
-      async function handleAssignShipper(orderCode, isPreLocked) {
-          var cleanCode = String(orderCode || "").trim();
-          var shipName = "";
-          var shipPhone = "";
-
-          if (isPreLocked) {
-              var matched = rawOrdersCache.find(function(o) { return String(o.code || "").trim() === cleanCode; });
-              var fullLabel = matched ? String(matched.shipper || "") : "";
-              shipName = fullLabel.split("(")[0].trim() || "Tài Xế";
-              shipPhone = (fullLabel.match(/\((.*?)\)/) || ["", ""])[1];
-          } else {
-              var select = document.getElementById("ship_select_" + cleanCode);
-              if (!select) return;
-              var parts = select.value.split("|");
-              shipName = parts[0];
-              shipPhone = parts[1];
-          }
-
-          try {
-              await callBackend(
-                  "kitchenAssignShipper", 
-                  [cleanCode, shipName, shipPhone], 
-                  "kitchenAssignShipper", 
-                  { orderCode: cleanCode, shipperName: shipName, shipperPhone: shipPhone }
-              );
-              alert("✅ Đã bàn giao đơn " + cleanCode + " cho tài xế " + shipName + " đi giao!");
-              loadKitchenOrders();
-          } catch (err) {
-              alert("❌ Lỗi bàn giao Shipper: " + err.message);
-          }
-      }
-
-      async function handleKitchenCancel(orderCode) {
-          var cleanCode = String(orderCode || "").trim();
-          if (!cleanCode) return;
-
-          var reason = prompt("Nhập lý do hủy đơn " + cleanCode + " (VD: Khách nhắn Zalo hủy, Hết topping...):", "Khách nhắn Zalo hủy");
-          if (reason === null || !reason.trim()) return;
-
-          if (localCancelledOrders.indexOf(cleanCode) === -1) {
-              localCancelledOrders.push(cleanCode);
-          }
-
-          rawOrdersCache = rawOrdersCache.filter(function(o) {
-              return String(o.code || "").trim() !== cleanCode;
-          });
-
-          updateFilterCounts(rawOrdersCache);
-          renderKitchenUI();
-
-          try {
-              await callBackend(
-                  "kitchenUpdateStatus", 
-                  [cleanCode, "CANCEL", reason], 
-                  "kitchenUpdateStatus", 
-                  { orderCode: cleanCode, action: "CANCEL", note: reason }
-              );
-          } catch (err) {
-              console.warn("⚠️ Lỗi đồng bộ lệnh hủy về máy chủ:", err.message);
-          }
-      }
-
-      return {
-          checkKdsAuth: checkKdsAuth,
-          handleKdsAuthLogin: handleKdsAuthLogin,
-          handleKdsLockOut: handleKdsLockOut,
-          openSoundConfigModal: openSoundConfigModal,
-          closeSoundConfigModal: closeSoundConfigModal,
-          toggleSoundMaster: toggleSoundMaster,
-          onSoundChoiceChange: onSoundChoiceChange,
-          testPlaySound: testPlaySound,
-          saveSoundConfig: saveSoundConfig,
-          changeFilter: changeFilter,
-          handleCookDone: handleCookDone,
-          handleAssignShipper: handleAssignShipper,
-          handleKitchenCancel: handleKitchenCancel
-      };
-  })();
-
-  window.onload = function() {
-      KitchenKdsController.checkKdsAuth();
-  };
+ * =========================================================================
+ * CONTROLLER: KITCHEN DISPLAY SYSTEM (TRẠM BẾP KDS THÍM 5 v3.0 MASTER)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+ * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+ * Kiến trúc: Dual Verification Gate, Tự động mở khóa đơn COD, Modal Grab/Vill
+ * =========================================================================
+ */
+var KitchenKdsController = (function() {
+    var isSoundEnabled = true;
+    var currentSoundType = "zalo"; // "zalo" | "dingdong" | "phone" | "beep"
+    var audioCtx = null;
+    var knownOrderCodes = [];
+    var isInitialLoad = true;
+    var rawOrdersCache = [];
+    var currentFilter = 'all';
+    var kdsPollingTimer = null;
+    var isCallingApi = false;
+    var localCancelledOrders = [];
+
+    // Trạng thái vận hành của Modal Điều Phối
+    var currentSelectedDeliveryChannel = "INTERNAL";
+    var activeTargetOrder = null;
+
+    var cachedShippers = [
+        { name: "Nguyễn Hải Âu", phone: "0934220585" },
+        { name: "Nguyễn Hải Âu", phone: "0969004693" },
+        { name: "Trần Minh Nam", phone: "0968222862" }
+    ];
+
+    function isRunningInsideGAS() {
+        return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
+    }
+
+    function callBackend(gasFunctionName, gasArgsArray, apiActionName, apiPayloadObj) {
+        return new Promise(function(resolve, reject) {
+            if (isRunningInsideGAS()) {
+                var runner = google.script.run
+                    .withSuccessHandler(function(res) { resolve(res); })
+                    .withFailureHandler(function(err) { reject(err); });
+                if (typeof runner[gasFunctionName] === 'function') {
+                    runner[gasFunctionName].apply(runner, gasArgsArray || []);
+                } else {
+                    reject(new Error("Hàm " + gasFunctionName + " không tồn tại trong GAS!"));
+                }
+            } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
+                window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
+                    .then(function(res) { resolve(res); })
+                    .catch(function(err) { reject(err); });
+            } else {
+                reject(new Error("Không tìm thấy cổng kết nối Thim5API!"));
+            }
+        });
+    }
+
+    /**
+     * KIỂM TRA ĐĂNG NHẬP TỰ ĐỘNG (AUTO-LOGIN PERSISTENT & BYPASS ADMIN)
+     */
+    function checkKdsAuth() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var authParam = urlParams.get("auth");
+        var savedPin = localStorage.getItem("thim5_kds_auth");
+        var overlay = document.getElementById("kdsAuthOverlay");
+
+        if (authParam === "1985" || authParam === "2026" || savedPin === "1985" || savedPin === "2026") {
+            if (authParam) {
+                localStorage.setItem("thim5_kds_auth", authParam);
+            }
+            if (overlay) {
+                overlay.style.display = "none";
+            }
+            initKDS();
+        } else {
+            if (overlay) {
+                overlay.style.display = "flex";
+            }
+            var pinInput = document.getElementById("kdsPinInput");
+            if (pinInput) {
+                pinInput.value = "";
+                pinInput.focus();
+                pinInput.onkeydown = function(e) {
+                    if (e.key === "Enter") handleKdsAuthLogin();
+                };
+            }
+        }
+    }
+
+    function handleKdsAuthLogin() {
+        var pinInput = document.getElementById("kdsPinInput");
+        var pin = pinInput ? pinInput.value.trim() : "";
+        var err = document.getElementById("kdsAuthError");
+        var overlay = document.getElementById("kdsAuthOverlay");
+
+        if (err) err.style.display = "none";
+
+        if (pin === "1985" || pin === "2026") {
+            localStorage.setItem("thim5_kds_auth", pin);
+            if (overlay) {
+                overlay.style.display = "none";
+            }
+
+            try { 
+                initAudioContext(); 
+                playToneSynthesis("zalo"); 
+            } catch(e) {
+                console.warn("⚠️ [Audio Unlock Warn]:", e);
+            }
+
+            initKDS();
+        } else {
+            if (err) {
+                err.innerText = "❌ Sai mã PIN Bếp! Vui lòng nhập đúng PIN Quản lý (1985).";
+                err.style.display = "block";
+            }
+            if (pinInput) {
+                pinInput.value = "";
+                pinInput.focus();
+            }
+        }
+    }
+
+    function handleKdsLockOut() {
+        if (confirm("Khóa màn hình trạm Bếp KDS?")) {
+            localStorage.removeItem("thim5_kds_auth");
+            if (kdsPollingTimer) {
+                clearInterval(kdsPollingTimer);
+                kdsPollingTimer = null;
+            }
+            var pinInput = document.getElementById("kdsPinInput");
+            if (pinInput) pinInput.value = "";
+            var overlay = document.getElementById("kdsAuthOverlay");
+            if (overlay) overlay.style.display = "flex";
+        }
+    }
+
+    function initKDS() {
+        updateLiveClock();
+        setInterval(updateLiveClock, 1000);
+        loadSoundSettingsFromStorage();
+        loadKitchenOrders();
+        
+        if (!kdsPollingTimer) {
+            kdsPollingTimer = setInterval(function() {
+                loadKitchenOrders(true);
+            }, 10000);
+        }
+
+        document.body.addEventListener('click', function() {
+            try { initAudioContext(); } catch(e) {}
+        }, { once: true });
+    }
+
+    function initAudioContext() {
+        try {
+            if (!audioCtx) {
+                var AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        } catch(e) {}
+    }
+
+    function updateLiveClock() {
+        var now = new Date();
+        var h = String(now.getHours()).padStart(2, '0');
+        var m = String(now.getMinutes()).padStart(2, '0');
+        var s = String(now.getSeconds()).padStart(2, '0');
+        var el = document.getElementById("kdsLiveClock");
+        if (el) el.innerText = h + ":" + m + ":" + s;
+    }
+
+    function playToneSynthesis(type) {
+        if (!isSoundEnabled) return;
+        try {
+            initAudioContext();
+            if (!audioCtx) return;
+
+            var now = audioCtx.currentTime;
+
+            if (type === "zalo") {
+                var osc1 = audioCtx.createOscillator();
+                var gain1 = audioCtx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(1760, now);
+                gain1.gain.setValueAtTime(0.35, now);
+                gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc1.connect(gain1);
+                gain1.connect(audioCtx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.15);
+
+                var osc2 = audioCtx.createOscillator();
+                var gain2 = audioCtx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(2637, now + 0.12);
+                gain2.gain.setValueAtTime(0.4, now + 0.12);
+                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.start(now + 0.12);
+                osc2.stop(now + 0.45);
+            } else if (type === "dingdong") {
+                var oscD1 = audioCtx.createOscillator();
+                var gainD1 = audioCtx.createGain();
+                oscD1.type = 'triangle';
+                oscD1.frequency.setValueAtTime(587.33, now);
+                gainD1.gain.setValueAtTime(0.45, now);
+                gainD1.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                oscD1.connect(gainD1);
+                gainD1.connect(audioCtx.destination);
+                oscD1.start(now);
+                oscD1.stop(now + 0.35);
+
+                var oscD2 = audioCtx.createOscillator();
+                var gainD2 = audioCtx.createGain();
+                oscD2.type = 'sine';
+                oscD2.frequency.setValueAtTime(880, now + 0.28);
+                gainD2.gain.setValueAtTime(0.5, now + 0.28);
+                gainD2.gain.exponentialRampToValueAtTime(0.005, now + 0.85);
+                oscD2.connect(gainD2);
+                gainD2.connect(audioCtx.destination);
+                oscD2.start(now + 0.28);
+                oscD2.stop(now + 0.85);
+            } else if (type === "phone") {
+                for (var pulse = 0; pulse < 3; pulse++) {
+                    var pulseStart = now + (pulse * 0.14);
+                    var oA = audioCtx.createOscillator();
+                    var oB = audioCtx.createOscillator();
+                    var gP = audioCtx.createGain();
+                    oA.type = 'square';
+                    oB.type = 'sine';
+                    oA.frequency.setValueAtTime(853, pulseStart);
+                    oB.frequency.setValueAtTime(960, pulseStart);
+                    gP.gain.setValueAtTime(0.18, pulseStart);
+                    gP.gain.exponentialRampToValueAtTime(0.01, pulseStart + 0.1);
+                    oA.connect(gP);
+                    oB.connect(gP);
+                    gP.connect(audioCtx.destination);
+                    oA.start(pulseStart);
+                    oB.start(pulseStart);
+                    oA.stop(pulseStart + 0.1);
+                    oB.stop(pulseStart + 0.1);
+                }
+            } else {
+                var oscB1 = audioCtx.createOscillator();
+                var gainB1 = audioCtx.createGain();
+                oscB1.type = 'sine';
+                oscB1.frequency.setValueAtTime(880, now);
+                gainB1.gain.setValueAtTime(0.3, now);
+                gainB1.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+                oscB1.connect(gainB1);
+                gainB1.connect(audioCtx.destination);
+                oscB1.start(now);
+                oscB1.stop(now + 0.22);
+
+                var oscB2 = audioCtx.createOscillator();
+                var gainB2 = audioCtx.createGain();
+                oscB2.type = 'sine';
+                oscB2.frequency.setValueAtTime(1174.66, now + 0.18);
+                gainB2.gain.setValueAtTime(0.3, now + 0.18);
+                gainB2.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                oscB2.connect(gainB2);
+                gainB2.connect(audioCtx.destination);
+                oscB2.start(now + 0.18);
+                oscB2.stop(now + 0.45);
+            }
+        } catch(e) {
+            console.warn("⚠️ [KDS Sound Synthesis Error]:", e);
+        }
+    }
+
+    function playNewOrderAlert() {
+        var targetType = currentSoundType || localStorage.getItem("thim5_kds_sound_type") || "zalo";
+        playToneSynthesis(targetType);
+    }
+
+    function openSoundConfigModal() {
+        initAudioContext();
+        var modal = document.getElementById("modalKdsSoundConfig");
+        if (modal) modal.classList.remove("hidden");
+        syncSoundModalUI();
+    }
+
+    function closeSoundConfigModal() {
+        var modal = document.getElementById("modalKdsSoundConfig");
+        if (modal) modal.classList.add("hidden");
+    }
+
+    function toggleSoundMaster() {
+        isSoundEnabled = !isSoundEnabled;
+        localStorage.setItem("thim5_kds_sound_enabled", isSoundEnabled ? "true" : "false");
+        syncSoundModalUI();
+        updateTopbarSoundButton();
+        if (isSoundEnabled) {
+            playNewOrderAlert();
+        }
+    }
+
+    function onSoundChoiceChange(val) {
+        currentSoundType = String(val || "zalo").trim();
+    }
+
+    function testPlaySound(val) {
+        initAudioContext();
+        var t = String(val || currentSoundType || "zalo").trim();
+        playToneSynthesis(t);
+    }
+
+    function saveSoundConfig() {
+        var radios = document.querySelectorAll("input[name='kdsSoundChoice']");
+        radios.forEach(function(r) {
+            if (r.checked) currentSoundType = r.value;
+        });
+        localStorage.setItem("thim5_kds_sound_type", currentSoundType);
+        localStorage.setItem("thim5_kds_sound_enabled", isSoundEnabled ? "true" : "false");
+        updateTopbarSoundButton();
+        closeSoundConfigModal();
+        playNewOrderAlert();
+    }
+
+    function loadSoundSettingsFromStorage() {
+        var savedEnabled = localStorage.getItem("thim5_kds_sound_enabled");
+        if (savedEnabled !== null) {
+            isSoundEnabled = (savedEnabled === "true");
+        }
+        var savedType = localStorage.getItem("thim5_kds_sound_type");
+        if (savedType) {
+            currentSoundType = savedType;
+        }
+        updateTopbarSoundButton();
+    }
+
+    function syncSoundModalUI() {
+        var badge = document.getElementById("cfgSoundStatusBadge");
+        if (badge) {
+            if (isSoundEnabled) {
+                badge.className = "px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300";
+                badge.innerText = "ĐANG BẬT";
+            } else {
+                badge.className = "px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-rose-500/20 text-rose-300";
+                badge.innerText = "ĐÃ TẮT";
+            }
+        }
+        var radio = document.querySelector(`input[name='kdsSoundChoice'][value='${currentSoundType}']`);
+        if (radio) radio.checked = true;
+    }
+
+    function updateTopbarSoundButton() {
+        var btn = document.getElementById("btnSoundToggle");
+        var label = document.getElementById("soundLabel");
+        var icon = document.getElementById("soundIcon");
+
+        var soundNameMap = {
+            zalo: "Zalo",
+            dingdong: "DingDong",
+            phone: "Chuông ĐT",
+            beep: "Bíp Kép"
+        };
+        var curName = soundNameMap[currentSoundType] || "Zalo";
+
+        if (isSoundEnabled) {
+            if (btn) btn.className = "px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-sm";
+            if (label) label.innerText = "Âm Báo: " + curName + " (BẬT)";
+            if (icon) icon.className = "fa-solid fa-bell";
+        } else {
+            if (btn) btn.className = "px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 active:scale-95";
+            if (label) label.innerText = "Âm Báo: TẮT";
+            if (icon) icon.className = "fa-solid fa-bell-slash";
+        }
+    }
+
+    function unwrapOrdersArray(res) {
+        if (!res) return [];
+        if (Array.isArray(res)) return res;
+        if (Array.isArray(res.orders)) return res.orders;
+        if (res.data) {
+            if (Array.isArray(res.data)) return res.data;
+            if (Array.isArray(res.data.orders)) return res.data.orders;
+        }
+        return [];
+    }
+
+    async function loadKitchenOrders(isSilent) {
+        if (isCallingApi) return;
+        isCallingApi = true;
+
+        try {
+            var res = await callBackend("getKitchenKdsOrders", [], "getKitchenKdsOrders", {});
+            var orders = unwrapOrdersArray(res);
+
+            rawOrdersCache = orders.filter(function(o) {
+                var code = String(o.code || o.orderCode || o.orderId || "").trim();
+                var isCancelledStatus = (o.status === "CANCELLED" || o.status === "Đã Hủy" || Number(o.step) === -1);
+                var isLocallyCancelled = (localCancelledOrders.indexOf(code) !== -1);
+                return !isCancelledStatus && !isLocallyCancelled;
+            });
+
+            updateFilterCounts(rawOrdersCache);
+            renderKitchenUI();
+        } catch (err) {
+            console.error("❌ Lỗi nạp Bếp KDS:", err);
+        } finally {
+            isCallingApi = false;
+        }
+    }
+
+    function updateFilterCounts(orders) {
+        var activeOrders = (orders || []).filter(function(o) {
+            var stepVal = Number(o.step !== undefined ? o.step : 0);
+            return o.status !== "CANCELLED" && o.status !== "Đã Hủy" && stepVal >= 0 && stepVal <= 3;
+        });
+
+        var cNeed = 0, cPacked = 0, cWait = 0;
+        activeOrders.forEach(function(o) {
+            var st = Number(o.step !== undefined ? o.step : 0);
+            if (st === 2) cNeed++;
+            else if (st === 2.5) cPacked++;
+            else if (st === 0) cWait++;
+        });
+
+        var elAll = document.getElementById("countAll");
+        var elNeed = document.getElementById("countNeedCook");
+        var elPacked = document.getElementById("countPacked");
+        var elWait = document.getElementById("countWaitCod");
+        var elDisp = document.getElementById("dispOrderCount");
+
+        if (elAll) elAll.innerText = activeOrders.length;
+        if (elNeed) elNeed.innerText = cNeed;
+        if (elPacked) elPacked.innerText = cPacked;
+        if (elWait) elWait.innerText = cWait;
+        if (elDisp) elDisp.innerText = activeOrders.length + " ĐƠN ĐANG XỬ LÝ";
+    }
+
+    function changeFilter(filterKey, btnElement) {
+        currentFilter = filterKey;
+        document.querySelectorAll(".kds-filter-tab").forEach(function(b) {
+            b.className = "kds-filter-tab px-3.5 py-2 rounded-xl font-bold text-[11px] transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white shrink-0";
+        });
+        if (btnElement) {
+            btnElement.className = "kds-filter-tab px-3.5 py-2 rounded-xl font-bold text-[11px] transition bg-amber-500 text-slate-950 shrink-0 shadow active";
+        }
+        renderKitchenUI();
+    }
+
+    /**
+     * RENDER GIAO DIỆN BẾP KDS CHUẨN MASTER VÀ MỞ CỔNG DUYỆT ĐƠN COD
+     */
+    function renderKitchenUI() {
+        var grid = document.getElementById("kitchenOrdersGrid");
+        if (!grid) return;
+
+        var activeOrders = (rawOrdersCache || []).filter(function(o) {
+            var code = String(o.code || o.orderCode || o.orderId || "").trim();
+            var stepVal = Number(o.step !== undefined ? o.step : 0);
+            var isCancelledStatus = (o.status === "CANCELLED" || o.status === "Đã Hủy" || stepVal === -1);
+            var isLocallyCancelled = (localCancelledOrders.indexOf(code) !== -1);
+            return !isCancelledStatus && !isLocallyCancelled && stepVal >= 0 && stepVal <= 3;
+        });
+
+        var displayOrders = activeOrders;
+        if (currentFilter === 'need_cook') {
+            displayOrders = activeOrders.filter(function(o) { return Number(o.step) === 2; });
+        } else if (currentFilter === 'packed') {
+            displayOrders = activeOrders.filter(function(o) { return Number(o.step) === 2.5; });
+        } else if (currentFilter === 'wait_cod') {
+            displayOrders = activeOrders.filter(function(o) { return Number(o.step) === 0; });
+        }
+
+        var currentCodes = activeOrders.map(function(o) { return String(o.code || o.orderCode || o.orderId || '').trim(); });
+        if (!isInitialLoad) {
+            var hasNewOrder = currentCodes.some(function(code) { return knownOrderCodes.indexOf(code) === -1; });
+            if (hasNewOrder) {
+                playNewOrderAlert();
+            }
+        } else {
+            isInitialLoad = false;
+        }
+        knownOrderCodes = currentCodes;
+
+        if (displayOrders.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full p-12 rounded-3xl bg-slate-900/60 border border-slate-800 text-center text-slate-400 space-y-2 select-none">
+                    <div class="text-4xl">🎉</div>
+                    <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider">Không Có Đơn Nào Trong Mục Này</h3>
+                    <p class="text-[11px] text-slate-500">Bếp KDS đang tự động lắng nghe đơn hàng mới từ Web D2C...</p>
+                </div>
+            `;
+            return;
+        }
+
+        var html = "";
+        displayOrders.forEach(function(o) {
+            var cleanCode = String(o.code || o.orderCode || o.orderId || '').trim();
+            var stepNum = Number(o.step !== undefined ? o.step : 0);
+            var isCod = (o.method === "COD" || o.paymentMethod === "COD");
+            var isPaidOnline = !isCod;
+            var isNeedCook = (stepNum === 2);
+            var isPacked = (stepNum === 2.5);
+            var isWaitCod = (stepNum === 0);
+            var isDelivering = (stepNum === 3);
+
+            var assignedShipperName = String(o.shipper || o.shipperInfo || "").trim();
+            var isShipperLocked = (assignedShipperName.length > 0);
+
+            var formattedItemsHtml = (o.items || '').split(" | ").map(function(itemText) {
+                return `<div class="py-1 border-b border-slate-800/80 last:border-none text-slate-200 font-bold">• ${itemText}</div>`;
+            }).join("");
+
+            var shipperOptionsHtml = cachedShippers.map(function(s) {
+                var isSelected = (assignedShipperName.indexOf(s.name) !== -1 || assignedShipperName.indexOf(s.phone) !== -1) ? "selected" : "";
+                return `<option value="${s.name}|${s.phone}" ${isSelected}>🛵 ${s.name} (${s.phone})</option>`;
+            }).join("");
+
+            var timerComponentHtml = (typeof KDSTimerController !== "undefined" && typeof KDSTimerController.buildTimerHtml === "function")
+                ? KDSTimerController.buildTimerHtml(o)
+                : `<span class="text-[10.5px] font-mono text-slate-400">⏰ ${o.time || 'Vừa xong'}</span>`;
+
+            html += `
+                <div class="p-4 rounded-3xl bg-slate-900 border-2 ${isNeedCook ? 'border-orange-500/80 order-card-urgent' : (isWaitCod ? 'border-amber-500/40 bg-amber-950/10' : 'border-slate-800')} shadow-xl flex flex-col justify-between space-y-3">
+                    <div>
+                        <div class="border-b border-slate-800/80 pb-2 mb-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono font-black text-amber-400 text-base">${cleanCode}</span>
+                            </div>
+                            ${timerComponentHtml}
+                        </div>
+
+                        <div class="mb-2">
+                            ${isPaidOnline ? `
+                                <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                    💳 Đã Quét VietQR • Tiền Đã Vào Két • NẤU NGAY
+                                </span>
+                            ` : `
+                                <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                    💵 Tiền Mặt COD: Thu ${Number(o.total || o.finalTotal || 0).toLocaleString('vi-VN')} đ
+                                </span>
+                            `}
+                        </div>
+
+                        <div class="text-[11px] text-slate-400 space-y-0.5">
+                            <div>Khách: <strong class="text-white">${o.name || 'Khách vãng lai'}</strong> • SĐT: <strong class="text-slate-200">${o.phone || 'N/A'}</strong></div>
+                            <div class="truncate">Nơi nhận: <strong class="text-slate-300">${o.address || 'Hòa Thành, Tây Ninh'}</strong></div>
+                        </div>
+
+                        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 my-2">
+                            <div class="text-[9.5px] font-black uppercase tracking-widest text-slate-500 mb-1">Món Ăn & Topping Đã Đặt:</div>
+                            <div class="text-xs space-y-0.5 leading-relaxed">${formattedItemsHtml}</div>
+                        </div>
+
+                        <div class="p-2 rounded-xl bg-orange-500/10 border border-orange-500/30 text-[11px] text-orange-300">
+                            🌶️ <strong>Khẩu vị:</strong> ${o.taste || 'Cay Nhẹ (Chuẩn vị Thím 5)'}
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5 pt-1">
+                        ${isWaitCod ? `
+                            <div class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-center font-bold text-amber-300 text-[11px]">
+                                ⏳ Đơn COD: Chờ Shipper chốt hoặc Bếp duyệt nấu trước!
+                            </div>
+                            <!-- CỔNG DUYỆT ĐƠN LINH HOẠT THAY THẾ NÚT KHÓA CỨNG CŨ -->
+                            <button type="button" 
+                                    id="btn_dispatch_${cleanCode}" 
+                                    onclick="KitchenKdsController.openDispatchModal('${cleanCode}')" 
+                                    class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:opacity-95 text-slate-950 font-black text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-bolt"></i>
+                                <span>⚡ Bếp Duyệt Đơn &amp; Nấu Ngay</span>
+                            </button>
+                        ` : (isNeedCook ? `
+                            ${isShipperLocked ? `
+                                <div class="p-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center text-amber-400 text-[10.5px] font-bold">
+                                    🛵 Đơn đã khóa cứng cho tài xế: <strong>${assignedShipperName}</strong>
+                                </div>
+                            ` : ''}
+                            <button type="button" id="btn_cook_${cleanCode}" onclick="KitchenKdsController.handleCookDone('${cleanCode}')" class="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-fire-burner"></i>
+                                <span>ĐÃ NẤU XONG ➔ ĐÓNG GÓI CHỜ SHIP</span>
+                            </button>
+                        ` : (isPacked ? `
+                            <div class="space-y-1.5">
+                                ${isShipperLocked ? `
+                                    <div class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center text-emerald-300 text-[11px]">
+                                        📦 Món đã đóng hộp giữ nhiệt! Chờ tài xế bảo hộ:
+                                        <div class="font-black text-amber-400 text-xs mt-0.5">🛵 ${assignedShipperName}</div>
+                                    </div>
+                                    <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', true)" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition active:scale-95 shadow">
+                                        BÀN GIAO CHO ${assignedShipperName.split('(')[0].trim().toUpperCase()}
+                                    </button>
+                                ` : `
+                                    <div class="p-1.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[10.5px]">
+                                        📦 Đã đóng gói xong! Bếp trưởng chỉ định Shipper:
+                                    </div>
+                                    <div class="flex gap-1.5">
+                                        <select id="ship_select_${cleanCode}" class="flex-1 bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-2 font-bold outline-none">
+                                            ${shipperOptionsHtml}
+                                        </select>
+                                        <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', false)" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition active:scale-95 shadow">
+                                            Gán Giao
+                                        </button>
+                                    </div>
+                                `}
+                            </div>
+                        ` : (isDelivering ? `
+                            <div class="p-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[11px]">
+                                🛵 Đang giao bởi: <strong>${assignedShipperName || 'Shipper'}</strong>
+                            </div>
+                        ` : '')))}
+
+                        <button type="button" onclick="KitchenKdsController.handleKitchenCancel('${cleanCode}')" class="w-full py-1.5 rounded-xl bg-slate-950 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 border border-slate-800 text-[10.5px] font-bold transition">
+                            🚫 Hủy Đơn (Khách Báo Zalo / Hết Nguyên Liệu)
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        grid.innerHTML = html;
+    }
+
+    /**
+     * MỞ MODAL ĐIỀU PHỐI VÀ DUYỆT ĐƠN COD
+     */
+    function openDispatchModal(orderCode) {
+        var cleanCode = String(orderCode || "").trim();
+        var target = rawOrdersCache.find(function(o) { 
+            return String(o.code || o.orderCode || o.orderId || "").trim() === cleanCode; 
+        });
+
+        if (!target) {
+            alert("Không tìm thấy thông tin đơn " + cleanCode);
+            return;
+        }
+
+        activeTargetOrder = target;
+        var modal = document.getElementById("dispatchModalOverlay");
+        if (!modal) return;
+
+        document.getElementById("modalOrderId").value = cleanCode;
+        document.getElementById("modalDisplayOrderId").innerText = cleanCode;
+        document.getElementById("modalDisplayCustomer").innerText = (target.name || "Khách") + " (" + (target.phone || "N/A") + ")";
+
+        var customerShip = Number(target.customerShipFee || target.shipFee || target.finalShipFee || 12000);
+        var codAmount = Number(target.total || target.finalTotal || 0);
+        var subtotal = Number(target.subtotal || 0);
+
+        document.getElementById("modalCustomerShipFee").value = customerShip;
+        document.getElementById("modalSubtotal").value = subtotal;
+        document.getElementById("modalDisplayCustomerShip").innerText = customerShip.toLocaleString("vi-VN") + " đ";
+        document.getElementById("modalDisplayCodAmount").innerText = codAmount.toLocaleString("vi-VN") + " đ";
+
+        // Nạp danh sách Shipper vào Select
+        var selectEl = document.getElementById("modalSelectShipper");
+        if (selectEl) {
+            selectEl.innerHTML = '<option value="">-- Chưa chỉ định (Mở cho toàn đội nhận) --</option>';
+            cachedShippers.forEach(function(s) {
+                var opt = document.createElement("option");
+                opt.value = s.name + " (" + s.phone + ")";
+                opt.textContent = "🛵 " + s.name + " (" + s.phone + ")";
+                selectEl.appendChild(opt);
+            });
+        }
+
+        selectDeliveryChannel("INTERNAL");
+        modal.classList.remove("hidden");
+    }
+
+    function closeDispatchModal() {
+        var modal = document.getElementById("dispatchModalOverlay");
+        if (modal) modal.classList.add("hidden");
+        activeTargetOrder = null;
+    }
+
+    function selectDeliveryChannel(channel) {
+        currentSelectedDeliveryChannel = channel;
+        var btnInternal = document.getElementById("btnModalTypeInternal");
+        var btnExternal = document.getElementById("btnModalTypeExternal");
+        var secInternal = document.getElementById("sectionModalInternal");
+        var secExternal = document.getElementById("sectionModalExternal");
+
+        if (channel === "INTERNAL") {
+            if (btnInternal) btnInternal.className = "py-2.5 px-3 rounded-xl border-2 border-amber-500 bg-amber-500/10 text-amber-400 font-bold text-xs transition flex items-center justify-center gap-1.5";
+            if (btnExternal) btnExternal.className = "py-2.5 px-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold text-xs hover:text-white transition flex items-center justify-center gap-1.5";
+            if (secInternal) secInternal.classList.remove("hidden");
+            if (secExternal) secExternal.classList.add("hidden");
+        } else {
+            if (btnInternal) btnInternal.className = "py-2.5 px-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold text-xs hover:text-white transition flex items-center justify-center gap-1.5";
+            if (btnExternal) btnExternal.className = "py-2.5 px-3 rounded-xl border-2 border-amber-500 bg-amber-500/10 text-amber-400 font-bold text-xs transition flex items-center justify-center gap-1.5";
+            if (secInternal) secInternal.classList.add("hidden");
+            if (secExternal) secExternal.classList.remove("hidden");
+        }
+        calculateModalSubsidy();
+    }
+
+    function calculateModalSubsidy() {
+        var dispSubsidy = document.getElementById("modalDisplaySubsidyFee");
+        if (!dispSubsidy) return;
+
+        if (currentSelectedDeliveryChannel === "INTERNAL") {
+            dispSubsidy.innerText = "0 đ (Shipper Quán)";
+            return;
+        }
+
+        var customerShip = Number(document.getElementById("modalCustomerShipFee").value) || 0;
+        var externalCost = Number(document.getElementById("modalExternalFee").value) || 0;
+        var subsidy = Math.max(0, externalCost - customerShip);
+
+        dispSubsidy.innerText = subsidy.toLocaleString("vi-VN") + " đ";
+    }
+
+    /**
+     * THỰC THI DUYỆT ĐƠN & BẮT ĐẦU NẤU TỨC THÌ
+     */
+    async function executeVerifyAndCook() {
+        if (!activeTargetOrder) return;
+
+        var orderCode = String(document.getElementById("modalOrderId").value || "").trim();
+        var btn = document.getElementById("btnModalConfirmCook");
+        var origText = btn ? btn.innerHTML : "";
+
+        var shipperInfo = "";
+        var trackingCode = "";
+        var externalFee = 0;
+
+        if (currentSelectedDeliveryChannel === "INTERNAL") {
+            shipperInfo = document.getElementById("modalSelectShipper").value;
+        } else {
+            var provider = document.getElementById("modalExternalProvider").value;
+            trackingCode = document.getElementById("modalExternalTracking").value.trim();
+            externalFee = Number(document.getElementById("modalExternalFee").value) || 0;
+            shipperInfo = provider + (trackingCode ? (" (" + trackingCode + ")") : "");
+        }
+
+        var customerShipFee = Number(document.getElementById("modalCustomerShipFee").value) || 0;
+        var subsidizedAmount = (currentSelectedDeliveryChannel === "EXTERNAL") ? Math.max(0, externalFee - customerShipFee) : 0;
+
+        var payload = {
+            orderCode: orderCode,
+            orderId: orderCode,
+            verifiedBy: "KITCHEN",
+            deliveryChannel: currentSelectedDeliveryChannel,
+            shipperInfo: shipperInfo,
+            trackingCode: trackingCode,
+            externalShipFee: externalFee,
+            subsidizedShipFee: subsidizedAmount
+        };
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang duyệt...';
+        }
+
+        try {
+            await callBackend(
+                "verifyAndAssignCookOrder",
+                [payload],
+                "verifyAndAssignCookOrder",
+                payload
+            );
+
+            // Optimistic update: Đưa ngay đơn sang tab Cần Nấu Ngay (Step 2)
+            activeTargetOrder.step = 2;
+            activeTargetOrder.status = "COOKING";
+            activeTargetOrder.shipper = shipperInfo;
+
+            closeDispatchModal();
+            updateFilterCounts(rawOrdersCache);
+            changeFilter('need_cook', document.querySelector('[data-filter="need_cook"]'));
+
+        } catch (err) {
+            alert("❌ Lỗi duyệt đơn: " + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        }
+    }
+
+    async function handleCookDone(orderCode) {
+        var cleanCode = String(orderCode || "").trim();
+        var btn = document.getElementById("btn_cook_" + cleanCode);
+        if (btn) {
+            btn.innerText = "⏳ Đang cập nhật trạng thái đóng gói...";
+            btn.disabled = true;
+        }
+
+        try {
+            await callBackend(
+                "kitchenUpdateStatus", 
+                [cleanCode, "COOK_DONE", ""], 
+                "kitchenUpdateStatus", 
+                { orderCode: cleanCode, action: "COOK_DONE", note: "" }
+            );
+            loadKitchenOrders();
+        } catch (err) {
+            alert("❌ Lỗi cập nhật Bếp: " + err.message);
+            if (btn) {
+                btn.innerText = "ĐÃ NẤU XONG ➔ ĐÓNG GÓI CHỜ SHIP";
+                btn.disabled = false;
+            }
+        }
+    }
+
+    async function handleAssignShipper(orderCode, isPreLocked) {
+        var cleanCode = String(orderCode || "").trim();
+        var shipName = "";
+        var shipPhone = "";
+
+        if (isPreLocked) {
+            var matched = rawOrdersCache.find(function(o) { return String(o.code || o.orderCode || o.orderId || "").trim() === cleanCode; });
+            var fullLabel = matched ? String(matched.shipper || matched.shipperInfo || "") : "";
+            shipName = fullLabel.split("(")[0].trim() || "Tài Xế";
+            shipPhone = (fullLabel.match(/\((.*?)\)/) || ["", ""])[1];
+        } else {
+            var select = document.getElementById("ship_select_" + cleanCode);
+            if (!select) return;
+            var parts = select.value.split("|");
+            shipName = parts[0];
+            shipPhone = parts[1];
+        }
+
+        try {
+            await callBackend(
+                "kitchenAssignShipper", 
+                [cleanCode, shipName, shipPhone], 
+                "kitchenAssignShipper", 
+                { orderCode: cleanCode, shipperName: shipName, shipperPhone: shipPhone }
+            );
+            alert("✅ Đã bàn giao đơn " + cleanCode + " cho tài xế " + shipName + " đi giao!");
+            loadKitchenOrders();
+        } catch (err) {
+            alert("❌ Lỗi bàn giao Shipper: " + err.message);
+        }
+    }
+
+    async function handleKitchenCancel(orderCode) {
+        var cleanCode = String(orderCode || "").trim();
+        if (!cleanCode) return;
+
+        var reason = prompt("Nhập lý do hủy đơn " + cleanCode + " (VD: Khách nhắn Zalo hủy, Hết topping...):", "Khách nhắn Zalo hủy");
+        if (reason === null || !reason.trim()) return;
+
+        if (localCancelledOrders.indexOf(cleanCode) === -1) {
+            localCancelledOrders.push(cleanCode);
+        }
+
+        rawOrdersCache = rawOrdersCache.filter(function(o) {
+            return String(o.code || o.orderCode || o.orderId || "").trim() !== cleanCode;
+        });
+
+        updateFilterCounts(rawOrdersCache);
+        renderKitchenUI();
+
+        try {
+            await callBackend(
+                "kitchenUpdateStatus", 
+                [cleanCode, "CANCEL", reason], 
+                "kitchenUpdateStatus", 
+                { orderCode: cleanCode, action: "CANCEL", note: reason }
+            );
+        } catch (err) {
+            console.warn("⚠️ Lỗi đồng bộ lệnh hủy về máy chủ:", err.message);
+        }
+    }
+
+    return {
+        checkKdsAuth: checkKdsAuth,
+        handleKdsAuthLogin: handleKdsAuthLogin,
+        handleKdsLockOut: handleKdsLockOut,
+        openSoundConfigModal: openSoundConfigModal,
+        closeSoundConfigModal: closeSoundConfigModal,
+        toggleSoundMaster: toggleSoundMaster,
+        onSoundChoiceChange: onSoundChoiceChange,
+        testPlaySound: testPlaySound,
+        saveSoundConfig: saveSoundConfig,
+        changeFilter: changeFilter,
+        handleCookDone: handleCookDone,
+        handleAssignShipper: handleAssignShipper,
+        handleKitchenCancel: handleKitchenCancel,
+        openDispatchModal: openDispatchModal,
+        closeDispatchModal: closeDispatchModal,
+        selectDeliveryChannel: selectDeliveryChannel,
+        calculateModalSubsidy: calculateModalSubsidy,
+        executeVerifyAndCook: executeVerifyAndCook
+    };
+})();
+
+window.onload = function() {
+    KitchenKdsController.checkKdsAuth();
+};
       /**
      * =========================================================================
      * BỘ ĐIỀU KHIỂN HẸN GIỜ RA MÓN BẾP KDS (JUST-IN-TIME DISPATCH ENGINE)

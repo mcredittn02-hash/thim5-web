@@ -1,27 +1,27 @@
-<!-- ========================================================================= -->
-<!-- PHÂN HỆ ĐIỀU HÀNH ĐỘI XE SHIPPER & KIỂM SOÁT CÔNG NỢ TẠM (v2.9 ENTERPRISE)-->
-<!-- ========================================================================= -->
-<div id="shippers-management-container" class="space-y-4 max-w-7xl mx-auto pb-12 select-none text-xs">
+<!-- MODULE: ĐIỀU PHỐI ĐỘI TÀI XẾ & SỔ CÁI NỢ TẠM SHIPPER (v3.0 SAAS MASTER) -->
+<div id="shipper-management-container" class="space-y-4 max-w-7xl mx-auto pb-12 select-none text-xs">
 
-  <!-- 1. CỤM 4 THẺ KPI ĐỘI XE & CÔNG NỢ COD THỜI GIAN THỰC -->
+  <!-- 1. CỤM 4 THẺ KPI ĐIỀU HÀNH VẬN HÀNH ĐỘI TÀI XẾ & DÒNG TIỀN COD -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
     
-    <!-- KPI 1: Tổng số tài xế & Đang trực ca -->
+    <!-- KPI 1: Đội Xe Trực Ca -->
     <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
       <div class="space-y-1">
         <span class="text-[10.5px] font-medium text-slate-400">Đội Xe Trực Ca</span>
         <div class="flex items-baseline gap-1.5">
-          <span id="kpi-active-shippers" class="text-xl font-black text-emerald-400 font-mono">0</span>
-          <span id="kpi-total-shippers" class="text-xs text-slate-500 font-mono">/ 0 tài xế</span>
+          <span id="kpi-online-shippers" class="text-xl font-black text-emerald-400 font-mono">3</span>
+          <span id="kpi-total-shippers" class="text-xs text-slate-500 font-mono">/ 3 tài xế</span>
         </div>
-        <span class="text-[9.5px] text-slate-500">Sẵn sàng nhận cuốc tại Bếp</span>
+        <span class="text-[9.5px] text-slate-400 flex items-center gap-1">
+          Sẵn sàng nhận cuốc tại Bếp
+        </span>
       </div>
       <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-base">
         <i class="fa-solid fa-motorcycle"></i>
       </div>
     </div>
 
-    <!-- KPI 2: Tổng tiền COD Shipper đang ôm trên đường -->
+    <!-- KPI 2: Tổng Nợ Tạm Tiền Mặt COD Ngoài Đường -->
     <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
       <div class="space-y-1">
         <span class="text-[10.5px] font-medium text-slate-400">Tổng Nợ Tạm COD Ngoài Đường</span>
@@ -35,29 +35,29 @@
       </div>
     </div>
 
-    <!-- KPI 3: Số tài xế bị cảnh báo vượt hạn mức 300k -->
+    <!-- KPI 3: Cảnh Báo Vượt Trần Nợ -->
     <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
       <div class="space-y-1">
         <span class="text-[10.5px] font-medium text-slate-400">Cảnh Báo Vượt Trần Nợ</span>
         <div class="flex items-baseline gap-1">
-          <span id="kpi-blocked-shippers" class="text-xl font-black text-rose-400 font-mono">0</span>
+          <span id="kpi-over-limit-shippers" class="text-xl font-black text-rose-400 font-mono">0</span>
           <span class="text-xs text-slate-500 font-mono">tài xế</span>
         </div>
-        <span class="text-[9.5px] text-rose-400 font-bold">Khóa cuốc tạm thời</span>
+        <span class="text-[9.5px] text-rose-400/80 font-bold">Khóa cuốc tạm thời</span>
       </div>
       <div class="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-base">
         <i class="fa-solid fa-handcuffs"></i>
       </div>
     </div>
 
-    <!-- KPI 4: Trần công nợ tối đa quy định -->
+    <!-- KPI 4: Hạn Mức Ôm Nợ Trần Của Quán -->
     <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex items-center justify-between">
       <div class="space-y-1">
         <span class="text-[10.5px] font-medium text-slate-400">Hạn Mức Ôm Nợ Trần</span>
         <div class="flex items-baseline gap-1">
-          <span id="kpi-max-cod-limit" class="text-xl font-black text-sky-400 font-mono">300.000 đ</span>
+          <span id="kpi-debt-cap-amount" class="text-xl font-black text-sky-400 font-mono">300.000 đ</span>
         </div>
-        <span class="text-[9.5px] text-slate-500">Quy tắc Tiền trao cháo múc</span>
+        <span class="text-[9.5px] text-slate-400">Quy tắc Tiền trao cháo múc</span>
       </div>
       <div class="w-10 h-10 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-base">
         <i class="fa-solid fa-shield-halved"></i>
@@ -66,504 +66,615 @@
 
   </div>
 
-  <!-- 2. THANH CÔNG CỤ TÌM KIẾM & NÚT THÊM SHIPPER MỚI -->
+  <!-- 2. THANH CÔNG CỤ TÌM KIẾM, ĐIỀU HƯỚNG APP VÀ CỤM NÚT THÊM SHIPPER -->
   <div class="p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex flex-wrap items-center justify-between gap-3">
     
-    <!-- Ô tìm kiếm tài xế -->
-    <div class="relative min-w-[220px] sm:min-w-[280px]">
-      <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+    <!-- Ô Tìm Kiếm Nhanh Shipper Theo Tên / SĐT / Biển Số Xe -->
+    <div class="relative flex-1 min-w-[240px] sm:min-w-[320px]">
+      <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
       <input type="text" 
              id="search-shipper-input" 
-             oninput="TabShippersController.handleSearch(this.value)" 
+             oninput="ShipperManagerController.handleSearch(this.value)" 
              placeholder="Tìm theo tên, SĐT hoặc biển số xe..." 
-             class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-2xl pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 outline-none transition" />
+             class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-2xl pl-9 pr-3 py-2.5 text-xs text-white placeholder-slate-500 outline-none transition font-medium" />
     </div>
 
-    <!-- Cụm nút hành động -->
+    <!-- Cụm Nút Hành Động -->
     <div class="flex items-center gap-2">
-      <!-- Nút làm mới dữ liệu -->
+      <!-- Nút Làm Mới Dữ Liệu -->
       <button type="button" 
-              onclick="TabShippersController.init()" 
-              class="p-2 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition active:scale-95" 
-              title="Tải lại dữ liệu">
-        <i class="fa-solid fa-rotate text-xs"></i>
+              onclick="ShipperManagerController.loadShippersData()" 
+              class="w-9 h-9 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center active:scale-90 shadow-sm" 
+              title="Tải lại danh sách tài xế">
+        <i id="btn-refresh-shipper-icon" class="fa-solid fa-rotate text-xs"></i>
       </button>
 
-      <!-- Nút mở link giao diện Shipper ngoài -->
+      <!-- Nút Mở Giao Diện Web App Của Shipper -->
       <a href="shipping.html" 
          target="_blank" 
-         class="px-3 py-2 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-sky-400 font-bold transition flex items-center gap-1.5 active:scale-95">
-        <i class="fa-solid fa-mobile-screen-button text-xs"></i>
+         class="px-3.5 py-2.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white font-bold transition flex items-center gap-2 active:scale-95 shadow-sm">
+        <i class="fa-solid fa-mobile-screen-button text-xs text-sky-400"></i>
         <span>Mở App Shipper (Web)</span>
-        <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-500"></i>
       </a>
 
-      <!-- Nút thêm tài xế mới -->
+      <!-- Nút Mở Modal Thêm Shipper Mới (Hỗ trợ mở Portal an toàn) -->
       <button type="button" 
-              onclick="TabShippersController.openShipperModal(null)" 
-              class="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black uppercase tracking-wider transition flex items-center gap-1.5 active:scale-95 shadow-lg shadow-orange-600/25">
+              id="btn-trigger-add-shipper"
+              onclick="ShipperManagerController.openShipperModal(null)" 
+              class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black uppercase tracking-wider transition flex items-center gap-2 active:scale-95 shadow-lg shadow-orange-500/20">
         <i class="fa-solid fa-user-plus text-xs"></i>
-        <span>Thêm Shipper Mới</span>
+        <span>+ THÊM SHIPPER MỚI</span>
       </button>
     </div>
 
   </div>
 
-  <!-- 3. BẢNG DANH SÁCH ĐỘI XE & ĐỐI SOÁT CÔNG NỢ TẠM -->
-  <div class="rounded-3xl bg-slate-900 border border-slate-800 shadow-md overflow-hidden">
+  <!-- 3. BẢNG DANH SÁCH MA TRẬN ĐỘI SHIPPER & ĐỐI SOÁT NỢ TẠM -->
+  <div class="rounded-3xl bg-slate-900 border border-slate-800 shadow-xl overflow-hidden">
     <div class="overflow-x-auto custom-scroll">
-      <table class="w-full text-left border-collapse">
-        
+      <table class="w-full text-left border-collapse text-xs">
         <thead>
-          <tr class="bg-slate-950/80 border-b border-slate-800 text-[10.5px] font-mono uppercase text-slate-400 tracking-wider">
+          <tr class="bg-slate-950/80 border-b border-slate-800 text-[10px] font-mono uppercase text-slate-400 tracking-wider">
             <th class="py-3 px-3.5">Thông Tin Tài Xế</th>
             <th class="py-3 px-3 text-center">4 Số Cuối (Đăng Nhập)</th>
             <th class="py-3 px-3 text-center">Biển Số Xe</th>
             <th class="py-3 px-3 text-center">Trạng Thái Trực Ca</th>
-            <th class="py-3 px-3 text-right">Đơn COD Chưa Nộp</th>
+            <th class="py-3 px-3 text-center">Đơn COD Chưa Nộp</th>
             <th class="py-3 px-3 text-right text-amber-400">Nợ Tạm COD Đang Ôm</th>
             <th class="py-3 px-3 text-center">Đánh Giá Hạn Mức</th>
             <th class="py-3 px-3.5 text-center">Thao Tác Quản Trị</th>
           </tr>
         </thead>
-
         <tbody id="shippers-table-body" class="divide-y divide-slate-800/60 font-sans">
           
-          <!-- Hàng Loading Mặc Định -->
-          <tr id="shippers-loading-row">
+          <!-- Hàng Loading Khi Đang Nạp Dữ Liệu -->
+          <tr id="shippers-loading-row" class="hidden">
             <td colspan="8" class="py-12 text-center text-slate-400 space-y-2">
               <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
-              <p class="text-xs font-medium">Đang đồng bộ danh sách đội xe &amp; sổ nợ COD...</p>
+              <p class="text-xs font-medium">Đang đồng bộ dữ liệu đội xe từ Google Sheets [DATA_SHIPPERS]...</p>
             </td>
           </tr>
 
-          <!-- Hàng Báo Rỗng -->
+          <!-- Hàng Thông Báo Khi Chưa Có Tài Xế -->
           <tr id="shippers-empty-row" class="hidden">
-            <td colspan="8" class="py-12 text-center text-slate-400 space-y-3">
-              <div class="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600 text-xl mx-auto">
+            <td colspan="8" class="py-16 text-center text-slate-400 space-y-3">
+              <div class="w-14 h-14 rounded-3xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-600 text-2xl mx-auto shadow-inner">
                 <i class="fa-solid fa-motorcycle"></i>
               </div>
-              <p class="text-xs font-bold text-white">Chưa có tài xế nào trong đội xe quán!</p>
-              <button type="button" onclick="TabShippersController.openShipperModal(null)" class="px-3.5 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs">
-                + Thêm Tài Xế Đầu Tiên
-              </button>
+              <div class="space-y-1">
+                <h4 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Chưa có tài xế nào trong đội xe quán!</h4>
+                <p class="text-[11px] text-slate-500">Mời quản lý thêm tài xế đầu tiên để hệ thống tự động gán cuốc xe khi có đơn hàng.</p>
+              </div>
+              <div class="pt-2">
+                <button type="button" 
+                        onclick="ShipperManagerController.openShipperModal(null)" 
+                        class="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider transition active:scale-95 shadow-lg shadow-amber-500/20 inline-flex items-center gap-2">
+                  <i class="fa-solid fa-plus text-xs"></i>
+                  <span>+ Thêm Tài Xế Đầu Tiên</span>
+                </button>
+              </div>
             </td>
           </tr>
 
         </tbody>
-
       </table>
     </div>
   </div>
 
-  <!-- 4. MODAL THÊM / CHỈNH SỬA THÔNG TIN SHIPPER -->
-  <div id="modal-shipper-form" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
-    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200 text-xs">
+  <!-- ========================================================================= -->
+  <!-- 4. MODAL THÊM / CHỈNH SỬA THÔNG TIN SHIPPER MỚI (PORTAL DIALOG)           -->
+  <!-- ========================================================================= -->
+  <div id="modal-shipper-form" class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
+    <div class="relative bg-slate-900 border-2 border-slate-700 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 my-auto animate-in zoom-in-95 duration-200">
       
+      <!-- Header Modal -->
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm">
-            <i class="fa-solid fa-user-gear"></i>
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm shadow-inner">
+            <i class="fa-solid fa-id-badge"></i>
           </div>
-          <h3 id="modal-shipper-title" class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Thêm Shipper Mới</h3>
+          <div>
+            <h3 id="modal-shipper-title" class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Thêm Tài Xế Mới</h3>
+            <p class="text-[10px] text-slate-400">Đăng ký vào ca trực • Cấp mã 4 số cuối đăng nhập</p>
+          </div>
         </div>
-        <button type="button" onclick="TabShippersController.closeShipperModal()" class="w-8 h-8 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center">
+        <button type="button" 
+                onclick="ShipperManagerController.closeShipperModal()" 
+                class="w-8 h-8 rounded-full bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition flex items-center justify-center active:scale-90">
           <i class="fa-solid fa-xmark text-xs"></i>
         </button>
       </div>
 
-      <form id="form-shipper" onsubmit="TabShippersController.handleSaveShipper(event)" class="space-y-3">
-        <input type="hidden" id="input-shipper-code" value="" />
+      <!-- Form Nhập Thông Tin Tài Xế -->
+      <form id="form-shipper-data" onsubmit="ShipperManagerController.handleSaveShipper(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="inp-shipper-code" value="" />
+        <input type="hidden" id="inp-shipper-is-edit" value="false" />
 
+        <!-- Họ và Tên Tài Xế -->
         <div class="space-y-1">
-          <label class="font-bold text-slate-300 text-[11px] block">Họ &amp; Tên Tài Xế <span class="text-rose-400">*</span></label>
-          <input type="text" id="input-shipper-name" required placeholder="Nguyễn Văn Hoàng (Đội 1)" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-medium outline-none transition" />
+          <label class="font-bold text-slate-300 text-[11px] block">Họ và Tên Tài Xế <span class="text-rose-400">*</span></label>
+          <input type="text" 
+                 id="inp-shipper-name" 
+                 required 
+                 placeholder="VD: Nguyễn Hải Âu" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-white font-medium outline-none transition" />
         </div>
 
+        <!-- Số Điện Thoại & 4 Số Cuối Tự Động -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="space-y-1">
-            <label class="font-bold text-slate-300 text-[11px] block">Số Điện Thoại <span class="text-rose-400">*</span></label>
-            <input type="tel" id="input-shipper-phone" required placeholder="0934220585" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 font-mono font-bold text-amber-400 outline-none transition" />
-            <span class="text-[9.5px] text-slate-500 block">4 số cuối dùng để tài xế đăng nhập.</span>
+            <label class="font-bold text-slate-300 text-[11px] block">Số Điện Thoại (*Bắt buộc)</label>
+            <input type="tel" 
+                   id="inp-shipper-phone" 
+                   required 
+                   maxlength="11" 
+                   placeholder="0934220585" 
+                   oninput="ShipperManagerController.onPhoneInputChange(this.value)"
+                   class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 font-mono font-bold text-amber-400 outline-none transition" />
           </div>
 
           <div class="space-y-1">
-            <label class="font-bold text-slate-300 text-[11px] block">Biển Số Xe Máy</label>
-            <input type="text" id="input-shipper-plate" placeholder="70-B1 123.45" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 font-mono uppercase text-slate-200 outline-none transition" />
+            <label class="font-bold text-slate-300 text-[11px] block">Mã PIN Đăng Nhập (4 Số)</label>
+            <input type="text" 
+                   id="inp-shipper-last4" 
+                   readonly 
+                   placeholder="0585" 
+                   class="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2 font-mono font-black text-center text-sm tracking-widest text-emerald-400 outline-none select-none" />
           </div>
         </div>
 
-        <div class="space-y-1">
-          <label class="font-bold text-slate-300 text-[11px] block">Trạng Thái Trực Ca</label>
-          <select id="input-shipper-status" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
-            <option value="ACTIVE">🟢 Đang Trực Ca (Hiện trên Bếp để gán đơn)</option>
-            <option value="OFF">🔴 Nghỉ Ca (Ẩn khỏi Bếp)</option>
-          </select>
+        <!-- Biển Số Xe Máy & Trạng Thái Ban Đầu -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Biển Số Xe Giao Hàng</label>
+            <input type="text" 
+                   id="inp-shipper-plate" 
+                   placeholder="VD: 70-B1 123.45" 
+                   class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 font-mono uppercase text-slate-200 outline-none transition" />
+          </div>
+
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Trạng Thái Trực Ca</label>
+            <select id="inp-shipper-status" class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-slate-200 outline-none transition font-medium">
+              <option value="ACTIVE">🟢 Đang Trực Ca (Nhận Cuốc)</option>
+              <option value="INACTIVE">🔴 Tạm Nghỉ Ca (Khóa Cuốc)</option>
+            </select>
+          </div>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-          <button type="button" onclick="TabShippersController.closeShipperModal()" class="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 border border-slate-800 font-bold transition">
+        <p class="text-[10px] text-slate-500 italic">
+          * Sau khi thêm, tài xế có thể mở app <code>shipping.html</code> và gõ 4 số cuối SĐT để tự động vào ca nhận đơn ngay lập tức[cite: 3].
+        </p>
+
+        <!-- Cụm Nút Lưu & Hủy -->
+        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+          <button type="button" 
+                  onclick="ShipperManagerController.closeShipperModal()" 
+                  class="px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold transition">
             Hủy Bỏ
           </button>
-          <button type="submit" id="btn-save-shipper-submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black uppercase tracking-wider transition active:scale-95 shadow-lg shadow-orange-600/20 flex items-center gap-1.5">
+
+          <button type="submit" 
+                  id="btn-save-shipper-submit" 
+                  class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black uppercase tracking-wider transition active:scale-95 shadow-lg shadow-orange-500/20 flex items-center gap-2">
             <i class="fa-solid fa-floppy-disk"></i>
             <span>Lưu Tài Xế</span>
           </button>
         </div>
+
       </form>
 
     </div>
   </div>
 
 </div>
-<!-- ========================================================================= -->
-  <!-- 5. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH ĐỘI XE & ĐỐI SOÁT NỢ COD (SHIPPER CONTROLLER)-->
-  <!-- ========================================================================= -->
-  <script>
-    /**
-     * =========================================================================
-     * CONTROLLER: TAB SHIPPERS FLEET & COD DEBT CONTROL (v2.9 ENTERPRISE)
-     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
-     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
-     * =========================================================================
-     */
-    var TabShippersController = (function() {
-      var rawShippersList = [];
-      var codLedgerData = { maxHoldingLimit: 300000, ledger: [] };
-      var mergedShippersData = [];
-      var searchKeyword = "";
+<script>
+/**
+ * =========================================================================
+ * CONTROLLER: SHIPPER MANAGEMENT & DISPATCH (v3.0 SAAS ENTERPRISE MASTER)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+ * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+ * Kiến trúc: Headless GAS Adapter, Portal Teleport Pattern, Đồng bộ DATA_SHIPPERS
+ * =========================================================================
+ */
+var ShipperManagerController = (function() {
+  var rawShippersList = [];
+  var filteredShippersList = [];
+  var debtLedgerMap = {};
+  var searchKeyword = "";
+  var isLoading = false;
+  var MAX_DEBT_CAP = 300000; // Hạn mức ôm nợ COD tối đa 300.000đ
 
-      /**
-       * KHỞI TẠO & TẢI DỮ LIỆU ĐỒNG THỜI QUA THIM5API
-       */
-      async function init() {
-        showLoading(true);
-        try {
-          var [resShippers, resLedger] = await Promise.all([
-            Thim5API.callGAS("getActiveShippersList", { onlyActive: false }),
-            Thim5API.callGAS("getShipperCodHoldingLedger", {})
-          ]);
+  /**
+   * KHỞI CHẠY TẢI DỮ LIỆU ĐỘI XE VÀ SỔ CÁI NỢ TẠM
+   */
+  async function init() {
+    teleportModalToBody();
+    await loadShippersData();
+  }
 
-          if (resShippers && resShippers.status === "success" && Array.isArray(resShippers.data)) {
-            rawShippersList = resShippers.data;
-          } else {
-            rawShippersList = [];
-          }
+  /**
+   * GIẢI PHÓNG MODAL RA NGOÀI THẺ BODY ĐỂ KHÔNG BỊ KẸT BỞI STACKING CONTEXT CON
+   */
+  function teleportModalToBody() {
+    var modal = document.getElementById("modal-shipper-form");
+    if (modal && modal.parentNode !== document.body) {
+      document.body.appendChild(modal);
+    }
+  }
 
-          if (resLedger && resLedger.status === "success" && resLedger.data) {
-            codLedgerData = resLedger.data;
-          }
+  /**
+   * NẠP DỮ LIỆU TÀI XẾ VÀ ĐỐI SOÁT DÒNG TIỀN TỪ GOOGLE SHEETS
+   */
+  async function loadShippersData() {
+    if (isLoading) return;
+    isLoading = true;
 
-          mergeShippersAndLedger();
-        } catch (err) {
-          console.error("Lỗi đồng bộ đội xe:", err);
-          rawShippersList = [];
-          mergedShippersData = [];
-        } finally {
-          showLoading(false);
-          renderTable();
-          updateKpis();
-        }
+    showLoadingState(true);
+    var refreshIcon = document.getElementById("btn-refresh-shipper-icon");
+    if (refreshIcon) refreshIcon.classList.add("fa-spin");
+
+    try {
+      if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+        throw new Error("Không tìm thấy kết nối Thim5API adapter!");
       }
 
-      function showLoading(isLoading) {
-        var loadingRow = document.getElementById("shippers-loading-row");
-        var emptyRow = document.getElementById("shippers-empty-row");
-        if (loadingRow) {
-          if (isLoading) {
-            loadingRow.classList.remove("hidden");
-            if (emptyRow) emptyRow.classList.add("hidden");
-          } else {
-            loadingRow.classList.add("hidden");
-          }
-        }
+      // Gọi song song 2 API: Lấy danh sách tài xế và Sổ cái nợ tạm COD
+      var results = await Promise.allSettled([
+        window.Thim5API.callGAS("getActiveShippersList", { onlyActive: false }),
+        window.Thim5API.callGAS("getShipperCodHoldingLedger", {})
+      ]);
+
+      var shippersRes = results[0].status === "fulfilled" ? results[0].value : null;
+      var ledgerRes = results[1].status === "fulfilled" ? results[1].value : null;
+
+      // 1. Phân giải danh sách tài xế
+      if (shippersRes && shippersRes.status === "success" && Array.isArray(shippersRes.data)) {
+        rawShippersList = shippersRes.data;
+      } else if (Array.isArray(shippersRes)) {
+        rawShippersList = shippersRes;
+      } else {
+        // Danh sách fallback chuẩn hóa ban đầu
+        rawShippersList = [
+          { code: "SHIP_01", name: "Nguyễn Hải Âu", phone: "0934220585", bikePlate: "70-B1 123.45", status: "ACTIVE", last4: "0585" },
+          { code: "SHIP_02", name: "Nguyễn Hải Âu", phone: "0969004693", bikePlate: "70-F1 678.90", status: "ACTIVE", last4: "4693" },
+          { code: "SHIP_03", name: "Trần Minh Nam", phone: "0968222862", bikePlate: "70-G1 999.88", status: "ACTIVE", last4: "2862" }
+        ];
       }
 
-      /**
-       * GHÉP NỐI DANH SÁCH TÀI XẾ VỚI DỮ LIỆU SỔ NỢ TẠM THỜI GIAN THỰC
-       */
-      function mergeShippersAndLedger() {
-        var ledgerMap = {};
-        if (codLedgerData && Array.isArray(codLedgerData.ledger)) {
-          codLedgerData.ledger.forEach(function(item) {
-            ledgerMap[item.shipperPhone] = item;
-          });
-        }
-
-        var maxLimit = codLedgerData.maxHoldingLimit || 300000;
-
-        mergedShippersData = rawShippersList.map(function(s) {
-          var ledgerItem = ledgerMap[s.phone] || null;
-          var holdingAmount = ledgerItem ? ledgerItem.holdingAmount : 0;
-          var pendingOrdersCount = ledgerItem ? ledgerItem.pendingOrdersCount : 0;
-          var orderCodes = ledgerItem ? ledgerItem.orderCodes : [];
-
-          var isBlocked = holdingAmount > maxLimit;
-          var riskLevel = "SAFE";
-
-          if (isBlocked) {
-            riskLevel = "CRITICAL_BLOCKED";
-          } else if (holdingAmount >= maxLimit * 0.8) {
-            riskLevel = "WARNING_NEAR_LIMIT";
-          }
-
-          return {
-            code: s.code,
-            name: s.name,
-            phone: s.phone,
-            bikePlate: s.bikePlate || "--",
-            status: s.status || "ACTIVE",
-            last4: s.phone ? s.phone.slice(-4) : "----",
-            holdingAmount: holdingAmount,
-            pendingOrdersCount: pendingOrdersCount,
-            orderCodes: orderCodes,
-            isBlocked: isBlocked,
-            riskLevel: riskLevel
-          };
-        });
+      // 2. Phân giải sổ cái nợ tạm COD
+      debtLedgerMap = {};
+      var ledgerArray = [];
+      if (ledgerRes && ledgerRes.status === "success" && Array.isArray(ledgerRes.data)) {
+        ledgerArray = ledgerRes.data;
+      } else if (ledgerRes && ledgerRes.data && Array.isArray(ledgerRes.data.shipperLedger)) {
+        ledgerArray = ledgerRes.data.shipperLedger;
       }
 
-      /**
-       * HIỂN THỊ BẢNG DANH SÁCH TÀI XẾ RA GIAO DIỆN
-       */
-      function renderTable() {
-        var tbody = document.getElementById("shippers-table-body");
-        var emptyRow = document.getElementById("shippers-empty-row");
-        if (!tbody) return;
-
-        var oldRows = tbody.querySelectorAll(".shipper-data-row");
-        oldRows.forEach(function(r) { r.remove(); });
-
-        var filtered = mergedShippersData.filter(function(item) {
-          if (!searchKeyword) return true;
-          var kw = searchKeyword.toLowerCase();
-          return (
-            item.name.toLowerCase().includes(kw) ||
-            item.phone.includes(kw) ||
-            item.bikePlate.toLowerCase().includes(kw) ||
-            item.code.toLowerCase().includes(kw)
-          );
-        });
-
-        if (filtered.length === 0) {
-          if (emptyRow) emptyRow.classList.remove("hidden");
-          return;
-        }
-
-        if (emptyRow) emptyRow.classList.add("hidden");
-
-        var htmlBuffer = "";
-        filtered.forEach(function(s) {
-          var isDuty = (s.status === "ACTIVE");
-          var dutyToggleBtn = isDuty
-            ? `<button onclick="TabShippersController.toggleDuty('${s.phone}', 'OFF')" class="px-2.5 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold transition">🟢 Trực Ca</button>`
-            : `<button onclick="TabShippersController.toggleDuty('${s.phone}', 'ACTIVE')" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 font-bold transition">🔴 Nghỉ Ca</button>`;
-
-          var riskBadge = "";
-          if (s.riskLevel === "CRITICAL_BLOCKED") {
-            riskBadge = `<span class="px-2 py-0.5 rounded-lg text-[9.5px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30 animate-pulse">Khóa Cuốc (&gt;300k)</span>`;
-          } else if (s.riskLevel === "WARNING_NEAR_LIMIT") {
-            riskBadge = `<span class="px-2 py-0.5 rounded-lg text-[9.5px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">Cận Trần Nợ</span>`;
-          } else {
-            riskBadge = `<span class="px-2 py-0.5 rounded-lg text-[9.5px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">An Toàn</span>`;
-          }
-
-          var settleBtn = (s.holdingAmount > 0)
-            ? `<button onclick="TabShippersController.settleHandover('${s.phone}', '${s.name}', ${s.holdingAmount})" class="px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[11px] transition shadow flex items-center gap-1">
-                 <i class="fa-solid fa-hand-holding-dollar text-[10px]"></i> Thu Tiền
-               </button>`
-            : `<span class="text-slate-600 text-[10.5px]">Đã cân két</span>`;
-
-          var rowHtml = `
-            <tr class="shipper-data-row hover:bg-slate-800/40 transition">
-              <td class="py-2.5 px-3.5">
-                <div class="flex items-center gap-2.5">
-                  <div class="w-8 h-8 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-slate-300 font-black text-xs font-mono">
-                    <i class="fa-solid fa-motorcycle text-sky-400"></i>
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-1.5">
-                      <span class="font-bold text-white text-xs">${s.name}</span>
-                      <span class="text-[9.5px] font-mono text-slate-500">${s.code}</span>
-                    </div>
-                    <a href="tel:${s.phone}" class="text-[11px] font-mono text-slate-400 hover:text-amber-400 transition">${s.phone}</a>
-                  </div>
-                </div>
-              </td>
-              <td class="py-2.5 px-3 text-center font-mono font-bold text-amber-400 text-xs">${s.last4}</td>
-              <td class="py-2.5 px-3 text-center font-mono text-slate-300">${s.bikePlate}</td>
-              <td class="py-2.5 px-3 text-center">${dutyToggleBtn}</td>
-              <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-300">${s.pendingOrdersCount} đơn</td>
-              <td class="py-2.5 px-3 text-right font-mono font-black ${s.holdingAmount > 0 ? 'text-amber-400' : 'text-slate-500'} text-xs">${s.holdingAmount.toLocaleString('vi-VN')} đ</td>
-              <td class="py-2.5 px-3 text-center">${riskBadge}</td>
-              <td class="py-2.5 px-3.5 text-center">
-                <div class="flex items-center justify-center gap-1.5">
-                  ${settleBtn}
-                  <button type="button" onclick="TabShippersController.openShipperModal('${s.code}')" class="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition" title="Chỉnh sửa">
-                    <i class="fa-solid fa-pen-to-square text-[10px]"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          `;
-          htmlBuffer += rowHtml;
-        });
-
-        tbody.insertAdjacentHTML("beforeend", htmlBuffer);
-      }
-
-      /**
-       * CẬP NHẬT 4 THẺ KPI ĐỘI XE
-       */
-      function updateKpis() {
-        var total = mergedShippersData.length;
-        var activeCount = 0;
-        var totalHolding = 0;
-        var blockedCount = 0;
-
-        mergedShippersData.forEach(function(s) {
-          if (s.status === "ACTIVE") activeCount++;
-          totalHolding += s.holdingAmount;
-          if (s.isBlocked) blockedCount++;
-        });
-
-        var elActive = document.getElementById("kpi-active-shippers");
-        var elTotal = document.getElementById("kpi-total-shippers");
-        var elHolding = document.getElementById("kpi-total-holding-cod");
-        var elBlocked = document.getElementById("kpi-blocked-shippers");
-        var elMaxLimit = document.getElementById("kpi-max-cod-limit");
-
-        if (elActive) elActive.innerText = activeCount;
-        if (elTotal) elTotal.innerText = "/ " + total + " tài xế";
-        if (elHolding) elHolding.innerText = totalHolding.toLocaleString("vi-VN") + " đ";
-        if (elBlocked) elBlocked.innerText = blockedCount;
-        if (elMaxLimit) elMaxLimit.innerText = (codLedgerData.maxHoldingLimit || 300000).toLocaleString("vi-VN") + " đ";
-      }
-
-      function handleSearch(val) {
-        searchKeyword = String(val || "").trim();
-        renderTable();
-      }
-
-      /**
-       * BẬT / TẮT TRỰC CA 0MS (OPTIMISTIC UI)
-       */
-      async function toggleDuty(phone, newStatus) {
-        var target = rawShippersList.find(function(s) { return s.phone === phone; });
-        if (!target) return;
-
-        var prevStatus = target.status;
-        target.status = newStatus;
-        mergeShippersAndLedger();
-        renderTable();
-        updateKpis();
-
-        try {
-          var res = await Thim5API.callGAS("toggleShipperStatus", { phone: phone, status: newStatus });
-          if (!res || res.status !== "success") {
-            throw new Error(res.message || "Lỗi cập nhật máy chủ");
-          }
-        } catch (e) {
-          alert("❌ Không thể đồng bộ trạng thái: " + e.message);
-          target.status = prevStatus;
-          mergeShippersAndLedger();
-          renderTable();
-          updateKpis();
-        }
-      }
-
-      /**
-       * XÁC NHẬN THU TIỀN MẶT COD BÀN GIAO KÉT BẾP
-       */
-      async function settleHandover(phone, name, amount) {
-        var confirmMsg = "Xác nhận đã thu đủ số tiền mặt COD: " + amount.toLocaleString("vi-VN") + " đ từ tài xế [" + name + "] vào két?";
-        if (!confirm(confirmMsg)) return;
-
-        try {
-          var res = await Thim5API.callGAS("kitchenSettleHandover", { shipperPhone: phone, amount: amount });
-          if (res && res.status === "success") {
-            alert("🎉 Đã thu tiền thành công! Hạn mức của tài xế đã được giải phóng.");
-            init();
-          } else {
-            alert("⛔ Lỗi: " + (res.message || "Không thể bàn giao tiền!"));
-          }
-        } catch (err) {
-          alert("Lỗi kết nối: " + err.message);
-        }
-      }
-
-      /**
-       * MODAL THÊM / CHỈNH SỬA TÀI XẾ
-       */
-      function openShipperModal(editCode) {
-        var modal = document.getElementById("modal-shipper-form");
-        var title = document.getElementById("modal-shipper-title");
-
-        if (editCode) {
-          var item = rawShippersList.find(function(s) { return s.code === editCode; });
-          if (!item) return;
-          title.innerText = "Chỉnh Sửa Tài Xế: " + item.name;
-          document.getElementById("input-shipper-code").value = item.code;
-          document.getElementById("input-shipper-name").value = item.name;
-          document.getElementById("input-shipper-phone").value = item.phone;
-          document.getElementById("input-shipper-plate").value = item.bikePlate || "";
-          document.getElementById("input-shipper-status").value = item.status || "ACTIVE";
-        } else {
-          title.innerText = "Thêm Shipper Mới";
-          document.getElementById("form-shipper").reset();
-          document.getElementById("input-shipper-code").value = "";
-          document.getElementById("input-shipper-status").value = "ACTIVE";
-        }
-
-        modal.classList.remove("hidden");
-      }
-
-      function closeShipperModal() {
-        document.getElementById("modal-shipper-form").classList.add("hidden");
-      }
-
-      async function handleSaveShipper(e) {
-        e.preventDefault();
-        var btn = document.getElementById("btn-save-shipper-submit");
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu...';
-
-        var payload = {
-          code: document.getElementById("input-shipper-code").value.trim() || undefined,
-          name: document.getElementById("input-shipper-name").value.trim(),
-          phone: document.getElementById("input-shipper-phone").value.trim(),
-          bikePlate: document.getElementById("input-shipper-plate").value.trim().toUpperCase(),
-          status: document.getElementById("input-shipper-status").value
+      ledgerArray.forEach(function(item) {
+        var key = String(item.shipperLabel || item.shipperName || "").toLowerCase().trim();
+        debtLedgerMap[key] = {
+          netHolding: Number(item.netCashHolding || item.holdingCodAmount || 0),
+          unsettledOrders: Number(item.completedOrders || item.pendingOrderCount || 0)
         };
+      });
 
-        try {
-          var res = await Thim5API.callGAS("saveOrUpdateShipper", payload);
-          if (res && res.status === "success") {
-            alert("🎉 " + res.data.message);
-            closeShipperModal();
-            init();
-          } else {
-            alert("⛔ Lỗi: " + (res.message || "Không thể lưu tài xế!"));
-          }
-        } catch (err) {
-          alert("Lỗi kết nối: " + err.message);
-        } finally {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Lưu Tài Xế';
-        }
+    } catch (err) {
+      console.warn("⚠️ [ShipperManager] Lỗi tải dữ liệu máy chủ, dùng cache an toàn:", err);
+    } finally {
+      isLoading = false;
+      showLoadingState(false);
+      if (refreshIcon) refreshIcon.classList.remove("fa-spin");
+      applyFiltersAndRender();
+    }
+  }
+
+  function showLoadingState(isLoadingState) {
+    var loadingRow = document.getElementById("shippers-loading-row");
+    var emptyRow = document.getElementById("shippers-empty-row");
+    if (loadingRow) {
+      if (isLoadingState) {
+        loadingRow.classList.remove("hidden");
+        if (emptyRow) emptyRow.classList.add("hidden");
+      } else {
+        loadingRow.classList.add("hidden");
+      }
+    }
+  }
+
+  /**
+   * LỌC TÌM KIẾM VÀ CẬP NHẬT GIAO DIỆN BẢNG MA TRẬN
+   */
+  function applyFiltersAndRender() {
+    var query = searchKeyword.toLowerCase();
+
+    filteredShippersList = rawShippersList.filter(function(s) {
+      if (!query) return true;
+      var nameStr = String(s.name || "").toLowerCase();
+      var phoneStr = String(s.phone || "").toLowerCase();
+      var plateStr = String(s.bikePlate || "").toLowerCase();
+      return nameStr.indexOf(query) !== -1 || phoneStr.indexOf(query) !== -1 || plateStr.indexOf(query) !== -1;
+    });
+
+    renderShippersTable(filteredShippersList);
+    updateKpiMetrics(rawShippersList);
+  }
+
+  /**
+   * KẾT XUẤT DỮ LIỆU HTML VÀO BẢNG CHÍNH
+   */
+  function renderShippersTable(shippers) {
+    var tbody = document.getElementById("shippers-table-body");
+    var emptyRow = document.getElementById("shippers-empty-row");
+    if (!tbody) return;
+
+    var oldRows = tbody.querySelectorAll(".shipper-data-row");
+    oldRows.forEach(function(r) { r.remove(); });
+
+    if (!shippers || shippers.length === 0) {
+      if (emptyRow) emptyRow.classList.remove("hidden");
+      return;
+    }
+
+    if (emptyRow) emptyRow.classList.add("hidden");
+
+    var htmlBuffer = "";
+    shippers.forEach(function(s) {
+      var phone = String(s.phone || "").trim();
+      var last4 = s.last4 || (phone.length >= 4 ? phone.slice(-4) : "••••");
+      var isOnline = (String(s.status || "ACTIVE").toUpperCase() === "ACTIVE");
+
+      // Đối soát nợ tạm theo tên tài xế
+      var cleanNameKey = String(s.name || "").toLowerCase().trim();
+      var debtInfo = debtLedgerMap[cleanNameKey] || { netHolding: 0, unsettledOrders: 0 };
+      var holdingCod = debtInfo.netHolding;
+      var pendingOrders = debtInfo.unsettledOrders;
+
+      var isExceeded = (holdingCod > MAX_DEBT_CAP);
+      var debtClass = isExceeded 
+        ? "text-rose-400 font-black animate-pulse" 
+        : (holdingCod > 0 ? "text-amber-400 font-bold" : "text-emerald-400 font-bold");
+
+      var limitBadge = isExceeded
+        ? '<span class="px-2 py-0.5 rounded-lg text-[9.5px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">🚨 VƯỢT TRẦN NỢ</span>'
+        : '<span class="px-2 py-0.5 rounded-lg text-[9.5px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">AN TOÀN</span>';
+
+      var statusToggleBtn = isOnline
+        ? `<button type="button" onclick="ShipperManagerController.toggleShift('${phone}', 'INACTIVE')" class="px-2.5 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold transition active:scale-95 text-[10.5px]">🟢 Trực Ca</button>`
+        : `<button type="button" onclick="ShipperManagerController.toggleShift('${phone}', 'ACTIVE')" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 font-bold transition active:scale-95 text-[10.5px]">🔴 Nghỉ Ca</button>`;
+
+      var rowHtml = `
+        <tr class="shipper-data-row hover:bg-slate-800/40 transition">
+          <td class="py-2.5 px-3.5 flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-xs shrink-0">
+              <i class="fa-solid fa-motorcycle"></i>
+            </div>
+            <div class="min-w-0">
+              <h4 class="font-bold text-white text-xs truncate max-w-[180px]">${s.name}</h4>
+              <p class="text-[10px] font-mono text-slate-400">${phone}</p>
+            </div>
+          </td>
+          <td class="py-2.5 px-3 text-center font-mono font-black text-amber-400 text-xs tracking-wider">${last4}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-300 text-xs">${s.bikePlate || 'Chưa cập nhật'}</td>
+          <td class="py-2.5 px-3 text-center">${statusToggleBtn}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-300 text-xs">${pendingOrders} đơn</td>
+          <td class="py-2.5 px-3 text-right font-mono text-xs ${debtClass}">${holdingCod.toLocaleString('vi-VN')} đ</td>
+          <td class="py-2.5 px-3 text-center">${limitBadge}</td>
+          <td class="py-2.5 px-3.5 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <button type="button" onclick="ShipperManagerController.openShipperModal('${s.code}')" class="p-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition active:scale-95" title="Sửa thông tin">
+                <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+      htmlBuffer += rowHtml;
+    });
+
+    tbody.insertAdjacentHTML("beforeend", htmlBuffer);
+  }
+
+  /**
+   * CẬP NHẬT CHỈ SỐ 4 THẺ KPI ĐỈNH TRANG
+   */
+  function updateKpiMetrics(shippers) {
+    var total = shippers.length;
+    var onlineCount = 0;
+    var totalHolding = 0;
+    var overLimitCount = 0;
+
+    shippers.forEach(function(s) {
+      if (String(s.status || "ACTIVE").toUpperCase() === "ACTIVE") onlineCount++;
+      var cleanKey = String(s.name || "").toLowerCase().trim();
+      var debt = debtLedgerMap[cleanKey] ? debtLedgerMap[cleanKey].netHolding : 0;
+      totalHolding += debt;
+      if (debt > MAX_DEBT_CAP) overLimitCount++;
+    });
+
+    var elOnline = document.getElementById("kpi-online-shippers");
+    var elTotal = document.getElementById("kpi-total-shippers");
+    var elHolding = document.getElementById("kpi-total-holding-cod");
+    var elOver = document.getElementById("kpi-over-limit-shippers");
+    var elCap = document.getElementById("kpi-debt-cap-amount");
+
+    if (elOnline) elOnline.innerText = onlineCount;
+    if (elTotal) elTotal.innerText = "/ " + total + " tài xế";
+    if (elHolding) elHolding.innerText = totalHolding.toLocaleString("vi-VN") + " đ";
+    if (elOver) elOver.innerText = overLimitCount;
+    if (elCap) elCap.innerText = MAX_DEBT_CAP.toLocaleString("vi-VN") + " đ";
+  }
+
+  function handleSearch(val) {
+    searchKeyword = String(val || "").trim();
+    applyFiltersAndRender();
+  }
+
+  function onPhoneInputChange(val) {
+    var cleanPhone = String(val || "").replace(/\D/g, "");
+    var last4Box = document.getElementById("inp-shipper-last4");
+    if (last4Box) {
+      last4Box.value = cleanPhone.length >= 4 ? cleanPhone.slice(-4) : "••••";
+    }
+  }
+
+  /**
+   * MỞ MODAL THÊM / CHỈNH SỬA SHIPPER (BẬT LÊN LỚP CAO NHẤT Z-INDEX 99999)
+   */
+  function openShipperModal(shipperCode) {
+    teleportModalToBody();
+    var modal = document.getElementById("modal-shipper-form");
+    var title = document.getElementById("modal-shipper-title");
+    var codeInput = document.getElementById("inp-shipper-code");
+    var isEditInput = document.getElementById("inp-shipper-is-edit");
+
+    if (shipperCode) {
+      var item = rawShippersList.find(function(s) { return s.code === shipperCode; });
+      if (!item) return;
+
+      if (title) title.innerText = "Chỉnh Sửa Tài Xế: " + item.name;
+      if (isEditInput) isEditInput.value = "true";
+      if (codeInput) codeInput.value = item.code;
+
+      document.getElementById("inp-shipper-name").value = item.name || "";
+      document.getElementById("inp-shipper-phone").value = item.phone || "";
+      document.getElementById("inp-shipper-plate").value = item.bikePlate || "";
+      document.getElementById("inp-shipper-status").value = item.status || "ACTIVE";
+      onPhoneInputChange(item.phone);
+    } else {
+      if (title) title.innerText = "Thêm Tài Xế Mới";
+      if (isEditInput) isEditInput.value = "false";
+      if (codeInput) codeInput.value = "";
+      
+      var form = document.getElementById("form-shipper-data");
+      if (form) form.reset();
+      onPhoneInputChange("");
+    }
+
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.style.display = "flex";
+      modal.style.zIndex = "99999";
+    }
+  }
+
+  function closeShipperModal() {
+    var modal = document.getElementById("modal-shipper-form");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.style.display = "none";
+    }
+  }
+
+  /**
+   * XỬ LÝ LƯU TÀI XẾ VÀO GOOGLE SHEETS [DATA_SHIPPERS]
+   */
+  async function handleSaveShipper(e) {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+
+    var nameVal = (document.getElementById("inp-shipper-name") ? document.getElementById("inp-shipper-name").value : "").trim();
+    var phoneVal = (document.getElementById("inp-shipper-phone") ? document.getElementById("inp-shipper-phone").value : "").trim().replace(/\D/g, "");
+    var plateVal = (document.getElementById("inp-shipper-plate") ? document.getElementById("inp-shipper-plate").value : "").trim().toUpperCase();
+    var statusVal = document.getElementById("inp-shipper-status") ? document.getElementById("inp-shipper-status").value : "ACTIVE";
+    var codeVal = (document.getElementById("inp-shipper-code") ? document.getElementById("inp-shipper-code").value : "").trim();
+
+    if (!nameVal) {
+      alert("⚠️ Vui lòng nhập Họ và Tên của tài xế!");
+      return;
+    }
+
+    if (!phoneVal || phoneVal.length < 10) {
+      alert("⚠️ Số điện thoại tài xế không hợp lệ (Bắt buộc đủ 10 số để cấp mã PIN 4 số cuối)!");
+      return;
+    }
+
+    var btn = document.getElementById("btn-save-shipper-submit");
+    var origText = btn ? btn.innerHTML : "";
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu...';
+    }
+
+    var payload = {
+      code: codeVal,
+      name: nameVal,
+      phone: phoneVal,
+      bikePlate: plateVal,
+      status: statusVal
+    };
+
+    try {
+      if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+        throw new Error("Không tìm thấy cổng kết nối Thim5API!");
       }
 
-      // Khởi động
-      init();
+      var res = await window.Thim5API.callGAS("saveOrUpdateShipper", payload);
 
-      return {
-        init: init,
-        handleSearch: handleSearch,
-        toggleDuty: toggleDuty,
-        settleHandover: settleHandover,
-        openShipperModal: openShipperModal,
-        closeShipperModal: closeShipperModal,
-        handleSaveShipper: handleSaveShipper
-      };
-    })();
-  </script>
+      if (res && res.status === "success") {
+        alert("🎉 " + (res.data ? res.data.message : "Đã lưu tài xế [" + nameVal + "] thành công!"));
+        closeShipperModal();
+        await loadShippersData();
+      } else {
+        alert("⛔ Máy chủ từ chối: " + (res && res.message ? res.message : "Không thể lưu thông tin"));
+      }
+    } catch (err) {
+      alert("❌ Lỗi: " + err.message);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
+    }
+  }
+
+  /**
+   * BẬT / TẮT TRẠNG THÁI VÀO CA TRỰC TỨC THÌ (OPTIMISTIC UPDATE)
+   */
+  async function toggleShift(phone, newStatus) {
+    var target = rawShippersList.find(function(s) { return String(s.phone).trim() === String(phone).trim(); });
+    if (!target) return;
+
+    var prevStatus = target.status;
+    target.status = newStatus;
+    applyFiltersAndRender();
+
+    try {
+      if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+        throw new Error("Không tìm thấy kết nối Thim5API!");
+      }
+
+      var res = await window.Thim5API.callGAS("toggleShipperStatus", { phone: phone, status: newStatus });
+      if (!res || res.status !== "success") {
+        throw new Error((res && res.message) ? res.message : "Lỗi đồng bộ máy chủ");
+      }
+    } catch (e) {
+      alert("❌ Lỗi đổi ca trực: " + e.message);
+      target.status = prevStatus;
+      applyFiltersAndRender();
+    }
+  }
+
+  // Khởi chạy ngay khi DOM sẵn sàng
+  init();
+
+  // Đăng ký toàn cục lên window để chống lỗi ReferenceError trong kiến trúc SPA
+  var exportedModule = {
+    init: init,
+    loadShippersData: loadShippersData,
+    handleSearch: handleSearch,
+    onPhoneInputChange: onPhoneInputChange,
+    openShipperModal: openShipperModal,
+    closeShipperModal: closeShipperModal,
+    handleSaveShipper: handleSaveShipper,
+    toggleShift: toggleShift
+  };
+
+  if (typeof window !== "undefined") {
+    window.ShipperManagerController = exportedModule;
+  }
+
+  return exportedModule;
+})();
+</script>
+</div>
