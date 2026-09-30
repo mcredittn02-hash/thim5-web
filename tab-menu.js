@@ -3,7 +3,7 @@
  * MODULE: TAB MENU & OMNI-INGESTION PIPELINE (v3.0 SAAS ENTERPRISE)
  * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
  * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
- * Tệp tin: tab-menu.js (Thuần JavaScript 100% - Cứu hộ hiển thị & Auto-Mount)
+ * Tệp tin: tab-menu.js (Thuần JavaScript 100% - Khắc phục hiển thị bảng ma trận)
  * =========================================================================
  */
 window.TabMenuController = (function() {
@@ -22,10 +22,9 @@ window.TabMenuController = (function() {
    * KHỞI CHẠY TẢI THỰC ĐƠN VÀ DANH MỤC VỚI CƠ CHẾ CHỜ DOM (AUTO-MOUNT)
    */
   async function init() {
-    // 1. Kiểm tra xem DOM của tab-menu.html đã được nhúng vào admin-shell chưa
     var tableBody = document.getElementById("menu-table-body");
     var tabContainer = document.getElementById("category-filter-tabs");
-    
+
     if ((!tableBody || !tabContainer) && initRetryCount < 10) {
       initRetryCount++;
       setTimeout(init, 60);
@@ -55,10 +54,10 @@ window.TabMenuController = (function() {
       var menuRes = results[0].status === "fulfilled" ? results[0].value : null;
       var catRes = results[1].status === "fulfilled" ? results[1].value : null;
 
-      // 2. BÓC TÁCH DỮ LIỆU ĐA TẦNG (MULTI-LAYER EXTRACTION) CHỐNG MẤT MÓN
+      // 1. Bóc tách an toàn danh sách món ăn
       rawMenuList = extractDishesFromResponse(menuRes);
 
-      // 3. Bóc tách danh mục từ phản hồi catalog hoặc API danh mục
+      // 2. Bóc tách danh mục từ phản hồi catalog hoặc API danh mục
       dynamicCategories = extractCategoriesFromResponse(menuRes, catRes);
 
     } catch (err) {
@@ -73,28 +72,22 @@ window.TabMenuController = (function() {
 
   /**
    * CỖ MÁY BÓC TÁCH DANH SÁCH MÓN ĂN VƯỢT MỌI CẤU TRÚC PHẢN HỒI
-   * @param {Object|Array} res - Phản hồi từ backend
-   * @returns {Array} Mảng các món ăn chuẩn hóa
    */
   function extractDishesFromResponse(res) {
     if (!res) return [];
 
-    // Trường hợp 1: Phản hồi chuẩn bọc trong res.data.items
     if (res.data && Array.isArray(res.data.items)) {
       return res.data.items;
     }
 
-    // Trường hợp 2: res.data trực tiếp là một mảng
     if (res.data && Array.isArray(res.data)) {
       return res.data;
     }
 
-    // Trường hợp 3: api.js đã unwrap và đưa về res.items
     if (Array.isArray(res.items)) {
       return res.items;
     }
 
-    // Trường hợp 4: res chính là mảng món ăn
     if (Array.isArray(res)) {
       return res;
     }
@@ -106,12 +99,10 @@ window.TabMenuController = (function() {
    * CỖ MÁY BÓC TÁCH DANH MỤC TỪ CÁC NGUỒN PHẢN HỒI
    */
   function extractCategoriesFromResponse(menuRes, catRes) {
-    // Ưu tiên 1: Đọc từ API danh mục chuyên trách
     if (catRes && catRes.status === "success" && Array.isArray(catRes.data) && catRes.data.length > 0) {
       return catRes.data;
     }
 
-    // Ưu tiên 2: Đọc từ trường categories gộp trong menuRes
     if (menuRes && menuRes.data && Array.isArray(menuRes.data.categories) && menuRes.data.categories.length > 0) {
       return menuRes.data.categories;
     }
@@ -130,7 +121,7 @@ window.TabMenuController = (function() {
         { code: "CAT_COMBO", icon: "🍱", name: "Combo Độc Quyền", slug: "combo", maxFcPercent: 35 },
         { code: "CAT_SOUP", icon: "🥣", name: "Súp Booster", slug: "nuoc", maxFcPercent: 30 },
         { code: "CAT_DRINK", icon: "🥤", name: "Nước 1L", slug: "giai-khat", maxFcPercent: 20 },
-        { code: "CAT_TOPPING", icon: "🍳", name: "Topping / Ăn Kèm", slug: "an-kem", maxFcPercent: 25 },
+        { code: "CAT_TOPPING", icon: "🍳", name: "Topping Thêm", slug: "an-kem", maxFcPercent: 25 },
         { code: "CAT_EXTEND", icon: "🍗", name: "Món Mở Rộng", slug: "mo-rong", maxFcPercent: 40 }
       ];
       return;
@@ -146,8 +137,8 @@ window.TabMenuController = (function() {
     if (!hasTopping) {
       dynamicCategories.push({
         code: "CAT_TOPPING",
-        icon: "🍳",
-        name: "Topping / Ăn Kèm",
+        icon: "🥓",
+        name: "Topping Thêm",
         slug: "an-kem",
         maxFcPercent: 25
       });
@@ -176,7 +167,49 @@ window.TabMenuController = (function() {
   }
 
   /**
-   * VẼ THANH TAB BỘ LỌC DANH MỤC ĐỘNG 100% (TỰ ĐỘNG SINH TAB TOPPING)
+   * CẬP NHẬT 4 KPI VẬN HÀNH BẾP & FOOD COST
+   */
+  function renderKpiMetrics(items) {
+    var total = items.length;
+    var activeCount = 0;
+    var boosterCount = 0;
+    var totalCogs = 0;
+    var totalPrice = 0;
+
+    items.forEach(function(i) {
+      if (String(i.status || "ACTIVE").toUpperCase() !== "OUT_OF_STOCK") {
+        activeCount++;
+      }
+
+      var c = String(i.category || i.categorySlug || "").toLowerCase();
+      var tag = String(i.tag || "").toUpperCase();
+      if (c.includes("súp") || c.includes("uống") || c.includes("nước") || c.includes("topping") || c.includes("an-kem") || tag === "BOOSTER") {
+        boosterCount++;
+      }
+
+      var p = Number(String(i.d2cPrice || i.priceD2c || i.price || 0).replace(/[^\d]/g, '')) || 0;
+      var cg = Number(String(i.cogs || i.cost || 0).replace(/[^\d]/g, '')) || 0;
+      if (p > 0) {
+        totalPrice += p;
+        totalCogs += cg;
+      }
+    });
+
+    var avgFc = totalPrice > 0 ? (totalCogs / totalPrice) * 100 : 0;
+
+    var elActive = document.getElementById("kpi-active-items");
+    var elTotal = document.getElementById("kpi-total-items");
+    var elFc = document.getElementById("kpi-avg-foodcost");
+    var elBooster = document.getElementById("kpi-booster-count");
+
+    if (elActive) elActive.innerText = activeCount;
+    if (elTotal) elTotal.innerText = "/ " + total + " món";
+    if (elFc) elFc.innerText = avgFc.toFixed(1) + "%";
+    if (elBooster) elBooster.innerText = boosterCount;
+  }
+
+  /**
+   * VẼ THANH TAB BỘ LỌC DANH MỤC ĐỘNG 100%
    */
   function renderCategoryTabs() {
     var container = document.getElementById("category-filter-tabs");
@@ -194,11 +227,10 @@ window.TabMenuController = (function() {
 
     dynamicCategories.forEach(function(cat) {
       var slug = String(cat.slug || cat.code || "").trim();
-      var icon = cat.icon || "🍽️";
+      var icon = cat.icon || "🍽️️";
       var name = cat.name || "Danh mục";
       var isActive = (currentCategoryFilter.toLowerCase() === slug.toLowerCase());
 
-      // Đếm số lượng món thuộc danh mục này
       var itemCount = rawMenuList.filter(function(item) {
         var itemCat = String(item.category || item.categorySlug || "").toLowerCase();
         var itemCode = String(item.category || "").toUpperCase();
@@ -260,6 +292,19 @@ window.TabMenuController = (function() {
     applyFiltersAndRender();
   }
   /**
+   * HÀM PHỤ TRỢ LÀM SẠCH VÀ CHUYỂN ĐỔI CHUỖI TIỀN TỆ THÀNH SỐ NGUYÊN (CHỐNG NAN)
+   * @param {*} val - Giá trị thô từ Google Sheets hoặc Form nhập
+   * @returns {number}
+   */
+  function cleanNumber(val) {
+    if (typeof val === "number") return isNaN(val) ? 0 : val;
+    if (!val) return 0;
+    var cleanedStr = String(val).replace(/[^\d]/g, '');
+    var parsed = Number(cleanedStr);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+
+  /**
    * LỌC DỮ LIỆU MÓN ĂN & CẬP NHẬT GIAO DIỆN BẢNG MA TRẬN REVERSE-PRICING
    */
   function applyFiltersAndRender() {
@@ -273,44 +318,48 @@ window.TabMenuController = (function() {
       if (currentCategoryFilter === "ALL") {
         matchCat = true;
       } else {
-        var itemCatSlug = String(item.category || item.categorySlug || "").toLowerCase();
-        var filterSlug = String(currentCategoryFilter).toLowerCase();
-        
-        // Khớp trực tiếp mã slug hoặc mã code danh mục
-        matchCat = (itemCatSlug === filterSlug) || 
-                   (itemCatSlug.includes(filterSlug)) ||
-                   (filterSlug === "an-kem" && (itemCatSlug.includes("topping") || itemCatSlug.includes("ăn kèm") || itemCatSlug.includes("an-kem")));
+        var itemCat = String(item.category || item.categorySlug || "").toLowerCase().trim();
+        var filterSlug = String(currentCategoryFilter).toLowerCase().trim();
+
+        // Khớp trực tiếp mã slug, tên danh mục hoặc mã code
+        matchCat = (itemCat === filterSlug) || 
+                   (itemCat.includes(filterSlug)) ||
+                   (filterSlug.includes(itemCat)) ||
+                   (filterSlug === "an-kem" && (itemCat.includes("topping") || itemCat.includes("ăn kèm") || itemCat.includes("thêm")));
       }
 
-      // 2. Lọc theo từ khóa tìm kiếm
+      // 2. Lọc theo từ khóa tìm kiếm (Tên món, mã SKU, danh mục)
       var matchQuery = true;
       if (query) {
         var itemName = String(item.name || "").toLowerCase();
         var itemCode = String(item.code || "").toLowerCase();
-        var itemCat = String(item.category || item.categorySlug || "").toLowerCase();
-        matchQuery = itemName.includes(query) || itemCode.includes(query) || itemCat.includes(query);
+        var itemCatStr = String(item.category || item.categorySlug || "").toLowerCase();
+        matchQuery = itemName.includes(query) || itemCode.includes(query) || itemCatStr.includes(query);
       }
 
       return matchCat && matchQuery;
     });
 
     renderMenuTable(filteredMenuList);
-    updateKpiMetrics(rawMenuList);
+    renderKpiMetrics(rawMenuList);
   }
 
   /**
-   * RENDER DỮ LIỆU VÀO BẢNG CHÍNH CHUẨN REVERSE-PRICING 13 CỘT
+   * RENDER DỮ LIỆU VÀO BẢNG CHÍNH CHUẨN REVERSE-PRICING 13 CỘT (BỌC THÉP TRỰC TIẾP)
    */
   function renderMenuTable(items) {
     var tbody = document.getElementById("menu-table-body");
     var emptyRow = document.getElementById("menu-empty-row");
     if (!tbody) return;
 
-    var oldRows = tbody.querySelectorAll(".menu-data-row");
-    oldRows.forEach(function(r) { r.remove(); });
+    // Xóa sạch toàn bộ các dòng cũ
+    tbody.innerHTML = "";
 
     if (!items || items.length === 0) {
-      if (emptyRow) emptyRow.classList.remove("hidden");
+      if (emptyRow) {
+        emptyRow.classList.remove("hidden");
+        tbody.appendChild(emptyRow);
+      }
       return;
     }
 
@@ -318,15 +367,15 @@ window.TabMenuController = (function() {
 
     var htmlBuffer = "";
     items.forEach(function(item) {
-      var appPrice = Number(item.appPrice || item.priceApp || 0);
+      var appPrice = cleanNumber(item.appPrice || item.priceApp);
       var discountPercent = (item.discountPercent !== undefined && item.discountPercent !== null && item.discountPercent !== "") 
-                            ? Number(item.discountPercent) 
-                            : (DEFAULT_PLATFORM_FEE_RATE * 100);
-      var d2cPrice = Number(item.d2cPrice || item.priceD2c || item.price || 0);
-      var cogs = Number(item.cogs || item.cost || 0);
-      var netProfit = Number(item.netProfit || 0);
+                            ? cleanNumber(item.discountPercent) 
+                            : Math.round(DEFAULT_PLATFORM_FEE_RATE * 100);
+      var d2cPrice = cleanNumber(item.d2cPrice || item.priceD2c || item.price);
+      var cogs = cleanNumber(item.cogs || item.cost);
+      var netProfit = cleanNumber(item.netProfit);
 
-      // Tự động tính toán Reverse-Pricing nếu thiếu giá
+      // Tự động tính toán giá Reverse-Pricing nếu thiếu dữ liệu giá D2C
       if (d2cPrice === 0 && appPrice > 0) {
         if (window.T5_DICT && typeof window.T5_DICT.calculateReversePricing === "function") {
           var pCalc = window.T5_DICT.calculateReversePricing(appPrice, cogs, discountPercent, 15);
@@ -353,22 +402,24 @@ window.TabMenuController = (function() {
 
       var imgUrl = item.imageUrl || item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100';
       var crossSell = item.crossSellSuggest || item.crossSell || '--';
+      var catName = item.category || item.categorySlug || 'Món Cơm';
+      var tagStr = item.tag || item.role || 'CORE';
 
-      var rowHtml = `
-        <tr class="menu-data-row hover:bg-slate-800/40 transition">
+      htmlBuffer += `
+        <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/40">
           <td class="py-2.5 px-3.5 flex items-center gap-2.5">
             <div class="w-10 h-10 rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden flex-shrink-0">
               <img src="${imgUrl}" alt="${item.name || 'Món'}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100'" />
             </div>
             <div class="space-y-0.5 overflow-hidden">
               <div class="flex items-center gap-1.5">
-                <span class="font-mono text-[10px] font-bold text-amber-400">${item.code}</span>
-                <span class="px-1.5 py-0.2 rounded text-[9px] font-mono bg-slate-800 text-slate-400 border border-slate-700">${item.tag || 'CORE'}</span>
+                <span class="font-mono text-[10px] font-bold text-amber-400">${item.code || 'SKU'}</span>
+                <span class="px-1.5 py-0.2 rounded text-[9px] font-mono bg-slate-800 text-slate-400 border border-slate-700">${tagStr}</span>
               </div>
-              <h4 class="font-bold text-white text-xs leading-tight truncate max-w-[190px]" title="${item.name}">${item.name}</h4>
+              <h4 class="font-bold text-white text-xs leading-tight truncate max-w-[190px]" title="${item.name || ''}">${item.name || 'Chưa đặt tên'}</h4>
             </div>
           </td>
-          <td class="py-2.5 px-3 text-center text-slate-300 font-medium text-[11px]">${item.category || item.categorySlug || 'Món Cơm'}</td>
+          <td class="py-2.5 px-3 text-center text-slate-300 font-medium text-[11px]">${catName}</td>
           <td class="py-2.5 px-3 text-right font-mono text-rose-400 text-xs font-bold">${cogs.toLocaleString('vi-VN')} đ</td>
           <td class="py-2.5 px-3 text-right font-mono font-black text-emerald-400 text-xs">+${netProfit.toLocaleString('vi-VN')} đ</td>
           <td class="py-2.5 px-3 text-right font-mono font-black text-amber-400 text-xs">${d2cPrice.toLocaleString('vi-VN')} đ</td>
@@ -381,64 +432,20 @@ window.TabMenuController = (function() {
           <td class="py-2.5 px-3 text-center font-mono text-slate-400 text-[11px]">${crossSell}</td>
           <td class="py-2.5 px-3 text-center">${statusBadge}</td>
           <td class="py-2.5 px-3.5 text-center">
-            <div class="flex items-center justify-center gap-1">
-              <button type="button" onclick="window.TabMenuController.openDishModal('${item.code}')" class="p-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition active:scale-95" title="Chỉnh sửa món">
+            <div class="flex items-center justify-center gap-1.5">
+              <button type="button" onclick="window.TabMenuController.openDishModal('${item.code}')" class="p-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition active:scale-95 shadow" title="Chỉnh sửa món">
                 <i class="fa-solid fa-pen-to-square text-[11px]"></i>
               </button>
-              <button type="button" onclick="window.TabMenuController.deleteDishItem('${item.code}')" class="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition active:scale-95" title="Xóa món">
+              <button type="button" onclick="window.TabMenuController.deleteDishItem('${item.code}')" class="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition active:scale-95 shadow" title="Xóa món">
                 <i class="fa-solid fa-trash text-[11px]"></i>
               </button>
             </div>
           </td>
         </tr>
       `;
-      htmlBuffer += rowHtml;
     });
 
-    tbody.insertAdjacentHTML("beforeend", htmlBuffer);
-  }
-
-  /**
-   * CẬP NHẬT 4 KPI VẬN HÀNH BẾP & FOOD COST
-   */
-  function updateKpiMetrics(items) {
-    var total = items.length;
-    var activeCount = 0;
-    var boosterCount = 0;
-    var totalCogs = 0;
-    var totalPrice = 0;
-
-    items.forEach(function(i) {
-      if (String(i.status || "").toUpperCase() !== "OUT_OF_STOCK") activeCount++;
-      var c = String(i.category || i.categorySlug || "").toLowerCase();
-      var tag = String(i.tag || "").toUpperCase();
-      if (c.includes("súp") || c.includes("uống") || c.includes("nước") || c.includes("topping") || c.includes("an-kem") || tag === "BOOSTER") {
-        boosterCount++;
-      }
-      var p = Number(i.d2cPrice || i.priceD2c || i.price || 0);
-      var cg = Number(i.cogs || i.cost || 0);
-      if (p > 0) {
-        totalPrice += p;
-        totalCogs += cg;
-      }
-    });
-
-    var avgFc = totalPrice > 0 ? (totalCogs / totalPrice) * 100 : 0;
-
-    var elActive = document.getElementById("kpi-active-items");
-    var elTotal = document.getElementById("kpi-total-items");
-    var elFc = document.getElementById("kpi-avg-foodcost");
-    var elBooster = document.getElementById("kpi-booster-count");
-
-    if (elActive) elActive.innerText = activeCount;
-    if (elTotal) elTotal.innerText = "/ " + total + " món";
-    if (elFc) elFc.innerText = avgFc.toFixed(1) + "%";
-    if (elBooster) elBooster.innerText = boosterCount;
-  }
-
-  function handleSearch(val) {
-    searchKeyword = String(val || "").trim();
-    applyFiltersAndRender();
+    tbody.innerHTML = htmlBuffer;
   }
 
   /**
@@ -454,7 +461,7 @@ window.TabMenuController = (function() {
 
     try {
       if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
-        throw new Error("Không tìm thấy kết nối Thim5API!");
+        throw new Error("Không tìm thấy kết nối Thim5API adapter!");
       }
 
       var actionName = (window.T5_DICT && window.T5_DICT.ACTIONS && window.T5_DICT.ACTIONS.TOGGLE_MENU_ITEM_STATUS)
@@ -463,7 +470,7 @@ window.TabMenuController = (function() {
 
       var res = await window.Thim5API.callGAS(actionName, { itemCode: code, status: newStatus });
       if (!res || res.status !== "success") {
-        throw new Error((res && res.message) ? res.message : "Lỗi cập nhật máy chủ");
+        throw new Error((res && res.message) ? res.message : "Lỗi cập nhật trạng thái");
       }
     } catch (e) {
       alert("❌ Không thể đồng bộ trạng thái món lên Google Sheets: " + e.message);
@@ -484,9 +491,9 @@ window.TabMenuController = (function() {
 
     if (!cogsInput || !priceInput || !appPriceInput) return;
 
-    var cogs = Number(cogsInput.value) || 0;
-    var d2cPrice = Number(priceInput.value) || 0;
-    var appPrice = Number(appPriceInput.value) || 0;
+    var cogs = cleanNumber(cogsInput.value);
+    var d2cPrice = cleanNumber(priceInput.value);
+    var appPrice = cleanNumber(appPriceInput.value);
 
     // Chiều 1: Nhập Giá App Sàn -> Tự động tính Giá Web D2C
     if (triggerSource === "APP" && appPrice > 0) {
@@ -652,13 +659,13 @@ window.TabMenuController = (function() {
       if (unitInp) unitInp.value = item.unit || "Phần";
 
       var cogsInp = document.getElementById("dish-cogs");
-      if (cogsInp) cogsInp.value = item.cogs || item.cost || "";
+      if (cogsInp) cogsInp.value = cleanNumber(item.cogs || item.cost) || "";
 
       var priceInp = document.getElementById("dish-price");
-      if (priceInp) priceInp.value = item.d2cPrice || item.price || "";
+      if (priceInp) priceInp.value = cleanNumber(item.d2cPrice || item.price) || "";
 
       var appPriceInp = document.getElementById("dish-app-price");
-      if (appPriceInp) appPriceInp.value = item.appPrice || item.priceApp || "";
+      if (appPriceInp) appPriceInp.value = cleanNumber(item.appPrice || item.priceApp) || "";
 
       var imgInp = document.getElementById("dish-image");
       if (imgInp) imgInp.value = item.imageUrl || item.image || "";
@@ -733,9 +740,9 @@ window.TabMenuController = (function() {
       var catVal = document.getElementById("dish-category") ? document.getElementById("dish-category").value : "com";
       var roleVal = document.getElementById("dish-role") ? document.getElementById("dish-role").value : "CORE";
       var unitVal = (document.getElementById("dish-unit") ? document.getElementById("dish-unit").value : "Phần").trim() || "Phần";
-      var cogsVal = Number(document.getElementById("dish-cogs") ? document.getElementById("dish-cogs").value : 0) || 0;
-      var priceVal = Number(document.getElementById("dish-price") ? document.getElementById("dish-price").value : 0) || 0;
-      var appPriceVal = Number(document.getElementById("dish-app-price") ? document.getElementById("dish-app-price").value : 0) || 0;
+      var cogsVal = cleanNumber(document.getElementById("dish-cogs") ? document.getElementById("dish-cogs").value : 0);
+      var priceVal = cleanNumber(document.getElementById("dish-price") ? document.getElementById("dish-price").value : 0);
+      var appPriceVal = cleanNumber(document.getElementById("dish-app-price") ? document.getElementById("dish-app-price").value : 0);
       var rawImgVal = (document.getElementById("dish-image") ? document.getElementById("dish-image").value : "").trim();
       var statusVal = document.getElementById("dish-status") ? document.getElementById("dish-status").value : "ACTIVE";
       var descVal = (document.getElementById("dish-desc") ? document.getElementById("dish-desc").value : "").trim();
@@ -1012,8 +1019,8 @@ window.TabMenuController = (function() {
             code: parts[0].trim().toUpperCase(),
             name: parts[1].trim(),
             category: parts[2].trim() || "Món Cơm",
-            cogs: Number(parts[3]) || 0,
-            price: Number(parts[4]) || 0,
+            cogs: cleanNumber(parts[3]),
+            price: cleanNumber(parts[4]),
             role: parts[5] ? parts[5].trim().toUpperCase() : "CORE"
           });
         }
@@ -1150,8 +1157,8 @@ window.TabMenuController = (function() {
     if (tbody) {
       tbody.innerHTML = "";
       items.forEach(function(m, idx) {
-        var cogs = Number(m.cogs || m.cost) || 0;
-        var price = Number(m.d2cPrice || m.price) || 0;
+        var cogs = cleanNumber(m.cogs || m.cost);
+        var price = cleanNumber(m.d2cPrice || m.price);
         var fc = price > 0 ? ((cogs / price) * 100).toFixed(1) + "%" : "0%";
 
         var tr = `
