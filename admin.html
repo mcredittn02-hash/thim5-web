@@ -146,18 +146,24 @@
     </div>
 
   </div>
-
-  <!-- BỘ NÃO JAVASCRIPT CONTROLLER ĐIỀU HÀNH XÁC THỰC -->
+  <!-- BỘ NÃO JAVASCRIPT CONTROLLER ĐIỀU HÀNH XÁC THỰC CHUẨN HÓA -->
   <script>
     /**
-     * CONTROLLER: ADMIN LOGIN GATEWAY (v2.9 ENTERPRISE)
+     * =========================================================================
+     * CONTROLLER: ADMIN LOGIN GATEWAY (v3.2 SAAS ENTERPRISE)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+     * Kiến trúc: Loại bỏ Premature Submit, Hỗ trợ Master Key dài, Đồng bộ Token
+     * =========================================================================
      */
     var AdminLoginController = (function() {
       var currentMode = "PIN"; // "PIN" hoặc "SUPER"
       var currentPin = "";
       var isSubmitting = false;
 
-      // Cập nhật giao diện chấm PIN
+      /**
+       * CẬP NHẬT TRỰC QUAN CÁC CHẤM PIN TRÊN MÀN HÌNH
+       */
       function updateDots() {
         for (var i = 0; i < 4; i++) {
           var dot = document.getElementById("pin-dot-" + i);
@@ -170,17 +176,24 @@
         }
       }
 
+      /**
+       * NHẬP KÝ TỰ SỐ VÀO BIẾN ĐỆM
+       * ĐÃ LOẠI BỎ HOÀN TOÀN LỖI TỰ ĐỘNG GỬI SỚM KHI CHẠM MỐC 4 KÝ TỰ
+       */
       function pressDigit(d) {
         if (isSubmitting) return;
-        if (currentPin.length < 6) {
-          currentPin += d;
+        showStatus("", "");
+
+        // Cho phép nhập tối đa 20 ký tự (hỗ trợ cả mã PIN thông thường lẫn chuỗi ký tự dài)
+        if (currentPin.length < 20) {
+          currentPin += String(d);
           updateDots();
-          if (currentPin.length === 4) {
-            submitCurrentMode();
-          }
         }
       }
 
+      /**
+       * XÓA TOÀN BỘ MÃ ĐANG NHẬP
+       */
       function clearAll() {
         if (isSubmitting) return;
         currentPin = "";
@@ -188,14 +201,21 @@
         showStatus("", "");
       }
 
+      /**
+       * XÓA KÝ TỰ CUỐI CÙNG (BACKSPACE)
+       */
       function backspace() {
         if (isSubmitting) return;
         if (currentPin.length > 0) {
           currentPin = currentPin.slice(0, -1);
           updateDots();
+          showStatus("", "");
         }
       }
 
+      /**
+       * CHUYỂN ĐỔI CHẾ ĐỘ XÁC THỰC (PIN NHANH VS SUPER ADMIN 2FA)
+       */
       function switchMode(mode) {
         currentMode = mode;
         var pinBox = document.getElementById("mode-pin-container");
@@ -207,21 +227,25 @@
         clearAll();
 
         if (mode === "PIN") {
-          pinBox.classList.remove("hidden");
-          superBox.classList.add("hidden");
-          btnPin.className = "flex-1 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow";
-          btnSuper.className = "flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
-          subTitle.innerText = "Nhập mã PIN quyền hạn để tiếp tục:";
+          if (pinBox) pinBox.classList.remove("hidden");
+          if (superBox) superBox.classList.add("hidden");
+          if (btnPin) btnPin.className = "flex-1 py-1.5 rounded-xl transition bg-amber-500 text-slate-950 shadow";
+          if (btnSuper) btnSuper.className = "flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
+          if (subTitle) subTitle.innerText = "Nhập mã PIN quyền hạn để tiếp tục:";
         } else {
-          pinBox.classList.add("hidden");
-          superBox.classList.remove("hidden");
-          btnSuper.className = "flex-1 py-1.5 rounded-xl transition bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 shadow font-black";
-          btnPin.className = "flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
-          subTitle.innerText = "Xác thực 2 lớp dành riêng cho Super Admin:";
-          document.getElementById("input-master-key").focus();
+          if (pinBox) pinBox.classList.add("hidden");
+          if (superBox) superBox.classList.remove("hidden");
+          if (btnSuper) btnSuper.className = "flex-1 py-1.5 rounded-xl transition bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 shadow font-black";
+          if (btnPin) btnPin.className = "flex-1 py-1.5 rounded-xl transition text-slate-400 hover:text-white";
+          if (subTitle) subTitle.innerText = "Xác thực 2 lớp dành riêng cho Super Admin:";
+          var masterInput = document.getElementById("input-master-key");
+          if (masterInput) masterInput.focus();
         }
       }
 
+      /**
+       * HIỂN THỊ THÔNG BÁO PHẢN HỒI TRẠNG THÁI
+       */
       function showStatus(text, type) {
         var el = document.getElementById("status-message");
         if (!el) return;
@@ -231,20 +255,28 @@
         } else if (type === "error") {
           el.className = "text-xs font-bold text-rose-400";
           triggerShake();
+        } else if (type === "loading") {
+          el.className = "text-xs font-medium text-amber-400 flex items-center justify-center gap-1.5";
         } else {
           el.className = "text-xs text-slate-400";
         }
       }
 
+      /**
+       * HIỆU ỨNG RUNG LẮC KHI NHẬP SAI THÔNG TIN
+       */
       function triggerShake() {
         var card = document.getElementById("login-card");
         if (card) {
           card.classList.remove("animate-shake");
-          void card.offsetWidth; // Trigger reflow
+          void card.offsetWidth; // Trigger reflow ép kích hoạt lại keyframe
           card.classList.add("animate-shake");
         }
       }
 
+      /**
+       * BỘ ĐIỀU PHỐI SUBMIT THEO CHẾ ĐỘ HIỆN HÀNH
+       */
       function submitCurrentMode() {
         if (currentMode === "PIN") {
           submitPinAuth();
@@ -253,50 +285,76 @@
         }
       }
 
-      // Xử lý xác thực mã PIN POS (1985 / 2026)
+      /**
+       * XỬ LÝ XÁC THỰC MÃ PIN POS (1985 / 2026 / MASTER KEY)
+       */
       async function submitPinAuth() {
-        if (!currentPin) {
-          showStatus("Vui lòng nhập mã PIN quyền hạn!", "error");
+        var cleanPin = currentPin.trim();
+
+        if (!cleanPin) {
+          showStatus("Vui lòng nhập mã PIN quyền hạn để tiếp tục!", "error");
           return;
         }
 
         isSubmitting = true;
         var btn = document.getElementById("btn-verify");
         var btnText = document.getElementById("btn-verify-text");
-        btn.disabled = true;
-        btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Xác Thực...';
+        if (btn) btn.disabled = true;
+        if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Xác Thực...';
         showStatus("Đang kiểm tra quyền hạn máy chủ...", "loading");
 
         try {
-          var res = await Thim5API.callGAS("verifyAdminRole", { pin: currentPin });
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+            throw new Error("Chưa kết nối module Thim5API adapter (kiểm tra lại file api.js)!");
+          }
+
+          var res = await Thim5API.callGAS("verifyAdminRole", {
+            pin: cleanPin,
+            passcode: cleanPin
+          });
 
           if (res && res.status === "success" && res.data) {
-            sessionStorage.setItem("thim5_auth_role", res.data.role);
-            sessionStorage.setItem("thim5_admin_token", res.data.authToken || "");
-            
-            showStatus("🎉 " + res.data.message + " Đang vào hệ thống...", "success");
+            var role = res.data.role || "POS_STAFF";
+            var token = res.data.authToken || "";
+
+            // Lưu đồng bộ cả 2 định dạng khóa vào sessionStorage
+            sessionStorage.setItem("thim5_auth_role", role);
+            sessionStorage.setItem("thim5_admin_token", token);
+            sessionStorage.setItem("THIM5_AUTH_TOKEN", token);
+            sessionStorage.setItem("THIM5_ADMIN_ROLE", role);
+            sessionStorage.setItem("THIM5_ROLE_TITLE", res.data.roleTitle || "");
+
+            showStatus("🎉 " + (res.data.message || "Xác thực thành công!") + " Đang vào hệ thống...", "success");
 
             setTimeout(function() {
               window.location.replace("admin-shell.html");
             }, 350);
 
           } else {
-            showStatus("❌ " + (res.message || "Mã PIN không chính xác!"), "error");
+            var errMsg = (res && res.message) ? res.message : "Mã PIN quyền hạn không chính xác!";
+            showStatus("❌ " + errMsg, "error");
             clearAll();
           }
         } catch (err) {
+          console.error("Lỗi xác thực mã PIN:", err);
           showStatus("❌ Lỗi kết nối: " + err.message, "error");
+          clearAll();
         } finally {
           isSubmitting = false;
-          btn.disabled = false;
-          btnText.innerText = "Xác Thực Quyền Truy Cập";
+          if (btn) btn.disabled = false;
+          if (btnText) btnText.innerText = "Xác Thực Quyền Truy Cập";
         }
       }
 
-      // Xử lý xác thực Super Admin 2FA
+      /**
+       * XỬ LÝ XÁC THỰC SUPER ADMIN 2FA (MASTER KEY + TOTP)
+       */
       async function submitSuperTotpAuth() {
-        var masterKey = document.getElementById("input-master-key").value.trim();
-        var totpCode = document.getElementById("input-totp-code").value.trim();
+        var masterKeyInput = document.getElementById("input-master-key");
+        var totpCodeInput = document.getElementById("input-totp-code");
+
+        var masterKey = masterKeyInput ? masterKeyInput.value.trim() : "";
+        var totpCode = totpCodeInput ? totpCodeInput.value.trim().replace(/\s/g, '') : "";
 
         if (!masterKey || !totpCode) {
           showStatus("Vui lòng nhập đầy đủ Master Key và Mã TOTP 6 số!", "error");
@@ -306,20 +364,29 @@
         isSubmitting = true;
         var btn = document.getElementById("btn-verify");
         var btnText = document.getElementById("btn-verify-text");
-        btn.disabled = true;
-        btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Kiểm Toán 2FA...';
+        if (btn) btn.disabled = true;
+        if (btnText) btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Kiểm Toán 2FA...';
         showStatus("Đang kiểm tra bảo mật Google Authenticator...", "loading");
 
         try {
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+            throw new Error("Chưa kết nối module Thim5API adapter!");
+          }
+
           var res = await Thim5API.callGAS("verifySuperAdminTotp", {
             masterKey: masterKey,
             totpCode: totpCode
           });
 
           if (res && res.status === "success" && res.data) {
+            var sessionToken = res.data.sessionToken || "";
+
+            // Lưu phiên Super Admin toàn cục
             sessionStorage.setItem("thim5_auth_role", "SUPER_ADMIN");
             sessionStorage.setItem("thim5_master_key", masterKey);
-            sessionStorage.setItem("thim5_admin_token", res.data.sessionToken || "");
+            sessionStorage.setItem("thim5_admin_token", sessionToken);
+            sessionStorage.setItem("THIM5_AUTH_TOKEN", sessionToken);
+            sessionStorage.setItem("THIM5_ADMIN_ROLE", "SUPER_ADMIN");
 
             showStatus("🎉 Xác thực 2FA thành công! Đang chuyển hướng...", "success");
 
@@ -328,20 +395,26 @@
             }, 350);
 
           } else {
-            showStatus("❌ " + (res.message || "Xác thực 2FA thất bại!"), "error");
+            var errMsg = (res && res.message) ? res.message : "Xác thực 2FA thất bại!";
+            showStatus("❌ " + errMsg, "error");
           }
         } catch (err) {
+          console.error("Lỗi xác thực 2FA:", err);
           showStatus("❌ Lỗi kết nối 2FA: " + err.message, "error");
         } finally {
           isSubmitting = false;
-          btn.disabled = false;
-          btnText.innerText = "Xác Thực Quyền Truy Cập";
+          if (btn) btn.disabled = false;
+          if (btnText) btnText.innerText = "Xác Thực Quyền Truy Cập";
         }
       }
 
-      // Gửi mã OTP khẩn cấp về haiau2205@gmail.com
+      /**
+       * GỬI MÃ OTP CỨU HỘ KHẨN CẤP VỀ GMAIL SUPER ADMIN
+       */
       async function requestEmergencyOtp() {
-        var masterKey = document.getElementById("input-master-key").value.trim();
+        var masterKeyInput = document.getElementById("input-master-key");
+        var masterKey = masterKeyInput ? masterKeyInput.value.trim() : "";
+
         if (!masterKey) {
           masterKey = prompt("Vui lòng nhập Master Key để gửi mã khẩn cấp về Gmail haiau2205@gmail.com:");
         }
@@ -349,11 +422,19 @@
 
         showStatus("Đang gửi mã giải cứu về Gmail...", "loading");
         try {
-          var res = await Thim5API.callGAS("sendEmergencyBackupOtpToEmail", { masterKey: masterKey.trim() });
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+            throw new Error("Chưa kết nối Thim5API!");
+          }
+
+          var res = await Thim5API.callGAS("sendEmergencyBackupOtpToEmail", { 
+            masterKey: masterKey.trim() 
+          });
+
           if (res && res.status === "success") {
-            alert("📬 " + res.data.message);
-            document.getElementById("input-master-key").value = masterKey.trim();
-            document.getElementById("input-totp-code").focus();
+            alert("📬 " + (res.data ? res.data.message : "Đã gửi mã giải cứu khẩn cấp qua Gmail!"));
+            if (masterKeyInput) masterKeyInput.value = masterKey.trim();
+            var totpInput = document.getElementById("input-totp-code");
+            if (totpInput) totpInput.focus();
             showStatus("Đã gửi mã giải cứu thành công.", "success");
           } else {
             showStatus("⛔ " + (res.message || "Không thể gửi mã cứu hộ!"), "error");
@@ -363,12 +444,15 @@
         }
       }
 
-      // Hỗ trợ nhập liệu bàn phím máy tính
+      /**
+       * HỖ TRỢ NHẬP LIỆU TỪ BÀN PHÍM VẬT LÝ MÁY TÍNH
+       */
       window.addEventListener("keydown", function(e) {
         if (currentMode !== "PIN") {
           if (e.key === "Enter") submitCurrentMode();
           return;
         }
+
         if (e.key >= "0" && e.key <= "9") {
           pressDigit(e.key);
         } else if (e.key === "Backspace") {
@@ -380,14 +464,17 @@
         }
       });
 
-      // Tự động chuyển trang nếu phiên làm việc trước đó vẫn còn hiệu lực
+      /**
+       * TỰ ĐỘNG CHUYỂN TRANG NẾU PHIÊN ĐĂNG NHẬP TRƯỚC ĐÓ VẪN CÒN HIỆU LỰC
+       */
       window.addEventListener("DOMContentLoaded", function() {
-        var savedRole = sessionStorage.getItem("thim5_auth_role");
+        var savedRole = sessionStorage.getItem("thim5_auth_role") || sessionStorage.getItem("THIM5_ADMIN_ROLE");
         if (savedRole) {
           window.location.replace("admin-shell.html");
         }
       });
 
+      // Public API ra ngoài phạm vi điều khiển
       return {
         pressDigit: pressDigit,
         clearAll: clearAll,
