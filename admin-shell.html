@@ -1220,7 +1220,10 @@
       }
       /**
        * CHUYỂN ĐỔI TAB CHÍNH VÀ NẠP COMPONENT ĐỘNG (SAFE COMPONENT LOADER)
-       * Khắc phục triệt để lỗi tìm sai ID DOM outlet và class nút bấm
+       * Chuẩn hóa 100% cú pháp, triệt tiêu lỗi thiếu dấu và mất màu syntax
+       * 
+       * @param {string} tabKey - Mã định danh tab ("pl", "menu", "orders", "shippers", "control-plane", "campaign")
+       * @param {HTMLElement|null} btnElement - Thẻ nút bấm vừa click trên Sidebar
        */
       async function switchMainTab(tabKey, btnElement) {
         currentActiveTab = tabKey;
@@ -1233,7 +1236,7 @@
         if (btnElement) {
           btnElement.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 active";
         } else {
-          var matchedBtn = document.querySelector(`.sidebar-nav-btn[data-tab="${tabKey}"]`);
+          var matchedBtn = document.querySelector('.sidebar-nav-btn[data-tab="' + tabKey + '"]');
           if (matchedBtn) {
             matchedBtn.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 active";
           }
@@ -1244,7 +1247,9 @@
 
         // 2. Xử lý hiển thị Tab Super Control Plane riêng biệt
         if (tabKey === "control-plane") {
-          if (outlet) outlet.classList.add("hidden");
+          if (outlet) {
+            outlet.classList.add("hidden");
+          }
           if (superView) {
             superView.classList.remove("hidden");
             loadSystemConfigData();
@@ -1253,25 +1258,33 @@
           return;
         }
 
-        // Với các Tab khác: Hiện Outlet động, ẩn Super Control Plane
-        if (superView) superView.classList.add("hidden");
-        if (!outlet) return;
+        // Với các Tab nghiệp vụ khác: Hiện Outlet động, ẩn Super Control Plane
+        if (superView) {
+          superView.classList.add("hidden");
+        }
+
+        if (!outlet) {
+          console.error("❌ Không tìm thấy vùng chứa DOM #dynamic-tab-outlet!");
+          return;
+        }
+
         outlet.classList.remove("hidden");
 
-        // Hiển thị vòng xoay nạp dữ liệu mượt mà
-        outlet.innerHTML = `
-          <div class="py-20 text-center text-slate-400 space-y-3">
-            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-amber-400"></i>
-            <p class="text-xs font-mono">Đang nạp phân hệ [${tabKey.toUpperCase()}]...</p>
-          </div>
-        `;
+        // Hiển thị vòng xoay nạp dữ liệu mượt mà (Chuẩn hóa nối chuỗi an toàn, không kẹt backtick)
+        outlet.innerHTML = 
+          '<div class="py-20 text-center text-slate-400 space-y-3">' +
+            '<i class="fa-solid fa-circle-notch fa-spin text-3xl text-amber-400"></i>' +
+            '<p class="text-xs font-mono">Đang nạp phân hệ [' + tabKey.toUpperCase() + ']...</p>' +
+          '</div>';
 
         // Tự động đóng Sidebar trên thiết bị di động sau khi chọn tab
         toggleSidebar(false);
 
         // Xác định đường dẫn tệp tin HTML view tương ứng
         var fileName = "tab-" + tabKey + ".html";
-        if (tabKey === "config") fileName = "tab-system-config.html";
+        if (tabKey === "config") {
+          fileName = "tab-system-config.html";
+        }
 
         try {
           var response = await fetch(fileName + "?v=" + Date.now());
@@ -1302,6 +1315,12 @@
 
       /**
        * TỰ ĐỘNG RENDER KHUNG VIEW DỰ PHÒNG NẾU FILE CHƯA ĐƯỢC TẢI LÊN HOSTING
+       * Khắc phục triệt để lỗi gãy chuỗi HTML nội suy
+       * 
+       * @param {HTMLElement} container - Vùng chứa outlet
+       * @param {string} tabKey - Mã tab
+       * @param {string} fileName - Tên file html tương ứng
+       * @param {string} errorDetail - Chi tiết lỗi kết nối
        */
       function renderFallbackTabContent(container, tabKey, fileName, errorDetail) {
         if (!container) return;
@@ -1317,53 +1336,41 @@
 
         var title = tabTitles[tabKey] || ("Phân Hệ " + tabKey.toUpperCase());
 
-        container.innerHTML = `
-          <div class="max-w-4xl mx-auto my-8 p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-6 animate-in fade-in-50 duration-200 text-slate-100">
-            
-            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg">
-                  <i class="fa-solid fa-puzzle-piece"></i>
-                </div>
-                <div>
-                  <h3 class="text-sm font-black uppercase tracking-wider text-white">${title}</h3>
-                  <p class="text-[11px] font-mono text-slate-400">File module: <span class="text-amber-400">${fileName}</span></p>
-                </div>
-              </div>
-
-              <span class="px-3 py-1 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-mono font-bold">
-                Mô-đun Đang Khởi Tạo
-              </span>
-            </div>
-
-            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2 text-xs">
-              <p class="font-bold text-slate-300">Thông báo từ Hệ Thống SaaS Control Plane:</p>
-              <p class="text-slate-400 leading-relaxed text-[11px]">
-                File <code class="text-amber-400 font-mono font-bold">${fileName}</code> chưa được tải lên hosting máy chủ.
-                ${errorDetail ? `<br><span class="text-rose-400 font-mono">Chi tiết: ${errorDetail}</span>` : ""}
-              </p>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-3 pt-2">
-              <button type="button" 
-                      onclick="AdminShellController.switchMainTab('${tabKey}', null)" 
-                      class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition active:scale-95 flex items-center gap-2 shadow">
-                <i class="fa-solid fa-rotate-right text-amber-400"></i>
-                <span>Tải Lại Phân Hệ</span>
-              </button>
-
-              <button type="button" 
-                      onclick="AdminShellController.switchMainTab('control-plane', null)" 
-                      class="px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition active:scale-95 flex items-center gap-2">
-                <i class="fa-solid fa-sliders"></i>
-                <span>Mở Super Control Plane</span>
-              </button>
-            </div>
-
-          </div>
-        `;
+        container.innerHTML = 
+          '<div class="max-w-4xl mx-auto my-8 p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-6 animate-in fade-in-50 duration-200 text-slate-100">' +
+            '<div class="flex items-center justify-between border-b border-slate-800 pb-4">' +
+              '<div class="flex items-center gap-3">' +
+                '<div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg">' +
+                  '<i class="fa-solid fa-puzzle-piece"></i>' +
+                '</div>' +
+                '<div>' +
+                  '<h3 class="text-sm font-black uppercase tracking-wider text-white">' + title + '</h3>' +
+                  '<p class="text-[11px] font-mono text-slate-400">File module: <span class="text-amber-400">' + fileName + '</span></p>' +
+                '</div>' +
+              '</div>' +
+              '<span class="px-3 py-1 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-mono font-bold">' +
+                'Mô-đun Đang Khởi Tạo' +
+              '</span>' +
+            '</div>' +
+            '<div class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2 text-xs">' +
+              '<p class="font-bold text-slate-300">Thông báo từ Hệ Thống SaaS Control Plane:</p>' +
+              '<p class="text-slate-400 leading-relaxed text-[11px]">' +
+                'File <code class="text-amber-400 font-mono font-bold">' + fileName + '</code> chưa được tải lên hosting máy chủ.' +
+                (errorDetail ? '<br><span class="text-rose-400 font-mono">Chi tiết: ' + errorDetail + '</span>' : '') +
+              '</p>' +
+            '</div>' +
+            '<div class="flex flex-wrap items-center gap-3 pt-2">' +
+              '<button type="button" onclick="AdminShellController.switchMainTab(\'' + tabKey + '\', null)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition active:scale-95 flex items-center gap-2 shadow">' +
+                '<i class="fa-solid fa-rotate-right text-amber-400"></i>' +
+                '<span>Tải Lại Phân Hệ</span>' +
+              '</button>' +
+              '<button type="button" onclick="AdminShellController.switchMainTab(\'control-plane\', null)" class="px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs transition active:scale-95 flex items-center gap-2">' +
+                '<i class="fa-solid fa-sliders"></i>' +
+                '<span>Mở Super Control Plane</span>' +
+              '</button>' +
+            '</div>' +
+          '</div>';
       }
-
       /**
        * NHỊP ĐẬP HỆ THỐNG HEARTBEAT PING (ĐỒNG BỘ ĐỘ TRỄ MẠNG REALTIME)
        */
