@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mì Trộn Thím 5 • Đặt Món Trực Tiếp D2C Đất Thánh</title>
+    <title>Mì Trộn Thím 5 • Đặt Món Trực Tiếp D2C</title>
     
     <!-- PWA Metadata & Favicon -->
     <meta name="theme-color" content="#020617">
@@ -28,15 +28,132 @@
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
                         mono: ['monospace']
+                    },
+                    colors: {
+                        brand: {
+                            primary: 'var(--brand-primary)',
+                            secondary: 'var(--brand-secondary)',
+                            accent: 'var(--brand-accent)',
+                            bg: 'var(--brand-bg)'
+                        }
                     }
                 }
             }
         }
     </script>
 
+    <!-- ========================================================================= -->
+    <!-- MARKETING TRACKING ENGINE: GOOGLE ANALYTICS 4, META PIXEL & TIKTOK PIXEL  -->
+    <!-- Nạp bất đồng bộ (Non-blocking), tự động nhận diện ID từ cấu hình hệ thống -->
+    <!-- ========================================================================= -->
+    <script>
+        (function() {
+            var cachedCfg = {};
+            try {
+                cachedCfg = JSON.parse(localStorage.getItem("T5_CACHED_CONFIG") || "{}");
+            } catch(e) {}
+
+            // 1. Google Analytics 4 (GA4)
+            var ga4Id = cachedCfg.GA4_MEASUREMENT_ID || "G-XXXXXXXXXX";
+            if (ga4Id && ga4Id !== "G-XXXXXXXXXX") {
+                var gaScript = document.createElement("script");
+                gaScript.async = true;
+                gaScript.src = "https://www.googletagmanager.com/gtag/js?id=" + ga4Id;
+                document.head.appendChild(gaScript);
+
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                window.gtag = gtag;
+                gtag('js', new Date());
+                gtag('config', ga4Id);
+            }
+
+            // 2. Meta Pixel (Facebook Ads)
+            var metaId = cachedCfg.META_PIXEL_ID || "XXXXXXXXXXXXXXXX";
+            if (metaId && metaId !== "XXXXXXXXXXXXXXXX") {
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', metaId);
+                fbq('track', 'PageView');
+            }
+
+            // 3. TikTok Pixel
+            var tiktokId = cachedCfg.TIKTOK_PIXEL_ID || "XXXXXXXXXXXXXXXX";
+            if (tiktokId && tiktokId !== "XXXXXXXXXXXXXXXX") {
+                !function (w, d, t) {
+                  w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+                  ttq.load(tiktokId);
+                  ttq.page();
+                }(window, document, 'ttq');
+            }
+        })();
+    </script>
+
+    <!-- ========================================================================= -->
+    <!-- DYNAMIC SEASONAL THEME ENGINE: CSS BIẾN MÀU THEO MÙA LỄ HỘI              -->
+    <!-- ========================================================================= -->
     <style>
+        :root {
+            /* MẶC ĐỊNH: Đất Thánh Thím 5 (Đỏ - Cam - Hổ Phách) */
+            --brand-primary: #f59e0b;
+            --brand-secondary: #dc2626;
+            --brand-accent: #10b981;
+            --brand-bg: #020617;
+            --brand-gradient: linear-gradient(135deg, #dc2626, #ea580c, #f59e0b);
+            --brand-badge-bg: rgba(245, 158, 11, 0.1);
+            --brand-badge-border: rgba(245, 158, 11, 0.3);
+            --brand-badge-text: #fbbf24;
+        }
+
+        /* SKIN: HALLOWEEN (Cam Bí Ngô & Tím Huyền Bí) */
+        html.skin-halloween {
+            --brand-primary: #f97316;
+            --brand-secondary: #9333ea;
+            --brand-accent: #a855f7;
+            --brand-bg: #090314;
+            --brand-gradient: linear-gradient(135deg, #7e22ce, #c2410c, #ea580c);
+            --brand-badge-bg: rgba(249, 115, 22, 0.15);
+            --brand-badge-border: rgba(168, 85, 247, 0.4);
+            --brand-badge-text: #fb923c;
+        }
+
+        /* SKIN: GIÁNG SINH / NOEL (Đỏ Tuyết & Xanh Thông) */
+        html.skin-xmas {
+            --brand-primary: #ef4444;
+            --brand-secondary: #059669;
+            --brand-accent: #38bdf8;
+            --brand-bg: #02120e;
+            --brand-gradient: linear-gradient(135deg, #dc2626, #16a34a, #059669);
+            --brand-badge-bg: rgba(239, 68, 68, 0.15);
+            --brand-badge-border: rgba(5, 150, 105, 0.4);
+            --brand-badge-text: #f87171;
+        }
+
+        /* SKIN: TẾT NGUYÊN ĐÁN (Đỏ May Mắn & Vàng Hoàng Kim) */
+        html.skin-tet {
+            --brand-primary: #eab308;
+            --brand-secondary: #b91c1c;
+            --brand-accent: #fbbf24;
+            --brand-bg: #150204;
+            --brand-gradient: linear-gradient(135deg, #991b1b, #dc2626, #eab308);
+            --brand-badge-bg: rgba(234, 179, 8, 0.15);
+            --brand-badge-border: rgba(220, 38, 38, 0.5);
+            --brand-badge-text: #fde047;
+        }
+
         * { -webkit-tap-highlight-color: transparent; }
-        body { background-color: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { 
+            background-color: var(--brand-bg); 
+            color: #f8fafc; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            transition: background-color 0.4s ease;
+        }
         .custom-scroll::-webkit-scrollbar { display: none; }
         .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -71,7 +188,7 @@
                 </div>
             </div>
 
-            <!-- Cụm Nút Bấm: Ghim App & Hotline (Đọc động từ SYS_CONFIG) -->
+            <!-- Cụm Nút Bấm: Ghim App & Hotline (Đồng bộ cấu hình động) -->
             <div class="shrink-0 flex items-center gap-1.5">
                 <button type="button" 
                         id="btn-install-pwa" 
@@ -128,7 +245,6 @@
         </div>
 
     </section>
-    
     <!-- ========================================================================= -->
     <!-- 3. THANH TÌM KIẾM MÓN ĂN & BỘ LỌC DANH MỤC MA TRẬN ĐA NGÀNH HÀNG         -->
     <!-- ========================================================================= -->
@@ -152,8 +268,8 @@
             </button>
         </div>
 
-        <!-- Thanh Trượt Bộ Lọc Danh Mục Ngang (Tự Động Sinh Từ SYS_CATEGORIES) -->
-        <div id="storefront-category-tabs" class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 -mx-3 px-3 select-none">
+        <!-- Thanh Trượt Bộ Lọc Danh Mục Ngang -->
+        <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 -mx-3 px-3 select-none" id="categories-filter-bar">
             <button type="button" 
                     data-cat="all" 
                     onclick="D2CStoreFrontController.filterCategory('all', this)" 
@@ -161,11 +277,59 @@
                 <i class="fa-solid fa-fire text-xs"></i>
                 <span>Tất Cả Món</span>
             </button>
+
+            <button type="button" 
+                    data-cat="cơm" 
+                    onclick="D2CStoreFrontController.filterCategory('cơm', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-bowl-rice text-xs text-amber-400"></i>
+                <span>Món Cơm</span>
+            </button>
+
+            <button type="button" 
+                    data-cat="combo" 
+                    onclick="D2CStoreFrontController.filterCategory('combo', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-crown text-xs text-amber-400"></i>
+                <span>Combo Đại Tiệc</span>
+            </button>
+
+            <button type="button" 
+                    data-cat="kho" 
+                    onclick="D2CStoreFrontController.filterCategory('kho', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-bowl-food text-xs text-red-400"></i>
+                <span>Mì Trộn (Khô)</span>
+            </button>
+
+            <button type="button" 
+                    data-cat="nuoc" 
+                    onclick="D2CStoreFrontController.filterCategory('nuoc', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-spoon text-xs text-sky-400"></i>
+                <span>Món Nước Súp</span>
+            </button>
+
+            <button type="button" 
+                    data-cat="an-kem" 
+                    onclick="D2CStoreFrontController.filterCategory('an-kem', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-cookie-bite text-xs text-amber-400"></i>
+                <span>Ăn Kèm &amp; Topping</span>
+            </button>
+
+            <button type="button" 
+                    data-cat="giai-khat" 
+                    onclick="D2CStoreFrontController.filterCategory('giai-khat', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-bottle-water text-xs text-emerald-400"></i>
+                <span>Giải Khát (1L)</span>
+            </button>
         </div>
     </section>
 
     <!-- ========================================================================= -->
-    <!-- 4. KHU VỰC MENU GRID HIỂN THỊ DANH SÁCH MÓN ĂN THỰC TẾ                    -->
+    <!-- 4. KHU VỰC MENU GRID HIỂN THỊ DANH SÁCH MÓN ĂN THỰC TẾ (13 CỘT REVERSE)   -->
     <!-- ========================================================================= -->
     <main class="w-full max-w-md mx-auto px-3 pt-2 pb-28 space-y-3">
         
@@ -187,6 +351,7 @@
         </div>
 
     </main>
+
     <!-- ========================================================================= -->
     <!-- 5. MODAL TÙY CHỌN MÓN ĐA NĂNG (TÁCH BIỆT MÌ TRỘN CAY VS MÓN CƠM NƯỚC CHẤM) -->
     <!-- ========================================================================= -->
@@ -202,6 +367,7 @@
                         <h4 id="cust-dish-name" class="text-sm font-black text-white truncate">Tên Món Ăn</h4>
                         <div class="flex items-center gap-2 mt-0.5">
                             <span id="cust-dish-base-price" class="text-xs font-mono font-black text-amber-400">39.000 đ</span>
+                            <span id="cust-dish-app-price" class="text-[10px] font-mono text-slate-500 line-through hidden">45.000 đ</span>
                             <span id="cust-dish-cat-badge" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-400 border border-slate-700">Món Khô</span>
                         </div>
                     </div>
@@ -216,7 +382,7 @@
             <!-- Thân Modal: Cuộn Nội Dung Tùy Chọn -->
             <div class="p-4 space-y-4 overflow-y-auto custom-scroll text-xs">
                 
-                <!-- KHỐI 1: KHẨU VỊ CAY SA TẾ (DÀNH RIÊNG CHO MÌ TRỘN & MÓN NƯỚC, ẨN HOÀN TOÀN VỚI MÓN CƠM/NƯỚC UỐNG) -->
+                <!-- KHỐI 1: KHẨU VỊ CAY SA TẾ (DÀNH CHO MÌ TRỘN & MÓN NƯỚC, ẨN VỚI MÓN CƠM/NƯỚC UỐNG) -->
                 <div id="box-taste-selector" class="space-y-2">
                     <div class="flex items-center justify-between">
                         <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
@@ -258,7 +424,7 @@
                     </div>
                 </div>
 
-                <!-- KHỐI 2: CHỌN NƯỚC CHẤM ĐẤT THÁNH (DÀNH RIÊNG CHO MÓN CƠM - TƯƠNG DÃ TAY THU PHÍ 2.000đ) -->
+                <!-- KHỐI 2: CHỌN NƯỚC CHẤM ĐẤT THÁNH (DÀNH CHO MÓN CƠM - TƯƠNG DÃ TAY THU PHÍ 2.000đ) -->
                 <div id="box-sauce-selector" class="hidden space-y-2">
                     <div class="flex items-center justify-between">
                         <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
@@ -324,7 +490,7 @@
                     </div>
                 </div>
 
-                <!-- KHỐI 3: BẢNG TOPPING CHỌN THÊM CÓ TÍNH TIỀN (VŨ KHÍ TĂNG TICKET SIZE) -->
+                <!-- KHỐI 3: BẢNG TOPPING CHỌN THÊM ĐỘC LẬP CÓ TÍNH TIỀN (TICKET BOOSTER) -->
                 <div id="box-topping-selector" class="space-y-2 pt-1 border-t border-slate-800/80">
                     <div class="flex items-center justify-between">
                         <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
@@ -333,9 +499,9 @@
                         <span class="text-[10px] text-slate-400 font-mono">Chọn nhiều món</span>
                     </div>
 
-                    <!-- Danh Sách Topping Thực Tế Sẽ Được JS Render Vào Đây -->
+                    <!-- Danh Sách Topping Thực Tế Độc Lập Được Nạp Tự Động Từ Backend -->
                     <div class="grid grid-cols-1 gap-1.5" id="customizer-toppings-list">
-                        <!-- Render Toppings List -->
+                        <!-- Render Toppings List Dynamically -->
                     </div>
                 </div>
 
@@ -380,7 +546,6 @@
         </div>
 
     </div>
-
     <!-- ========================================================================= -->
     <!-- 6. THANH KÉO AOV ĐỘNG STICKY (KÍCH THÍCH MỞ KHÓA VÒNG QUAY >= 79K)        -->
     <!-- ========================================================================= -->
@@ -457,7 +622,7 @@
             <button type="button" 
                     onclick="D2CStoreFrontController.openCartDrawer()" 
                     class="py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-red-600/20 transition flex items-center gap-2 active:scale-95">
-                    <span>Xem Giỏ Hàng</span>
+                <span>Xem Giỏ Hàng</span>
                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </button>
 
@@ -523,14 +688,14 @@
                     </div>
                 </div>
 
-                <!-- Bảng Tóm Tắt Dòng Tiền & Bù Ship Động Chuẩn SSOT -->
+                <!-- Bảng Tóm Tắt Dòng Tiền & Bù Ship -->
                 <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5 text-[11px]">
                     <div class="flex justify-between text-slate-400">
                         <span>Tiền Món Ăn:</span>
                         <span id="disp-drawer-subtotal" class="font-mono font-bold text-white">0 đ</span>
                     </div>
                     <div class="flex justify-between text-slate-400">
-                        <span>Trợ Giá Ship Bếp Thím 5:</span>
+                        <span>Trợ Giá Ship (Ước Tính):</span>
                         <span id="disp-drawer-shipping-subsidy" class="font-mono font-bold text-emerald-400">-0 đ</span>
                     </div>
                     <div class="pt-1.5 border-t border-slate-800 flex justify-between items-center text-xs">
@@ -553,6 +718,7 @@
         </div>
 
     </div>
+
     <!-- ========================================================================= -->
     <!-- 9. MODAL FORM ĐẶT HÀNG D2C & KIỂM TRA BILL BẬC THANG TRƯỚC KHI GỬI BẾP     -->
     <!-- ========================================================================= -->
@@ -604,7 +770,7 @@
                     </div>
                 </div>
 
-                <!-- KHỐI ĐỊA CHỈ GIAO HÀNG TÌM KIẾM ĐỊA DANH ĐỘNG (KHÔNG CỐ ĐỊNH) -->
+                <!-- KHỐI ĐỊA CHỈ GIAO HÀNG ĐỊNH VỊ GPS VỆ TINH CHÍNH XÁC & TÌM KIẾM ĐỊA DANH -->
                 <div class="space-y-1.5 pt-1 border-t border-slate-800/80 relative">
                     <div class="flex items-center justify-between">
                         <label class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
@@ -638,16 +804,16 @@
                     </div>
 
                     <div class="flex items-center justify-between text-[10px] text-slate-500 px-1">
-                        <span>💡 Gợi ý: Gõ tên hàng quán hoặc địa điểm gần bạn để định vị nhanh</span>
+                        <span>💡 Gợi ý: Bấm lấy GPS hoặc gõ tên địa danh để Shipper mở Google Maps dẫn đường</span>
                     </div>
 
-                    <!-- KHUNG HIỂN THỊ CỰ LY & CƯỚC SHIP LINH HOẠT THỜI GIAN THỰC (ZERO-HARDCODE) -->
+                    <!-- KHUNG HIỂN THỊ CỰ LY & CƯỚC SHIP (LÀM TRÒN MỐC 0.5KM CẠNH TRANH GIÁ) -->
                     <div class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 text-xs">
                         <span class="text-slate-400 flex items-center gap-1.5 font-bold" id="txt-calc-distance">
-                            <i class="fa-solid fa-route text-amber-400"></i> Cự ly: Đang tính...
+                            <i class="fa-solid fa-route text-amber-400"></i> Cự ly: ~1.2 km (Tính cước: 1.5 km)
                         </span>
                         <div class="flex items-center gap-1.5 font-mono">
-                            <span class="font-black text-amber-400" id="txt-calc-shipping-fee">0 đ</span>
+                            <span class="font-black text-white" id="txt-calc-shipping-fee">12.000 đ</span>
                             <span class="text-[10px] text-emerald-400 font-bold hidden" id="txt-calc-subsidy-tag"></span>
                         </div>
                     </div>
@@ -668,7 +834,7 @@
                     </div>
                 </div>
 
-                <!-- Phương Thức Thanh Toán (ƯU TIÊN COD MẶC ĐỊNH ĐỂ SHIPPER GỌI XÁC MINH) -->
+                <!-- Phương Thức Thanh Toán (COD MẶC ĐỊNH HOẶC VIETQR / VÍ MOMO) -->
                 <div class="space-y-2 pt-1 border-t border-slate-800/80">
                     <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
                         <i class="fa-solid fa-credit-card text-emerald-400"></i> Phương Thức Thanh Toán:
@@ -740,22 +906,22 @@
                     </div>
                 </div>
 
-                <!-- Bảng Tổng Kết Dòng Tiền (Phản ánh đúng Cước thu khách & Tiền quán bù) -->
+                <!-- Bảng Tổng Kết Dòng Tiền -->
                 <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5 text-xs">
                     <div class="flex justify-between text-slate-400 text-[11px]">
                         <span>Tổng Tiền Món:</span>
                         <span id="chk-summary-subtotal" class="font-mono font-bold text-white">0 đ</span>
                     </div>
                     <div class="flex justify-between text-slate-400 text-[11px]">
-                        <span>Phí Giao Hàng (Tài Xế Nhận):</span>
-                        <span id="chk-summary-shipping-fee" class="font-mono font-bold text-white">0 đ</span>
+                        <span>Phí Giao Hàng (Làm tròn 0.5km):</span>
+                        <span id="chk-summary-shipping-fee" class="font-mono font-bold text-white">12.000 đ</span>
                     </div>
                     <div class="flex justify-between text-emerald-400 text-[11px]">
-                        <span>Trợ Giá Ship Bếp Thím 5:</span>
+                        <span>Trợ Giá Cước Giao Hàng:</span>
                         <span id="chk-summary-subsidy" class="font-mono font-bold">-0 đ</span>
                     </div>
                     <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-sm">
-                        <span class="font-black text-white">TỔNG THANH TOÁN (THỰC THU):</span>
+                        <span class="font-black text-white">TỔNG THANH TOÁN:</span>
                         <strong id="chk-summary-final-total" class="font-mono font-black text-amber-400 text-base">0 đ</strong>
                     </div>
                 </div>
@@ -818,35 +984,43 @@
 
     <!-- Khe cắm Vòng Quay May Mắn Tri Ân nạp động từ wheel.html -->
     <div id="wheel-mount-point"></div>
+    <!-- ========================================================================= -->
+    <!-- 11. NẠP THƯ VIỆN ĐIỀU PHỐI API TRUNG TÂM THÍM 5 (TỰ NẠP MASTER DICTIONARY) -->
+    <!-- ========================================================================= -->
+    <script src="api.js?v=20260927"></script>
 
     <!-- ========================================================================= -->
-    <!-- 11. NẠP TỪ ĐIỂN SSOT & THƯ VIỆN KẾT NỐI API TRUNG TÂM THÍM 5               -->
+    <!-- 12. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH MẶT TIỀN D2C THÍM 5 (ENTERPRISE CORE)     -->
     <!-- ========================================================================= -->
-    <script src="thim5-master-dictionary.js?v=20261001"></script>
-    <script src="api.js?v=20261001"></script>
     <script>
     /**
      * =========================================================================
-     * CONTROLLER: D2C STOREFRONT SUITE (MẶT TIỀN D2C THÍM 5 v3.0 MASTER)
+     * CONTROLLER: D2C STOREFRONT SUITE (MẶT TIỀN D2C THÍM 5 v3.5 MASTER GHOST)
      * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
      * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
-     * Kiến trúc: Headless API, Dynamic Reverse-Pricing & Zero-Hardcode Shipping
      * =========================================================================
      */
     var D2CStoreFrontController = (function() {
-        'use strict';
-
-        // TỌA ĐỘ VÀ CẤU HÌNH GỐC DỰ PHÒNG (FALLBACK KHI CHƯA NẠP ĐƯỢC TỪ SHEET)
+        // CẤU HÌNH GỐC BẾP HÒA THÀNH & LOGISTICS (ĐƯỢC GHI ĐÈ ĐỘNG TỪ SYS_CONFIG)
         var STORE_BASE_CONFIG = {
             storeName: "Mì Trộn Thím 5",
             phone: "0934220585",
             address: "125 Hùng Vương, KP4, TT. Hòa Thành, Tây Ninh",
             coords: { lat: 11.285267, lng: 106.133347 },
-            bankCode: "MB",
+            bankCode: "MBBANK",
             bankBin: "970422",
             bankAccount: "3939388888",
             accountHolder: "NGUYEN HAI AU",
-            minAovThreshold: 79000
+            momoPhone: "0934220585",
+            minAovThreshold: 79000,
+            shipBaseDistanceKm: 2.0,
+            shipBaseFee: 12000,
+            shipStepDistanceKm: 0.5,
+            shipFeePerStep: 2500,
+            activeSkin: "DEFAULT",
+            metaPixelId: "",
+            tiktokPixelId: "",
+            ga4MeasurementId: ""
         };
 
         // BỘ NHỚ ĐỆM TRẠNG THÁI ỨNG DỤNG (APPLICATION STATE)
@@ -862,10 +1036,10 @@
             isWheelLoaded: false,
             customerLocation: null,
             calculatedDistanceKm: 0,
-            shippingFee: 0,
+            billedDistanceKm: 0,
+            shippingFee: 12000,
             shippingSubsidy: 0,
             subsidyReason: "",
-            customerPayShipFee: 0,
             selectedPaymentMethod: "COD",
             currentCustomizingDish: null,
             currentTaste: "Cay Nhẹ",
@@ -875,103 +1049,196 @@
             customizerQty: 1,
             storeStatus: "OPEN",
             closedMessage: "",
-            dynamicCategories: [],
-            menuItemsList: [],
-            dynamicShippingConfig: null
+            menuCatalog: [],
+            toppingCatalog: []
         };
-
-        // DANH MỤC TOPPING ĂN KÈM CHUẨN F&B ĐẤT THÁNH
-        var TOPPING_PRESETS = [
-            { id: "top_trung", name: "Trứng Lòng Đào Béo Ngậy", price: 6000, icon: "🥚" },
-            { id: "top_topmo", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn", price: 16000, icon: "🥓" },
-            { id: "top_bovien", name: "Bò Viên Gân Giòn (3 Viên)", price: 12000, icon: "🍡" },
-            { id: "top_xaxiu", name: "Xá Xíu Mềm Thơm Thêm", price: 15000, icon: "🥩" },
-            { id: "top_duiga", name: "Đùi Gà Nướng Mật Ong Thảo Mộc", price: 25000, icon: "🍗" },
-            { id: "top_tom", name: "Topping Tôm Tươi Rim Mặn Ngọt", price: 15000, icon: "🦐" },
-            { id: "top_vatmi", name: "Thêm 1 Vắt Mì Trộn", price: 8000, icon: "🍜" }
-        ];
 
         var activeCustomizerToppingIds = [];
 
-        // DANH MỤC THỰC ĐƠN DỰ PHÒNG (FALLBACK AN TOÀN KHI MẤT KẾT NỐI MẠNG)
+        // DANH MỤC TOPPING ĂN KÈM HẠT GIỐNG DỰ PHÒNG (SẼ ĐƯỢC GHI ĐÈ ĐỘNG TỪ BACKEND)
+        var TOPPING_PRESETS = [
+            { id: "TOP_TRUNG", name: "Trứng Lòng Đào Béo Ngậy", price: 6000, icon: "🥚" },
+            { id: "TOP_TOP_MO", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn", price: 10000, icon: "🥓" },
+            { id: "TOP_BO_VIEN", name: "Bò Viên Gân Giòn (3 Viên)", price: 12000, icon: "🍡" },
+            { id: "TOP_XA_XIU", name: "Xá Xíu Mềm Thơm Thêm", price: 15000, icon: "🥩" },
+            { id: "TOP_DUI_GA", name: "Đùi Gà Nướng Mật Ong", price: 25000, icon: "🍗" },
+            { id: "TOP_TOM", name: "Topping Tôm Tươi Rim Mặn Ngọt", price: 15000, icon: "🦐" },
+            { id: "TOP_VAT_MI", name: "Thêm 1 Vắt Mì Trộn", price: 8000, icon: "🍜" }
+        ];
+
+        // DANH MỤC THỰC ĐƠN HẠT GIỐNG DỰ PHÒNG CHUẨN 13 CỘT REVERSE-PRICING
         var FALLBACK_MENU = [
-            { id: "C01", cat: "cơm", name: "Cơm Tấm Sườn Bì Chả Thím 5", price: 45000, img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400", desc: "Cơm tấm hạt dẻo thơm, sườn nướng mật ong thảo mộc, chả trứng hấp béo ngậy.", isHot: true },
-            { id: "C02", cat: "cơm", name: "Cơm Phủ Trứng Thịt Bằm Đất Thánh", price: 42000, img: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400", desc: "Cơm nóng phủ lớp trứng chiên mềm xốp, thịt bằm xào nấm sốt tương đậm đà.", isHot: true },
-            { id: "M01", cat: "combo", name: "Combo Đại Tiệc Thím 5", price: 89000, img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400", desc: "Mì trộn xá xíu tóp mỡ + 1 chén súp bò viên + 1 ly trà đào 1L.", isHot: true },
-            { id: "M02", cat: "combo", name: "Combo No Say Đôi Lứa", price: 119000, img: "https://images.unsplash.com/photo-1552611052-33e04de081de?w=400", desc: "2 tô mì trộn thập cẩm đặc biệt + 2 chén súp trứng cút + 2 nước ngọt.", isHot: true },
-            { id: "M03", cat: "kho", name: "Mì Trộn Xá Xíu Tóp Mỡ", price: 39000, img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400", desc: "Mì dai giòn trộn sốt sa tế cay độc bản, xá xíu mềm thơm, tóp mỡ giòn rụm.", isHot: true },
-            { id: "M04", cat: "kho", name: "Mì Trộn Bò Viên Gân Giòn", price: 42000, img: "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=400", desc: "Bò viên gân loại 1 dai giòn sần sật, phủ sốt sa tế tóp mỡ hành phi.", isHot: false },
-            { id: "M05", cat: "kho", name: "Mì Trộn Thập Cẩm Đặc Biệt", price: 49000, img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400", desc: "Đầy đặn xá xíu, bò viên gân, trứng lòng đào béo ngậy và tóp mỡ vàng ươm.", isHot: true },
-            { id: "M06", cat: "nuoc", name: "Mì Súp Bò Mỹ Sa Tế Cay", price: 45000, img: "https://images.unsplash.com/photo-1594998893017-36147cbcae05?w=400", desc: "Nước súp hầm xương thanh ngọt đậm đà, thịt bò Mỹ béo ngậy the the sa tế.", isHot: false },
-            { id: "M07", cat: "an-kem", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn (Hũ)", price: 16000, img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=400", desc: "Tóp mỡ nóng giòn ráo dầu, lắc tỏi ớt sa tế cay tê nhức nách.", isHot: false },
-            { id: "M08", cat: "an-kem", name: "Trứng Lòng Đào Béo Ngậy (Quả)", price: 6000, img: "https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=400", desc: "Trứng gà luộc chuẩn canh giờ, lòng đào dẻo quánh hòa quyện sốt mì.", isHot: false },
-            { id: "M09", cat: "giai-khat", name: "Trà Đào Mát Lạnh Khổng Lồ 1L", price: 25000, img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400", desc: "Ly khổng lồ 1000ml mát lạnh, kèm miếng đào giòn ngọt giải ngấy cực đã.", isHot: true },
-            { id: "M10", cat: "giai-khat", name: "Nước Suối Tinh Khiết Ướp Lạnh", price: 10000, img: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400", desc: "Chai 500ml ướp lạnh đập tan cơn khát tức thì.", isHot: false }
+            { id: "C01", cat: "cơm", name: "Cơm Tấm Sườn Bì Chả Thím 5", price: 45000, appPrice: 52000, img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400", desc: "Cơm tấm hạt dẻo thơm, sườn nướng mật ong thảo mộc, chả trứng hấp béo ngậy.", isHot: true },
+            { id: "C02", cat: "cơm", name: "Cơm Phủ Trứng Thịt Bằm Đất Thánh", price: 42000, appPrice: 49000, img: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400", desc: "Cơm nóng phủ lớp trứng chiên mềm xốp, thịt bằm xào nấm sốt tương đậm đà.", isHot: true },
+            { id: "M01", cat: "combo", name: "Combo Đại Tiệc Thím 5", price: 89000, appPrice: 105000, img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400", desc: "Mì trộn xá xíu tóp mỡ + 1 chén súp bò viên + 1 ly trà đào 1L.", isHot: true },
+            { id: "M02", cat: "combo", name: "Combo No Say Đôi Lứa", price: 119000, appPrice: 139000, img: "https://images.unsplash.com/photo-1552611052-33e04de081de?w=400", desc: "2 tô mì trộn thập cẩm đặc biệt + 2 chén súp trứng cút + 2 nước ngọt.", isHot: true },
+            { id: "M03", cat: "kho", name: "Mì Trộn Xá Xíu Tóp Mỡ", price: 39000, appPrice: 45000, img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400", desc: "Mì dai giòn trộn sốt sa tế cay độc bản, xá xíu mềm thơm, tóp mỡ giòn rụm.", isHot: true },
+            { id: "M04", cat: "kho", name: "Mì Trộn Bò Viên Gân Giòn", price: 42000, appPrice: 48000, img: "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=400", desc: "Bò viên gân loại 1 dai giòn sần sật, phủ sốt sa tế tóp mỡ hành phi.", isHot: false },
+            { id: "M05", cat: "kho", name: "Mì Trộn Thập Cẩm Đặc Biệt", price: 49000, appPrice: 58000, img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400", desc: "Đầy đặn xá xíu, bò viên gân, trứng lòng đào béo ngậy và tóp mỡ vàng ươm.", isHot: true },
+            { id: "M06", cat: "nuoc", name: "Mì Súp Bò Mỹ Sa Tế Cay", price: 45000, appPrice: 52000, img: "https://images.unsplash.com/photo-1594998893017-36147cbcae05?w=400", desc: "Nước súp hầm xương thanh ngọt đậm đà, thịt bò Mỹ béo ngậy the the sa tế.", isHot: false },
+            { id: "M07", cat: "an-kem", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn (Hũ)", price: 16000, appPrice: 20000, img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=400", desc: "Tóp mỡ nóng giòn ráo dầu, lắc tỏi ớt sa tế cay tê nhức nách.", isHot: false },
+            { id: "M08", cat: "an-kem", name: "Trứng Lòng Đào Béo Ngậy (Quả)", price: 6000, appPrice: 8000, img: "https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=400", desc: "Trứng gà luộc chuẩn canh giờ, lòng đào dẻo quánh hòa quyện sốt mì.", isHot: false },
+            { id: "M09", cat: "giai-khat", name: "Trà Đào Mát Lạnh Khổng Lồ 1L", price: 25000, appPrice: 30000, img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400", desc: "Ly khổng lồ 1000ml mát lạnh, kèm miếng đào giòn ngọt giải ngấy cực đã.", isHot: true },
+            { id: "M10", cat: "giai-khat", name: "Nước Suối Tinh Khiết Ướp Lạnh", price: 10000, appPrice: 12000, img: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400", desc: "Chai 500ml ướp lạnh đập tan cơn khát tức thì.", isHot: false }
         ];
 
         /**
-         * KHỞI ĐỘNG HỆ THỐNG MẶT TIỀN D2C
+         * KHỞI ĐỘNG HỆ THỐNG MẶT TIỀN D2C - TỐI ƯU FIRST-PAINT 20MS
          */
-        async function init() {
-            await Promise.allSettled([
-                loadSystemConfig(),
-                loadDynamicMenu()
-            ]);
+        function init() {
+            // 1. Nạp tức thì từ cache localStorage để hiển thị ngay trong 20ms
+            restoreLocalCacheInstant();
 
+            // 2. Kích hoạt hiệu ứng Skin mùa lễ hội
+            applySeasonalSkinTheme(STORE_BASE_CONFIG.activeSkin);
+
+            // 3. Render giao diện từ dữ liệu cache
             initHeroCarousel();
             bindHeroCarouselEvents();
             initPwaInstaller();
             initGiftEventListener();
             renderMenuGrid();
             updateAovAndCartUI();
+
+            // 4. Bắn sự kiện Marketing PageView
+            trackMarketingEvent("PageView", {});
+
+            // 5. Gọi ngầm Backend Apps Script để đồng bộ cấu hình và menu mới nhất
+            syncBackendDataAsync();
         }
 
         /**
-         * ĐỒNG BỘ CẤU HÌNH HỆ THỐNG VÀ CƯỚC SHIP ĐỘNG TỪ SHEET [SYS_CONFIG]
+         * BẮT SỰ KIỆN MARKETING TRACKING (META PIXEL, TIKTOK PIXEL, GA4)
          */
-        async function loadSystemConfig() {
+        function trackMarketingEvent(eventName, eventData) {
+            try {
+                // Meta Pixel (Facebook)
+                if (typeof window.fbq === "function") {
+                    window.fbq("track", eventName, eventData);
+                }
+                // TikTok Pixel
+                if (typeof window.ttq === "object" && typeof window.ttq.track === "function") {
+                    window.ttq.track(eventName, eventData);
+                }
+                // Google Analytics 4
+                if (typeof window.gtag === "function") {
+                    window.gtag("event", eventName, eventData);
+                }
+            } catch (err) {
+                console.warn("⚠️ [TrackingEngine] Lỗi bắn sự kiện marketing:", err);
+            }
+        }
+
+        /**
+         * NẠP TỨC THÌ TỪ LOCALSTORAGE TRONG 20MS (CHỐNG TRỄ MẠNG COLD START)
+         */
+        function restoreLocalCacheInstant() {
+            try {
+                var cachedCfg = JSON.parse(localStorage.getItem("T5_CACHED_CONFIG") || "{}");
+                if (cachedCfg && cachedCfg.storeName) {
+                    Object.assign(STORE_BASE_CONFIG, cachedCfg);
+                }
+                var cachedMenu = JSON.parse(localStorage.getItem("T5_CACHED_MENU") || "[]");
+                if (Array.isArray(cachedMenu) && cachedMenu.length > 0) {
+                    FALLBACK_MENU = cachedMenu;
+                }
+                var cachedToppings = JSON.parse(localStorage.getItem("T5_CACHED_TOPPINGS") || "[]");
+                if (Array.isArray(cachedToppings) && cachedToppings.length > 0) {
+                    TOPPING_PRESETS = cachedToppings;
+                }
+            } catch (e) {
+                console.warn("⚠️ [CacheReader] Không thể đọc cache local:", e);
+            }
+            updateHeaderDomElements();
+        }
+
+        /**
+         * ÁP DỤNG THEME & SKIN THEO MÙA LỄ HỘI (HALLOWEEN, XMAS, TẾT)
+         */
+        function applySeasonalSkinTheme(skinCode) {
+            var htmlEl = document.documentElement;
+            htmlEl.classList.remove("skin-halloween", "skin-xmas", "skin-tet");
+
+            var code = String(skinCode || "DEFAULT").toUpperCase().trim();
+            if (code === "HALLOWEEN") {
+                htmlEl.classList.add("skin-halloween");
+            } else if (code === "XMAS" || code === "NOEL") {
+                htmlEl.classList.add("skin-xmas");
+            } else if (code === "TET") {
+                htmlEl.classList.add("skin-tet");
+            }
+        }
+
+        /**
+         * GỌI NGẦM ĐỒNG BỘ CẤU HÌNH & MENU TỪ BACKEND APPS SCRIPT
+         */
+        async function syncBackendDataAsync() {
             try {
                 if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
-                    var actionConfig = (window.T5_DICT && window.T5_DICT.ACTIONS && window.T5_DICT.ACTIONS.GET_SYSTEM_DYNAMIC_CONFIG)
-                                       ? window.T5_DICT.ACTIONS.GET_SYSTEM_DYNAMIC_CONFIG
-                                       : "getSystemDynamicConfig";
-
-                    var res = await Thim5API.callGAS(actionConfig, {});
-                    var cfg = (res && res.data) ? res.data : res;
-
+                    // Đồng bộ cấu hình SYS_CONFIG
+                    var resCfg = await Thim5API.callGAS("getConfig", {});
+                    var cfg = (resCfg && resCfg.data) ? resCfg.data : resCfg;
                     if (cfg) {
-                        var storeInfo = cfg.store || cfg;
-                        STORE_BASE_CONFIG.storeName = storeInfo.name || storeInfo.storeName || STORE_BASE_CONFIG.storeName;
-                        STORE_BASE_CONFIG.phone = storeInfo.phone || STORE_BASE_CONFIG.phone;
-                        STORE_BASE_CONFIG.address = storeInfo.address || STORE_BASE_CONFIG.address;
+                        STORE_BASE_CONFIG.storeName = cfg.STORE_NAME || cfg.storeName || STORE_BASE_CONFIG.storeName;
+                        STORE_BASE_CONFIG.phone = cfg.STORE_HOTLINE || cfg.phone || STORE_BASE_CONFIG.phone;
+                        STORE_BASE_CONFIG.address = cfg.STORE_ADDRESS || cfg.address || STORE_BASE_CONFIG.address;
+                        STORE_BASE_CONFIG.bankCode = cfg.BANK_CODE || STORE_BASE_CONFIG.bankCode;
+                        STORE_BASE_CONFIG.bankBin = cfg.BANK_BIN || STORE_BASE_CONFIG.bankBin;
+                        STORE_BASE_CONFIG.bankAccount = cfg.BANK_ACCOUNT_NO || STORE_BASE_CONFIG.bankAccount;
+                        STORE_BASE_CONFIG.accountHolder = cfg.BANK_ACCOUNT_NAME || STORE_BASE_CONFIG.accountHolder;
+                        STORE_BASE_CONFIG.momoPhone = cfg.MOMO_PHONE || STORE_BASE_CONFIG.momoPhone;
+                        STORE_BASE_CONFIG.activeSkin = cfg.ACTIVE_SEASON_SKIN || "DEFAULT";
 
-                        var payInfo = cfg.payment || cfg;
-                        STORE_BASE_CONFIG.bankCode = payInfo.bankCode || STORE_BASE_CONFIG.bankCode;
-                        STORE_BASE_CONFIG.bankBin = payInfo.bankBin || STORE_BASE_CONFIG.bankBin;
-                        STORE_BASE_CONFIG.bankAccount = payInfo.accountNo || payInfo.bankAccount || STORE_BASE_CONFIG.bankAccount;
-                        STORE_BASE_CONFIG.accountHolder = payInfo.accountName || payInfo.accountHolder || STORE_BASE_CONFIG.accountHolder;
-
-                        if (storeInfo.coords && storeInfo.coords.lat && storeInfo.coords.lng) {
-                            STORE_BASE_CONFIG.coords.lat = Number(storeInfo.coords.lat);
-                            STORE_BASE_CONFIG.coords.lng = Number(storeInfo.coords.lng);
+                        if (cfg.STORE_LATITUDE && cfg.STORE_LONGITUDE) {
+                            STORE_BASE_CONFIG.coords.lat = Number(cfg.STORE_LATITUDE);
+                            STORE_BASE_CONFIG.coords.lng = Number(cfg.STORE_LONGITUDE);
                         }
 
-                        appState.storeStatus = String(storeInfo.status || cfg.storeStatus || "OPEN").toUpperCase().trim();
-                        appState.closedMessage = storeInfo.closedMessage || cfg.closedMessage || "Bếp Thím 5 tạm dừng nhận đơn ít phút!";
+                        appState.storeStatus = (cfg.STORE_STATUS) ? String(cfg.STORE_STATUS).toUpperCase().trim() : "OPEN";
+                        appState.closedMessage = cfg.CLOSED_MESSAGE || "Bếp Thím 5 tạm dừng nhận đơn ít phút!";
 
-                        // Lưu cấu hình biểu phí ship động thời gian thực
-                        if (cfg.shipping) {
-                            appState.dynamicShippingConfig = cfg.shipping;
+                        localStorage.setItem("T5_CACHED_CONFIG", JSON.stringify(STORE_BASE_CONFIG));
+                        applySeasonalSkinTheme(STORE_BASE_CONFIG.activeSkin);
+                        updateHeaderDomElements();
+                    }
+
+                    // Đồng bộ thực đơn 13 cột từ DATA_MENU
+                    var resMenu = await Thim5API.callGAS("getAdminMenuCatalog", {});
+                    if (resMenu && resMenu.status === "success" && Array.isArray(resMenu.data && resMenu.data.items)) {
+                        var parsedItems = resMenu.data.items.map(function(item) {
+                            return {
+                                id: item.code,
+                                cat: String(item.category || "").toLowerCase(),
+                                name: item.name,
+                                price: Number(item.d2cPrice || item.price || 0),
+                                appPrice: Number(item.appPrice || 0),
+                                img: item.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400",
+                                desc: item.description || "Hương vị thơm ngon độc quyền chuẩn vị Đất Thánh.",
+                                isHot: String(item.tag || "").indexOf("BEST_SELLER") !== -1
+                            };
+                        });
+
+                        if (parsedItems.length > 0) {
+                            FALLBACK_MENU = parsedItems;
+                            localStorage.setItem("T5_CACHED_MENU", JSON.stringify(FALLBACK_MENU));
+                            initHeroCarousel();
+                            renderMenuGrid();
                         }
+                    }
+
+                    // Đồng bộ danh mục Topping độc lập
+                    var resToppings = await Thim5API.callGAS("getToppingCatalog", {});
+                    if (resToppings && resToppings.status === "success" && Array.isArray(resToppings.data)) {
+                        TOPPING_PRESETS = resToppings.data;
+                        localStorage.setItem("T5_CACHED_TOPPINGS", JSON.stringify(TOPPING_PRESETS));
                     }
                 }
             } catch (e) {
-                console.warn("⚠️ [D2CStoreFront] Sử dụng cấu hình dự phòng an toàn:", e);
-                appState.storeStatus = "OPEN";
-                appState.closedMessage = "";
+                console.warn("⚠️ [SyncBackend] Không thể đồng bộ ngầm dữ liệu Backend:", e);
             }
+        }
 
-            // Cập nhật thông tin Header
+        function updateHeaderDomElements() {
             var elPhone = document.getElementById("disp-store-phone");
             var linkPhone = document.getElementById("link-store-phone");
             var elName = document.getElementById("disp-store-name");
@@ -979,7 +1246,6 @@
             if (linkPhone) linkPhone.href = "tel:" + STORE_BASE_CONFIG.phone;
             if (elName) elName.innerText = STORE_BASE_CONFIG.storeName;
 
-            // Cập nhật trạng thái đóng/mở quán
             var dotStatus = document.getElementById("disp-store-status-dot");
             var txtStatus = document.getElementById("disp-store-status-text");
             var btnSubmitOrder = document.getElementById("btn-submit-order");
@@ -1010,104 +1276,14 @@
         }
 
         /**
-         * NẠP THỰC ĐƠN ĐỘNG 13 CỘT REVERSE-PRICING TỪ DATA_MENU
-         */
-        async function loadDynamicMenu() {
-            try {
-                if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
-                    var actionCatalog = (window.T5_DICT && window.T5_DICT.ACTIONS && window.T5_DICT.ACTIONS.GET_ADMIN_MENU_CATALOG)
-                                        ? window.T5_DICT.ACTIONS.GET_ADMIN_MENU_CATALOG
-                                        : "getAdminMenuCatalog";
-
-                    var res = await Thim5API.callGAS(actionCatalog, {});
-                    var rawDishes = [];
-
-                    if (res && res.data && Array.isArray(res.data.items)) rawDishes = res.data.items;
-                    else if (res && res.data && Array.isArray(res.data)) rawDishes = res.data;
-                    else if (res && Array.isArray(res.items)) rawDishes = res.items;
-                    else if (Array.isArray(res)) rawDishes = res;
-
-                    if (rawDishes.length > 0) {
-                        appState.menuItemsList = rawDishes.map(function(item) {
-                            var p = Number(String(item.d2cPrice || item.priceD2c || item.price || 0).replace(/[^\d]/g, '')) || 0;
-                            var rawCat = String(item.category || item.categorySlug || "com").toLowerCase().trim();
-                            return {
-                                id: String(item.code || item.id || "ITEM"),
-                                cat: rawCat,
-                                name: String(item.name || "Món ăn").trim(),
-                                price: p,
-                                img: item.imageUrl || item.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400",
-                                desc: String(item.description || item.desc || "Hương vị đậm đà Bếp Thím 5.").trim(),
-                                isHot: Boolean(item.tag === "CORE" || item.tag === "COMBO" || item.isHot)
-                            };
-                        });
-                        renderCategoryTabs();
-                        return;
-                    }
-                }
-            } catch (err) {
-                console.warn("⚠️ [D2CStoreFront] Lỗi nạp thực đơn từ máy chủ, nạp danh mục dự phòng:", err);
-            }
-
-            // Fallback nếu không có mạng
-            appState.menuItemsList = FALLBACK_MENU;
-            renderCategoryTabs();
-        }
-
-        /**
-         * RENDER BỘ LỌC DANH MỤC ĐỘNG TỪ DANH SÁCH MÓN ĂN THỰC TẾ
-         */
-        function renderCategoryTabs() {
-            var tabsContainer = document.getElementById("storefront-category-tabs");
-            if (!tabsContainer) return;
-
-            var catsMap = { "all": { label: "Tất Cả Món", icon: "fa-fire" } };
-            appState.menuItemsList.forEach(function(dish) {
-                var c = dish.cat.toLowerCase();
-                if (!catsMap[c]) {
-                    var icon = "fa-utensils";
-                    var label = c.toUpperCase();
-                    if (c.includes("cơm") || c === "com") { icon = "fa-bowl-rice"; label = "Món Cơm"; }
-                    else if (c.includes("combo")) { icon = "fa-crown"; label = "Combo Tiệc"; }
-                    else if (c.includes("kho") || c.includes("mì") || c.includes("mi")) { icon = "fa-bowl-food"; label = "Mì Trộn"; }
-                    else if (c.includes("nuoc") || c.includes("nước") || c.includes("súp")) { icon = "fa-spoon"; label = "Món Súp"; }
-                    else if (c.includes("an-kem") || c.includes("topping")) { icon = "fa-cookie-bite"; label = "Ăn Kèm"; }
-                    else if (c.includes("giai-khat") || c.includes("uống")) { icon = "fa-bottle-water"; label = "Giải Khát (1L)"; }
-                    catsMap[c] = { label: label, icon: icon };
-                }
-            });
-
-            var tabsHtml = Object.keys(catsMap).map(function(key) {
-                var cData = catsMap[key];
-                var isActive = (appState.currentCategory === key);
-                var activeClass = isActive 
-                    ? "bg-amber-500 text-slate-950 shadow-sm active" 
-                    : "text-slate-400 bg-slate-900 border border-slate-800 hover:text-white";
-
-                return `
-                    <button type="button" 
-                            data-cat="${key}" 
-                            onclick="D2CStoreFrontController.filterCategory('${key}', this)" 
-                            class="cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${activeClass}">
-                        <i class="fa-solid ${cData.icon} text-xs ${isActive ? '' : 'text-amber-400'}"></i>
-                        <span>${cData.label}</span>
-                    </button>
-                `;
-            }).join("");
-
-            tabsContainer.innerHTML = tabsHtml;
-        }
-
-        /**
          * RENDER HERO BANNER CAROUSEL
          */
         function initHeroCarousel() {
             var track = document.getElementById("carousel-track");
             if (!track) return;
 
-            var pool = appState.menuItemsList.length > 0 ? appState.menuItemsList : FALLBACK_MENU;
-            appState.heroSlides = pool.filter(function(d) { return d.isHot; });
-            if (appState.heroSlides.length === 0) appState.heroSlides = pool.slice(0, 4);
+            appState.heroSlides = FALLBACK_MENU.filter(function(d) { return d.isHot; });
+            if (appState.heroSlides.length === 0) appState.heroSlides = FALLBACK_MENU.slice(0, 4);
 
             renderHeroSlides(appState.heroSlides);
             renderHeroDots(appState.heroSlides.length);
@@ -1209,15 +1385,14 @@
         }
 
         /**
-         * RENDER DANH SÁCH MÓN ĂN TRÊN MENU GRID
+         * RENDER DANH SÁCH MÓN ĂN TRÊN MENU GRID (NEO TÂM LÝ GIÁ APP)
          */
         function renderMenuGrid() {
             var grid = document.getElementById("dish-menu-grid");
             var countLabel = document.getElementById("disp-dish-count-label");
             if (!grid) return;
 
-            var sourceList = appState.menuItemsList.length > 0 ? appState.menuItemsList : FALLBACK_MENU;
-            var list = sourceList.filter(function(item) {
+            var list = FALLBACK_MENU.filter(function(item) {
                 var currentCat = String(appState.currentCategory || "all").toLowerCase().trim();
                 var itemCat = String(item.cat || "").toLowerCase().trim();
 
@@ -1246,6 +1421,7 @@
 
             grid.innerHTML = list.map(function(dish) {
                 var priceNum = Number(dish.price) || 0;
+                var appPriceNum = Number(dish.appPrice) || Math.round(priceNum * 1.15);
                 var safeDesc = dish.desc || "Hương vị thơm ngon đặc trưng Bếp Thím 5.";
                 var safeImg = dish.img || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
                 var isHotBadge = dish.isHot ? '<span class="px-1.5 py-0.2 rounded-md bg-red-500/20 text-red-400 text-[9px] font-bold border border-red-500/30 shrink-0">Bán Chạy</span>' : '';
@@ -1262,7 +1438,10 @@
                                 <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">${safeDesc}</p>
                             </div>
                             <div class="flex items-center justify-between pt-1">
-                                <span class="text-xs font-mono font-black text-amber-400">${priceNum.toLocaleString("vi-VN")} đ</span>
+                                <div class="flex items-baseline gap-1.5">
+                                    <span class="text-xs font-mono font-black text-amber-400">${priceNum.toLocaleString("vi-VN")} đ</span>
+                                    <span class="text-[9.5px] font-mono text-slate-500 line-through">${appPriceNum.toLocaleString("vi-VN")}đ</span>
+                                </div>
                                 <button type="button" 
                                         onclick="D2CStoreFrontController.openCustomizerModal('${dish.id}')" 
                                         class="px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-black uppercase tracking-wider transition shadow flex items-center gap-1 active:scale-95">
@@ -1278,7 +1457,7 @@
         function filterCategory(cat, btnEl) {
             appState.currentCategory = cat;
             document.querySelectorAll(".cat-tab-btn").forEach(function(b) {
-                b.className = "cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5";
+                b.className = "cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5";
             });
             if (btnEl) {
                 btnEl.className = "cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-sm active";
@@ -1306,12 +1485,20 @@
          * MỞ MODAL TÙY CHỌN MÓN ĐA NĂNG
          */
         function openCustomizerModal(dishId) {
-            var pool = appState.menuItemsList.length > 0 ? appState.menuItemsList : FALLBACK_MENU;
-            var dish = pool.find(function(d) { return d.id === dishId; });
+            var dish = FALLBACK_MENU.find(function(d) { return d.id === dishId; });
             if (!dish) return;
 
+            // Bắn sự kiện Marketing ViewContent
+            trackMarketingEvent("ViewContent", {
+                content_name: dish.name,
+                content_ids: [dish.id],
+                content_type: "product",
+                value: dish.price,
+                currency: "VND"
+            });
+
             // Nước suối đóng chai -> Thêm thẳng không cần tùy chỉnh
-            if (dish.cat === "giai-khat" && (dish.id === "M10" || dish.name.includes("Nước Suối"))) {
+            if (dish.cat === "giai-khat" && dish.id === "M10") {
                 appState.cartItems.push({
                     id: dish.id + "_" + Date.now(),
                     dishId: dish.id,
@@ -1339,6 +1526,7 @@
             var elImg = document.getElementById("cust-dish-img");
             var elName = document.getElementById("cust-dish-name");
             var elBasePrice = document.getElementById("cust-dish-base-price");
+            var elAppPrice = document.getElementById("cust-dish-app-price");
             var elCatBadge = document.getElementById("cust-dish-cat-badge");
             var elQty = document.getElementById("cust-dish-qty");
             var boxTaste = document.getElementById("box-taste-selector");
@@ -1347,9 +1535,15 @@
             var noteEl = document.getElementById("cust-dish-note");
 
             var dishPriceNum = Number(dish.price) || 0;
+            var dishAppPriceNum = Number(dish.appPrice) || Math.round(dishPriceNum * 1.15);
+
             if (elImg) elImg.src = dish.img || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
             if (elName) elName.innerText = dish.name;
             if (elBasePrice) elBasePrice.innerText = dishPriceNum.toLocaleString("vi-VN") + " đ";
+            if (elAppPrice) {
+                elAppPrice.innerText = dishAppPriceNum.toLocaleString("vi-VN") + " đ";
+                elAppPrice.classList.remove("hidden");
+            }
             if (elQty) elQty.innerText = "1";
             if (noteEl) noteEl.value = "";
 
@@ -1402,6 +1596,7 @@
 
             container.innerHTML = TOPPING_PRESETS.map(function(top) {
                 var isChecked = activeCustomizerToppingIds.indexOf(top.id) !== -1;
+                var safeIcon = top.icon || "🥗";
                 return `
                     <label class="p-2.5 rounded-xl bg-slate-950 border ${isChecked ? 'border-amber-500 bg-amber-500/10' : 'border-slate-800'} hover:border-slate-700 transition flex items-center justify-between cursor-pointer select-none">
                         <div class="flex items-center gap-2.5">
@@ -1410,10 +1605,10 @@
                                    ${isChecked ? 'checked' : ''} 
                                    onchange="D2CStoreFrontController.toggleCustomizerTopping('${top.id}', this.checked)"
                                    class="w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-0 cursor-pointer">
-                            <span class="text-base">${top.icon}</span>
+                            <span class="text-base">${safeIcon}</span>
                             <span class="text-xs font-bold text-slate-200">${top.name}</span>
                         </div>
-                        <span class="text-xs font-mono font-bold text-emerald-400">+${top.price.toLocaleString("vi-VN")} đ</span>
+                        <span class="text-xs font-mono font-bold text-emerald-400">+${Number(top.price).toLocaleString("vi-VN")} đ</span>
                     </label>
                 `;
             }).join("");
@@ -1476,7 +1671,9 @@
                 if (top) toppingsTotal += Number(top.price) || 0;
             });
 
-            var grandTotal = (basePrice + sauceFee + toppingsTotal) * appState.customizerQty;
+            var unitPriceWithExtras = basePrice + sauceFee + toppingsTotal;
+            var grandTotal = unitPriceWithExtras * appState.customizerQty;
+
             var elBtnPrice = document.getElementById("cust-total-btn-price");
             if (elBtnPrice) elBtnPrice.innerText = grandTotal.toLocaleString("vi-VN") + " đ";
         }
@@ -1518,6 +1715,16 @@
             };
 
             appState.cartItems.push(cartItem);
+
+            // Bắn sự kiện Marketing AddToCart
+            trackMarketingEvent("AddToCart", {
+                content_name: cartItem.name,
+                content_ids: [cartItem.dishId],
+                content_type: "product",
+                value: cartItem.price * cartItem.quantity,
+                currency: "VND"
+            });
+
             closeCustomizerModal();
             updateAovAndCartUI();
 
@@ -1542,6 +1749,7 @@
                 }
             });
 
+            // Rào chắn bảo vệ quà may mắn khi giỏ hàng tụt dưới 79k
             if (subtotal < STORE_BASE_CONFIG.minAovThreshold && appState.appliedGift) {
                 appState.appliedGift = null;
                 alert("⚠️ Đơn hàng chưa đạt mốc 79.000đ. Phần quà tặng may mắn đã tạm thời được gỡ bỏ khỏi giỏ hàng!");
@@ -1604,7 +1812,7 @@
                     var sauceHtml = item.sauce ? `<div class="text-[10px] text-amber-300 font-bold ml-2">↳ Nước chấm: ${item.sauce} ${item.sauceFee > 0 ? '(+' + item.sauceFee.toLocaleString('vi-VN') + 'đ)' : ''}</div>` : '';
                     var tasteHtml = item.taste ? `<span class="text-amber-400 font-semibold ml-2">• Khẩu vị: ${item.taste}</span>` : '';
                     var toppingsHtml = (item.toppings && item.toppings.length > 0)
-                        ? item.toppings.map(function(t) { return `<div class="text-[10px] text-emerald-400 ml-2">↳ 1x ${t.name} (+${t.price.toLocaleString('vi-VN')}đ)</div>`; }).join("")
+                        ? item.toppings.map(function(t) { return `<div class="text-[10px] text-emerald-400 ml-2">↳ 1x ${t.name} (+${Number(t.price).toLocaleString('vi-VN')}đ)</div>`; }).join("")
                         : "";
 
                     return `
@@ -1614,7 +1822,7 @@
                                     <h5 class="font-black text-white text-xs truncate">
                                         <span class="text-amber-400 font-mono">${item.quantity}x</span> ${item.name}
                                     </h5>
-                                    <span class="text-[10px] font-mono text-slate-400">Đơn giá món: ${item.basePrice.toLocaleString('vi-VN')}đ</span>
+                                    <span class="text-[10px] font-mono text-slate-400">Đơn giá món: ${Number(item.basePrice).toLocaleString('vi-VN')}đ</span>
                                 </div>
                                 <div class="flex items-center gap-2.5 shrink-0">
                                     <span class="font-mono font-black text-xs text-amber-400">${(item.price * item.quantity).toLocaleString("vi-VN")} đ</span>
@@ -1666,11 +1874,11 @@
                 return;
             }
 
-            treeBox.innerHTML = appState.cartItems.map(function(item) {
+            treeBox.innerHTML = appState.cartItems.map(function(item, idx) {
                 var sauceLine = item.sauce ? `<div class="text-[10.5px] text-amber-300 font-bold ml-3">↳ Nước chấm: ${item.sauce} ${item.sauceFee > 0 ? '(+' + item.sauceFee.toLocaleString('vi-VN') + 'đ)' : ''}</div>` : '';
                 var tasteLine = item.taste ? `<div class="text-[10px] text-slate-400 ml-3">• Khẩu vị: ${item.taste}</div>` : '';
                 var toppingLines = (item.toppings && item.toppings.length > 0)
-                    ? item.toppings.map(function(t) { return `<div class="text-[10.5px] text-emerald-400 font-medium ml-3">↳ 1x ${t.name} (+${t.price.toLocaleString('vi-VN')}đ)</div>`; }).join("")
+                    ? item.toppings.map(function(t) { return `<div class="text-[10.5px] text-emerald-400 font-medium ml-3">↳ 1x ${t.name} (+${Number(t.price).toLocaleString('vi-VN')}đ)</div>`; }).join("")
                     : "";
 
                 return `
@@ -1794,10 +2002,10 @@
         }
 
         /**
-         * THUẬT TOÁN HAVERSINE ĐO KHOẢNG CÁCH CHUẨN TỪ ĐIỂN SSOT
+         * THUẬT TOÁN HAVERSINE ĐO KHOẢNG CÁCH CHUẨN VỆ TINH SSOT
          */
         function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
-            var R = 6371;
+            var R = 6371; // Bán kính Trái Đất (km)
             var dLat = (lat2 - lat1) * (Math.PI / 180);
             var dLon = (lon2 - lon1) * (Math.PI / 180);
             var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -1808,7 +2016,7 @@
         }
 
         /**
-         * LẤY ĐỊNH VỊ VỆ TINH GPS CỦA KHÁCH HÀNG
+         * LẤY ĐỊNH VỊ VỆ TINH GPS CHÍNH XÁC CỦA KHÁCH HÀNG (GIỮ NGUYÊN LAT/LNG)
          */
         function detectCustomerGps() {
             if (!navigator.geolocation) {
@@ -1835,7 +2043,7 @@
                     );
 
                     var addrEl = document.getElementById("chk-customer-address");
-                    if (addrEl) addrEl.value = `Tọa độ GPS: ${uLat.toFixed(5)}, ${uLng.toFixed(5)} (Tây Ninh)`;
+                    if (addrEl) addrEl.value = `Vị trí vệ tinh GPS: ${uLat.toFixed(5)}, ${uLng.toFixed(5)} (Tây Ninh)`;
 
                     recalculateShippingFee();
 
@@ -1845,7 +2053,7 @@
                         setTimeout(function() { if (btn) btn.innerHTML = origText; }, 3000);
                     }
                 },
-                function() {
+                function(err) {
                     if (btn) {
                         btn.disabled = false;
                         btn.innerHTML = origText;
@@ -1966,70 +2174,84 @@
         });
 
         /**
-         * TÍNH TOÁN CƯỚC SHIP 3 CHIỀU LINH HOẠT THEO TỪ ĐIỂN SSOT (ZERO-HARDCODE)
+         * TÍNH TOÁN CƯỚC SHIP ĐỘNG TỪ SYS_CONFIG & LÀM TRÒN LÊN MỐC 0.5KM
          */
         function recalculateShippingFee() {
             var dist = (appState.calculatedDistanceKm !== undefined && appState.calculatedDistanceKm !== null) 
                        ? Number(appState.calculatedDistanceKm) 
-                       : 1.0;
+                       : 1.8;
+
+            // THUẬT TOÁN LÀM TRÒN LÊN THEO MỐC 0.5KM ĐỂ CẠNH TRANH GIÁ
+            // Ví dụ: 1.2km -> 1.5km; 1.6km -> 2.0km; 2.1km -> 2.5km
+            var billedDist = Math.ceil(dist * 2) / 2;
+            appState.billedDistanceKm = billedDist;
+
+            var baseDist = Number(STORE_BASE_CONFIG.shipBaseDistanceKm) || 2.0;
+            var baseFee = Number(STORE_BASE_CONFIG.shipBaseFee) || 12000;
+            var stepDist = Number(STORE_BASE_CONFIG.shipStepDistanceKm) || 0.5;
+            var feePerStep = Number(STORE_BASE_CONFIG.shipFeePerStep) || 2500;
+
+            var calcFee = baseFee;
+            if (billedDist > baseDist) {
+                var extraSteps = Math.ceil((billedDist - baseDist) / stepDist);
+                calcFee += (extraSteps * feePerStep);
+            }
+            calcFee = Math.ceil(calcFee / 1000) * 1000;
 
             var subtotal = 0;
+            var hasHighMarginItem = false;
             appState.cartItems.forEach(function(i) {
-                if (!i.isGift) subtotal += (i.price * i.quantity);
+                if (!i.isGift) {
+                    subtotal += (i.price * i.quantity);
+                    var dId = String(i.dishId || "");
+                    if (dId === "M09" || i.name.indexOf("Trà Đào") !== -1 || i.name.indexOf("Combo") !== -1) {
+                        hasHighMarginItem = true;
+                    }
+                }
             });
 
-            var logistics = null;
-
-            // Ưu tiên gọi Cỗ máy tính toán từ điển SSOT window.T5_DICT
-            if (typeof window !== "undefined" && window.T5_DICT && typeof window.T5_DICT.calculateDynamicShippingFee === "function") {
-                logistics = window.T5_DICT.calculateDynamicShippingFee(dist, subtotal, appState.dynamicShippingConfig);
-            } else {
-                // Fallback tính toán tại chỗ nếu chưa nạp được dictionary
-                var roundedKm = Math.max(1, Math.ceil(dist));
-                var driverFee = Math.max(5000, roundedKm * 4500);
-                var customerFee = Math.max(3000, roundedKm * 3000);
-                var subsidy = Math.max(0, driverFee - customerFee);
-                var reason = "Trợ giá cước cạnh tranh D2C";
-
-                if (subtotal >= 149000 && subtotal > 0) {
-                    subsidy += customerFee;
-                    customerFee = 0;
-                    reason = "Freeship đơn tiệc từ 149k";
-                }
-
-                logistics = {
-                    distanceKm: dist,
-                    billableKm: roundedKm,
-                    driverPayoutFee: driverFee,
-                    customerPayFee: customerFee,
-                    merchantSubsidy: subsidy,
-                    subsidyReason: reason,
-                    isFreeShip: (customerFee === 0)
-                };
+            // CHÍNH SÁCH TRỢ GIÁ CƯỚC SHIP (FREESHIP & SUBSIDY)
+            var sub = 0;
+            var reason = "";
+            if (billedDist >= 4.0 && (subtotal >= 149000 || (subtotal >= 110000 && hasHighMarginItem))) {
+                sub = 15000;
+                reason = "Hỗ trợ đơn xa > 4km";
+            } else if (billedDist >= 3.5 && subtotal >= 120000) {
+                sub = 10000;
+                reason = "Hỗ trợ đơn xa > 3.5km";
+            } else if (subtotal >= 89000) {
+                sub = 5000;
+                reason = "Ưu đãi đơn từ 89k";
             }
 
-            appState.shippingFee = logistics.driverPayoutFee;
-            appState.customerPayShipFee = logistics.customerPayFee;
-            appState.shippingSubsidy = logistics.merchantSubsidy;
-            appState.subsidyReason = logistics.subsidyReason;
+            var appliedSub = Math.min(calcFee, sub);
+
+            appState.shippingFee = calcFee;
+            appState.shippingSubsidy = appliedSub;
+            appState.subsidyReason = reason;
+
+            var custPayShip = Math.max(0, calcFee - appliedSub);
 
             var txtDist = document.getElementById("txt-calc-distance");
             var txtFee = document.getElementById("txt-calc-shipping-fee");
             var tagSubsidy = document.getElementById("txt-calc-subsidy-tag");
 
             if (txtDist) {
-                if (dist < 0.3) txtDist.innerHTML = '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-location-dot"></i> Tại quán (< 300m)</span>';
-                else txtDist.innerText = `Cự ly: ~${logistics.billableKm || Math.ceil(dist)} km`;
+                if (dist < 0.3) {
+                    txtDist.innerHTML = '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-location-dot"></i> Tại quán (< 300m)</span>';
+                } else {
+                    txtDist.innerText = `Cự ly: ~${dist.toFixed(1)} km (Tính cước: ${billedDist.toFixed(1)} km)`;
+                }
             }
 
-            if (txtFee) txtFee.innerText = logistics.customerPayFee.toLocaleString("vi-VN") + " đ";
+            if (txtFee) txtFee.innerText = custPayShip.toLocaleString("vi-VN") + " đ";
 
             if (tagSubsidy) {
-                if (logistics.merchantSubsidy > 0) {
+                if (appliedSub > 0) {
                     tagSubsidy.classList.remove("hidden");
-                    tagSubsidy.innerText = logistics.isFreeShip 
-                        ? `(Freeship -${logistics.merchantSubsidy.toLocaleString('vi-VN')}đ)`
-                        : `(Quán bù -${logistics.merchantSubsidy.toLocaleString('vi-VN')}đ)`;
+                    tagSubsidy.innerText = custPayShip === 0 
+                        ? `(Freeship -${appliedSub.toLocaleString('vi-VN')}đ)`
+                        : `(Trợ giá -${appliedSub.toLocaleString('vi-VN')}đ)`;
                 } else {
                     tagSubsidy.classList.add("hidden");
                 }
@@ -2044,10 +2266,10 @@
                 if (!i.isGift) subtotal += (i.price * i.quantity);
             });
 
-            var driverFee = Number(appState.shippingFee) || 0;
+            var fee = Number(appState.shippingFee) || 0;
             var sub = Number(appState.shippingSubsidy) || 0;
-            var customerPayShip = Number(appState.customerPayShipFee) || Math.max(0, driverFee - sub);
-            var finalTotal = subtotal + customerPayShip;
+            var actualShip = Math.max(0, fee - sub);
+            var finalTotal = subtotal + actualShip;
 
             var elSub = document.getElementById("chk-summary-subtotal");
             var elFee = document.getElementById("chk-summary-shipping-fee");
@@ -2055,7 +2277,7 @@
             var elFinal = document.getElementById("chk-summary-final-total");
 
             if (elSub) elSub.innerText = subtotal.toLocaleString("vi-VN") + " đ";
-            if (elFee) elFee.innerText = driverFee.toLocaleString("vi-VN") + " đ";
+            if (elFee) elFee.innerText = fee.toLocaleString("vi-VN") + " đ";
             if (elSubTag) elSubTag.innerText = sub > 0 ? ("-" + sub.toLocaleString("vi-VN") + " đ" + (appState.subsidyReason ? " (" + appState.subsidyReason + ")" : "")) : "-0 đ";
             if (elFinal) elFinal.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
 
@@ -2069,7 +2291,8 @@
             var yearStr = String(now.getFullYear()).slice(-2);
             var monthStr = String(now.getMonth() + 1).padStart(2, '0');
             var dayStr = String(now.getDate()).padStart(2, '0');
-            var tempMemo = "DH" + yearStr + monthStr + dayStr + "_T5";
+            var randSuffix = Math.floor(1000 + Math.random() * 9000);
+            var tempMemo = "DH" + yearStr + monthStr + dayStr + "_" + randSuffix;
 
             var bankBin = STORE_BASE_CONFIG.bankBin;
             var bankAcc = STORE_BASE_CONFIG.bankAccount;
@@ -2119,6 +2342,17 @@
                 alert("⚠️ Giỏ hàng đang trống. Quý khách vui lòng chọn món trước!");
                 return;
             }
+
+            var subtotal = 0;
+            appState.cartItems.forEach(function(i) { if (!i.isGift) subtotal += (i.price * i.quantity); });
+
+            // Bắn sự kiện Marketing InitiateCheckout
+            trackMarketingEvent("InitiateCheckout", {
+                num_items: appState.cartItems.length,
+                value: subtotal,
+                currency: "VND"
+            });
+
             closeCartDrawer();
             var modal = document.getElementById("modal-checkout-order");
             if (modal) modal.classList.remove("hidden");
@@ -2133,7 +2367,7 @@
         }
 
         /**
-         * XÁC NHẬN GỬI ĐƠN VỀ BẾP
+         * XÁC NHẬN GỬI ĐƠN VỀ BẾP - TRUYỀN TỌA ĐỘ GPS CHÍNH XÁC VÀ BẮN EVENT PURCHASE
          */
         async function submitFinalOrder() {
             var nameEl = document.getElementById("chk-customer-name");
@@ -2157,7 +2391,7 @@
             }
 
             if (!addr) {
-                alert("⚠️ Quý khách vui lòng nhập Địa Chỉ Giao Hàng hoặc chọn địa điểm gợi ý!");
+                alert("⚠️ Quý khách vui lòng nhập Địa Chỉ Giao Hàng hoặc bấm nút lấy vị trí GPS!");
                 if (addrEl) addrEl.focus();
                 return;
             }
@@ -2172,8 +2406,8 @@
                 if (!i.isGift) subtotal += (i.price * i.quantity);
             });
 
-            var customerShip = Number(appState.customerPayShipFee) || Math.max(0, appState.shippingFee - appState.shippingSubsidy);
-            var finalTotal = subtotal + customerShip;
+            var actualShip = Math.max(0, appState.shippingFee - appState.shippingSubsidy);
+            var finalTotal = subtotal + actualShip;
 
             var now = new Date();
             var yearStr = String(now.getFullYear()).slice(-2);
@@ -2182,20 +2416,26 @@
             var randSuffix = Math.floor(1000 + Math.random() * 9000);
             var orderCode = "DH" + yearStr + monthStr + dayStr + "_" + randSuffix;
 
-            // Xây dựng chuỗi phân cấp bậc thang lưu vào Sheet DATA_ORDERS
+            // Xây dựng chuỗi phân cấp bậc thang Visual Hierarchy Tree kèm thẻ GPS chính xác
             var hierarchicalItemsTree = appState.cartItems.map(function(item) {
                 var lines = [];
-                lines.push("• " + item.quantity + "x " + item.name + " (" + item.basePrice.toLocaleString("vi-VN") + "đ)");
+                lines.push("• " + item.quantity + "x " + item.name + " (" + Number(item.basePrice).toLocaleString("vi-VN") + "đ)");
                 if (item.sauce) lines.push("  ↳ Nước chấm: " + item.sauce + (item.sauceFee > 0 ? " (+" + item.sauceFee.toLocaleString("vi-VN") + "đ)" : ""));
                 if (item.taste) lines.push("  • Khẩu vị: " + item.taste);
                 if (item.toppings && item.toppings.length > 0) {
                     item.toppings.forEach(function(t) {
-                        lines.push("  ↳ 1x " + t.name + " (+" + t.price.toLocaleString("vi-VN") + "đ)");
+                        lines.push("  ↳ 1x " + t.name + " (+" + Number(t.price).toLocaleString("vi-VN") + "đ)");
                     });
                 }
                 if (item.note) lines.push("  Ghi chú: " + item.note);
                 return lines.join("\n");
             }).join("\n\n");
+
+            // Đính kèm thẻ GPS chuẩn để Shipper mở Google Maps dẫn đường
+            var gpsTag = "";
+            if (appState.customerLocation && appState.customerLocation.lat && appState.customerLocation.lng) {
+                gpsTag = `\n[GPS:${appState.customerLocation.lat},${appState.customerLocation.lng}]`;
+            }
 
             var orderPayload = {
                 orderCode: orderCode,
@@ -2210,13 +2450,15 @@
                 gift: appState.appliedGift,
                 giftName: appState.appliedGift ? appState.appliedGift.name : "",
                 subtotal: subtotal,
-                baseShipFee: appState.shippingFee,
+                distanceKm: appState.calculatedDistanceKm,
+                billedDistanceKm: appState.billedDistanceKm,
                 shippingFee: appState.shippingFee,
                 shippingSubsidy: appState.shippingSubsidy,
                 subsidyReason: appState.subsidyReason || "",
                 finalTotal: finalTotal,
                 paymentMethod: appState.selectedPaymentMethod,
-                note: hierarchicalItemsTree,
+                serviceType: "FOOD_DELIVERY",
+                note: hierarchicalItemsTree + gpsTag,
                 timestamp: now.toISOString()
             };
 
@@ -2232,15 +2474,21 @@
                     throw new Error("Không tìm thấy kết nối Thim5API (file api.js chưa nạp đúng)!");
                 }
 
-                var actionOrder = (window.T5_DICT && window.T5_DICT.ACTIONS && window.T5_DICT.ACTIONS.CREATE_D2C_ORDER)
-                                  ? window.T5_DICT.ACTIONS.CREATE_D2C_ORDER
-                                  : "createD2COrder";
-
-                var res = await Thim5API.callGAS(actionOrder, orderPayload);
+                var res = await Thim5API.callGAS("createD2COrder", orderPayload);
 
                 if (!res || (res.status !== "success" && res.code !== 200)) {
                     throw new Error((res && res.message) ? res.message : "Máy chủ Bếp từ chối tiếp nhận đơn hàng!");
                 }
+
+                // Bắn sự kiện Marketing Purchase tối ưu chiến dịch quảng cáo
+                trackMarketingEvent("Purchase", {
+                    content_name: "Đơn hàng Thím 5",
+                    content_type: "product",
+                    value: finalTotal,
+                    currency: "VND",
+                    num_items: appState.cartItems.length,
+                    order_id: orderCode
+                });
 
                 sessionStorage.setItem("thim5_last_order", JSON.stringify(orderPayload));
 
