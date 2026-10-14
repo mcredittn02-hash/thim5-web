@@ -1,0 +1,68 @@
+# ROO CODE / GEMINI SYSTEM CONTRACT: ZERO-DEFECT PROTOCOL
+# Dự án: LongHoaFood Master & SaaS Multi-Tenant F&B System
+# Founder & Chỉ huy Tối cao: Anh Hải Âu | Cố vấn Kỹ thuật: Đu Đủ
+# Mô hình AI nội trú: gemini-3.1-pro-preview / gemini-2.5-pro
+
+## ĐIỀU 1: VÙNG CẤM BẤT BIẾN (NO-TOUCH FORBIDDEN ZONE)
+1. Tuyệt đối KHÔNG ĐƯỢC TỰ Ý SỬA ĐỔI hoặc GHI ĐÈ các file sau trừ khi có lệnh đích danh từ anh Hải Âu:
+   - `.clasp.json`, `.clasp.stag.json`, `.clasp.prod.json` (Tránh làm lệch Script ID môi trường).
+   - `BACKEND_APPSCRIPT/appsscript.json` (Bảo vệ V8 runtime và múi giờ GMT+7).
+   - Toàn bộ thư mục `LEGACY_ARCHIVE/` (Khu vực lưu trữ lịch sử, chỉ đọc).
+2. Khi sửa đổi code, chỉ được phép làm việc trong 2 vùng:
+   - `FRONTEND_WEB/` (Giao diện SPA, view con .html, api.js).
+   - `BACKEND_APPSCRIPT/` (Các module xử lý .gs).
+
+## ĐIỀU 2: KỶ LUẬT CHỐNG CẮT XÉN TUYỆT ĐỐI (ANTI-TRUNCATION RULE)
+1. NGHIÊM CẤM mọi hình thức cắt xén, giả định hoặc dùng comment tóm tắt như:
+   - `// ... rest of code unchanged`
+   - `// giữ nguyên logic cũ`
+   - `/* TODO */`
+   - `/* code cũ ở đây */`
+2. Khi sửa file lớn (> 200 dòng): Bắt buộc sử dụng công cụ thay thế khối cục bộ chính xác (`apply_diff` / search & replace block), tuyệt đối không ghi đè toàn bộ file làm mất các hàm đang chạy ổn định.
+3. Không tự ý xóa các hàm, biến hoặc router actions hiện có.
+
+## ĐIỀU 3: BẢO VỆ CSDL CHUẨN SSOT (7 SHEETS BẤT BIẾN)
+Mọi logic đọc/ghi dữ liệu phải tuân thủ nghiêm ngặt 7 sheet chuẩn hóa:
+1. `DATA_MENU`: Cấu trúc 13 cột Reverse-Pricing (Mã Món, Tên Món Ăn, Nhóm Phân Loại, Giá App, % Giảm D2C, Giá Bán D2C Web, Giá Vốn COGS, Lợi Nhuận Ròng, Trạng Thái Bếp, Mô Tả, Link Ảnh, Bán Kèm, Tag Chiến Lược).
+2. `SYS_CATEGORIES`: 5 cột (Mã Danh Mục, Icon, Tên Danh Mục, Slug D2C, Trần Food Cost).
+3. `SYS_CONFIG`: Cấu hình Key - Value toàn hệ thống (Phí sàn, Thuế HKD 4.5%, Phí Master 2%).
+4. `DATA_ORDERS`: Sổ cái đơn hàng D2C và POS.
+5. `DATA_SHIPPERS`: Quản trị đội ngũ giao vận & hạn mức tiền mặt COD.
+6. `DATA_SHIPPER_LEDGER`: Sổ cái nộp két và đối soát vận chuyển.
+7. `DATA_CUSTOMERS`: Hồ sơ CRM tích điểm D2C.
+-> CẤM tự ý đổi tên sheet, đổi thứ tự cột hoặc thêm bớt cột ngoài thỏa thuận SSOT.
+
+## ĐIỀU 4: KHÓA DANH MỤC ACTION ROUTER (API CONTRACT)
+Frontend chỉ được phép gọi các Action API đã được định nghĩa trong `MasterDictionary.gs` và điều phối qua `CoreRouter.gs`:
+- Quản trị Thực đơn: `getAdminMenuCatalog`, `saveOrUpdateMenuItem`, `toggleMenuItemStatus`, `deleteMenuItem`.
+- Quản trị Giao vận: `deleteShipper`, `settleShipperDebt`.
+- Omni-Ingestion: `batchImportMenuItems`, `uploadDishMediaImage`, `processMenuOcrWithGemini`.
+- Tài chính & D2C: `getFinancialPlSummary`, `getConfig`, `createD2COrder`.
+-> NẾU CẦN TẠO ACTION MỚI: Bắt buộc khai báo tại `MasterDictionary.gs` và `CoreRouter.gs` trước khi gọi ở Frontend!
+
+## ĐIỀU 5: HÀNG RÀO TÀI CHÍNH F&B (MARGIN & CASH SHIELD)
+Mọi mã nguồn liên quan đến tính toán tiền bạc phải tuân thủ:
+1. Công thức Reverse-Pricing:
+   Giá Bán D2C = (Food Cost Mục Tiêu + Lợi Nhuận Ròng) / (1 - % Khấu Trừ Nền Tảng)
+2. Khóa trần khuyến mãi toàn đơn <= 15% doanh thu gộp (chống âm dòng tiền).
+3. Rào chắn nợ COD: Nghiêm cấm xóa tài xế nếu số dư nợ quỹ tiền mặt COD khác 0.
+
+## ĐIỀU 6: QUY TRÌNH THỰC THI 3 BƯỚC CHO MỌI TASK
+Trước khi chạm vào code:
+- Bước 1: Dùng tool `list_directory` hoặc `read_file` để kiểm tra thực tế, KHÔNG ĐƯỢC ĐOÁN MÒ.
+- Bước 2: Báo cáo nguyên nhân gốc rễ và đề xuất phương án sửa đổi bằng Diff rõ ràng.
+- Bước 3: Sau khi được anh Hải Âu duyệt, thực thi sửa đổi và kiểm tra lại toàn diện liên file (Inter-file audit).
+
+## ĐIỀU 7: VÒNG LẶP TỰ ĐỘNG CẬP NHẬT ROADMAP BẮT BUỘC (ROADMAP AUTO-UPDATE PROTOCOL)
+Mỗi Agent khi nhận nhiệm vụ BẮT BUỘC phải thực thi theo chu trình 3 bước sau đối với file `ROADMAP.md`:
+1. **Trước khi bắt đầu**:
+   - Mở `ROADMAP.md` bằng `read_file`.
+   - Tìm task được giao và dùng `apply_diff` đổi trạng thái từ `[ ]` (Chưa làm) thành `[/]` (Đang thực hiện).
+2. **Trong khi thực hiện**:
+   - Tuân thủ nghiêm ngặt phạm vi của task, không làm lan man sang các task khác.
+3. **Sau khi hoàn thành và tự kiểm tra (Self-Audit)**:
+   - Dùng `apply_diff` đổi trạng thái task trong `ROADMAP.md` từ `[/]` thành `[x]` (Đã hoàn thành).
+   - Thêm 1 dòng nhật ký vào bảng `NHẬT KÝ THỰC THI AGENT (EXECUTION AUDIT LOG)` ở cuối file `ROADMAP.md` với định dạng:
+     `| [Ngày Giờ] | [Tên Task] | [File đã tác động] | [Kết quả kiểm tra] |`
+   - Cập nhật dòng `Cập nhật lần cuối: ...` ở đầu file `ROADMAP.md`.
+-> NẾU CHƯA CẬP NHẬT ROADMAP.MD, AGENT KHÔNG ĐƯỢC PHÉP TUYÊN BỐ HOÀN THÀNH NHIỆM VỤ!

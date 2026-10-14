@@ -1,0 +1,9 @@
+{
+  "name": "anngonlonghoa-system",
+  "version": "1.0.0",
+  "description": "Multi-Environment CI/CD Automation for Google Apps Script Backend",
+  "scripts": {
+    "push:stag": "powershell -Command \"Copy-Item -Path .clasp.stag.json -Destination .clasp.json -Force; clasp push -f\"",
+    "push:prod": "powershell -Command \"Copy-Item -Path .clasp.prod.json -Destination .clasp.json -Force; clasp push -f\""
+  }
+}
