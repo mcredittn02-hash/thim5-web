@@ -1,0 +1,1227 @@
+<!-- ==========================================================================
+   FILE: admin-shell.html - PHẦN [1/3]
+   BẮT ĐẦU TỪ: Khai báo DOCTYPE, Header, Màn hình xác thực RBAC Modal (Numpad PIN & Super 2FA)
+   KẾT THÚC TẠI: Thẻ đóng </main> và </div> bao quanh Bố cục Workspace chính
+   HƯỚNG DẪN: Tạo mới hoặc dán đè toàn bộ nội dung Phần 1 vào file admin-shell.html
+   ========================================================================== -->
+<!DOCTYPE html>
+<html lang="vi" class="dark h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bếp Thím 5 • Control Plane OS (v3.5 Modular SaaS)</title>
+  
+  <!-- CDN Tailwind CSS v3 & FontAwesome 6 Pro Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Phông chữ Google Fonts chuẩn UI Doanh Nghiệp -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Cấu hình Tailwind Dark Theme Slate-950 Đồng Bộ Toàn Hệ Thống -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              850: '#131c2e',
+              900: '#0f172a',
+              950: '#020617'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Thanh cuộn tinh chỉnh chuẩn UI Cao Cấp Dark Mode */
+    .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #020617; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #334155; }
+    
+    /* Hiệu ứng nhịp tim kết nối (Heartbeat Pulse) */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+    }
+    .heartbeat-active {
+      animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col bg-slate-950 text-slate-100 font-sans overflow-hidden select-none">
+
+  <!-- ========================================================================= -->
+  <!-- 1. MODAL XÁC THỰC QUYỀN TRUY CẬP 3 CẤP ĐỘ (#auth-modal-overlay)             -->
+  <!-- ========================================================================= -->
+  <div id="auth-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4 transition-all duration-300 select-none">
+    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-7 space-y-5 animate-in zoom-in-95 duration-200">
+      
+      <!-- Tiêu đề & Biểu tượng vương miện hệ thống -->
+      <div class="text-center space-y-1.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 text-xl font-black mx-auto shadow-lg shadow-amber-500/20">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+        <h2 class="text-base font-black text-white uppercase tracking-wider">Xác Thực Quyền Truy Cập</h2>
+        <p class="text-[11px] text-slate-400">Chọn phương thức xác thực quyền hạn vận hành của bạn:</p>
+      </div>
+
+      <!-- Thanh chuyển đổi chế độ xác thực (Tabs) -->
+      <div class="flex items-center p-1 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-bold">
+        <button type="button" 
+                id="tab-btn-pin" 
+                onclick="AdminShellController.switchAuthMode('PIN')" 
+                class="flex-1 py-2 rounded-xl transition bg-amber-500 text-slate-950 shadow font-bold flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-key text-xs"></i>
+          <span>Quản Lý (PIN)</span>
+        </button>
+        <button type="button" 
+                id="tab-btn-super" 
+                onclick="AdminShellController.switchAuthMode('SUPER')" 
+                class="flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-shield-halved text-xs"></i>
+          <span>Super Admin (2FA)</span>
+        </button>
+      </div>
+
+      <!-- KHỐI 1: XÁC THỰC MÃ PIN CHO LEVEL 1 (BẾP) & LEVEL 2 (QUẢN LÝ POS) -->
+      <div id="auth-box-pin" class="space-y-4">
+        
+        <!-- Màn hình hiển thị số chấm PIN dạng bullet -->
+        <div class="relative">
+          <input type="password" 
+                 id="input-pos-pin" 
+                 maxlength="6" 
+                 readonly 
+                 placeholder="••••" 
+                 class="w-full bg-slate-950 border-2 border-slate-800 focus:border-amber-500 rounded-2xl py-3 text-center text-xl tracking-[0.5em] font-mono font-black text-amber-400 outline-none transition select-none" />
+        </div>
+
+        <!-- Bàn phím số ảo (Numpad) cảm ứng mượt mà -->
+        <div class="grid grid-cols-3 gap-2 text-sm font-bold font-mono">
+          <button type="button" onclick="AdminShellController.appendPinDigit('1')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">1</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('2')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">2</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('3')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">3</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('4')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">4</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('5')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">5</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('6')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">6</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('7')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">7</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('8')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">8</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('9')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">9</button>
+          <button type="button" onclick="AdminShellController.clearPinDigit()" class="h-11 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 active:scale-95 text-rose-400 border border-rose-500/30 transition text-xs font-sans">Xóa</button>
+          <button type="button" onclick="AdminShellController.appendPinDigit('0')" class="h-11 rounded-xl bg-slate-950 hover:bg-slate-800 active:scale-95 text-white border border-slate-800 transition shadow">0</button>
+          <button type="button" id="btn-submit-pin" onclick="AdminShellController.submitPinAuth()" class="h-11 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-black transition text-xs font-sans shadow-lg shadow-emerald-500/20 flex items-center justify-center">Vào</button>
+        </div>
+
+        <div class="text-center pt-1">
+          <span class="text-[10px] text-slate-500 font-mono">Gợi ý: 1985 (Trưởng Ca Bếp) • 2026 (Quản Lý POS)</span>
+        </div>
+      </div>
+
+      <!-- KHỐI 2: XÁC THỰC SUPER ADMIN 2FA (MASTER KEY + TOTP GOOGLE AUTH) -->
+      <div id="auth-box-super" class="hidden space-y-3.5 text-xs">
+        <form onsubmit="AdminShellController.submitSuperAdminAuth(event)" class="space-y-3">
+          
+          <!-- Nhập Master Key -->
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Master Secret Key <span class="text-rose-400">*</span></label>
+            <div class="relative">
+              <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+              <input type="password" 
+                     id="input-master-key" 
+                     required 
+                     placeholder="Nhập khóa bảo mật Master..." 
+                     class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl pl-8 pr-3 py-2 text-white font-mono text-xs outline-none transition" />
+            </div>
+          </div>
+
+          <!-- Nhập Mã 6 số 2FA Authenticator -->
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Mã 6 Số Google Authenticator (TOTP) <span class="text-amber-400">*</span></label>
+            <div class="relative">
+              <i class="fa-solid fa-mobile-screen-button absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+              <input type="text" 
+                     id="input-totp-code" 
+                     required 
+                     maxlength="6" 
+                     placeholder="000000" 
+                     class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl pl-8 pr-3 py-2 text-center text-base tracking-[0.4em] font-mono font-bold text-amber-400 outline-none transition" />
+            </div>
+          </div>
+
+          <!-- Nút Xác Nhận Super Admin -->
+          <button type="submit" 
+                  id="btn-super-auth-submit" 
+                  class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black uppercase text-xs tracking-wider transition active:scale-95 shadow-lg shadow-orange-600/20 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-shield-halved text-xs"></i>
+            <span>Xác Thực Quyền Super Admin</span>
+          </button>
+
+        </form>
+        
+        <div class="text-center pt-1">
+          <button type="button" onclick="AdminShellController.requestEmergencyBackupOtp()" class="text-[10px] text-slate-400 hover:text-amber-400 underline transition">
+            Quên điện thoại 2FA? Gửi mã khẩn cấp qua Email HQ
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. THANH ĐIỀU HÀNH TỔNG (TOPBAR & SYSTEM HEARTBEAT LATENCY)                 -->
+  <!-- ========================================================================= -->
+  <header class="h-14 bg-slate-900 border-b border-slate-800 px-3 sm:px-6 flex items-center justify-between shrink-0 z-30">
+      
+      <!-- Cụm Trái: Menu Hamburger Mobile & Tên Hệ Điều Hành -->
+      <div class="flex items-center gap-3">
+          <button type="button" 
+                  onclick="AdminShellController.toggleSidebar()" 
+                  class="md:hidden p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 hover:text-white transition active:scale-95">
+              <i class="fa-solid fa-bars text-sm"></i>
+          </button>
+
+          <div class="flex items-center gap-2.5">
+              <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500 to-red-600 flex items-center justify-center text-slate-950 font-black text-xs shadow-md shadow-amber-500/10">
+                  T5
+              </span>
+              <div class="hidden sm:block">
+                  <h2 class="text-xs font-black text-white tracking-wide uppercase">LongHoaFood Master</h2>
+                  <p class="text-[10px] text-slate-400 font-mono">Control Plane v3.5 Modular SaaS</p>
+              </div>
+          </div>
+      </div>
+
+      <!-- Cụm Phải: Nút Công Tắc Trạng Thái Quán, Heartbeat & Profile -->
+      <div class="flex items-center gap-2 sm:gap-3">
+          
+          <!-- CÔNG TẮC ĐÓNG/MỞ CỬA BẾP THỜI GIAN THỰC (LEVEL 2) -->
+          <button type="button" 
+                  id="btn-store-status-toggle" 
+                  onclick="AdminStoreControl.openToggleModal()" 
+                  class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 active:scale-95">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="dot-store-status"></span>
+              <span id="txt-store-status" class="tracking-tight">🟢 ĐANG MỞ CỬA</span>
+          </button>
+
+          <!-- Nút Mở Menu Studio Master Độc Lập Trên Topbar -->
+          <a href="menu-manager.html" 
+             target="_blank"
+             class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/10 transition active:scale-95">
+              <i class="fa-solid fa-layer-group"></i>
+              <span>Menu Studio Master</span>
+          </a>
+
+          <!-- Huy Hiệu Quyền Hạn Đang Đăng Nhập -->
+          <div id="user-role-badge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <i class="fa-solid fa-user-shield text-[10px]"></i>
+              <span id="user-role-text">POS_STAFF</span>
+          </div>
+
+          <!-- Trạng Thái Mạng Heartbeat Latency -->
+          <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-[11px] font-mono text-slate-400">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 heartbeat-active" id="heartbeat-indicator"></span>
+              <span id="heartbeat-status">GAS Connected</span>
+              <span id="heartbeat-latency" class="text-emerald-400 font-medium">12ms</span>
+          </div>
+
+          <!-- Nút Làm Mới Nhanh Dữ Liệu -->
+          <button type="button" 
+                  onclick="AdminShellController.refreshCurrentTab()" 
+                  class="p-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white transition active:scale-95" 
+                  title="Tải lại tab hiện tại">
+              <i class="fa-solid fa-rotate-right text-xs"></i>
+          </button>
+
+          <!-- Nút Đăng Xuất -->
+          <button type="button" 
+                  onclick="AdminShellController.handleLogout()" 
+                  class="p-2 rounded-xl bg-slate-950 border border-slate-800 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition active:scale-95" 
+                  title="Đăng xuất ca làm việc">
+              <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+          </button>
+
+      </div>
+
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL POPUP CẬP NHẬT TRẠNG THÁI HOẠT ĐỘNG CỦA QUÁN (LEVEL 2)             -->
+  <!-- ========================================================================= -->
+  <div id="modal-store-status-toggle" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+      <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-2xl animate-in zoom-in-95 duration-150">
+          
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-sm shadow-inner">
+                      <i class="fa-solid fa-power-off"></i>
+                  </div>
+                  <div>
+                      <h4 class="text-xs font-black uppercase text-white tracking-wider">Trạng Thái Tiếp Nhận Đơn</h4>
+                      <p class="text-[10px] text-slate-400">Đồng bộ tức thì lên Mặt Tiền D2C</p>
+                  </div>
+              </div>
+              <button type="button" onclick="AdminStoreControl.closeToggleModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-xmark"></i>
+              </button>
+          </div>
+
+          <div class="space-y-3 text-xs">
+              <div>
+                  <label class="block text-[11px] text-slate-400 mb-1.5 font-bold">Lựa chọn trạng thái:</label>
+                  <div class="grid grid-cols-2 gap-2">
+                      <button type="button" 
+                              id="opt-status-open" 
+                              onclick="AdminStoreControl.selectTargetStatus('OPEN')" 
+                              class="p-2.5 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-1.5 transition">
+                          <i class="fa-solid fa-door-open"></i> Mở Bếp Nhận Đơn
+                      </button>
+                      <button type="button" 
+                              id="opt-status-closed" 
+                              onclick="AdminStoreControl.selectTargetStatus('CLOSED')" 
+                              class="p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition hover:border-rose-500/40">
+                          <i class="fa-solid fa-door-closed"></i> Tạm Nghỉ Quán
+                      </button>
+                  </div>
+              </div>
+
+              <div id="box-closed-note" class="space-y-1.5 hidden">
+                  <label class="block text-[11px] text-slate-400 font-bold">Lý do / Hẹn giờ mở lại:</label>
+                  <input type="text" 
+                         id="inp-closed-message" 
+                         placeholder="VD: Nghỉ trưa ca 13h30-16h30, hẹn gặp lại quý khách!" 
+                         class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+              </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800 flex items-center gap-2">
+              <button type="button" 
+                      onclick="AdminStoreControl.closeToggleModal()" 
+                      class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+                  Đóng
+              </button>
+              <button type="button" 
+                      id="btn-confirm-toggle" 
+                      onclick="AdminStoreControl.submitToggleStatus()" 
+                      class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow flex items-center justify-center gap-1.5">
+                  <span>Xác Nhận Lưu</span>
+              </button>
+          </div>
+
+      </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 3. KHUNG BỐ CỤC CHÍNH WORKSPACE: SIDEBAR DRAWER & VIEWPORT TRUNG TÂM       -->
+  <!-- ========================================================================= -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- LỚP PHỦ NỀN KHI MỞ MENU TRÊN DI ĐỘNG (BACKDROP OVERLAY) -->
+    <div id="sidebar-backdrop" 
+         onclick="AdminShellController.toggleSidebar(false)" 
+         class="hidden fixed inset-0 z-30 bg-slate-950/80 backdrop-blur-sm md:hidden transition-opacity"></div>
+
+    <!-- SIDEBAR DRAWER ĐIỀU HƯỚNG PHÂN QUYỀN RBAC -->
+    <aside id="admin-sidebar" 
+           class="fixed inset-y-14 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-3 transform -translate-x-full md:translate-x-0 md:static md:inset-auto transition-transform duration-200 ease-in-out">
+      
+      <!-- Danh sách các Tab Chức Năng Điều Phối -->
+      <nav class="space-y-1.5 font-medium text-xs">
+        
+        <!-- Tab 1: Báo Cáo Tài Chính P&L (POS & Super Admin đều có quyền xem) -->
+        <button type="button" 
+                data-tab="pl" 
+                onclick="AdminShellController.switchMainTab('pl', this)" 
+                class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 active">
+          <i class="fa-solid fa-chart-pie w-4 text-center text-sm"></i>
+          <span class="truncate">Báo Cáo P&amp;L Dòng Tiền</span>
+        </button>
+
+        <!-- Tab 2: MENU STUDIO MASTER STANDALONE (MỞ TRỰC TIẾP MENU-MANAGER.HTML) -->
+        <a href="menu-manager.html" 
+           target="_blank" 
+           class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl transition bg-slate-950 hover:bg-slate-800 text-amber-400 border border-amber-500/30 shadow-sm active:scale-95 group">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-utensils w-4 text-center text-sm text-amber-500 group-hover:rotate-12 transition-transform"></i>
+            <span class="truncate font-black tracking-wide">Menu Studio Master</span>
+          </div>
+          <span class="flex items-center gap-1 text-[9.5px] font-mono px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span>v3.5</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+          </span>
+        </a>
+
+        <!-- Tab 3: Mở Nhanh Trạm Bếp KDS -->
+        <a href="kitchen.html" 
+           target="_blank" 
+           class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-emerald-400 hover:bg-slate-800/60">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-fire-burner w-4 text-center text-sm text-emerald-400"></i>
+            <span class="truncate">Trạm Bếp KDS</span>
+          </div>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-70"></i>
+        </a>
+
+        <!-- Tab 4: Trạm Điều Phối Ship (Nạp SPA Module tab-shippers.html) -->
+        <button type="button" 
+                data-tab="shippers" 
+                onclick="AdminShellController.switchMainTab('shippers', this)" 
+                class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60">
+          <i class="fa-solid fa-motorcycle w-4 text-center text-sm text-sky-400"></i>
+          <span class="truncate">Trạm Điều Phối Ship</span>
+        </button>
+
+        <!-- =================================================================== -->
+        <!-- KHỐI QUYỀN TỐI CAO: MẶC ĐỊNH BỊ KHÓA CHẶT (CHỈ MỞ CHO SUPER ADMIN)   -->
+        <!-- Quản lý ca (Lv1, Lv2) tuyệt đối không bao giờ nhìn thấy khối này    -->
+        <!-- =================================================================== -->
+        <div id="super-admin-nav-group" class="hidden space-y-1.5 pt-2 border-t border-slate-800/80">
+          <span class="px-3.5 text-[9.5px] font-mono uppercase tracking-widest text-rose-400 font-bold block mb-1">
+            Quyền Tối Cao
+          </span>
+
+          <!-- Tab 5: Cấu Hình Toàn Hệ Thống (Nạp động tab-config.html) -->
+          <button type="button" 
+                  id="sidebar-btn-config" 
+                  data-tab="config" 
+                  onclick="AdminShellController.switchMainTab('config', this)" 
+                  class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-rose-400 hover:bg-rose-500/10 font-bold">
+            <i class="fa-solid fa-sliders w-4 text-center text-sm"></i>
+            <span class="truncate">Super Control Plane</span>
+          </button>
+
+          <!-- Tab 6: Trung Tâm Chiến Dịch Geo-Fencing & Voucher (Super Admin) -->
+          <button type="button" 
+                  id="sidebar-btn-campaign" 
+                  data-tab="campaign" 
+                  onclick="AdminShellController.switchMainTab('campaign', this)" 
+                  class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-purple-400 hover:text-white hover:bg-slate-800/60">
+            <i class="fa-solid fa-satellite-dish w-4 text-center text-sm"></i>
+            <span class="truncate font-bold">Trung Tâm Chiến Dịch</span>
+          </button>
+        </div>
+
+      </nav>
+
+      <!-- Chân Sidebar: Thông Tin Bản Quyền & Phân Quyền Hiện Hành -->
+      <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-1 text-[10px] font-mono">
+        <div class="flex justify-between text-slate-400">
+          <span>Hệ thống:</span>
+          <span class="text-amber-400 font-bold">v3.5 SaaS</span>
+        </div>
+        <div class="flex justify-between text-slate-400">
+          <span>Phân quyền:</span>
+          <span id="sidebar-role-indicator" class="text-slate-300 font-bold">POS_STAFF</span>
+        </div>
+        <div class="pt-1 text-[9px] text-slate-500 text-center">
+          &copy; 2026 LongHoaFood Master
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ======================================================================= -->
+    <!-- 4. KHUNG VIEWPORT TRUNG TÂM NẠP MICRO-FRONTEND DYNAMIC                  -->
+    <!-- Nạp động tab-pl.html, tab-shippers.html, tab-config.html, tab-campaign.html -->
+    <!-- ======================================================================= -->
+    <main class="flex-1 h-full overflow-y-auto custom-scroll bg-slate-950 p-2 sm:p-4">
+      
+      <!-- CỬA NẠP ĐỘNG DUY NHẤT CHO CÁC COMPONENT CON -->
+      <div id="dynamic-tab-outlet" class="w-full">
+        <div class="p-12 text-center text-slate-400 space-y-3">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
+          <p class="text-xs font-medium font-sans">Đang tải dữ liệu Báo Cáo P&amp;L Dòng Tiền...</p>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+    <!-- ========================================================================= -->
+  <!-- 4. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH TRUNG TÂM (ADMIN SHELL CONTROLLER)         -->
+  <!-- ========================================================================= -->
+  <script>
+    /**
+     * =========================================================================
+     * CONTROLLER: ADMIN SHELL CORE PLANE (v3.5 MODULAR SAAS ENTERPRISE)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+     * Kiến trúc: Micro-Frontend Router, RBAC Firewall, Khóa chặt Tab Config
+     * =========================================================================
+     */
+    var AdminShellController = (function() {
+      var currentRole = null;
+      var currentMasterKey = "";
+      var currentActiveTab = "pl";
+      var heartbeatInterval = null;
+
+      /**
+       * CHUYỂN ĐỔI CHẾ ĐỘ XÁC THỰC TRÊN MODAL (PIN VS 2FA)
+       */
+      function switchAuthMode(mode) {
+        var boxPin = document.getElementById("auth-box-pin");
+        var boxSuper = document.getElementById("auth-box-super");
+        var btnPin = document.getElementById("tab-btn-pin");
+        var btnSuper = document.getElementById("tab-btn-super");
+
+        if (mode === "PIN") {
+          if (boxPin) boxPin.classList.remove("hidden");
+          if (boxSuper) boxSuper.classList.add("hidden");
+          if (btnPin) btnPin.className = "flex-1 py-2 rounded-xl transition bg-amber-500 text-slate-950 shadow font-bold flex items-center justify-center gap-1.5";
+          if (btnSuper) btnSuper.className = "flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white flex items-center justify-center gap-1.5";
+        } else {
+          if (boxPin) boxPin.classList.add("hidden");
+          if (boxSuper) boxSuper.classList.remove("hidden");
+          if (btnSuper) btnSuper.className = "flex-1 py-2 rounded-xl transition bg-gradient-to-r from-amber-500 to-orange-600 text-slate-950 shadow font-black flex items-center justify-center gap-1.5";
+          if (btnPin) btnPin.className = "flex-1 py-2 rounded-xl transition text-slate-400 hover:text-white flex items-center justify-center gap-1.5";
+        }
+      }
+
+      /**
+       * THAO TÁC BÀN PHÍM SỐ ẢO (NUMPAD PIN)
+       */
+      function appendPinDigit(digit) {
+        var pinInput = document.getElementById("input-pos-pin");
+        if (pinInput && pinInput.value.length < 6) {
+          pinInput.value += digit;
+        }
+      }
+
+      function clearPinDigit() {
+        var pinInput = document.getElementById("input-pos-pin");
+        if (pinInput) pinInput.value = "";
+      }
+
+      /**
+       * XÁC THỰC MÃ PIN VẬN HÀNH (LEVEL 1 & LEVEL 2)
+       */
+      async function submitPinAuth() {
+        var pinInput = document.getElementById("input-pos-pin");
+        var pin = pinInput ? pinInput.value.trim() : "";
+
+        if (!pin) {
+          alert("Vui lòng nhập mã PIN quyền hạn!");
+          return;
+        }
+
+        var btnSubmit = document.getElementById("btn-submit-pin");
+        var originalBtnText = btnSubmit ? btnSubmit.innerHTML : "Vào";
+        if (btnSubmit) {
+          btnSubmit.disabled = true;
+          btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        }
+
+        try {
+          if (pin === "1985") {
+            currentRole = "KITCHEN_LEAD";
+            sessionStorage.setItem("thim5_auth_role", "KITCHEN_LEAD");
+            sessionStorage.setItem("THIM5_ADMIN_ROLE", "KITCHEN_LEAD");
+            localStorage.setItem("thim5_auth_role", "KITCHEN_LEAD");
+            unlockWorkspace();
+            return;
+          } else if (pin === "2026") {
+            currentRole = "POS_STAFF";
+            sessionStorage.setItem("thim5_auth_role", "POS_STAFF");
+            sessionStorage.setItem("THIM5_ADMIN_ROLE", "POS_STAFF");
+            localStorage.setItem("thim5_auth_role", "POS_STAFF");
+            unlockWorkspace();
+            return;
+          }
+
+          if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+            var actionName = (window.T5_DICT && window.T5_DICT.ACTIONS)
+              ? (window.T5_DICT.ACTIONS.VERIFY_ADMIN_ROLE || "verifyAdminRole")
+              : "verifyAdminRole";
+
+            var res = await Thim5API.callGAS(actionName, { pin: pin });
+            if (res && res.status === "success" && res.data) {
+              currentRole = res.data.role || "POS_STAFF";
+              sessionStorage.setItem("thim5_auth_role", currentRole);
+              sessionStorage.setItem("THIM5_ADMIN_ROLE", currentRole);
+              localStorage.setItem("thim5_auth_role", currentRole);
+              sessionStorage.setItem("thim5_admin_token", res.data.authToken || "");
+              sessionStorage.setItem("THIM5_AUTH_TOKEN", res.data.authToken || "");
+              localStorage.setItem("thim5_admin_token", res.data.authToken || "");
+              unlockWorkspace();
+              return;
+            } else {
+              alert("⛔ " + (res && res.message ? res.message : "Mã PIN không chính xác!"));
+              clearPinDigit();
+            }
+          } else {
+            alert("⛔ Mã PIN không hợp lệ! (Gợi ý: 1985 cho Bếp, 2026 cho Quản lý ca)");
+            clearPinDigit();
+          }
+        } catch (err) {
+          console.error("Lỗi xác thực PIN:", err);
+          if (pin === "1985" || pin === "2026") {
+            currentRole = (pin === "1985") ? "KITCHEN_LEAD" : "POS_STAFF";
+            sessionStorage.setItem("thim5_auth_role", currentRole);
+            sessionStorage.setItem("THIM5_ADMIN_ROLE", currentRole);
+            localStorage.setItem("thim5_auth_role", currentRole);
+            unlockWorkspace();
+          } else {
+            alert("❌ Lỗi kết nối xác thực: " + err.message);
+            clearPinDigit();
+          }
+        } finally {
+          if (btnSubmit) {
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = originalBtnText;
+          }
+        }
+      }
+
+      /**
+       * XÁC THỰC SUPER ADMIN 2FA (MASTER KEY + TOTP)
+       */
+      async function submitSuperAdminAuth(event) {
+        if (event) event.preventDefault();
+
+        var keyInput = document.getElementById("input-master-key");
+        var totpInput = document.getElementById("input-totp-code");
+        var btn = document.getElementById("btn-super-auth-submit");
+
+        var masterKey = keyInput ? keyInput.value.trim() : "";
+        var totpCode = totpInput ? totpInput.value.trim() : "";
+
+        if (!masterKey || !totpCode) {
+          alert("Vui lòng nhập đầy đủ Master Secret Key và Mã 6 số 2FA!");
+          return;
+        }
+
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Xác Thực 2FA...';
+        }
+
+        try {
+          if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+            var actionName = (window.T5_DICT && window.T5_DICT.ACTIONS)
+              ? (window.T5_DICT.ACTIONS.VERIFY_SUPER_ADMIN_TOTP || "verifySuperAdminTotp")
+              : "verifySuperAdminTotp";
+
+            var res = await Thim5API.callGAS(actionName, {
+              masterKey: masterKey,
+              totpCode: totpCode
+            });
+
+            if (res && res.status === "success") {
+              currentRole = "SUPER_ADMIN";
+              currentMasterKey = masterKey;
+              sessionStorage.setItem("thim5_auth_role", "SUPER_ADMIN");
+              sessionStorage.setItem("THIM5_ADMIN_ROLE", "SUPER_ADMIN");
+              localStorage.setItem("thim5_auth_role", "SUPER_ADMIN");
+              sessionStorage.setItem("thim5_master_key", masterKey);
+              localStorage.setItem("thim5_master_key", masterKey);
+              if (res.data && res.data.sessionToken) {
+                sessionStorage.setItem("thim5_admin_token", res.data.sessionToken);
+                sessionStorage.setItem("THIM5_AUTH_TOKEN", res.data.sessionToken);
+                localStorage.setItem("thim5_admin_token", res.data.sessionToken);
+              }
+              unlockWorkspace();
+            } else {
+              alert("❌ " + (res && res.message ? res.message : "Mã xác thực 2FA không chính xác hoặc đã hết hạn!"));
+            }
+          } else {
+            throw new Error("Không tìm thấy kết nối Thim5API Backend!");
+          }
+        } catch (err) {
+          alert("❌ Lỗi xác thực 2FA: " + err.message);
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-shield-halved text-xs"></i> <span>Xác Thực Quyền Super Admin</span>';
+          }
+        }
+      }
+
+      /**
+       * YÊU CẦU MÃ BACKUP OTP QUA EMAIL
+       */
+      async function requestEmergencyBackupOtp() {
+        var masterKey = prompt("Nhập Master Key của chuỗi để nhận mã khẩn cấp qua Email:");
+        if (!masterKey) return;
+
+        try {
+          if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+            var actionName = (window.T5_DICT && window.T5_DICT.ACTIONS)
+              ? (window.T5_DICT.ACTIONS.SEND_EMERGENCY_BACKUP_OTP || "sendEmergencyBackupOtpToEmail")
+              : "sendEmergencyBackupOtpToEmail";
+
+            var res = await Thim5API.callGAS(actionName, { masterKey: masterKey.trim() });
+            if (res && res.status === "success") {
+              alert("📧 " + (res.data ? res.data.message : "Đã gửi mã xác thực khẩn cấp về Email Super Admin!"));
+            } else {
+              alert("⛔ " + (res && res.message ? res.message : "Yêu cầu thất bại!"));
+            }
+          }
+        } catch (e) {
+          alert("Lỗi kết nối khẩn cấp: " + e.message);
+        }
+      }
+
+      /**
+       * MỞ KHÓA GIAO DIỆN CHÍNH - TIÊU DIỆT MODAL OVERLAY & PHÂN QUYỀN RBAC
+       */
+      function unlockWorkspace() {
+        var overlays = document.querySelectorAll("#auth-modal-overlay, .auth-overlay");
+        overlays.forEach(function(ov) {
+          ov.style.cssText = "display: none !important; opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; z-index: -999 !important;";
+          try { ov.remove(); } catch (eRemove) {}
+        });
+
+        document.body.style.overflow = "auto";
+        document.body.classList.remove("overflow-hidden");
+
+        try {
+          var roleBadgeText = document.getElementById("user-role-text");
+          var roleBadgeBox = document.getElementById("user-role-badge");
+          var superNavGroup = document.getElementById("super-admin-nav-group");
+          var sidebarRoleIndicator = document.getElementById("sidebar-role-indicator");
+
+          if (currentRole === "SUPER_ADMIN") {
+            if (roleBadgeText) roleBadgeText.innerText = "SUPER ADMIN";
+            if (roleBadgeBox) roleBadgeBox.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30";
+            if (superNavGroup) superNavGroup.classList.remove("hidden");
+            if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "SUPER_ADMIN";
+          } else if (currentRole === "KITCHEN_LEAD") {
+            if (roleBadgeText) roleBadgeText.innerText = "TRƯỞNG CA BẾP";
+            if (roleBadgeBox) roleBadgeBox.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20";
+            if (superNavGroup) superNavGroup.classList.add("hidden");
+            if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "KITCHEN_LEAD";
+          } else {
+            if (roleBadgeText) roleBadgeText.innerText = "QUẢN LÝ CA (POS)";
+            if (roleBadgeBox) roleBadgeBox.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20";
+            if (superNavGroup) superNavGroup.classList.add("hidden");
+            if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "POS_STAFF";
+          }
+        } catch (eRbac) {
+          console.warn("Cảnh báo RBAC UI:", eRbac);
+        }
+
+        try {
+          var defaultTab = (currentRole === "KITCHEN_LEAD") ? "shippers" : "pl";
+          var targetTabBtn = document.querySelector('.sidebar-nav-btn[data-tab="' + defaultTab + '"]');
+          switchMainTab(defaultTab, targetTabBtn);
+        } catch (eTab) {
+          console.error("Lỗi điều hướng tab mặc định:", eTab);
+        }
+
+        try {
+          runSystemHeartbeat();
+          if (!heartbeatInterval) heartbeatInterval = setInterval(runSystemHeartbeat, 30000);
+        } catch (eHb) {
+          console.warn("Lỗi khởi động Heartbeat:", eHb);
+        }
+      }
+
+      /**
+       * CHUYỂN ĐỔI TAB CHÍNH VÀ NẠP COMPONENT ĐỘNG (MICRO-FRONTEND ROUTER)
+       */
+      /**
+       * BỘ NHỚ ĐỆM IN-MEMORY TAB CACHE (TỐI ƯU HIỆU NĂNG TẢI LẠI TRONG 5MS)
+       */
+      var tabCache = {};
+
+      /**
+       * CHUYỂN ĐỔI TAB CHÍNH VÀ NẠP COMPONENT ĐỘNG (MICRO-FRONTEND ROUTER)
+       * Nâng cấp: Dynamic Path Fallback Resolver (tương thích Live Server port 5500 & Production)
+       */
+      async function switchMainTab(tabKey, btnElement) {
+        if (tabKey === "config" && currentRole !== "SUPER_ADMIN") {
+          alert("⛔ TỪ CHỐI TRUY CẬP: Phân hệ Cấu Hình Toàn Hệ Thống chỉ dành riêng cho Super Admin!");
+          return;
+        }
+
+        currentActiveTab = tabKey;
+
+        document.querySelectorAll(".sidebar-nav-btn").forEach(function(b) {
+          b.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60";
+        });
+
+        if (btnElement) {
+          btnElement.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 active";
+        } else {
+          var matchedBtn = document.querySelector('.sidebar-nav-btn[data-tab="' + tabKey + '"]');
+          if (matchedBtn) {
+            matchedBtn.className = "sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 active";
+          }
+        }
+
+        var outlet = document.getElementById("dynamic-tab-outlet");
+        if (!outlet) return;
+
+        toggleSidebar(false);
+
+        // Kiểm tra In-Memory Cache trước để hiển thị tức thì
+        if (tabCache[tabKey]) {
+          injectTabContent(outlet, tabKey, tabCache[tabKey]);
+          return;
+        }
+
+        outlet.innerHTML = 
+          '<div class="py-20 text-center text-slate-400 space-y-3">' +
+            '<i class="fa-solid fa-circle-notch fa-spin text-3xl text-amber-400"></i>' +
+            '<p class="text-xs font-mono">Đang nạp phân hệ [' + tabKey.toUpperCase() + ']...</p>' +
+          '</div>';
+
+        var fileName = "tab-" + tabKey + ".html";
+        
+        // Mảng các đường dẫn fallback tương thích đa môi trường (Live Server root, subfolder, production)
+        var candidateUrls = [
+          fileName + "?v=" + Date.now(),
+          "./" + fileName + "?v=" + Date.now(),
+          "FRONTEND_WEB/" + fileName + "?v=" + Date.now(),
+          "./FRONTEND_WEB/" + fileName + "?v=" + Date.now()
+        ];
+
+        var htmlContent = null;
+        var lastError = null;
+
+        for (var i = 0; i < candidateUrls.length; i++) {
+          try {
+            var response = await fetch(candidateUrls[i]);
+            if (response.ok) {
+              htmlContent = await response.text();
+              break;
+            } else {
+              lastError = "HTTP " + response.status + " (" + candidateUrls[i] + ")";
+            }
+          } catch (err) {
+            lastError = err.message + " (" + candidateUrls[i] + ")";
+          }
+        }
+
+        if (htmlContent) {
+          tabCache[tabKey] = htmlContent;
+          injectTabContent(outlet, tabKey, htmlContent);
+        } else {
+          console.warn("⚠️ Không thể nạp component từ máy chủ:", lastError);
+          renderFallbackTabContent(outlet, tabKey, fileName, lastError);
+        }
+      }
+
+      /**
+       * BƠM NỘI DUNG VÀ TÁI THỰC THI SCRIPT CỦA TAB CON AN TOÀN
+       */
+      function injectTabContent(container, tabKey, html) {
+        if (!container) return;
+        container.innerHTML = html;
+
+        var scripts = container.querySelectorAll("script");
+        scripts.forEach(function(oldScript) {
+          var newScript = document.createElement("script");
+          Array.from(oldScript.attributes).forEach(function(attr) {
+            newScript.setAttribute(attr.name, attr.value);
+          });
+          newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+
+        // Kích hoạt vòng đời khởi chạy tương ứng của từng Controller con nếu có
+        try {
+          if (tabKey === "pl" && window.TabPlController && typeof window.TabPlController.init === "function") {
+            window.TabPlController.init();
+          } else if (tabKey === "shippers" && window.TabShippersController && typeof window.TabShippersController.init === "function") {
+            window.TabShippersController.init();
+          } else if (tabKey === "config" && window.TabConfigController && typeof window.TabConfigController.init === "function") {
+            window.TabConfigController.init();
+          } else if (tabKey === "campaign" && window.TabCampaignController && typeof window.TabCampaignController.init === "function") {
+            window.TabCampaignController.init();
+          }
+        } catch (initErr) {
+          console.warn("Lỗi khởi tạo Controller tab " + tabKey + ":", initErr);
+        }
+      }
+
+      /**
+       * RENDER KHUNG VIEW DỰ PHÒNG NẾU FILE CON CHƯA ĐƯỢC TẢI LÊN HOSTING
+       */
+      function renderFallbackTabContent(container, tabKey, fileName, errorDetail) {
+        if (!container) return;
+
+        var tabTitles = {
+          "pl": "Báo Cáo Tài Chính P&L & Dòng Tiền",
+          "shippers": "Trạm Điều Phối Đội Xe & Shipper",
+          "campaign": "Trung Tâm Chiến Dịch Geo-Fencing & Voucher",
+          "config": "Bộ Não Trung Tâm & Cấu Hình Hệ Thống"
+        };
+
+        var title = tabTitles[tabKey] || ("Phân Hệ " + tabKey.toUpperCase());
+
+        container.innerHTML = 
+          '<div class="max-w-4xl mx-auto my-8 p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-6 animate-in fade-in-50 duration-200 text-slate-100">' +
+            '<div class="flex items-center justify-between border-b border-slate-800 pb-4">' +
+              '<div class="flex items-center gap-3">' +
+                '<div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg">' +
+                  '<i class="fa-solid fa-puzzle-piece"></i>' +
+                '</div>' +
+                '<div>' +
+                  '<h3 class="text-sm font-black uppercase tracking-wider text-white">' + title + '</h3>' +
+                  '<p class="text-[11px] font-mono text-slate-400">File module: <span class="text-amber-400">' + fileName + '</span></p>' +
+                '</div>' +
+              '</div>' +
+              '<span class="px-3 py-1 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-mono font-bold">' +
+                'Mô-đun Đang Khởi Tạo' +
+              '</span>' +
+            '</div>' +
+            '<div class="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-2 text-xs">' +
+              '<p class="font-bold text-slate-300">Thông báo từ Hệ Thống SaaS Control Plane:</p>' +
+              '<p class="text-slate-400 leading-relaxed text-[11px]">' +
+                'File <code class="text-amber-400 font-mono font-bold">' + fileName + '</code> chưa được tải lên hosting máy chủ.' +
+                (errorDetail ? '<br><span class="text-rose-400 font-mono">Chi tiết: ' + errorDetail + '</span>' : '') +
+              '</p>' +
+            '</div>' +
+            '<div class="flex flex-wrap items-center gap-3 pt-2">' +
+              '<button type="button" onclick="AdminShellController.switchMainTab(\'' + tabKey + '\', null)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition active:scale-95 flex items-center gap-2 shadow">' +
+                '<i class="fa-solid fa-rotate-right text-amber-400"></i>' +
+                '<span>Tải Lại Phân Hệ</span>' +
+              '</button>' +
+            '</div>' +
+          '</div>';
+      }
+      /**
+       * NHỊP ĐẬP HỆ THỐNG HEARTBEAT PING (ĐO ĐỘ TRỄ MẠNG REALTIME)
+       */
+      async function runSystemHeartbeat() {
+        var indicator = document.getElementById("heartbeat-indicator");
+        var latencyEl = document.getElementById("heartbeat-latency");
+        var statusEl = document.getElementById("heartbeat-status");
+
+        if (!window.Thim5API || typeof window.Thim5API.getEndpoint !== "function") return;
+
+        var endpoint = Thim5API.getEndpoint();
+        var startTime = performance.now();
+
+        try {
+          var res = await fetch(endpoint + "?action=ping&_t=" + Date.now(), { method: "GET" });
+          var latency = Math.round(performance.now() - startTime);
+
+          if (res.ok) {
+            if (indicator) indicator.className = "w-2 h-2 rounded-full bg-emerald-400 heartbeat-active";
+            if (statusEl) statusEl.innerText = "GAS Connected";
+            if (latencyEl) {
+              latencyEl.innerText = latency + "ms";
+              latencyEl.className = (latency <= 300) ? "text-emerald-400 font-medium" : "text-amber-400 font-medium";
+            }
+          } else {
+            throw new Error("HTTP " + res.status);
+          }
+        } catch (err) {
+          if (indicator) indicator.className = "w-2 h-2 rounded-full bg-rose-500";
+          if (statusEl) statusEl.innerText = "Reconnecting...";
+          if (latencyEl) {
+            latencyEl.innerText = "Offline";
+            latencyEl.className = "text-rose-400 font-medium";
+          }
+        }
+      }
+
+      function toggleSidebar(forceState) {
+        var sidebar = document.getElementById("admin-sidebar");
+        var backdrop = document.getElementById("sidebar-backdrop");
+        if (!sidebar) return;
+
+        var isOpen = !sidebar.classList.contains("-translate-x-full");
+        var targetState = (forceState !== undefined) ? forceState : !isOpen;
+
+        if (targetState) {
+          sidebar.classList.remove("-translate-x-full");
+          if (backdrop) backdrop.classList.remove("hidden");
+        } else {
+          sidebar.classList.add("-translate-x-full");
+          if (backdrop) backdrop.classList.add("hidden");
+        }
+      }
+
+      function handleLogout() {
+        if (confirm("Anh Hải Âu có chắc muốn đăng xuất khỏi Trung Tâm Điều Hành?")) {
+          sessionStorage.clear();
+          localStorage.removeItem("thim5_auth_role");
+          localStorage.removeItem("thim5_admin_token");
+          localStorage.removeItem("thim5_master_key");
+          window.location.reload();
+        }
+      }
+
+      function refreshCurrentTab() {
+        if (currentActiveTab) {
+          var activeBtn = document.querySelector('.sidebar-nav-btn[data-tab="' + currentActiveTab + '"]');
+          switchMainTab(currentActiveTab, activeBtn);
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", function() {
+        var savedRole = sessionStorage.getItem("thim5_auth_role") || localStorage.getItem("thim5_auth_role");
+        var savedKey = sessionStorage.getItem("thim5_master_key") || localStorage.getItem("thim5_master_key");
+
+        if (savedRole) {
+          currentRole = savedRole;
+          if (savedKey) currentMasterKey = savedKey;
+          unlockWorkspace();
+        }
+      });
+
+      function getCurrentUserRole() {
+        return currentRole || sessionStorage.getItem("thim5_auth_role") || localStorage.getItem("thim5_auth_role") || "POS_STAFF";
+      }
+
+      function getMasterKey() {
+        return currentMasterKey || sessionStorage.getItem("thim5_master_key") || localStorage.getItem("thim5_master_key") || "";
+      }
+
+      return {
+        switchAuthMode: switchAuthMode,
+        appendPinDigit: appendPinDigit,
+        clearPinDigit: clearPinDigit,
+        submitPinAuth: submitPinAuth,
+        submitSuperAdminAuth: submitSuperAdminAuth,
+        requestEmergencyBackupOtp: requestEmergencyBackupOtp,
+        switchMainTab: switchMainTab,
+        toggleSidebar: toggleSidebar,
+        handleLogout: handleLogout,
+        refreshCurrentTab: refreshCurrentTab,
+        getCurrentUserRole: getCurrentUserRole,
+        getMasterKey: getMasterKey
+      };
+    })();
+  </script>
+  
+  <!-- ========================================================================= -->
+  <!-- 5. CONTROLLER CÔNG TẮC ĐÓNG/MỞ CỬA BẾP THỜI GIAN THỰC (ADMIN STORE CONTROL) -->
+  <!-- ========================================================================= -->
+  <script>
+    /**
+     * CONTROLLER: ADMIN STORE OPERATION SWITCH (LEVEL 2)
+     * Quản lý đóng/mở cửa quán thời gian thực và đồng bộ lên Mặt tiền D2C
+     */
+    var AdminStoreControl = (function() {
+      var currentStatus = "OPEN";
+      var selectedStatus = "OPEN";
+
+      function init() {
+        fetchCurrentStatus();
+      }
+
+      async function fetchCurrentStatus() {
+        try {
+          if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+            var actionName = (window.T5_DICT && window.T5_DICT.ACTIONS)
+              ? (window.T5_DICT.ACTIONS.GET_STORE_STATUS || "getStoreStatus")
+              : "getStoreStatus";
+
+            var res = await window.Thim5API.callGAS(actionName);
+            if (res && res.storeStatus) {
+              updateUI(res.storeStatus, res.closedMessage);
+            }
+          }
+        } catch (e) {
+          console.warn("⚠️ Không thể lấy trạng thái quán:", e);
+        }
+      }
+
+      function updateUI(status, message) {
+        currentStatus = status;
+        var btn = document.getElementById("btn-store-status-toggle");
+        var dot = document.getElementById("dot-store-status");
+        var txt = document.getElementById("txt-store-status");
+
+        if (!btn || !dot || !txt) return;
+
+        if (status === "OPEN") {
+          btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 active:scale-95";
+          dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+          txt.innerText = "🟢 ĐANG MỞ CỬA";
+        } else {
+          btn.className = "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-sm bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 active:scale-95";
+          dot.className = "w-2 h-2 rounded-full bg-rose-500";
+          txt.innerText = "🔴 TẠM NGHỈ QUÁN";
+        }
+      }
+
+      function openToggleModal() {
+        selectedStatus = currentStatus;
+        selectTargetStatus(currentStatus);
+        var modal = document.getElementById("modal-store-status-toggle");
+        if (modal) modal.classList.remove("hidden");
+      }
+
+      function closeToggleModal() {
+        var modal = document.getElementById("modal-store-status-toggle");
+        if (modal) modal.classList.add("hidden");
+      }
+
+      function selectTargetStatus(st) {
+        selectedStatus = st;
+        var btnOpen = document.getElementById("opt-status-open");
+        var btnClosed = document.getElementById("opt-status-closed");
+        var boxNote = document.getElementById("box-closed-note");
+
+        if (st === "OPEN") {
+          if (btnOpen) btnOpen.className = "p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-500/10 text-emerald-400 font-bold flex items-center justify-center gap-1.5 transition";
+          if (btnClosed) btnClosed.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition";
+          if (boxNote) boxNote.classList.add("hidden");
+        } else {
+          if (btnOpen) btnOpen.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold flex items-center justify-center gap-1.5 transition";
+          if (btnClosed) btnClosed.className = "p-2.5 rounded-xl border-2 border-rose-500 bg-rose-500/10 text-rose-400 font-bold flex items-center justify-center gap-1.5 transition";
+          if (boxNote) boxNote.classList.remove("hidden");
+        }
+      }
+
+      async function submitToggleStatus() {
+        var btn = document.getElementById("btn-confirm-toggle");
+        var inpMsg = document.getElementById("inp-closed-message");
+        var message = inpMsg ? inpMsg.value.trim() : "";
+
+        var origText = btn ? btn.innerHTML : "";
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang lưu...';
+        }
+
+        try {
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+            throw new Error("Không tìm thấy kết nối Thim5API!");
+          }
+
+          var actionName = (window.T5_DICT && window.T5_DICT.ACTIONS)
+            ? (window.T5_DICT.ACTIONS.TOGGLE_STORE_STATUS || "toggleStoreStatus")
+            : "toggleStoreStatus";
+
+          var res = await window.Thim5API.callGAS(actionName, {
+            status: selectedStatus,
+            message: message
+          });
+
+          if (!res || res.status !== "success") {
+            throw new Error((res && res.message) ? res.message : "Cập nhật thất bại!");
+          }
+
+          updateUI(selectedStatus, message);
+          closeToggleModal();
+          alert(res.message || "Đã cập nhật trạng thái hoạt động của Bếp thành công!");
+
+        } catch (err) {
+          alert("❌ Lỗi khi cập nhật trạng thái quán: " + err.message);
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = origText;
+          }
+        }
+      }
+
+      return {
+        init: init,
+        openToggleModal: openToggleModal,
+        closeToggleModal: closeToggleModal,
+        selectTargetStatus: selectTargetStatus,
+        submitToggleStatus: submitToggleStatus
+      };
+    })();
+
+    document.addEventListener("DOMContentLoaded", function() {
+      AdminStoreControl.init();
+    });
+  </script>
+
+  <!-- ========================================================================= -->
+  <!-- 6. GLOBAL MEDIA ENGINE: CANVAS COMPRESSOR DÙNG CHUNG CHO CÁC TAB CON     -->
+  <!-- ========================================================================= -->
+  <script>
+    /**
+     * THIM5 MEDIA ENGINE - BỘ NÉN ẢNH CLIENT-SIDE TỐI ƯU HẠ TẦNG GOOGLE DRIVE
+     * Tự động scale về Max 800x800, nén chất lượng 0.78, sinh Base64 < 120KB
+     */
+    window.Thim5MediaEngine = (function() {
+      function compressImage(file, maxDimension, quality) {
+        maxDimension = maxDimension || 800;
+        quality = quality || 0.78;
+
+        return new Promise(function(resolve, reject) {
+          if (!file || !file.type.match(/image.*/)) {
+            reject(new Error("File tải lên không phải là định dạng hình ảnh hợp lệ!"));
+            return;
+          }
+
+          var reader = new FileReader();
+          reader.onload = function(readerEvent) {
+            var image = new Image();
+            image.onload = function() {
+              var width = image.width;
+              var height = image.height;
+
+              if (width > height) {
+                if (width > maxDimension) {
+                  height = Math.round((height * maxDimension) / width);
+                  width = maxDimension;
+                }
+              } else {
+                if (height > maxDimension) {
+                  width = Math.round((width * maxDimension) / height);
+                  height = maxDimension;
+                }
+              }
+
+              var canvas = document.createElement("canvas");
+              canvas.width = width;
+              canvas.height = height;
+
+              var ctx = canvas.getContext("2d");
+              ctx.drawImage(image, 0, 0, width, height);
+
+              var mimeType = "image/webp";
+              var dataUrl = canvas.toDataURL(mimeType, quality);
+              if (dataUrl.indexOf("data:image/webp") === -1) {
+                mimeType = "image/jpeg";
+                dataUrl = canvas.toDataURL(mimeType, quality);
+              }
+
+              resolve({
+                base64Data: dataUrl,
+                mimeType: mimeType,
+                width: width,
+                height: height,
+                originalSize: file.size,
+                compressedLength: dataUrl.length
+              });
+            };
+            image.onerror = function() {
+              reject(new Error("Không thể nạp dữ liệu hình ảnh vào Canvas!"));
+            };
+            image.src = readerEvent.target.result;
+          };
+          reader.onerror = function() {
+            reject(new Error("Lỗi khi đọc file ảnh từ thiết bị!"));
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      return {
+        compressImage: compressImage
+      };
+    })();
+  </script>
+
+  <!-- ========================================================================= -->
+  <!-- 7. NẠP BỘ ĐÔI THƯ VIỆN ĐIỀU PHỐI DỮ LIỆU CHUẨN SSOT TẬP TRUNG             -->
+  <!-- ========================================================================= -->
+  <script src="thim5-master-dictionary.js?v=20261005"></script>
+  <script src="api.js?v=20261005"></script>
+
+</body>
+</html>
