@@ -1,3 +1,7 @@
+BACKEND_APPSCRIPT/
+*.md
+.clinerules
+.roorules
 .clasp.json
 .clasp.*.json
 *.log
