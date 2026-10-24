@@ -647,3 +647,50 @@ flowchart LR
      git checkout main
      git merge stag
      ```
+
+
+---
+
+## 9. MODULE KHUYẾN MÃI VOUCHER TRỢ GIÁ SHIP ĐỘNG THEO LỢI NHUẬN RÒNG (SMART SHIP VOUCHER v3.5)
+
+### 9.1. Kiến Trúc Thuật Toán & Tham Số Hệ Thống
+Hệ thống LongHoaFood Master v3.5 bổ sung thuật toán **Smart Ship Voucher** tự động thẩm định và trích thưởng phí vận chuyển dựa trên **Lợi Nhuận Ròng Thặng Dư** của giỏ hàng thay vì giảm giá cào bằng làm thâm hụt dòng tiền quán:
+
+$$\text{CartNetProfit} = \text{Subtotal} - \text{TotalCOGS} - \text{Subtotal} \times (\text{MasterFee} + \text{TaxHKD})$$
+$$\text{ProfitAllow} = \max\left(0, (\text{CartNetProfit} - \text{PROMO\_MIN\_NET\_PROFIT\_FLOOR}) \times \text{PROMO\_SURPLUS\_SHARE\_RATIO}\right)$$
+$$\text{CapAllow} = \max\left(0, \text{Subtotal} \times \text{MAX\_PROMO\_CAP\_PCT} - \text{OtherDiscount}\right)$$
+$$\text{MaxShipDiscount} = \min(\text{ShipFee}, \text{ProfitAllow}, \text{CapAllow})$$
+
+### 9.2. Danh Mục Khóa Cấu Hình SSOT Trên `SYS_CONFIG`
+| Tên Tham Số | Giá Trị Mặc Định | Kiểu | Ý Nghĩa Vận Hành |
+| :--- | :--- | :--- | :--- |
+| `PROMO_SMART_SHIP_VOUCHER_ENABLED` | `true` | Boolean | Công tắc tổng Bật/Tắt tính năng Voucher Ship Động |
+| `PROMO_TIER_25_ENABLED` | `true` | Boolean | Bật/Tắt mốc giảm 25% phí ship (`SHIP_25`) |
+| `PROMO_TIER_50_ENABLED` | `true` | Boolean | Bật/Tắt mốc giảm 50% phí ship (`SHIP_50`) |
+| `PROMO_TIER_100_ENABLED` | `true` | Boolean | Bật/Tắt mốc giảm 100% freeship (`SHIP_100`) |
+| `PROMO_UPSELL_NUDGE_ENABLED` | `true` | Boolean | Bật/Tắt gợi ý 1-Click mua thêm Topping/Nước uống (`Food Cost <= 20%`) |
+| `PROMO_MIN_NET_PROFIT_FLOOR` | `25000` | Number | Mức sàn Lợi Nhuận Ròng (VNĐ) quán giữ lại tối thiểu trước khi trích bù ship |
+| `PROMO_SURPLUS_SHARE_RATIO` | `0.7` | Number | Tỷ lệ trích tối đa 70% phần Lợi Nhuận Ròng thặng dư để tài trợ Voucher |
+
+### 9.3. Bổ Sung Phụ Lục DOM ID Mới
+1. **Storefront (`FRONTEND_WEB/index.html`):**
+   - `#box-smart-ship-voucher`: Hộp hiển thị Voucher Trợ Giá Ship Dành Riêng Cho Đơn Hàng.
+   - `#badge-ship-voucher-status`: Huy hiệu trạng thái mở khóa (`TRỢ GIÁ SHIP 50%`, `FREESHIP 100%`...).
+   - `#txt-ship-voucher-title`: Tiêu đề Voucher hiển thị số tiền tiết kiệm.
+   - `#txt-ship-voucher-desc`: Giải thích nguồn tài trợ từ Lợi Nhuận Ròng thặng dư.
+   - `#btn-apply-ship-voucher`: Nút bấm áp dụng / bỏ áp dụng voucher.
+   - `#box-ship-upsell-nudge`: Thanh thông điệp gợi ý thêm món.
+   - `#btn-quick-add-upsell`: Nút 1-Click thêm Topping Booster.
+
+2. **Admin Control Plane (`FRONTEND_WEB/admin-shell.html`):**
+   - `#btn-open-promo-modal`: Nút mở Modal Quản Lý Khuyến Mãi trên Header Topbar.
+   - `#modal-promo-config`: Modal Quản Lý Khuyến Mãi & Voucher Ship Động.
+   - `#toggle-promo-smart-ship`: Nút gạt công tắc tổng tính năng.
+   - `#toggle-promo-tier-25`, `#toggle-promo-tier-50`, `#toggle-promo-tier-100`: Nút gạt các bậc trợ giá.
+   - `#toggle-promo-upsell-nudge`: Nút gạt tính năng gợi ý Upsell.
+   - `#inp-promo-min-profit-floor`: Ô nhập Sàn Lợi Nhuận Ròng bảo vệ quán.
+   - `#inp-promo-surplus-ratio`: Ô nhập Tỷ lệ trích thặng dư.
+   - `#btn-save-promo-config`: Nút lưu trực tiếp vào Sheet `SYS_CONFIG`.
+
+3. **Dashboard Kiểm Thử Tự Động (`FRONTEND_WEB/system-test.html`):**
+   - `#res-mod3-smart-ship-voucher`: Thẻ kết quả kiểm thử hàm `evaluateSmartShipVoucher` tại MOD 3.

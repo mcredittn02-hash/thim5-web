@@ -106,7 +106,21 @@
         FALLBACK_D2C_DISCOUNT_PERCENT: 10.0,  // Web D2C giß║úm 10% so vß╗¢i Gi├í App S├án
         FALLBACK_D2C_BUFFER_PERCENT: 15.0,    // Quß╗╣ ─æß╗çm D2C 15% (B├╣ ship + Qu├á + Thuß║┐)
         FALLBACK_TAX_RATE_HKD: 0.045,         // Thuß║┐ HKD 4.5%
-        FALLBACK_MAX_PROMOTION_RATE: 0.15,    // Kh├│a trß║ºn khuyß║┐n m├úi tß╗æi ─æa 15% doanh thu gß╗Öp
+        FALLBACK_MAX_PROMOTION_RATE: 0.15,
+        // Fallback Cấu hình Khuyến Mãi Smart Ship Voucher Theo Lợi Nhuận Ròng
+        PROMO_SMART_SHIP_VOUCHER_ENABLED: true,
+        PROMO_TIER_25_ENABLED: true,
+        PROMO_TIER_50_ENABLED: true,
+        PROMO_TIER_100_ENABLED: true,
+        PROMO_UPSELL_NUDGE_ENABLED: true,
+        PROMO_MIN_NET_PROFIT_FLOOR: 25000,
+        PROMO_SURPLUS_SHARE_RATIO: 0.7,
+        MASTER_PLATFORM_FEE_PCT: 5.0,
+        SHIP_CUST_RATE_PER_KM: 5000,
+        SHIP_PARTNER_RATE_PER_KM: 4500,
+        MAX_PROMO_CAP_PCT: 15,
+        COD_HOLDING_LIMIT: 300000,
+        TAX_HKD_PCT: 4.5,    // Kh├│a trß║ºn khuyß║┐n m├úi tß╗æi ─æa 15% doanh thu gß╗Öp
         MAX_COD_HOLDING_PER_SHIPPER: 300000,  // Hß║ín mß╗⌐c ├┤m tiß╗ün mß║╖t COD tß╗æi ─æa cß╗ºa Shipper
         MIN_AOV_LUCKY_WHEEL: 79000            // Mß╗æc ─æ╞ín tß╗æi thiß╗âu k├¡ch hoß║ít v├▓ng quay may mß║»n
     });
@@ -463,6 +477,8 @@
         SAVE_SYSTEM_DYNAMIC_CONFIG: "saveSystemDynamicConfig",
         SAVE_SYSTEM_CONFIG: "saveSystemDynamicConfig",
         CALCULATE_DYNAMIC_SHIPPING_FEE: "calculateDynamicShippingFee",
+        EVALUATE_SMART_SHIP_VOUCHER: "evaluateSmartShipVoucher",
+        UPDATE_PROMO_CONFIG: "updatePromoConfig",
 
         // Trạm Bếp KDS & Bàn Giao Món
         GET_KITCHEN_KDS_ORDERS: "getKitchenKdsOrders",
@@ -655,7 +671,21 @@
         D2C_BUFFER_PERCENT: "D2C_BUFFER_PERCENT",                       // % Quß╗╣ ─æß╗çm D2C (B├╣ ship + V├▓ng quay + Thuß║┐)
         PLATFORM_MASTER_FEE: "PLATFORM_MASTER_FEE",                     // Ph├¡ nß╗ün tß║úng SaaS
         TAX_RATE_HKD: "TAX_RATE_HKD",                                   // Thuß║┐ kho├ín HKD 4.5%
-        MAX_PROMOTION_RATE: "MAX_PROMOTION_RATE",                       // Trß║ºn khuyß║┐n m├úi tß╗æi ─æa 15%
+        MAX_PROMOTION_RATE: "MAX_PROMOTION_RATE",
+        // Module Khuyến Mãi Voucher Ship Động Theo Lợi Nhuận Ròng
+        PROMO_SMART_SHIP_VOUCHER_ENABLED: "PROMO_SMART_SHIP_VOUCHER_ENABLED",
+        PROMO_TIER_25_ENABLED: "PROMO_TIER_25_ENABLED",
+        PROMO_TIER_50_ENABLED: "PROMO_TIER_50_ENABLED",
+        PROMO_TIER_100_ENABLED: "PROMO_TIER_100_ENABLED",
+        PROMO_UPSELL_NUDGE_ENABLED: "PROMO_UPSELL_NUDGE_ENABLED",
+        PROMO_MIN_NET_PROFIT_FLOOR: "PROMO_MIN_NET_PROFIT_FLOOR",
+        PROMO_SURPLUS_SHARE_RATIO: "PROMO_SURPLUS_SHARE_RATIO",
+        MASTER_PLATFORM_FEE_PCT: "MASTER_PLATFORM_FEE_PCT",
+        SHIP_CUST_RATE_PER_KM: "SHIP_CUST_RATE_PER_KM",
+        SHIP_PARTNER_RATE_PER_KM: "SHIP_PARTNER_RATE_PER_KM",
+        MAX_PROMO_CAP_PCT: "MAX_PROMO_CAP_PCT",
+        COD_HOLDING_LIMIT: "COD_HOLDING_LIMIT",
+        TAX_HKD_PCT: "TAX_HKD_PCT",                       // Trß║ºn khuyß║┐n m├úi tß╗æi ─æa 15%
 
         // Thanh to├ín ng├ón h├áng & MoMo
         BANK_BIN: "BANK_BIN",
@@ -980,6 +1010,145 @@
      * @param {number} [optBufferPercent] - % Quß╗╣ ─æß╗çm D2C (mß║╖c ─æß╗ïnh 15%)
      * @returns {Object} Chi tiß║┐t ph├ón t├¡ch Reverse-Pricing
      */
+    
+    /**
+     * TÍNH TOÁN VOUCHER TRỢ GIÁ SHIP ĐỘNG THEO KHOẢNG CÁCH & LỢI NHUẬN RÒNG (SMART SHIP VOUCHER)
+     * Thẩm định khả năng trợ giá ship dựa trên Lợi Nhuận Ròng thặng dư của giỏ hàng.
+     * Rào chắn:
+     *   1. Lợi nhuận ròng sàn tối thiểu quán phải giữ lại (PROMO_MIN_NET_PROFIT_FLOOR: 25.000đ).
+     *   2. Tỷ lệ trích thặng dư tối đa (PROMO_SURPLUS_SHARE_RATIO: 0.7 = 70%).
+     *   3. Khóa cứng trần khuyến mãi toàn đơn <= 15% Doanh Thu Gộp (MAX_PROMO_CAP_PCT).
+     *   4. Mở khóa bậc: 100% (Freeship), 50% (Giảm 50% ship), 25% (Giảm 25% ship).
+     *   5. Nudge Upsell: Gợi ý Topping / Nước uống (Food Cost <= 20%) để mở khóa bậc tiếp theo.
+     * 
+     * @param {Object} params - { subtotal, totalCogs, distanceKm, otherDiscount, config }
+     * @returns {Object} Kết quả đánh giá Voucher
+     */
+    function evaluateSmartShipVoucher(params) {
+        params = params || {};
+        var config = params.config || {};
+        var subtotal = Number(params.subtotal) || 0;
+        var totalCogs = Number(params.totalCogs);
+        if (isNaN(totalCogs) || totalCogs < 0) {
+            totalCogs = Math.round(subtotal * 0.40); // Ước tính 40% nếu không truyền giá vốn
+        }
+        var distanceKm = Number(params.distanceKm) || 1.0;
+        var otherDiscount = Number(params.otherDiscount) || 0;
+
+        // Cấu hình tham số (Fallback từ SSOT)
+        var isEnabled = config.PROMO_SMART_SHIP_VOUCHER_ENABLED !== false && String(config.PROMO_SMART_SHIP_VOUCHER_ENABLED) !== "false";
+        var tier25Enabled = config.PROMO_TIER_25_ENABLED !== false && String(config.PROMO_TIER_25_ENABLED) !== "false";
+        var tier50Enabled = config.PROMO_TIER_50_ENABLED !== false && String(config.PROMO_TIER_50_ENABLED) !== "false";
+        var tier100Enabled = config.PROMO_TIER_100_ENABLED !== false && String(config.PROMO_TIER_100_ENABLED) !== "false";
+        var upsellEnabled = config.PROMO_UPSELL_NUDGE_ENABLED !== false && String(config.PROMO_UPSELL_NUDGE_ENABLED) !== "false";
+
+        var profitFloor = Number(config.PROMO_MIN_NET_PROFIT_FLOOR !== undefined ? config.PROMO_MIN_NET_PROFIT_FLOOR : 25000);
+        var surplusRatio = Number(config.PROMO_SURPLUS_SHARE_RATIO !== undefined ? config.PROMO_SURPLUS_SHARE_RATIO : 0.7);
+        var custRatePerKm = Number(config.SHIP_CUST_RATE_PER_KM || config.SHIPPING_RATE_CUSTOMER_PER_KM || 5000);
+        var surgeMultiplier = Number(config.SHIP_SURGE_MULTIPLIER || 1.0);
+        var minCustFee = Number(config.SHIP_BASE_FEE_CUST || config.SHIPPING_MIN_CUSTOMER_FEE || 5000);
+        var maxPromoCapPct = Number(config.MAX_PROMO_CAP_PCT !== undefined ? config.MAX_PROMO_CAP_PCT : (config.MAX_PROMOTION_RATE !== undefined ? config.MAX_PROMOTION_RATE : 15));
+        if (maxPromoCapPct > 0 && maxPromoCapPct < 1) maxPromoCapPct = maxPromoCapPct * 100;
+        var masterFeePct = Number(config.MASTER_PLATFORM_FEE_PCT !== undefined ? config.MASTER_PLATFORM_FEE_PCT : 5.0);
+        if (masterFeePct > 0 && masterFeePct < 1) masterFeePct = masterFeePct * 100;
+        var taxHkdPct = Number(config.TAX_HKD_PCT !== undefined ? config.TAX_HKD_PCT : (config.TAX_RATE_HKD !== undefined ? config.TAX_RATE_HKD : 4.5));
+        if (taxHkdPct > 0 && taxHkdPct < 1) taxHkdPct = taxHkdPct * 100;
+
+        // 1. Phí ship gốc thu khách
+        var billableKm = Math.max(1, Math.ceil(distanceKm));
+        var shipFee = Math.max(minCustFee, Math.round(billableKm * custRatePerKm * surgeMultiplier));
+
+        // 2. Lợi nhuận ròng giỏ hàng (Sau khi trừ COGS, Phí Master 5% và Thuế HKD 4.5%)
+        var masterFee = Math.round(subtotal * (masterFeePct / 100));
+        var taxHkd = Math.round(subtotal * (taxHkdPct / 100));
+        var cartNetProfit = Math.max(0, subtotal - totalCogs - masterFee - taxHkd);
+
+        // 3. Ngân sách trợ giá ship từ Lợi nhuận thặng dư
+        var profitAllow = Math.max(0, Math.round((cartNetProfit - profitFloor) * surplusRatio));
+
+        // 4. Khóa trần tổng khuyến mãi <= 15% doanh thu gộp
+        var maxPromoAllowed = Math.round(subtotal * (maxPromoCapPct / 100));
+        var capAllow = Math.max(0, maxPromoAllowed - otherDiscount);
+
+        // 5. Ngân sách Voucher tối đa có thể cấp
+        var maxShipDiscount = Math.min(shipFee, profitAllow, capAllow);
+
+        var unlocked = false;
+        var voucherCode = "";
+        var tier = 0;
+        var discountPct = 0;
+        var discountAmount = 0;
+        var title = "";
+        var badgeText = "";
+
+        if (isEnabled && subtotal > 0 && maxShipDiscount > 0) {
+            if (tier100Enabled && maxShipDiscount >= shipFee) {
+                unlocked = true;
+                voucherCode = "SHIP_100";
+                tier = 100;
+                discountPct = 100;
+                discountAmount = shipFee;
+                title = "Freeship 100% Phí Vận Chuyển";
+                badgeText = "TIỆC LỚN FREESHIP 100%";
+            } else if (tier50Enabled && maxShipDiscount >= Math.round(shipFee * 0.5)) {
+                unlocked = true;
+                voucherCode = "SHIP_50";
+                tier = 50;
+                discountPct = 50;
+                discountAmount = Math.round(shipFee * 0.5);
+                title = "Giảm 50% Phí Vận Chuyển";
+                badgeText = "TRỢ GIÁ SHIP 50%";
+            } else if (tier25Enabled && maxShipDiscount >= Math.round(shipFee * 0.25)) {
+                unlocked = true;
+                voucherCode = "SHIP_25";
+                tier = 25;
+                discountPct = 25;
+                discountAmount = Math.round(shipFee * 0.25);
+                title = "Giảm 25% Phí Vận Chuyển";
+                badgeText = "TRỢ GIÁ SHIP 25%";
+            }
+        }
+
+        // 6. Tính toán Upsell Nudge để mở khóa bậc tiếp theo
+        var nextTierInfo = null;
+        if (isEnabled && upsellEnabled && tier < 100) {
+            var targetTier = (tier === 0) ? (tier25Enabled ? 25 : (tier50Enabled ? 50 : 100)) :
+                             (tier === 25) ? (tier50Enabled ? 50 : 100) : 100;
+            var targetDiscount = Math.round(shipFee * (targetTier / 100));
+            var neededNetProfit = Math.round(targetDiscount / (surplusRatio > 0 ? surplusRatio : 0.7)) + profitFloor;
+            var netProfitGap = Math.max(0, neededNetProfit - cartNetProfit);
+            // Nhóm Booster (Topping / Nước uống) có Food Cost <= 20%, biên lợi nhuận ròng ~65%
+            var suggestedSpend = netProfitGap > 0 ? Math.ceil((netProfitGap / 0.65) / 5000) * 5000 : 0;
+            if (suggestedSpend > 0) {
+                nextTierInfo = {
+                    targetTier: targetTier,
+                    targetDiscount: targetDiscount,
+                    netProfitGap: netProfitGap,
+                    suggestedSpend: suggestedSpend,
+                    nudgeMessage: "Chọn thêm Topping / Nước uống (~" + suggestedSpend.toLocaleString("vi-VN") + "đ) để mở khóa ngay Voucher giảm " + targetTier + "% phí ship!"
+                };
+            }
+        }
+
+        return {
+            enabled: isEnabled,
+            unlocked: unlocked,
+            voucherCode: voucherCode,
+            tier: tier,
+            discountPct: discountPct,
+            discountAmount: discountAmount,
+            title: title,
+            badgeText: badgeText,
+            shipFee: shipFee,
+            cartNetProfit: cartNetProfit,
+            profitFloor: profitFloor,
+            profitAllow: profitAllow,
+            capAllow: capAllow,
+            maxShipDiscount: maxShipDiscount,
+            nextTier: nextTierInfo
+        };
+    }
+
     function calculateReversePricing(appPrice, cogs, optDiscountPercent, optBufferPercent) {
         var rawAppPrice = Number(appPrice) || 0;
         var rawCogs = Number(cogs) || 0;
@@ -1040,7 +1209,13 @@
         registerAction: registerAction,
         normalizeOrderEntity: normalizeOrderEntity,
         calculateDynamicShippingFee: calculateDynamicShippingFee,
-        calculateReversePricing: calculateReversePricing
+        calculateReversePricing: calculateReversePricing,
+        evaluateSmartShipVoucher: evaluateSmartShipVoucher,
+        pricing: {
+            calculateReversePricing: calculateReversePricing,
+            calculateDynamicShippingFee: calculateDynamicShippingFee,
+            evaluateSmartShipVoucher: evaluateSmartShipVoucher
+        }
     };
 
 }));

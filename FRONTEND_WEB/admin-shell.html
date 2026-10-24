@@ -216,6 +216,17 @@
           </button>
 
                     <!-- Nút Mở Menu Studio Master Độc Lập Trên Topbar -->
+          
+          <!-- Nút Quản Lý Khuyến Mãi & Voucher Ship Động -->
+          <button type="button" 
+                  id="btn-open-promo-modal" 
+                  onclick="AdminPromoControl.openPromoModal()" 
+                  class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition active:scale-95 shadow-sm"
+                  title="Quản Lý Khuyến Mãi & Voucher Ship Động Theo Lợi Nhuận">
+              <i class="fa-solid fa-tags text-rose-400"></i>
+              <span>Voucher &amp; Trợ Giá Ship</span>
+          </button>
+
           <a href="menu-manager.html" 
              target="_blank"
              class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/10 transition active:scale-95">
@@ -332,6 +343,122 @@
   </div>
 
   <!-- ========================================================================= -->
+  
+  <!-- ========================================================================= -->
+  <!-- MODAL QUẢN LÝ KHUYẾN MÃI & VOUCHER SHIP ĐỘNG THEO LỢI NHUẬN RÒNG (MASTER)  -->
+  <!-- ========================================================================= -->
+  <div id="modal-promo-config" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+      <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-5 space-y-4 shadow-2xl animate-in zoom-in-95 duration-150">
+          
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 text-sm shadow-inner">
+                      <i class="fa-solid fa-tags"></i>
+                  </div>
+                  <div>
+                      <h4 class="text-xs font-black uppercase text-white tracking-wider">Khuyến Mãi &amp; Voucher Ship Động</h4>
+                      <p class="text-[10px] text-slate-400">Trợ giá ship dựa trên Lợi Nhuận Ròng thặng dư</p>
+                  </div>
+              </div>
+              <button type="button" onclick="AdminPromoControl.closePromoModal()" class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-xmark"></i>
+              </button>
+          </div>
+
+          <div class="space-y-3 text-xs max-h-[60vh] overflow-y-auto custom-scroll pr-1">
+              <!-- Công tắc tổng Smart Ship Voucher -->
+              <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                  <div>
+                      <span class="font-bold text-slate-200 block text-xs">Voucher Ship Động Theo Lợi Nhuận</span>
+                      <span class="text-[10px] text-slate-400">Công tắc tổng kích hoạt thuật toán</span>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" id="toggle-promo-smart-ship" class="sr-only peer">
+                      <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+              </div>
+
+              <!-- Các bậc giảm phí ship -->
+              <div class="p-3 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-2.5">
+                  <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Các Mốc Trợ Giá Mở Khóa:</span>
+                  
+                  <div class="flex items-center justify-between">
+                      <span class="text-xs text-slate-300">Giảm 25% Phí Ship (SHIP_25)</span>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" id="toggle-promo-tier-25" class="sr-only peer">
+                          <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
+                      </label>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                      <span class="text-xs text-slate-300">Giảm 50% Phí Ship (SHIP_50)</span>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" id="toggle-promo-tier-50" class="sr-only peer">
+                          <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
+                      </label>
+                  </div>
+
+                  <div class="flex items-center justify-between">
+                      <span class="text-xs text-slate-300">Freeship 100% Phí Ship (SHIP_100)</span>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" id="toggle-promo-tier-100" class="sr-only peer">
+                          <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
+                      </label>
+                  </div>
+
+                  <div class="flex items-center justify-between pt-1 border-t border-slate-800">
+                      <span class="text-xs text-slate-300">Gợi Ý Upsell Mua Thêm Topping</span>
+                      <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" id="toggle-promo-upsell-nudge" class="sr-only peer">
+                          <div class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-500"></div>
+                      </label>
+                  </div>
+              </div>
+
+              <!-- Tham số toán học bảo vệ quán -->
+              <div class="grid grid-cols-2 gap-2">
+                  <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                      <label class="block text-[10px] text-slate-400 font-bold uppercase">Sàn Lợi Nhuận Ròng (đ):</label>
+                      <input type="number" 
+                             id="inp-promo-min-profit-floor" 
+                             value="25000" 
+                             step="1000"
+                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-amber-300 font-mono font-bold focus:outline-none focus:border-amber-500">
+                      <span class="text-[9px] text-slate-500 block">Quán giữ lại tối thiểu trước khi bù</span>
+                  </div>
+
+                  <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                      <label class="block text-[10px] text-slate-400 font-bold uppercase">Tỷ Lệ Trích Thặng Dư:</label>
+                      <input type="number" 
+                             id="inp-promo-surplus-ratio" 
+                             value="0.7" 
+                             step="0.05"
+                             min="0.1"
+                             max="1.0"
+                             class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-emerald-300 font-mono font-bold focus:outline-none focus:border-emerald-500">
+                      <span class="text-[9px] text-slate-500 block">Ví dụ: 0.7 = 70% thặng dư bù ship</span>
+                  </div>
+              </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800 flex items-center gap-2">
+              <button type="button" 
+                      onclick="AdminPromoControl.closePromoModal()" 
+                      class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+                  Đóng
+              </button>
+              <button type="button" 
+                      id="btn-save-promo-config" 
+                      onclick="AdminPromoControl.savePromoConfig()" 
+                      class="flex-1 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-slate-950 font-black text-xs transition shadow flex items-center justify-center gap-1.5">
+                  <i class="fa-solid fa-floppy-disk"></i>
+                  <span>Lưu Vào SYS_CONFIG</span>
+              </button>
+          </div>
+
+      </div>
+  </div>
+
   <!-- 3. KHUNG BỐ CỤC CHÍNH WORKSPACE: SIDEBAR DRAWER & VIEWPORT TRUNG TÂM       -->
   <!-- ========================================================================= -->
   <div class="flex-1 flex overflow-hidden relative">

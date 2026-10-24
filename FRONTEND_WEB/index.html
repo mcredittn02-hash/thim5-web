@@ -839,6 +839,43 @@
                     </div>
                 </div>
 
+                
+                <!-- HỘP VOUCHER TRỢ GIÁ SHIP ĐỘNG THEO LỢI NHUẬN RÒNG -->
+                <div id="box-smart-ship-voucher" class="p-3 rounded-2xl bg-gradient-to-r from-emerald-950/60 to-slate-900 border border-emerald-500/40 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-xs text-emerald-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-gift text-amber-400"></i> Voucher Trợ Giá Ship Dành Riêng Cho Đơn Của Bạn
+                        </span>
+                        <span id="badge-ship-voucher-status" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            KIỂM TRA ĐIỀU KIỆN
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div id="txt-ship-voucher-title" class="text-xs font-bold text-white">Chưa đủ điều kiện trợ giá</div>
+                            <div id="txt-ship-voucher-desc" class="text-[10px] text-slate-400">Tài trợ từ Lợi Nhuận Ròng thặng dư của Bếp</div>
+                        </div>
+                        <button type="button" 
+                                id="btn-apply-ship-voucher" 
+                                onclick="D2CStoreFrontController.toggleSmartShipVoucher()" 
+                                class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition flex items-center gap-1 shadow-lg shadow-emerald-500/20">
+                            <i class="fa-solid fa-check"></i> <span id="txt-btn-apply-ship">Áp Dụng</span>
+                        </button>
+                    </div>
+
+                    <!-- THANH GỢI Ý UPSELL MUA THÊM TOPPING / NƯỚC UỐNG ĐỂ NÂNG BẬC SHIP -->
+                    <div id="box-ship-upsell-nudge" class="hidden p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-[11px]">
+                        <span id="txt-ship-upsell-nudge" class="text-amber-300 font-medium"></span>
+                        <button type="button" 
+                                id="btn-quick-add-upsell" 
+                                onclick="D2CStoreFrontController.quickAddBooster()" 
+                                class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 whitespace-nowrap transition">
+                            + Thêm Ngay
+                        </button>
+                    </div>
+                </div>
+
                 <!-- KHUNG XEM LẠI MÓN ĂN TRƯỚC KHI GỬI BẾP (CẤU TRÚC BẬC THANG RÕ RÀNG) -->
                 <div class="space-y-2 pt-1 border-t border-slate-800/80">
                     <div class="flex items-center justify-between">
@@ -1070,6 +1107,8 @@
             billedDistanceKm: 0,
             shippingFee: 0,
             shippingSubsidy: 0,
+            smartShipVoucher: null,
+            isSmartShipVoucherApplied: true,
             subsidyReason: "",
             vipCustomer: null,
             tierDiscountAmount: 0,
@@ -2441,6 +2480,41 @@
             if (bankEl) bankEl.innerText = STORE_BASE_CONFIG.bankCode;
             if (accEl) accEl.innerText = STORE_BASE_CONFIG.bankAccount;
             if (holderEl) holderEl.innerText = STORE_BASE_CONFIG.accountHolder;
+        }
+
+        
+        function toggleSmartShipVoucher() {
+            if (appState.smartShipVoucher && appState.smartShipVoucher.unlocked) {
+                appState.isSmartShipVoucherApplied = !appState.isSmartShipVoucherApplied;
+                if (!appState.isSmartShipVoucherApplied) {
+                    appState.shippingSubsidy = 0;
+                    appState.subsidyReason = "";
+                }
+                updateCheckoutSummary();
+            }
+        }
+
+        function quickAddBooster() {
+            // Tự động thêm 1 phần Trứng Lòng Đào hoặc Topping Booster có sẵn
+            var booster = TOPPING_PRESETS[0]; // Trứng lòng đào 6k
+            if (booster) {
+                appState.cartItems.push({
+                    dishId: booster.id,
+                    name: booster.name,
+                    price: booster.price,
+                    d2cPrice: booster.price,
+                    cogs: Math.round(booster.price * 0.20),
+                    quantity: 1,
+                    isGift: false,
+                    toppingIds: [],
+                    taste: "",
+                    soup: "",
+                    sauce: "",
+                    sauceFee: 0
+                });
+                renderCartDrawerItems(0);
+                updateCheckoutSummary();
+            }
         }
 
         function selectPaymentMethod(method) {

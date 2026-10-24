@@ -65,7 +65,20 @@ var DEFAULT_SYSTEM_CONFIG_MAP = Object.freeze({
   D2C_DISCOUNT_PERCENT: "10",              // % Web D2C giảm giá so với App sàn
   D2C_BUFFER_PERCENT: "15",                // % Quỹ đệm D2C (Bù ship + Vòng quay + Thuế)
   TAX_RATE_HKD: "4.5",                     // Thuế khoán hộ kinh doanh 4.5%
-  MAX_PROMOTION_RATE: "15",                // Trần khuyến mãi toàn đơn tối đa 15%
+  MAX_PROMOTION_RATE: "15",
+  // 3b. Module Khuyến Mãi Voucher Ship Động Theo Lợi Nhuận Ròng
+  PROMO_SMART_SHIP_VOUCHER_ENABLED: "true",
+  PROMO_TIER_25_ENABLED: "true",
+  PROMO_TIER_50_ENABLED: "true",
+  PROMO_TIER_100_ENABLED: "true",
+  PROMO_UPSELL_NUDGE_ENABLED: "true",
+  PROMO_MIN_NET_PROFIT_FLOOR: "25000",
+  PROMO_SURPLUS_SHARE_RATIO: "0.7",
+  SHIP_CUST_RATE_PER_KM: "5000",
+  SHIP_PARTNER_RATE_PER_KM: "4500",
+  MAX_PROMO_CAP_PCT: "15",
+  COD_HOLDING_LIMIT: "300000",
+  TAX_HKD_PCT: "4.5",                // Trần khuyến mãi toàn đơn tối đa 15%
 
   // 4. Thanh toán & Ngân hàng
   BANK_BIN: "970422",
@@ -351,6 +364,16 @@ function getSystemDynamicConfig(optArg) {
         status: String(config.STORE_STATUS || "OPEN").toUpperCase(),
         closedMessage: config.STORE_CLOSED_MESSAGE || ""
       },
+      
+      promo: {
+        smartShipVoucherEnabled: config.PROMO_SMART_SHIP_VOUCHER_ENABLED !== false && String(config.PROMO_SMART_SHIP_VOUCHER_ENABLED) !== "false",
+        tier25Enabled: config.PROMO_TIER_25_ENABLED !== false && String(config.PROMO_TIER_25_ENABLED) !== "false",
+        tier50Enabled: config.PROMO_TIER_50_ENABLED !== false && String(config.PROMO_TIER_50_ENABLED) !== "false",
+        tier100Enabled: config.PROMO_TIER_100_ENABLED !== false && String(config.PROMO_TIER_100_ENABLED) !== "false",
+        upsellNudgeEnabled: config.PROMO_UPSELL_NUDGE_ENABLED !== false && String(config.PROMO_UPSELL_NUDGE_ENABLED) !== "false",
+        minNetProfitFloor: Number(config.PROMO_MIN_NET_PROFIT_FLOOR) || 25000,
+        surplusShareRatio: Number(config.PROMO_SURPLUS_SHARE_RATIO) || 0.7
+      },
       shipping: {
         customerRatePerKm: customerRate,
         driverRatePerKm: driverRate,
@@ -487,6 +510,30 @@ function saveSystemDynamicConfig(payload) {
     }
 
     // 2. Biểu phí Ship D2C Linh Hoạt (Mô hình v3.5: 5k thu khách / 4.5k trả shipper)
+    
+    // 3b. Cấu hình Khuyến Mãi & Voucher Ship Động Theo Lợi Nhuận Ròng
+    if (payload.promo) {
+      if (payload.promo.smartShipVoucherEnabled !== undefined) setConfigKey("PROMO_SMART_SHIP_VOUCHER_ENABLED", payload.promo.smartShipVoucherEnabled, "Bật/Tắt Voucher Ship động");
+      if (payload.promo.tier25Enabled !== undefined) setConfigKey("PROMO_TIER_25_ENABLED", payload.promo.tier25Enabled, "Bật/Tắt mốc giảm 25% ship");
+      if (payload.promo.tier50Enabled !== undefined) setConfigKey("PROMO_TIER_50_ENABLED", payload.promo.tier50Enabled, "Bật/Tắt mốc giảm 50% ship");
+      if (payload.promo.tier100Enabled !== undefined) setConfigKey("PROMO_TIER_100_ENABLED", payload.promo.tier100Enabled, "Bật/Tắt mốc giảm 100% ship");
+      if (payload.promo.upsellNudgeEnabled !== undefined) setConfigKey("PROMO_UPSELL_NUDGE_ENABLED", payload.promo.upsellNudgeEnabled, "Bật/Tắt gợi ý upsell mua thêm");
+      if (payload.promo.minNetProfitFloor !== undefined) setConfigKey("PROMO_MIN_NET_PROFIT_FLOOR", payload.promo.minNetProfitFloor, "Sàn lợi nhuận ròng tối thiểu");
+      if (payload.promo.surplusShareRatio !== undefined) setConfigKey("PROMO_SURPLUS_SHARE_RATIO", payload.promo.surplusShareRatio, "Tỷ lệ trích thặng dư trợ giá ship");
+    }
+
+    var promoKeyList = [
+      "PROMO_SMART_SHIP_VOUCHER_ENABLED", "PROMO_TIER_25_ENABLED", "PROMO_TIER_50_ENABLED",
+      "PROMO_TIER_100_ENABLED", "PROMO_UPSELL_NUDGE_ENABLED", "PROMO_MIN_NET_PROFIT_FLOOR",
+      "PROMO_SURPLUS_SHARE_RATIO"
+    ];
+    for (var pki = 0; pki < promoKeyList.length; pki++) {
+      var pkName = promoKeyList[pki];
+      if (payload[pkName] !== undefined) {
+        setConfigKey(pkName, payload[pkName], "Cấu hình Khuyến Mãi Smart Ship");
+      }
+    }
+
     if (payload.shipping) {
       if (payload.shipping.customerRatePerKm !== undefined) {
         setConfigKey("SHIPPING_RATE_CUSTOMER_PER_KM", payload.shipping.customerRatePerKm, "Cước thu khách/km (Legacy)");
@@ -1431,4 +1478,28 @@ function getStoreOperationalStatus() {
       closedMessage: ""
     };
   }
+}
+
+/**
+ * CẬP NHẬT NHANH CẤU HÌNH KHUYẾN MÃI VOUCHER SHIP ĐỘNG (API: updatePromoConfig)
+ * Dành riêng cho Master Admin từ Dashboard hoặc Modal Quản Lý Khuyến Mãi
+ * 
+ * @param {Object} payload - { smartShipVoucherEnabled, tier25Enabled, tier50Enabled, tier100Enabled, upsellNudgeEnabled, minNetProfitFloor, surplusShareRatio, masterKey }
+ * @returns {Object} Phản hồi chuẩn hóa API
+ */
+function updatePromoConfig(payload) {
+  payload = payload || {};
+  var masterKey = payload.masterKey || CONFIG_MANAGER_CONSTANTS.SUPER_ADMIN_DEFAULT_KEY;
+  return saveSystemDynamicConfig({
+    masterKey: masterKey,
+    promo: {
+      smartShipVoucherEnabled: payload.smartShipVoucherEnabled !== undefined ? payload.smartShipVoucherEnabled : payload.PROMO_SMART_SHIP_VOUCHER_ENABLED,
+      tier25Enabled: payload.tier25Enabled !== undefined ? payload.tier25Enabled : payload.PROMO_TIER_25_ENABLED,
+      tier50Enabled: payload.tier50Enabled !== undefined ? payload.tier50Enabled : payload.PROMO_TIER_50_ENABLED,
+      tier100Enabled: payload.tier100Enabled !== undefined ? payload.tier100Enabled : payload.PROMO_TIER_100_ENABLED,
+      upsellNudgeEnabled: payload.upsellNudgeEnabled !== undefined ? payload.upsellNudgeEnabled : payload.PROMO_UPSELL_NUDGE_ENABLED,
+      minNetProfitFloor: payload.minNetProfitFloor !== undefined ? payload.minNetProfitFloor : payload.PROMO_MIN_NET_PROFIT_FLOOR,
+      surplusShareRatio: payload.surplusShareRatio !== undefined ? payload.surplusShareRatio : payload.PROMO_SURPLUS_SHARE_RATIO
+    }
+  });
 }

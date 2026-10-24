@@ -171,6 +171,25 @@ function validateAndCalculateOrderFinancials(rawPayload, dynamicConfig) {
     }
   }
 
+  
+    // 5b. Thẩm định Voucher Trợ Giá Ship Động Theo Lợi Nhuận Ròng (Smart Ship Voucher)
+    var smartVoucherCode = "";
+    if (dynamicConfig.PROMO_SMART_SHIP_VOUCHER_ENABLED !== false && 
+        String(dynamicConfig.PROMO_SMART_SHIP_VOUCHER_ENABLED) !== "false" &&
+        typeof evaluateSmartShipVoucher === "function") {
+      var smartEval = evaluateSmartShipVoucher({
+        subtotal: subtotal,
+        totalCogs: rawPayload.totalCogs,
+        distanceKm: distanceKm,
+        otherDiscount: voucherDiscount,
+        config: dynamicConfig
+      });
+      if (smartEval && smartEval.unlocked && smartEval.discountAmount > 0) {
+        appliedSubsidy = Math.max(appliedSubsidy, smartEval.discountAmount);
+        smartVoucherCode = smartEval.voucherCode;
+      }
+    }
+
   // 6. KHÓA CỨNG TRẦN TỔNG KHUYẾN MÃI TOÀN ĐƠN <= 15% DOANH THU GỘP (SYS_CONFIG)
   var maxAllowedPromo = subtotal > 0 ? Math.round(subtotal * (maxPromoRate / 100)) : 0;
   var voucherDiscount = T5_UTILS.cleanNumber(rawPayload.voucherDiscount || rawPayload.discountAmount || rawPayload.tierDiscountAmount || 0);
