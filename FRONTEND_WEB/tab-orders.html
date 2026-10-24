@@ -447,9 +447,9 @@ var OrdersController = (function() {
 
             if (status === "NEW" || status === "PENDING" || status === "RECEIVED" || stepNum === 0) {
                 lanes.lane1.push(order);
-            } else if (status === "COOKING" || status === "READY" || status === "PACKED" || stepNum === 2 || stepNum === 2.5) {
+            } else if (status === "COOKING" || status === "PREPARING" || status === "READY" || status === "PACKED" || status === "READY_TO_SHIP" || stepNum === 2 || stepNum === 2.5) {
                 lanes.lane2.push(order);
-            } else if (status === "SHIPPING" || status === "DELIVERING" || stepNum === 3) {
+            } else if (status === "SHIPPING" || status === "DELIVERING" || status === "DISPATCHED_3PL" || stepNum === 3) {
                 lanes.lane3.push(order);
             } else if (status === "COMPLETED" || stepNum === 4) {
                 lanes.lane4.push(order);

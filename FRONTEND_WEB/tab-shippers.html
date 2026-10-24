@@ -98,7 +98,7 @@
 
         <!-- Nút Thêm Tài Xế Mới -->
         <button type="button" 
-                onclick="TabShippersController.openShipperModal('ADD')" 
+                id="btn-open-shipper-modal" onclick="TabShippersController.openShipperModal('ADD')" 
                 class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-95 text-slate-950 font-black text-xs uppercase tracking-wider transition active:scale-95 shadow flex items-center gap-1.5">
           <i class="fa-solid fa-user-plus text-xs"></i>
           <span>Thêm Tài Xế</span>
@@ -334,7 +334,7 @@
           Hủy
         </button>
         <button type="button" 
-                id="btn-confirm-settle-cash" 
+                id="btn-term-settle-debt" data-alias="btn-confirm-settle-cash" 
                 onclick="TabShippersController.executeSettleCash()" 
                 class="flex-2 py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-95 text-slate-950 font-black uppercase text-xs tracking-wider transition active:scale-95 shadow-lg shadow-teal-600/20 flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-check"></i>
@@ -366,7 +366,7 @@
           <i class="fa-solid fa-route text-sky-400"></i>
         </div>
         <div class="mt-1.5 flex items-baseline gap-2">
-          <strong id="kpi-disp-active-count" class="text-xl sm:text-2xl font-mono font-black text-white">0</strong>
+          <strong id="kpi-disp-delivering-count" data-alias="kpi-disp-active-count" class="text-xl sm:text-2xl font-mono font-black text-white">0</strong>
           <span class="text-[10px] text-sky-400 font-bold">đơn đang ngoài đường</span>
         </div>
         <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-600"></div>
@@ -438,7 +438,7 @@
     </div>
 
     <!-- Khung Danh Sách Các Đơn Đang Giao Ngoài Đường (Dispatch Grid) -->
-    <div id="grid-active-trips" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+    <div id="grid-dispatch-orders" data-alias="grid-active-trips" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
       <div class="col-span-full p-12 rounded-3xl bg-slate-900 border border-slate-800 text-center text-slate-500 space-y-2">
         <i class="fa-solid fa-circle-notch fa-spin text-xl text-amber-400"></i>
         <p class="text-xs font-mono">Đang quét lộ trình các cuốc xe đang di chuyển...</p>
@@ -500,8 +500,51 @@
         </select>
       </div>
 
-      <!-- Phân Hệ App Ngoài: Đẩy Sang Sàn -->
-      <div id="sec-reassign-external" class="hidden space-y-2">
+      <!-- Phân Hệ App Ngoài: Đẩy Sang Sàn 3PL (GrabExpress / Vill / Xanh SM) -->
+      <div id="sec-reassign-external" class="hidden space-y-2.5">
+        <!-- 3 Nút Preset Nhanh Sàn 3PL -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-400 text-[10px] block">Chọn Nhanh Đối Tác 3PL:</label>
+          <div class="grid grid-cols-3 gap-1.5">
+            <button type="button" 
+                    onclick="TabShippersController.select3PlPreset('GRAB')" 
+                    class="py-1.5 px-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10.5px] font-bold flex items-center justify-center gap-1 transition active:scale-95 shadow">
+              <i class="fa-solid fa-motorcycle text-xs"></i>
+              <span>GrabExpress</span>
+            </button>
+            <button type="button" 
+                    onclick="TabShippersController.select3PlPreset('VILL')" 
+                    class="py-1.5 px-2 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10.5px] font-bold flex items-center justify-center gap-1 transition active:scale-95 shadow">
+              <i class="fa-solid fa-box text-xs"></i>
+              <span>VillShip</span>
+            </button>
+            <button type="button" 
+                    onclick="TabShippersController.select3PlPreset('XANH_SM')" 
+                    class="py-1.5 px-2 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[10.5px] font-bold flex items-center justify-center gap-1 transition active:scale-95 shadow">
+              <i class="fa-solid fa-bolt text-xs"></i>
+              <span>Xanh SM</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Nút 1-Click Copy Lộ Trình Đặt Xe 3PL -->
+        <div class="pt-1">
+          <button type="button" 
+                  id="btn-copy-3pl-reassign" 
+                  onclick="TabShippersController.copyCurrent3PlInfo()" 
+                  class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-copy"></i>
+            <span>📋 1-Click Copy Đặt Xe (Grab/Vill/Xanh SM)</span>
+          </button>
+        </div>
+
+        <!-- Khung xem trước thông tin đặt xe -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-400 text-[10px] block">Nội Dung Đặt Xe Tự Động:</label>
+          <div id="disp-reassign-3pl-preview" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[10px] font-mono text-slate-300 whitespace-pre-wrap select-all max-h-24 overflow-y-auto custom-scroll leading-relaxed">
+          </div>
+        </div>
+
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="font-bold text-slate-400 text-[10px] block mb-1">Đơn Vị Vận Chuyển:</label>
@@ -576,7 +619,7 @@
       <!-- Màn hình hiển thị 4 số PIN -->
       <div class="relative w-48 mx-auto">
         <input type="password" 
-               id="inp-term-driver-pin" 
+               id="sel-term-driver" data-alias="inp-term-driver-pin" 
                maxlength="4" 
                readonly 
                placeholder="••••" 
@@ -654,8 +697,10 @@
         <div class="text-right">
           <span class="text-[10px] text-slate-400 block">Hạn Mức Trần:</span>
           <span id="disp-term-driver-max-debt" class="text-[11px] font-mono font-bold text-slate-300">300.000 đ</span>
-        </div>
       </div>
+
+      <!-- Banner Cảnh Báo Khóa Nợ COD (Hiển Thị Khi Nợ >= Trần) -->
+      <div id="term-debt-lock-banner" class="hidden"></div>
 
       <!-- Danh Sách Cuốc Xe Được Gán Riêng Cho Tài Xế Này -->
       <div class="space-y-3">
@@ -868,11 +913,12 @@
         var phone = s.phone || "";
         var plate = s.plate || s.licensePlate || "Chưa ĐK";
         var status = s.status || "ACTIVE";
-        var isActive = (status === "ACTIVE");
         var maxDebt = Number(s.maxHolding || s.maxDebt || 300000);
         var currentDebt = Number(s.currentDebt || s.pendingCod || 0);
         var completed = Number(s.completedOrders || s.deliveredCount || 0);
-        var isExceeded = (currentDebt > maxDebt);
+        var isExceeded = (currentDebt >= maxDebt);
+        var isLocked = isExceeded || (status === "LOCKED_DEBT");
+        var isActive = (status === "ACTIVE") && !isExceeded;
 
         html += `
           <tr class="hover:bg-slate-800/40 transition">
@@ -888,21 +934,21 @@
             <td class="p-3 font-mono font-bold text-amber-400">${phone}</td>
             <td class="p-3 font-mono text-slate-300 uppercase">${plate}</td>
             <td class="p-3 text-center">
-              <span class="px-2.5 py-0.5 rounded-full text-[9.5px] font-black uppercase font-mono border ${isActive ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : 'bg-rose-500/10 text-rose-300 border-rose-500/30'}">
-                ${isActive ? '🟢 Đang Chạy' : '🔴 Tạm Khóa'}
+              <span class="px-2.5 py-0.5 rounded-full text-[9.5px] font-black uppercase font-mono border ${isActive ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'}">
+                ${isActive ? '🟢 Đang Chạy' : (isExceeded ? '⛔ ĐÃ KHÓA (Nợ COD)' : '🔴 Tạm Khóa')}
               </span>
             </td>
             <td class="p-3 text-right font-mono text-slate-400">${maxDebt.toLocaleString('vi-VN')} đ</td>
             <td class="p-3 text-right font-mono font-black ${isExceeded ? 'text-rose-400 animate-pulse' : (currentDebt > 0 ? 'text-amber-400' : 'text-emerald-400')}">
               ${currentDebt.toLocaleString('vi-VN')} đ
-              ${isExceeded ? '<span class="text-[9px] block text-rose-400 uppercase font-sans">Vượt Trần!</span>' : ''}
+              ${isExceeded ? '<span class="text-[9px] block text-rose-400 uppercase font-sans font-black">⛔ Vượt Trần!</span>' : ''}
             </td>
             <td class="p-3 text-center font-mono font-bold text-slate-300">${completed} cuốc</td>
             <td class="p-3 text-center">
               <div class="flex items-center justify-center gap-1.5">
                 <button type="button" 
                         onclick="TabShippersController.openSettleModal('${code}')" 
-                        class="px-2 py-1 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 transition active:scale-95 text-[10px] font-bold" 
+                        class="px-2.5 py-1 rounded-xl ${isExceeded ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black ring-2 ring-emerald-400 animate-bounce shadow-lg shadow-emerald-500/30' : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30'} flex items-center gap-1 transition active:scale-95 text-[10px]" 
                         title="Thu ngân nhận tiền nộp két">
                   <i class="fa-solid fa-hand-holding-dollar"></i>
                   <span>Nộp Két</span>
@@ -1145,9 +1191,18 @@
 
         var res = await callBackend("settleShipperDebt", [payload], "settleShipperDebt", payload);
         if (res && res.status === "success") {
-          alert("✅ Đã ghi nhận thu nộp két " + settleAmount.toLocaleString("vi-VN") + " đ thành công! Nợ COD của tài xế đã được cập nhật.");
+          if (found) {
+            found.currentDebt = Math.max(0, (found.currentDebt || 0) - settleAmount);
+            found.pendingCod = found.currentDebt;
+            var maxHold = Number(found.maxHolding || found.maxDebt || 300000);
+            if (found.currentDebt < maxHold) {
+              found.status = "ACTIVE";
+            }
+          }
+          alert("✅ Đã ghi nhận thu nộp két " + settleAmount.toLocaleString("vi-VN") + " đ thành công! Mở khóa nhận cuốc cho tài xế [" + sName + "] ngay lập tức.");
           closeSettleModal();
           loadFleetData();
+          updateTerminalDebtDisplay();
         } else {
           alert("⛔ " + (res && res.message ? res.message : "Lỗi ghi sổ cái nộp két!"));
         }
@@ -1176,7 +1231,7 @@
 
         var deliveringOrders = orders.filter(function(o) {
           var step = Number(o.step !== undefined ? o.step : 0);
-          return step === 3 || o.status === "DELIVERING";
+          return step === 3 || o.status === "DELIVERING" || o.status === "SHIPPING" || o.status === "DISPATCHED_3PL";
         });
 
         activeDispatchOrdersCache = deliveringOrders;
@@ -1298,12 +1353,20 @@
               </div>
             </div>
 
-            <div class="pt-2 border-t border-slate-800/80">
+            <div class="pt-2 border-t border-slate-800/80 grid grid-cols-2 gap-2">
+              <button type="button" 
+                      onclick="TabShippersController.copy3PlDispatchInfo('${code}')" 
+                      class="py-2 px-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10.5px] font-bold transition active:scale-95 flex items-center justify-center gap-1.5 shadow" 
+                      title="1-Click Copy lộ trình đặt xe GrabExpress / Vill / Xanh SM">
+                <i class="fa-solid fa-copy text-xs"></i>
+                <span>Copy Đặt Xe 3PL</span>
+              </button>
               <button type="button" 
                       onclick="TabShippersController.openReassignModal('${code}')" 
-                      class="w-full py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-amber-400 border border-slate-800 text-xs font-bold transition active:scale-95 flex items-center justify-center gap-1.5 shadow">
-                <i class="fa-solid fa-arrows-rotate text-[10px]"></i>
-                <span>Đổi Tài Xế / Chuyển Sàn Khẩn Cấp</span>
+                      class="py-2 px-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-amber-400 border border-slate-800 text-[10.5px] font-bold transition active:scale-95 flex items-center justify-center gap-1.5 shadow" 
+                      title="Đổi tài xế nội bộ hoặc chuyển sàn ngoài">
+                <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                <span>Đổi Tài Xế / Sàn</span>
               </button>
             </div>
           </div>
@@ -1313,11 +1376,82 @@
       grid.innerHTML = html;
     }
 
+    function format3PlDispatchText(order) {
+      if (!order) return "";
+      var code = order.code || order.orderCode || order.orderId || "";
+      var name = order.name || order.customerName || "Khách lẻ";
+      var phone = order.phone || order.customerPhone || "";
+      var addr = order.address || order.customerAddress || "Hòa Thành, Tây Ninh";
+      var total = Number(order.total || order.finalTotal || 0);
+      var isCod = (order.method === "COD" || order.paymentMethod === "COD");
+      var itemsText = "";
+      if (Array.isArray(order.items) && order.items.length > 0) {
+        itemsText = order.items.map(function(it) {
+          return (it.quantity || 1) + "x " + (it.name || it.dishName || "Món");
+        }).join(", ");
+      } else if (order.note) {
+        itemsText = order.note;
+      } else {
+        itemsText = "Mì Trộn Xá Xíu / Đặc Sản Bếp Thím 5";
+      }
+
+      var lines = [
+        "🍜 [ĐƠN HÀNG BẾP THÍM 5 - MÃ: " + code + "]",
+        "📍 ĐIỂM LẤY: Bếp Mì Trộn Thím 5 - 125 Hùng Vương, TT. Hòa Thành, Tây Ninh (Hotline: 0934.220.585)",
+        "📍 ĐIỂM GIAO: " + addr,
+        "👤 NGƯỜI NHẬN: " + name + " - 📞 " + phone,
+        "💵 TIỀN THU HỘ COD: " + (isCod ? (total.toLocaleString("vi-VN") + " đ") : "0 đ (Khách đã thanh toán qua VietQR)"),
+        "📦 MÓN ĂN: " + itemsText,
+        "⚠️ GHI CHÚ: Giao hàng cẩn thận, giữ hộp mì nằm ngang, chúc khách ngon miệng!"
+      ];
+      return lines.join("\n");
+    }
+
+    function copy3PlDispatchInfo(orderCode) {
+      var target = activeDispatchOrdersCache.find(function(o) {
+        return (o.code || o.orderCode || o.orderId) === orderCode;
+      });
+      if (!target) {
+        alert("Không tìm thấy thông tin đơn hàng " + orderCode);
+        return;
+      }
+      var text = format3PlDispatchText(target);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          alert("📋 ĐÃ COPY THÔNG TIN ĐẶT XE 3PL (Mã: " + orderCode + ")!\n\nHãy dán (Paste) vào App GrabExpress / Vill / Xanh SM để đặt xe nhanh.");
+        }).catch(function() {
+          prompt("Copy thông tin đặt xe bên dưới:", text);
+        });
+      } else {
+        prompt("Copy thông tin đặt xe bên dưới:", text);
+      }
+    }
+
+    function copyCurrent3PlInfo() {
+      if (!reassignTargetOrder) {
+        alert("Chưa chọn cuốc xe cần chuyển đổi!");
+        return;
+      }
+      copy3PlDispatchInfo(reassignTargetOrder.code || reassignTargetOrder.orderCode || reassignTargetOrder.orderId);
+    }
+
+    function select3PlPreset(provider) {
+      var sel = document.getElementById("sel-reassign-external-provider");
+      var trackInp = document.getElementById("inp-reassign-tracking-code");
+      if (sel) sel.value = provider;
+      if (trackInp) {
+        if (provider === "GRAB") trackInp.placeholder = "VD: GR-8821";
+        else if (provider === "VILL") trackInp.placeholder = "VD: VILL-5510";
+        else if (provider === "XANH_SM") trackInp.placeholder = "VD: XSM-3329";
+      }
+    }
+
     function openReassignModal(orderCode) {
       var modal = document.getElementById("modal-reassign-shipper");
       var codeLabel = document.getElementById("disp-reassign-order-code");
       var targetInp = document.getElementById("inp-reassign-target-code");
       var selShipper = document.getElementById("sel-reassign-shipper-list");
+      var previewBox = document.getElementById("disp-reassign-3pl-preview");
       if (!modal) return;
 
       var target = activeDispatchOrdersCache.find(function(o) { return (o.code || o.orderCode || o.orderId) === orderCode; });
@@ -1326,15 +1460,26 @@
       if (codeLabel) codeLabel.innerText = "MÃ ĐƠN: " + orderCode;
       if (targetInp) targetInp.value = orderCode;
 
+      if (previewBox && target) {
+        previewBox.innerText = format3PlDispatchText(target);
+      }
+
       if (selShipper) {
         selShipper.innerHTML = '<option value="">-- Chọn tài xế khác từ danh bạ --</option>';
         activeShippersCache.forEach(function(s) {
-          if (s.status === "ACTIVE") {
-            var opt = document.createElement("option");
-            opt.value = s.name + " (" + s.phone + ")";
-            opt.textContent = "🛵 " + s.name + " (" + s.phone + ") - " + (s.plate || "Xe máy");
-            selShipper.appendChild(opt);
+          var sDebt = Number(s.currentDebt || s.pendingCod || 0);
+          var sMax = Number(s.maxHolding || s.maxDebt || 300000);
+          var sLocked = (sDebt >= sMax) || (s.status === "LOCKED_DEBT");
+          var opt = document.createElement("option");
+          opt.value = s.name + " (" + s.phone + ")";
+          if (sLocked) {
+            opt.disabled = true;
+            opt.className = "text-rose-400 bg-slate-900";
+            opt.textContent = "⛔ " + s.name + " (" + s.phone + ") - KHÓA NỢ COD (" + sDebt.toLocaleString('vi-VN') + "đ > " + sMax.toLocaleString('vi-VN') + "đ)";
+          } else {
+            opt.textContent = "🛵 " + s.name + " (" + s.phone + ") - Nợ COD: " + sDebt.toLocaleString('vi-VN') + "đ";
           }
+          selShipper.appendChild(opt);
         });
       }
 
@@ -1364,6 +1509,10 @@
         if (btnExt) btnExt.className = "p-2 rounded-xl border-2 border-amber-500 bg-amber-500/10 text-amber-400 font-bold text-xs transition flex items-center justify-center gap-1.5";
         if (secInt) secInt.classList.add("hidden");
         if (secExt) secExt.classList.remove("hidden");
+        if (reassignTargetOrder) {
+          var previewBox = document.getElementById("disp-reassign-3pl-preview");
+          if (previewBox) previewBox.innerText = format3PlDispatchText(reassignTargetOrder);
+        }
       }
     }
 
@@ -1385,6 +1534,19 @@
         }
         var phoneMatch = shipperInfo.match(/(\d{9,11})/);
         if (phoneMatch) shipperPhone = phoneMatch[1];
+
+        // Kiểm toán chặn tuyệt đối tài xế vượt trần nợ COD
+        var selectedDriver = activeShippersCache.find(function(s) {
+          return s.phone === shipperPhone || (shipperInfo.indexOf(s.name) !== -1);
+        });
+        if (selectedDriver) {
+          var curDebt = Number(selectedDriver.currentDebt || selectedDriver.pendingCod || 0);
+          var maxDebt = Number(selectedDriver.maxHolding || selectedDriver.maxDebt || 300000);
+          if (curDebt >= maxDebt || selectedDriver.status === "LOCKED_DEBT") {
+            alert("⛔ TÀI XẾ BỊ KHÓA: Tài xế [" + selectedDriver.name + "] đang giữ " + curDebt.toLocaleString('vi-VN') + " đ tiền mặt COD (vượt trần " + maxDebt.toLocaleString('vi-VN') + " đ). Bắt buộc phải Nộp Két tất toán trước khi nhận cuốc mới!");
+            return;
+          }
+        }
       } else {
         var provider = document.getElementById("sel-reassign-external-provider").value;
         var track = document.getElementById("inp-reassign-tracking-code").value.trim();
@@ -1463,6 +1625,7 @@
     function updateTerminalDebtDisplay() {
       var debtEl = document.getElementById("disp-term-driver-debt");
       var maxDebtEl = document.getElementById("disp-term-driver-max-debt");
+      var bannerEl = document.getElementById("term-debt-lock-banner");
       var matched = activeShippersCache.find(function(s) {
         return String(s.phone || "").replace(/\D/g, "") === String(currentLoggedInDriverPhone).replace(/\D/g, "");
       });
@@ -1470,11 +1633,30 @@
       if (matched) {
         var curDebt = Number(matched.currentDebt || matched.pendingCod || 0);
         var maxDebt = Number(matched.maxHolding || matched.maxDebt || 300000);
+        var isLocked = (curDebt >= maxDebt) || (matched.status === "LOCKED_DEBT");
+
         if (debtEl) {
           debtEl.innerText = curDebt.toLocaleString("vi-VN") + " đ";
-          debtEl.className = "text-sm font-mono font-black " + (curDebt > maxDebt ? "text-rose-400 animate-pulse" : "text-amber-400");
+          debtEl.className = "text-sm font-mono font-black " + (isLocked ? "text-rose-400 animate-pulse" : "text-amber-400");
         }
         if (maxDebtEl) maxDebtEl.innerText = maxDebt.toLocaleString("vi-VN") + " đ";
+
+        if (bannerEl) {
+          if (isLocked) {
+            bannerEl.innerHTML = `
+              <div class="p-3.5 rounded-2xl bg-rose-500/20 border-2 border-rose-500/50 text-rose-300 flex items-center gap-3 animate-pulse shadow-lg">
+                <i class="fa-solid fa-triangle-exclamation text-lg shrink-0 text-rose-400"></i>
+                <div class="text-[11px] leading-tight space-y-0.5">
+                  <strong class="block text-xs uppercase font-sans font-black text-rose-200">⛔ TÀI KHOẢN ĐANG BỊ KHÓA NHẬN ĐƠN MỚI</strong>
+                  <span>Nợ COD hiện tại: <strong class="font-mono text-rose-100">${curDebt.toLocaleString('vi-VN')} đ</strong> (Vượt trần ${maxDebt.toLocaleString('vi-VN')} đ). Vui lòng đến gặp Thu Ngân / Bếp nộp tiền két để mở khóa!</span>
+                </div>
+              </div>
+            `;
+            bannerEl.classList.remove("hidden");
+          } else {
+            bannerEl.classList.add("hidden");
+          }
+        }
       }
     }
 
@@ -1600,6 +1782,11 @@
         return;
       }
 
+      var matchedDriver = activeShippersCache.find(function(s) {
+        return String(s.phone || "").replace(/\D/g, "") === String(currentLoggedInDriverPhone).replace(/\D/g, "");
+      });
+      var isDriverDebtLocked = Boolean(matchedDriver && ((Number(matchedDriver.currentDebt || 0) >= Number(matchedDriver.maxHolding || 300000)) || (matchedDriver.status === "LOCKED_DEBT")));
+
       var html = "";
       orders.forEach(function(o) {
         var code = o.code || o.orderCode || o.orderId || "";
@@ -1642,14 +1829,23 @@
                 <button type="button" disabled class="py-2.5 rounded-xl bg-slate-800 text-slate-500 font-bold text-xs">Không SĐT</button>
               `}
 
-              ${isPacked ? `
-                <button type="button" 
-                        onclick="TabShippersController.updateDriverOrderStatus('${code}', 'PICKED')" 
-                        class="py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs uppercase transition shadow active:scale-95 flex items-center justify-center gap-1.5">
-                  <i class="fa-solid fa-box-open"></i>
-                  <span>ĐÃ LẤY MÓN</span>
-                </button>
-              ` : `
+              ${isPacked ? (
+                isDriverDebtLocked ? `
+                  <button type="button" 
+                          onclick="alert('⛔ BẠN ĐANG BỊ KHÓA NỢ COD! Vui lòng gặp Thu Ngân / Bếp nộp tiền két để mở khóa trước khi lấy cuốc mới.');" 
+                          class="py-2.5 rounded-xl bg-rose-600/30 text-rose-300 font-black text-xs uppercase border border-rose-500/50 flex items-center justify-center gap-1.5 cursor-not-allowed">
+                    <i class="fa-solid fa-lock text-rose-400"></i>
+                    <span>KHÓA NỢ COD</span>
+                  </button>
+                ` : `
+                  <button type="button" 
+                          onclick="TabShippersController.updateDriverOrderStatus('${code}', 'PICKED')" 
+                          class="py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs uppercase transition shadow active:scale-95 flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-box-open"></i>
+                    <span>ĐÃ LẤY MÓN</span>
+                  </button>
+                `
+              ) : `
                 <button type="button" 
                         onclick="TabShippersController.updateDriverOrderStatus('${code}', 'DELIVERED_DONE',${isCod ? total : 0})" 
                         class="py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black text-xs uppercase transition shadow active:scale-95 flex items-center justify-center gap-1.5">
@@ -1666,6 +1862,16 @@
     }
 
     async function updateDriverOrderStatus(orderCode, actionType, codCollected) {
+      if (actionType === "PICKED") {
+        var matched = activeShippersCache.find(function(s) {
+          return String(s.phone || "").replace(/\D/g, "") === String(currentLoggedInDriverPhone).replace(/\D/g, "");
+        });
+        if (matched && ((Number(matched.currentDebt || 0) >= Number(matched.maxHolding || 300000)) || (matched.status === "LOCKED_DEBT"))) {
+          alert("⛔ TÀI KHOẢN ĐANG BỊ KHÓA NỢ COD: Bạn đang nợ " + Number(matched.currentDebt || 0).toLocaleString("vi-VN") + " đ tiền mặt COD. Vui lòng nộp tiền két tại Bếp để mở khóa trước khi lấy cuốc mới!");
+          return;
+        }
+      }
+
       if (!confirm("Xác nhận trạng thái cuốc xe " + orderCode + "?")) return;
 
       try {
@@ -1729,6 +1935,11 @@
       closeReassignModal: closeReassignModal,
       selectReassignChannel: selectReassignChannel,
       executeReassignShipper: executeReassignShipper,
+      copy3PlDispatchInfo: copy3PlDispatchInfo,
+      copyCurrent3PlInfo: copyCurrent3PlInfo,
+      select3PlPreset: select3PlPreset,
+      format3PlDispatchText: format3PlDispatchText,
+      loadFleetData: loadFleetData,
       appendTerminalDigit: appendTerminalDigit,
       clearTerminalDigit: clearTerminalDigit,
       submitTerminalLogin: submitTerminalLogin,

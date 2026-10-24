@@ -36,7 +36,7 @@
       
       <!-- CÁC NÚT CHO PHÉP TẤT CẢ LEVEL (Bếp Lv1 & POS Lv2 đều được xem) -->
       <button type="button" 
-              data-timeframe="today"
+              id="btn-pl-filter-today" data-timeframe="today"
               onclick="TabPlController.setQuickFilter('today', this)" 
               class="pl-filter-btn px-3 py-1.5 rounded-xl font-bold text-[10.5px] transition bg-amber-500 text-slate-950 shadow active">
         Hôm Nay
@@ -57,7 +57,7 @@
       </button>
 
       <button type="button" 
-              data-timeframe="thisMonth"
+              id="btn-pl-filter-month" data-timeframe="thisMonth"
               onclick="TabPlController.setQuickFilter('thisMonth', this)" 
               class="pl-filter-btn px-3 py-1.5 rounded-xl font-bold text-[10.5px] transition bg-slate-950 text-slate-400 border border-slate-800 hover:text-white">
         Tháng Này
@@ -101,7 +101,7 @@
   </div>
 
   <!-- THANH CHỌN DẢI NGÀY TÙY BIẾN CHO SUPER ADMIN (CUSTOM DATE PICKER) -->
-  <div id="box-custom-date-container" class="hidden p-3 rounded-2xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3 animate-in fade-in-50 duration-150">
+  <div id="pl-date-range" data-alias="pl-date-range" class="hidden p-3 rounded-2xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3 animate-in fade-in-50 duration-150">
     <div class="flex items-center gap-2">
       <span class="text-[11px] font-bold text-slate-300">Từ Ngày:</span>
       <input type="date" id="inp-custom-start" class="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1 text-slate-200 font-mono text-xs outline-none focus:border-amber-500" />
@@ -149,7 +149,10 @@
       </div>
       <div class="mt-1.5">
         <strong id="kpi-gross-profit" class="text-base sm:text-lg font-mono font-black text-sky-400">0 đ</strong>
-        <p id="kpi-gross-margin" class="text-[9.5px] text-slate-400 mt-0.5">Biên gộp: 0.0%</p>
+        <div class="flex items-center justify-between mt-0.5 text-[9.5px]">
+          <span id="kpi-gross-margin" class="text-slate-400">Biên gộp: 0.0%</span>
+          <span class="text-slate-400">COGS: <strong id="kpi-gross-cogs" class="text-rose-400 font-mono">0 đ</strong></span>
+        </div>
       </div>
       <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-600"></div>
     </div>
@@ -205,19 +208,19 @@
     <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1 font-mono text-[10px]">
       <div class="flex items-center gap-1.5 text-slate-300">
         <span class="w-2.5 h-2.5 rounded-sm bg-rose-500 shrink-0"></span>
-        <span>Giá Vốn COGS: <strong id="lbl-cogs-val" class="text-rose-400">0.0%</strong></span>
+        <span>Giá Vốn COGS: <strong id="lbl-cogs-val" data-id="kpi-gross-cogs" class="text-rose-400">0.0%</strong></span>
       </div>
       <div class="flex items-center gap-1.5 text-slate-300">
         <span class="w-2.5 h-2.5 rounded-sm bg-amber-500 shrink-0"></span>
-        <span>Bù Ship: <strong id="lbl-subsidy-val" class="text-amber-400">0.0%</strong></span>
+        <span>Bù Ship: <strong id="kpi-d2c-buffer-spent" data-alias="lbl-subsidy-val" class="text-amber-400">0.0%</strong></span>
       </div>
       <div class="flex items-center gap-1.5 text-slate-300">
         <span class="w-2.5 h-2.5 rounded-sm bg-blue-500 shrink-0"></span>
-        <span>Thuế HKD: <strong id="lbl-tax-val" class="text-blue-400">4.5%</strong></span>
+        <span>Thuế HKD: <strong id="kpi-master-ship-spread" data-alias="lbl-tax-val" class="text-blue-400">4.5%</strong></span>
       </div>
       <div class="flex items-center gap-1.5 text-slate-300">
         <span class="w-2.5 h-2.5 rounded-sm bg-purple-500 shrink-0"></span>
-        <span>Phí Master: <strong id="lbl-fee-val" class="text-purple-400">5.0%</strong></span>
+        <span>Phí Master: <strong id="kpi-master-platform-fee" data-alias="lbl-fee-val" class="text-purple-400">5.0%</strong></span>
       </div>
       <div class="flex items-center gap-1.5 text-slate-300">
         <span class="w-2.5 h-2.5 rounded-sm bg-emerald-500 shrink-0"></span>
@@ -546,6 +549,7 @@ var TabPlController = (function() {
     var netMarginPct = netRev > 0 ? ((netProfit / netRev) * 100).toFixed(1) : (parseSafeNum(kpi.netMarginPercent) || "0.0");
 
     var netRevEl = document.getElementById("kpi-net-revenue");
+    var grossCogsEl = document.getElementById("kpi-gross-cogs");
     var grossProfitEl = document.getElementById("kpi-gross-profit");
     var grossMarginEl = document.getElementById("kpi-gross-margin");
     var netProfitEl = document.getElementById("kpi-net-profit");
@@ -554,6 +558,7 @@ var TabPlController = (function() {
     var cashHandoverEl = document.getElementById("kpi-cash-handover");
 
     if (netRevEl) netRevEl.innerText = formatMoneyVnd(netRev);
+    if (grossCogsEl) grossCogsEl.innerText = formatMoneyVnd(cogs);
     if (grossProfitEl) grossProfitEl.innerText = formatMoneyVnd(grossProfit);
     if (grossMarginEl) grossMarginEl.innerText = "Biên gộp: " + grossMarginPct + "%";
     if (netProfitEl) netProfitEl.innerText = formatMoneyVnd(netProfit);
@@ -731,7 +736,17 @@ var TabPlController = (function() {
    * XỬ LÝ THU TIỀN MẶT COD NHANH TỪ SHIPPER VÀO KÉT TIỀN BẾP
    */
   async function handleSettleShipperCash(shipperLabel, shipperPhone, amount) {
-    if (!confirm("Xác nhận thu đủ " + formatMoneyVnd(amount) + " tiền mặt COD từ tài xế " + shipperLabel + " vào két tiền Bếp?")) {
+    var targetPhone = String(shipperPhone || "").trim();
+    if (!targetPhone) {
+      var prompted = prompt("Tài xế [" + shipperLabel + "] chưa có SĐT lưu trong hồ sơ cuốc. Vui lòng nhập SĐT tài xế để hạch toán nộp két:", "");
+      if (prompted) targetPhone = prompted.trim().replace(/\D/g, '');
+      if (!targetPhone) {
+        alert("⚠️ Không thể đối soát nếu thiếu số điện thoại tài xế!");
+        return;
+      }
+    }
+
+    if (!confirm("Xác nhận thu đủ " + formatMoneyVnd(amount) + " tiền mặt COD từ tài xế " + shipperLabel + (targetPhone ? (" (" + targetPhone + ")") : "") + " vào két tiền Bếp?")) {
       return;
     }
 
@@ -746,7 +761,8 @@ var TabPlController = (function() {
 
       var payload = {
         shipperLabel: shipperLabel,
-        shipperPhone: shipperPhone,
+        shipperPhone: targetPhone,
+        phone: targetPhone,
         amount: amount,
         action: "SETTLE_HANDOVER"
       };

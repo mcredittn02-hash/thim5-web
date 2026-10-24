@@ -16,7 +16,8 @@
     (function checkStudioAccess() {
       try {
         var role = sessionStorage.getItem("thim5_auth_role") || localStorage.getItem("thim5_auth_role");
-        if (!role || (role !== "POS_STAFF" && role !== "SUPER_ADMIN" && role !== "KITCHEN_LEAD")) {
+        var validRoles = ["SUPER_ADMIN_LV3", "SUPER_ADMIN", "TENANT_ADMIN", "POS_LV2", "POS_STAFF", "KITCHEN_LV1", "KITCHEN_LEAD"];
+        if (!role || validRoles.indexOf(role) === -1) {
           // Chưa xác thực hoặc không đủ quyền hạn, tự động chuyển về Admin Shell
           window.location.replace("admin-shell.html");
         }
@@ -251,16 +252,20 @@
         <div id="menuTableContentWrapper" class="overflow-x-auto transition-opacity duration-200">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
-              <tr class="bg-slate-900/90 text-slate-400 font-bold border-b border-slate-800 text-[10.5px] uppercase tracking-wider">
-                <th class="py-3 px-4">Món Ăn & SKU</th>
-                <th class="py-3 px-3">Danh Mục</th>
-                <th class="py-3 px-3 text-right">Giá App (+25%)</th>
-                <th class="py-3 px-3 text-right text-amber-400">Giá Web D2C</th>
-                <th class="py-3 px-3 text-right">Giá Vốn (COGS)</th>
-                <th class="py-3 px-3 text-right text-emerald-400">Lợi Nhuận Ròng</th>
-                <th class="py-3 px-3 text-center">Vai Trò</th>
-                <th class="py-3 px-3 text-center">Bếp Báo Hết</th>
-                <th class="py-3 px-4 text-right">Thao Tác</th>
+              <tr class="bg-slate-950/90 text-slate-400 font-bold border-b border-slate-800 text-[10.5px] uppercase tracking-wider font-mono">
+                <th class="py-3 px-3.5">1. Món Ăn &amp; Ảnh</th>
+                <th class="py-3 px-2">2. Mã SKU</th>
+                <th class="py-3 px-3">3. Danh Mục</th>
+                <th class="py-3 px-2 text-center">4. Vai Trò</th>
+                <th class="py-3 px-3 text-right">5. Giá App (+25%)</th>
+                <th class="py-3 px-2 text-right text-emerald-400">6. % Giảm D2C</th>
+                <th class="py-3 px-3 text-right text-amber-400 font-bold">7. Giá Web D2C</th>
+                <th class="py-3 px-3 text-right">8. Giá Vốn COGS</th>
+                <th class="py-3 px-2 text-center">9. % Food Cost</th>
+                <th class="py-3 px-3 text-right text-emerald-400 font-bold">10. Lợi Nhuận Ròng</th>
+                <th class="py-3 px-3 text-center">11. Súp Bán Kèm</th>
+                <th class="py-3 px-2 text-center">12. Trạng Thái Bếp</th>
+                <th class="py-3 px-3.5 text-right">13. Thao Tác</th>
               </tr>
             </thead>
             <tbody id="menuItemsTableBody" class="divide-y divide-slate-800/60 font-sans">
@@ -347,6 +352,7 @@
               <i class="fa-solid fa-file-excel text-emerald-400"></i>
             </div>
             <input type="file" 
+                   id="inputMenuExcelFile" 
                    accept=".xlsx, .xls, .csv" 
                    onchange="TabMenuController.handleExcelFileSelect(event)" 
                    class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-700 cursor-pointer">
@@ -360,6 +366,7 @@
               <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
             </div>
             <input type="file" 
+                   id="inputMenuOcrImage" 
                    accept="image/*" 
                    onchange="TabMenuController.triggerGeminiVisionOcr(event)" 
                    class="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-700 cursor-pointer">
@@ -498,7 +505,7 @@
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-sky-400 mb-0.5">% Giảm Giá D2C</label>
-                <input type="number" id="modalDishDiscountPercent" value="20" placeholder="20" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs font-mono text-sky-400 font-bold focus:outline-none focus:border-sky-500">
+                <input type="number" id="modalDishDiscountPercent" placeholder="10" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs font-mono text-sky-400 font-bold focus:outline-none focus:border-sky-500">
               </div>
               <div>
                 <label class="block text-[10px] font-bold text-amber-400 mb-0.5">Giá Web D2C *</label>
@@ -627,9 +634,9 @@
   <!-- ========================================================================= -->
   <!-- NẠP BỘ BA THƯ VIỆN & CONTROLLER ĐIỀU PHỐI DỮ LIỆU CHUẨN SSOT TẬP TRUNG    -->
   <!-- ========================================================================= -->
-  <script src="thim5-master-dictionary.js?v=20261005"></script>
-  <script src="api.js?v=20261005"></script>
-  <script src="tab-menu.js?v=20261005"></script>
+  <script src="thim5-master-dictionary.js?v=20261016"></script>
+  <script src="api.js?v=20261016"></script>
+  <script src="tab-menu.js?v=20261016"></script>
 
   <!-- KHỞI CHẠY CONTROLLER TOÀN DIỆN KHI DOM TẢI XONG -->
   <script>

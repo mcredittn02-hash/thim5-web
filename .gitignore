@@ -1,10 +1,14 @@
-BACKEND_APPSCRIPT/
-*.md
-.clinerules
-.roorules
+# Credentials & Sensitive Tokens
+.clasprc.json
 .clasp.json
 .clasp.*.json
-*.log
 .env
-.aider*
+*.log
+
+# Dependencies & IDE caches
 node_modules/
+.aider*
+.clinerules
+.roorules
+
+.antigravity/

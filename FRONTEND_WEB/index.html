@@ -690,7 +690,7 @@
                 <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5 text-[11px]">
                     <div class="flex justify-between text-slate-400">
                         <span>Tiền Món Ăn:</span>
-                        <span id="disp-drawer-subtotal" class="font-mono font-bold text-white">0 đ</span>
+                        <span id="disp-cart-subtotal" data-alias="disp-drawer-subtotal" class="font-mono font-bold text-white">0 đ</span>
                     </div>
                     <div class="flex justify-between text-slate-400">
                         <span>Trợ Giá Ship (Ước Tính):</span>
@@ -698,7 +698,7 @@
                     </div>
                     <div class="pt-1.5 border-t border-slate-800 flex justify-between items-center text-xs">
                         <span class="font-bold text-white">Tổng Tạm Tính:</span>
-                        <strong id="disp-drawer-final-total" class="font-mono font-black text-amber-400 text-sm">0 đ</strong>
+                        <strong id="disp-cart-final-total" data-alias="disp-drawer-final-total" class="font-mono font-black text-amber-400 text-sm">0 đ</strong>
                     </div>
                 </div>
 
@@ -767,8 +767,17 @@
                             <input type="tel" 
                                    id="chk-customer-phone" 
                                    maxlength="11" 
+                                   oninput="D2CStoreFrontController.onPhoneInput(this.value)"
                                    placeholder="09xx xxx xxx" 
                                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500 transition">
+                        </div>
+                    </div>
+                    <!-- BANNER KHÁCH VIP AUTO-CONFIRM TỰ ĐỘNG HIỆN KHI NHẬP SĐT VIP -->
+                    <div id="box-vip-status-banner" class="hidden p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-semibold flex items-center gap-2 mt-1 animate-in fade-in duration-200">
+                        <i class="fa-solid fa-crown text-amber-400 text-sm shrink-0"></i>
+                        <div class="min-w-0">
+                            <span id="txt-vip-status-title" class="font-bold text-amber-300 block">✨ Khách Hàng Thân Thiết VIP</span>
+                            <span id="txt-vip-status-msg" class="text-[9.5px] text-amber-200/80 block">Đơn hàng được Bếp AUTO-CONFIRM &amp; Nấu Ngay không cần gọi xác nhận!</span>
                         </div>
                     </div>
                 </div>
@@ -785,6 +794,14 @@
                                 class="px-2.5 py-1 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[10.5px] font-bold transition flex items-center gap-1 active:scale-95">
                             <i class="fa-solid fa-crosshairs"></i> Lấy Vị Trí Hiện Tại
                         </button>
+                    </div>
+
+                    <!-- CHỌN NHANH CỰ LY THỬ NGHIỆM CHUẨN DOD -->
+                    <div class="flex items-center gap-1.5 pt-0.5 pb-1 text-[10px] overflow-x-auto custom-scroll">
+                        <span class="text-slate-400 shrink-0 font-medium">Cự ly mẫu:</span>
+                        <button type="button" onclick="D2CStoreFrontController.setManualDistance(1.0, 'Nội ô Hòa Thành (1.0 km)')" class="px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 hover:text-amber-400 border border-slate-700 shrink-0 transition">1.0 km</button>
+                        <button type="button" onclick="D2CStoreFrontController.setManualDistance(3.0, 'Chợ Long Hoa (3.0 km)')" class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/40 font-bold shrink-0 transition">★ 3.0 km (Cước 15k)</button>
+                        <button type="button" onclick="D2CStoreFrontController.setManualDistance(5.0, 'Tòa Thánh Tây Ninh (5.0 km)')" class="px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 hover:text-amber-400 border border-slate-700 shrink-0 transition">5.0 km</button>
                     </div>
 
                     <!-- Ô NHẬP TỰ DO: HỖ TRỢ TÊN ĐƯỜNG, QUÁN XÁ, CÔNG TY, TRƯỜNG HỌC -->
@@ -916,11 +933,15 @@
                     </div>
                     <div class="flex justify-between text-slate-400 text-[11px]">
                         <span>Phí Giao Hàng:</span>
-                        <span id="chk-summary-shipping-fee" class="font-mono font-bold text-white">0 đ</span>
+                        <span id="disp-cart-shipping" data-alias="chk-summary-shipping-fee" class="font-mono font-bold text-white">0 đ</span>
                     </div>
                     <div class="flex justify-between text-emerald-400 text-[11px]">
                         <span>Trợ Giá Cước Giao Hàng:</span>
-                        <span id="chk-summary-subsidy" class="font-mono font-bold">-0 đ</span>
+                        <span id="disp-cart-subsidy" data-alias="chk-summary-subsidy" class="font-mono font-bold">-0 đ</span>
+                    </div>
+                    <div id="chk-summary-vip-discount-row" class="hidden flex justify-between text-amber-400 text-[11px]">
+                        <span>Ưu Đãi Hội Viên VIP:</span>
+                        <span id="chk-summary-vip-discount" class="font-mono font-bold">-0 đ</span>
                     </div>
                     <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-sm">
                         <span class="font-black text-white">TỔNG THANH TOÁN:</span>
@@ -960,6 +981,10 @@
                 <p class="text-xs text-slate-300 pt-1">
                     Đơn hàng của quý khách đang được Bếp Thím 5 chuẩn bị nóng hổi.
                 </p>
+                <div id="box-success-vip-badge" class="hidden p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 mt-1">
+                    <i class="fa-solid fa-crown text-amber-400"></i>
+                    <span>✨ Đơn hàng đã được AUTO-CONFIRM &amp; Bếp nấu ngay!</span>
+                </div>
             </div>
 
             <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-1 text-xs">
@@ -1021,6 +1046,8 @@
             shippingLocalWalkMeters: 300,      // Nạp động từ SYS_CONFIG: SHIPPING_LOCAL_WALK_METERS (< 300m = 0đ)
             freeshipMinSubtotal: 149000,       // Nạp động từ SYS_CONFIG: FREESHIP_MIN_SUBTOTAL
             maxShippingSubsidy: 20000,         // Nạp động từ SYS_CONFIG: MAX_SHIPPING_SUBSIDY
+            maxPromotionRate: 15,              // Nạp động từ SYS_CONFIG: MAX_PROMOTION_RATE (<= 15% doanh thu gộp)
+            masterPlatformFeePct: 5.0,         // Nạp động từ SYS_CONFIG: MASTER_PLATFORM_FEE_PCT (5% Master)
             activeSkin: "DEFAULT",
             metaPixelId: "",
             tiktokPixelId: "",
@@ -1044,6 +1071,8 @@
             shippingFee: 0,
             shippingSubsidy: 0,
             subsidyReason: "",
+            vipCustomer: null,
+            tierDiscountAmount: 0,
             selectedPaymentMethod: "COD",
             currentCustomizingDish: null,
             currentTaste: "Cay Nhẹ",
@@ -1199,6 +1228,14 @@
                         }
                         if (cfg.MAX_SHIPPING_SUBSIDY !== undefined) {
                             STORE_BASE_CONFIG.maxShippingSubsidy = Number(cfg.MAX_SHIPPING_SUBSIDY);
+                        }
+                        if (cfg.MAX_PROMOTION_RATE !== undefined) {
+                            STORE_BASE_CONFIG.maxPromotionRate = Number(cfg.MAX_PROMOTION_RATE);
+                        } else if (cfg.MAX_PROMO_CAP_PCT !== undefined) {
+                            STORE_BASE_CONFIG.maxPromotionRate = Number(cfg.MAX_PROMO_CAP_PCT);
+                        }
+                        if (cfg.MASTER_PLATFORM_FEE_PCT !== undefined) {
+                            STORE_BASE_CONFIG.masterPlatformFeePct = Number(cfg.MASTER_PLATFORM_FEE_PCT);
                         }
 
                         if (cfg.STORE_LATITUDE && cfg.STORE_LONGITUDE) {
@@ -2175,9 +2212,62 @@
         });
 
         /**
+         * CHỌN NHANH CỰ LY THỬ NGHIỆM CHUẨN DOD
+         */
+        function setManualDistance(km, label) {
+            appState.calculatedDistanceKm = Number(km);
+            var addrInput = document.getElementById("chk-customer-address");
+            if (addrInput) {
+                addrInput.value = label || (`Cự ly: ${km} km`);
+            }
+            recalculateShippingFee();
+        }
+
+        var phoneDebounceTimer = null;
+        function onPhoneInput(val) {
+            var phone = String(val || "").replace(/\D/g, '');
+            if (phoneDebounceTimer) clearTimeout(phoneDebounceTimer);
+            if (phone.length >= 10) {
+                phoneDebounceTimer = setTimeout(function() {
+                    checkCustomerCrmAndVip(phone);
+                }, 350);
+            } else {
+                var banner = document.getElementById("box-vip-status-banner");
+                if (banner) banner.classList.add("hidden");
+                appState.vipCustomer = null;
+                appState.tierDiscountAmount = 0;
+                recalculateShippingFee();
+            }
+        }
+
+        async function checkCustomerCrmAndVip(phone) {
+            try {
+                if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                    var res = await Thim5API.callGAS("lookupCustomerProfile", { phone: phone });
+                    if (res && res.status === "success" && res.data) {
+                        appState.vipCustomer = res.data;
+                        var banner = document.getElementById("box-vip-status-banner");
+                        var titleEl = document.getElementById("txt-vip-status-title");
+                        var msgEl = document.getElementById("txt-vip-status-msg");
+                        if (res.data.canAutoConfirm && banner) {
+                            banner.classList.remove("hidden");
+                            if (titleEl) titleEl.innerText = `✨ ${res.data.tierTitle} (${res.data.tasteName || 'Hội viên VIP'})`;
+                            if (msgEl) msgEl.innerText = `Đơn hàng được Bếp AUTO-CONFIRM & Nấu Ngay! (Giảm thêm ${res.data.tierDiscountPercent || 0}% VIP)`;
+                        } else if (banner) {
+                            banner.classList.add("hidden");
+                        }
+                        recalculateShippingFee();
+                    }
+                }
+            } catch (err) {
+                console.warn("⚠️ [CRM] Không thể tra cứu hội viên:", err);
+            }
+        }
+
+        /**
          * TÍNH TOÁN CƯỚC SHIP ĐỘNG THUẦN KHIẾT TỪ SYS_CONFIG
          * QUY TẮC CỐT TỬ: CỰ LY < 300m (0.3km) = 0đ (TẠI QUÁN / ĐI BỘ)
-         * CỰ LY >= 300m: TÍNH THEO ĐƠN GIÁ ĐỘNG (VD: 5.000đ/km) LÀM TRÒN MỐC 0.5KM
+         * CỰ LY >= 300m: TÍNH THEO ĐƠN GIÁ ĐỘNG (VD: 5.000đ/km) LÀM TRÒN LÊN
          */
         function recalculateShippingFee() {
             var dist = (appState.calculatedDistanceKm !== undefined && appState.calculatedDistanceKm !== null) 
@@ -2185,7 +2275,7 @@
                        : 1.8;
 
             var walkThresholdKm = (Number(STORE_BASE_CONFIG.shippingLocalWalkMeters) || 300) / 1000;
-            var billedDist = Math.ceil(dist * 2) / 2;
+            var billedDist = Math.max(1, Math.ceil(dist));
             appState.billedDistanceKm = billedDist;
 
             var ratePerKm = Number(STORE_BASE_CONFIG.shippingRateCustomerPerKm) || 5000;
@@ -2201,7 +2291,6 @@
                 reason = "Miễn phí tại quán (< 300m)";
             } else {
                 calcFee = Math.max(minCustomerFee, Math.round(billedDist * ratePerKm));
-                calcFee = Math.ceil(calcFee / 1000) * 1000;
 
                 var subtotal = 0;
                 var hasHighMarginItem = false;
@@ -2218,17 +2307,44 @@
                 var freeshipThreshold = Number(STORE_BASE_CONFIG.freeshipMinSubtotal) || 149000;
                 var maxSubsidy = Number(STORE_BASE_CONFIG.maxShippingSubsidy) || 20000;
 
-                if (billedDist >= 4.0 && (subtotal >= freeshipThreshold || (subtotal >= 110000 && hasHighMarginItem))) {
+                if (subtotal >= freeshipThreshold && subtotal > 0) {
+                    sub = Math.min(calcFee, maxSubsidy);
+                    reason = "Freeship đơn từ " + (freeshipThreshold / 1000) + "k";
+                } else if (billedDist >= 4.0 && (subtotal >= 110000 && hasHighMarginItem)) {
                     sub = Math.min(calcFee, Math.min(15000, maxSubsidy));
                     reason = "Hỗ trợ đơn xa > 4km";
                 } else if (billedDist >= 3.5 && subtotal >= 120000) {
                     sub = Math.min(calcFee, Math.min(10000, maxSubsidy));
                     reason = "Hỗ trợ đơn xa > 3.5km";
-                } else if (subtotal >= 89000) {
-                    sub = Math.min(calcFee, Math.min(5000, maxSubsidy));
-                    reason = "Ưu đãi đơn từ 89k";
                 }
             }
+
+            // KHÓA CỨNG TRẦN KHUYẾN MÃI TOÀN ĐƠN <= 15% DOANH THU GỘP (SYS_CONFIG)
+            var subtotalAmount = 0;
+            appState.cartItems.forEach(function(i) { if (!i.isGift) subtotalAmount += (i.price * i.quantity); });
+            var maxPromoPct = Number(STORE_BASE_CONFIG.maxPromotionRate) || 15;
+            var maxAllowedPromo = subtotalAmount > 0 ? Math.round(subtotalAmount * (maxPromoPct / 100)) : 0;
+
+            // Tính ưu đãi VIP Hội viên nếu có
+            var vipDiscount = 0;
+            if (appState.vipCustomer && appState.vipCustomer.tierDiscountPercent > 0 && subtotalAmount > 0) {
+                vipDiscount = Math.round(subtotalAmount * (Number(appState.vipCustomer.tierDiscountPercent) / 100));
+            }
+
+            var totalPromo = sub + vipDiscount;
+            if (totalPromo > maxAllowedPromo) {
+                var excess = totalPromo - maxAllowedPromo;
+                if (sub >= excess) {
+                    sub -= excess;
+                } else {
+                    excess -= sub;
+                    sub = 0;
+                    vipDiscount = Math.max(0, vipDiscount - excess);
+                }
+                reason = (reason ? reason + " • " : "") + "Khóa trần KM " + maxPromoPct + "%";
+            }
+
+            appState.tierDiscountAmount = vipDiscount;
 
             var custPayShip = Math.max(0, calcFee - sub);
 
@@ -2272,18 +2388,30 @@
 
             var fee = Number(appState.shippingFee) || 0;
             var sub = Number(appState.shippingSubsidy) || 0;
+            var vipDisc = Number(appState.tierDiscountAmount) || 0;
             var actualShip = Math.max(0, fee - sub);
-            var finalTotal = subtotal + actualShip;
+            var finalTotal = Math.max(0, subtotal - vipDisc) + actualShip;
 
             var elSub = document.getElementById("chk-summary-subtotal");
             var elFee = document.getElementById("chk-summary-shipping-fee");
             var elSubTag = document.getElementById("chk-summary-subsidy");
             var elFinal = document.getElementById("chk-summary-final-total");
+            var elVipRow = document.getElementById("chk-summary-vip-discount-row");
+            var elVipDisc = document.getElementById("chk-summary-vip-discount");
 
             if (elSub) elSub.innerText = subtotal.toLocaleString("vi-VN") + " đ";
             if (elFee) elFee.innerText = fee.toLocaleString("vi-VN") + " đ";
             if (elSubTag) elSubTag.innerText = sub > 0 ? ("-" + sub.toLocaleString("vi-VN") + " đ" + (appState.subsidyReason ? " (" + appState.subsidyReason + ")" : "")) : "-0 đ";
             if (elFinal) elFinal.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
+
+            if (elVipRow && elVipDisc) {
+                if (vipDisc > 0) {
+                    elVipRow.classList.remove("hidden");
+                    elVipDisc.innerText = "-" + vipDisc.toLocaleString("vi-VN") + " đ (" + (appState.vipCustomer ? appState.vipCustomer.tierTitle : "VIP") + ")";
+                } else {
+                    elVipRow.classList.add("hidden");
+                }
+            }
 
             if (appState.selectedPaymentMethod === "VIETQR") {
                 renderDynamicVietQr(finalTotal);
@@ -2411,8 +2539,9 @@
                 if (!i.isGift) subtotal += (i.price * i.quantity);
             });
 
+            var vipDisc = Number(appState.tierDiscountAmount) || 0;
             var actualShip = Math.max(0, appState.shippingFee - appState.shippingSubsidy);
-            var finalTotal = subtotal + actualShip;
+            var finalTotal = Math.max(0, subtotal - vipDisc) + actualShip;
 
             var now = new Date();
             var yearStr = String(now.getFullYear()).slice(-2);
@@ -2453,6 +2582,9 @@
                 gift: appState.appliedGift,
                 giftName: appState.appliedGift ? appState.appliedGift.name : "",
                 subtotal: subtotal,
+                voucherDiscount: vipDisc,
+                tierDiscountAmount: vipDisc,
+                isVipAutoConfirmed: Boolean(appState.vipCustomer && appState.vipCustomer.canAutoConfirm),
                 distanceKm: appState.calculatedDistanceKm,
                 billedDistanceKm: appState.billedDistanceKm,
                 shippingFee: appState.shippingFee,
@@ -2498,11 +2630,22 @@
                 closeCheckoutModal();
                 var successModal = document.getElementById("modal-order-success");
                 var codeEl = document.getElementById("disp-success-order-code");
+                var vipBadge = document.getElementById("box-success-vip-badge");
+
                 if (codeEl) codeEl.innerText = orderCode;
+                if (vipBadge) {
+                    if (res.data && res.data.isVipAutoConfirmed) {
+                        vipBadge.classList.remove("hidden");
+                    } else {
+                        vipBadge.classList.add("hidden");
+                    }
+                }
                 if (successModal) successModal.classList.remove("hidden");
 
                 appState.cartItems = [];
                 appState.appliedGift = null;
+                appState.vipCustomer = null;
+                appState.tierDiscountAmount = 0;
                 updateAovAndCartUI();
 
             } catch (err) {
@@ -2551,6 +2694,8 @@
             onAovBarClick: onAovBarClick,
             openLuckyWheelModal: openLuckyWheelModal,
             detectCustomerGps: detectCustomerGps,
+            setManualDistance: setManualDistance,
+            onPhoneInput: onPhoneInput,
             onAddressInput: onAddressInput,
             onAddressFocus: onAddressFocus,
             selectSuggestedAddress: selectSuggestedAddress,

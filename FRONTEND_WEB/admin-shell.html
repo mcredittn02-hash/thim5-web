@@ -64,7 +64,7 @@
   <!-- ========================================================================= -->
   <!-- 1. MODAL XÁC THỰC QUYỀN TRUY CẬP 3 CẤP ĐỘ (#auth-modal-overlay)             -->
   <!-- ========================================================================= -->
-  <div id="auth-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4 transition-all duration-300 select-none">
+  <div id="auth-modal" data-alias="auth-modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4 transition-all duration-300 select-none">
     <div class="relative bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-7 space-y-5 animate-in zoom-in-95 duration-200">
       
       <!-- Tiêu đề & Biểu tượng vương miện hệ thống -->
@@ -215,12 +215,21 @@
               <span id="txt-store-status" class="tracking-tight">🟢 ĐANG MỞ CỬA</span>
           </button>
 
-          <!-- Nút Mở Menu Studio Master Độc Lập Trên Topbar -->
+                    <!-- Nút Mở Menu Studio Master Độc Lập Trên Topbar -->
           <a href="menu-manager.html" 
              target="_blank"
              class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md shadow-amber-500/10 transition active:scale-95">
               <i class="fa-solid fa-layer-group"></i>
               <span>Menu Studio Master</span>
+          </a>
+
+          <!-- Nút Mở System Test Suite Dashboard -->
+          <a href="system-test.html" 
+             target="_blank"
+             class="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 transition active:scale-95 shadow-sm"
+             title="Mở Bảng Điều Khiển Kiểm Thử Tự Động Toàn Hệ Thống">
+              <i class="fa-solid fa-microchip text-indigo-400"></i>
+              <span>Kiểm Thử System Test</span>
           </a>
 
           <!-- Huy Hiệu Quyền Hạn Đang Đăng Nhập -->
@@ -341,29 +350,34 @@
         
         <!-- Tab 1: Báo Cáo Tài Chính P&L (POS & Super Admin đều có quyền xem) -->
         <button type="button" 
-                data-tab="pl" 
+                id="btn-tab-pl" data-tab="pl" 
                 onclick="AdminShellController.switchMainTab('pl', this)" 
                 class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/10 active">
           <i class="fa-solid fa-chart-pie w-4 text-center text-sm"></i>
           <span class="truncate">Báo Cáo P&amp;L Dòng Tiền</span>
         </button>
 
-        <!-- Tab 2: MENU STUDIO MASTER STANDALONE (MỞ TRỰC TIẾP MENU-MANAGER.HTML) -->
-        <a href="menu-manager.html" 
-           target="_blank" 
-           class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl transition bg-slate-950 hover:bg-slate-800 text-amber-400 border border-amber-500/30 shadow-sm active:scale-95 group">
+        <!-- Tab 2: Quản Trị Thực Đơn & Reverse-Pricing (Nạp SPA Module tab-menu.html) -->
+        <button type="button" 
+                id="btn-tab-menu" data-tab="menu" 
+                onclick="AdminShellController.switchMainTab('menu', this)" 
+                class="sidebar-nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60 group">
           <div class="flex items-center gap-3">
-            <i class="fa-solid fa-utensils w-4 text-center text-sm text-amber-500 group-hover:rotate-12 transition-transform"></i>
-            <span class="truncate font-black tracking-wide">Menu Studio Master</span>
+            <i class="fa-solid fa-utensils w-4 text-center text-sm text-amber-400 group-hover:rotate-12 transition-transform"></i>
+            <span class="truncate font-bold">Thực Đơn &amp; Định Giá</span>
           </div>
-          <span class="flex items-center gap-1 text-[9.5px] font-mono px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <a href="menu-manager.html" 
+             target="_blank" 
+             onclick="event.stopPropagation()" 
+             title="Mở Menu Studio trong cửa sổ riêng" 
+             class="flex items-center gap-1 text-[9.5px] font-mono px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500 hover:text-slate-950 transition">
             <span>v3.5</span>
             <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-          </span>
-        </a>
+          </a>
+        </button>
 
         <!-- Tab 3: Mở Nhanh Trạm Bếp KDS -->
-        <a href="kitchen.html" 
+        <a id="btn-tab-orders" href="kitchen.html" 
            target="_blank" 
            class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-emerald-400 hover:bg-slate-800/60">
           <div class="flex items-center gap-3">
@@ -375,7 +389,7 @@
 
         <!-- Tab 4: Trạm Điều Phối Ship (Nạp SPA Module tab-shippers.html) -->
         <button type="button" 
-                data-tab="shippers" 
+                id="btn-tab-shippers" data-tab="shippers" 
                 onclick="AdminShellController.switchMainTab('shippers', this)" 
                 class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-slate-400 hover:text-white hover:bg-slate-800/60">
           <i class="fa-solid fa-motorcycle w-4 text-center text-sm text-sky-400"></i>
@@ -438,7 +452,7 @@
     <main class="flex-1 h-full overflow-y-auto custom-scroll bg-slate-950 p-2 sm:p-4">
       
       <!-- CỬA NẠP ĐỘNG DUY NHẤT CHO CÁC COMPONENT CON -->
-      <div id="dynamic-tab-outlet" class="w-full">
+      <div id="main-tab-content" data-alias="dynamic-tab-outlet" class="w-full">
         <div class="p-12 text-center text-slate-400 space-y-3">
           <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-400"></i>
           <p class="text-xs font-medium font-sans">Đang tải dữ liệu Báo Cáo P&amp;L Dòng Tiền...</p>
@@ -692,13 +706,22 @@
           var superNavGroup = document.getElementById("super-admin-nav-group");
           var sidebarRoleIndicator = document.getElementById("sidebar-role-indicator");
 
-          if (currentRole === "SUPER_ADMIN") {
-            if (roleBadgeText) roleBadgeText.innerText = "SUPER ADMIN";
+          var isSuperAdmin = (currentRole === "SUPER_ADMIN" || currentRole === "SUPER_ADMIN_LV3");
+          var isKitchen = (currentRole === "KITCHEN_LEAD" || currentRole === "KITCHEN_LV1");
+          var isTenantAdmin = (currentRole === "TENANT_ADMIN");
+
+          if (isSuperAdmin) {
+            if (roleBadgeText) roleBadgeText.innerText = "SUPER ADMIN (LV3)";
             if (roleBadgeBox) roleBadgeBox.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30";
             if (superNavGroup) superNavGroup.classList.remove("hidden");
             if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "SUPER_ADMIN";
-          } else if (currentRole === "KITCHEN_LEAD") {
-            if (roleBadgeText) roleBadgeText.innerText = "TRƯỞNG CA BẾP";
+          } else if (isTenantAdmin) {
+            if (roleBadgeText) roleBadgeText.innerText = "CHỦ QUÁN (TENANT)";
+            if (roleBadgeBox) roleBadgeBox.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20";
+            if (superNavGroup) superNavGroup.classList.add("hidden");
+            if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "TENANT_ADMIN";
+          } else if (isKitchen) {
+            if (roleBadgeText) roleBadgeText.innerText = "TRƯỞNG CA BẾP (LV1)";
             if (roleBadgeBox) roleBadgeBox.className = "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20";
             if (superNavGroup) superNavGroup.classList.add("hidden");
             if (sidebarRoleIndicator) sidebarRoleIndicator.innerText = "KITCHEN_LEAD";
@@ -741,7 +764,8 @@
        * Nâng cấp: Dynamic Path Fallback Resolver (tương thích Live Server port 5500 & Production)
        */
       async function switchMainTab(tabKey, btnElement) {
-        if (tabKey === "config" && currentRole !== "SUPER_ADMIN") {
+        var isSuperAdmin = (currentRole === "SUPER_ADMIN" || currentRole === "SUPER_ADMIN_LV3");
+        if (tabKey === "config" && !isSuperAdmin) {
           alert("⛔ TỪ CHỐI TRUY CẬP: Phân hệ Cấu Hình Toàn Hệ Thống chỉ dành riêng cho Super Admin!");
           return;
         }
@@ -841,6 +865,24 @@
             window.TabConfigController.init();
           } else if (tabKey === "campaign" && window.TabCampaignController && typeof window.TabCampaignController.init === "function") {
             window.TabCampaignController.init();
+          } else if (tabKey === "menu") {
+            if (window.TabMenuController && typeof window.TabMenuController.init === "function") {
+              window.TabMenuController.init();
+            } else {
+              // Tự động nạp động tab-menu.js dự phòng nếu chưa có trong DOM
+              var menuScriptId = "script-tab-menu-runtime";
+              if (!document.getElementById(menuScriptId)) {
+                var scriptEl = document.createElement("script");
+                scriptEl.id = menuScriptId;
+                scriptEl.src = "tab-menu.js?v=" + Date.now();
+                scriptEl.onload = function() {
+                  if (window.TabMenuController && typeof window.TabMenuController.init === "function") {
+                    window.TabMenuController.init();
+                  }
+                };
+                document.body.appendChild(scriptEl);
+              }
+            }
           }
         } catch (initErr) {
           console.warn("Lỗi khởi tạo Controller tab " + tabKey + ":", initErr);
@@ -854,6 +896,7 @@
         if (!container) return;
 
         var tabTitles = {
+          "menu": "Bàn Điều Khiển Thực Đơn Menu Studio",
           "pl": "Báo Cáo Tài Chính P&L & Dòng Tiền",
           "shippers": "Trạm Điều Phối Đội Xe & Shipper",
           "campaign": "Trung Tâm Chiến Dịch Geo-Fencing & Voucher",
@@ -1218,10 +1261,11 @@
   </script>
 
   <!-- ========================================================================= -->
-  <!-- 7. NẠP BỘ ĐÔI THƯ VIỆN ĐIỀU PHỐI DỮ LIỆU CHUẨN SSOT TẬP TRUNG             -->
+  <!-- 7. NẠP BỘ THƯ VIỆN ĐIỀU PHỐI DỮ LIỆU CHUẨN SSOT & MODULES CONTROLLERS     -->
   <!-- ========================================================================= -->
-  <script src="thim5-master-dictionary.js?v=20261005"></script>
-  <script src="api.js?v=20261005"></script>
+  <script src="thim5-master-dictionary.js?v=20261016"></script>
+  <script src="api.js?v=20261016"></script>
+  <script src="tab-menu.js?v=20261016"></script>
 
 </body>
 </html>
