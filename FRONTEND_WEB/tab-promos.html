@@ -41,6 +41,24 @@
     </div>
   </div>
 
+  <!-- Quick Campaign Presets -->
+  <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-bold text-slate-700">⚡ Tạo Nhanh Theo Mẫu Chuẩn:</span>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+      <button type="button" onclick="TabPromosController.applyPreset('SOLO')" class="px-3 py-1.5 bg-white hover:bg-amber-50 text-amber-700 border border-amber-300 rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+        <span>🥣 Combo Đơn Lẻ 1+1+1 (-35% Ship + Topping)</span>
+      </button>
+      <button type="button" onclick="TabPromosController.applyPreset('GROUP')" class="px-3 py-1.5 bg-white hover:bg-blue-50 text-blue-700 border border-blue-300 rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+        <span>👨‍👩‍👧 Combo Nhóm 2-3 Người (-70% Ship + Nước)</span>
+      </button>
+      <button type="button" onclick="TabPromosController.applyPreset('FREESHIP')" class="px-3 py-1.5 bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+        <span>🚀 Đại Tiệc Freeship 100% (+ Combo Quà)</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Campaigns Grid Container -->
   <div id="campaigns-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
     <div class="col-span-full py-12 text-center text-slate-400">
@@ -293,6 +311,47 @@ window.TabPromosController = {
       window.AdminShellController.callBackend(payload, function() {
         if (window.AdminShellController.showToast) window.AdminShellController.showToast("Đã đổi trạng thái " + campId + " -> " + newStatus, "success");
       });
+    }
+  },
+
+  applyPreset: function(key) {
+    this.openEditor();
+    if (key === 'SOLO') {
+      document.getElementById("inp-camp-name").value = "Combo Đơn Lẻ 1+1+1 (Trợ Giá Ship)";
+      document.getElementById("inp-camp-min-mains").value = 1;
+      document.getElementById("inp-camp-min-toppings").value = 1;
+      document.getElementById("inp-camp-min-drinks").value = 1;
+      document.getElementById("inp-camp-min-subtotal").value = 60000;
+      document.getElementById("inp-camp-profit-floor").value = 15000;
+      document.getElementById("inp-camp-ship-disc-pct").value = 35;
+      document.getElementById("inp-camp-max-ship-disc").value = 10000;
+      document.getElementById("sel-camp-gift-type").value = "TOPPING";
+      document.getElementById("inp-camp-gift-desc").value = "Tặng 1 Topping Trứng Cút / Thịt Thêm";
+      document.getElementById("inp-camp-gift-max-price").value = 5000;
+    } else if (key === 'GROUP') {
+      document.getElementById("inp-camp-name").value = "Combo Nhóm 2-3 Người (Tiết Kiệm)";
+      document.getElementById("inp-camp-min-mains").value = 2;
+      document.getElementById("inp-camp-min-toppings").value = 2;
+      document.getElementById("inp-camp-min-drinks").value = 2;
+      document.getElementById("inp-camp-min-subtotal").value = 120000;
+      document.getElementById("inp-camp-profit-floor").value = 25000;
+      document.getElementById("inp-camp-ship-disc-pct").value = 70;
+      document.getElementById("inp-camp-max-ship-disc").value = 20000;
+      document.getElementById("sel-camp-gift-type").value = "DRINK_AND_TOPPING";
+      document.getElementById("inp-camp-gift-desc").value = "Tặng Combo Nước Sâm & Topping";
+      document.getElementById("inp-camp-gift-max-price").value = 10000;
+    } else if (key === 'FREESHIP') {
+      document.getElementById("inp-camp-name").value = "Đại Tiệc Freeship 100% + Quà Tặng";
+      document.getElementById("inp-camp-min-mains").value = 3;
+      document.getElementById("inp-camp-min-toppings").value = 2;
+      document.getElementById("inp-camp-min-drinks").value = 2;
+      document.getElementById("inp-camp-min-subtotal").value = 180000;
+      document.getElementById("inp-camp-profit-floor").value = 35000;
+      document.getElementById("inp-camp-ship-disc-pct").value = 100;
+      document.getElementById("inp-camp-max-ship-disc").value = 35000;
+      document.getElementById("sel-camp-gift-type").value = "DRINK_AND_TOPPING";
+      document.getElementById("inp-camp-gift-desc").value = "Tặng 2 Trà Đào Cam Sả Đặc Biệt";
+      document.getElementById("inp-camp-gift-max-price").value = 15000;
     }
   },
 

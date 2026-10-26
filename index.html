@@ -1,0 +1,2884 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mì Trộn Thím 5 • Đặt Món Trực Tiếp D2C</title>
+    
+    <!-- PWA Metadata & Favicon -->
+    <meta name="theme-color" content="#020617">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Thím 5 Food">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍜</text></svg>">
+
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['monospace']
+                    },
+                    colors: {
+                        brand: {
+                            primary: 'var(--brand-primary)',
+                            secondary: 'var(--brand-secondary)',
+                            accent: 'var(--brand-accent)',
+                            bg: 'var(--brand-bg)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- ========================================================================= -->
+    <!-- MARKETING TRACKING ENGINE: GOOGLE ANALYTICS 4, META PIXEL & TIKTOK PIXEL  -->
+    <!-- Nạp bất đồng bộ (Non-blocking), tự động nhận diện ID từ cấu hình hệ thống -->
+    <!-- ========================================================================= -->
+    <script>
+        (function() {
+            var cachedCfg = {};
+            try {
+                cachedCfg = JSON.parse(localStorage.getItem("T5_CACHED_CONFIG") || "{}");
+            } catch(e) {}
+
+            // 1. Google Analytics 4 (GA4)
+            var ga4Id = cachedCfg.GA4_MEASUREMENT_ID || "G-XXXXXXXXXX";
+            if (ga4Id && ga4Id !== "G-XXXXXXXXXX") {
+                var gaScript = document.createElement("script");
+                gaScript.async = true;
+                gaScript.src = "https://www.googletagmanager.com/gtag/js?id=" + ga4Id;
+                document.head.appendChild(gaScript);
+
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                window.gtag = gtag;
+                gtag('js', new Date());
+                gtag('config', ga4Id);
+            }
+
+            // 2. Meta Pixel (Facebook Ads)
+            var metaId = cachedCfg.META_PIXEL_ID || "XXXXXXXXXXXXXXXX";
+            if (metaId && metaId !== "XXXXXXXXXXXXXXXX") {
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', metaId);
+                fbq('track', 'PageView');
+            }
+
+            // 3. TikTok Pixel
+            var tiktokId = cachedCfg.TIKTOK_PIXEL_ID || "XXXXXXXXXXXXXXXX";
+            if (tiktokId && tiktokId !== "XXXXXXXXXXXXXXXX") {
+                !function (w, d, t) {
+                  w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+                  ttq.load(tiktokId);
+                  ttq.page();
+                }(window, document, 'ttq');
+            }
+        })();
+    </script>
+
+    <!-- ========================================================================= -->
+    <!-- DYNAMIC SEASONAL THEME ENGINE: CSS BIẾN MÀU THEO MÙA LỄ HỘI              -->
+    <!-- ========================================================================= -->
+    <style>
+        :root {
+            /* MẶC ĐỊNH: Đất Thánh Thím 5 (Đỏ - Cam - Hổ Phách) */
+            --brand-primary: #f59e0b;
+            --brand-secondary: #dc2626;
+            --brand-accent: #10b981;
+            --brand-bg: #020617;
+            --brand-gradient: linear-gradient(135deg, #dc2626, #ea580c, #f59e0b);
+            --brand-badge-bg: rgba(245, 158, 11, 0.1);
+            --brand-badge-border: rgba(245, 158, 11, 0.3);
+            --brand-badge-text: #fbbf24;
+        }
+
+        /* SKIN: HALLOWEEN (Cam Bí Ngô & Tím Huyền Bí) */
+        html.skin-halloween {
+            --brand-primary: #f97316;
+            --brand-secondary: #9333ea;
+            --brand-accent: #a855f7;
+            --brand-bg: #090314;
+            --brand-gradient: linear-gradient(135deg, #7e22ce, #c2410c, #ea580c);
+            --brand-badge-bg: rgba(249, 115, 22, 0.15);
+            --brand-badge-border: rgba(168, 85, 247, 0.4);
+            --brand-badge-text: #fb923c;
+        }
+
+        /* SKIN: GIÁNG SINH / NOEL (Đỏ Tuyết & Xanh Thông) */
+        html.skin-xmas {
+            --brand-primary: #ef4444;
+            --brand-secondary: #059669;
+            --brand-accent: #38bdf8;
+            --brand-bg: #02120e;
+            --brand-gradient: linear-gradient(135deg, #dc2626, #16a34a, #059669);
+            --brand-badge-bg: rgba(239, 68, 68, 0.15);
+            --brand-badge-border: rgba(5, 150, 105, 0.4);
+            --brand-badge-text: #f87171;
+        }
+
+        /* SKIN: TẾT NGUYÊN ĐÁN (Đỏ May Mắn & Vàng Hoàng Kim) */
+        html.skin-tet {
+            --brand-primary: #eab308;
+            --brand-secondary: #b91c1c;
+            --brand-accent: #fbbf24;
+            --brand-bg: #150204;
+            --brand-gradient: linear-gradient(135deg, #991b1b, #dc2626, #eab308);
+            --brand-badge-bg: rgba(234, 179, 8, 0.15);
+            --brand-badge-border: rgba(220, 38, 38, 0.5);
+            --brand-badge-text: #fde047;
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+        body { 
+            background-color: var(--brand-bg); 
+            color: #f8fafc; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            transition: background-color 0.4s ease;
+        }
+        .custom-scroll::-webkit-scrollbar { display: none; }
+        .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
+    <!-- ========================================================================= -->
+    <!-- 1. HEADER NHẬN DIỆN THƯƠNG HIỆU & LIÊN HỆ HOTLINE ĐỘNG                    -->
+    <!-- ========================================================================= -->
+    <header class="w-full bg-slate-950/95 border-b border-slate-800/80 sticky top-0 z-40 backdrop-blur-md px-3 sm:px-4 py-2.5">
+        <div class="max-w-md mx-auto flex items-center justify-between gap-2">
+            
+            <!-- Cụm Logo / Avatar & Tên Quán -->
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div id="store-logo-wrapper" class="relative shrink-0">
+                    <img id="disp-store-logo-img" src="" alt="Logo Thím 5" class="hidden w-10 h-10 rounded-2xl object-cover border-2 border-amber-500/50 shadow-md shadow-amber-500/10">
+                    <div id="disp-store-logo-badge" class="w-10 h-10 rounded-2xl bg-gradient-to-br from-red-600 to-amber-600 border border-amber-400/40 flex items-center justify-center text-white font-black text-sm shadow-md font-mono">
+                        T5
+                    </div>
+                    <span id="disp-store-status-dot" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-950"></span>
+                </div>
+
+                <div class="min-w-0">
+                    <h1 id="disp-store-name" class="text-sm font-black text-white tracking-wide truncate uppercase">
+                        Mì Trộn Thím 5
+                    </h1>
+                    <div class="flex items-center gap-1.5 text-[10.5px]">
+                        <span id="disp-store-status-text" class="text-emerald-400 font-bold flex items-center gap-1 truncate">
+                            <i class="fa-solid fa-circle text-[6px] animate-pulse"></i> Đang Nhận Đơn Nóng Hổi
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cụm Nút Bấm: Ghim App & Hotline (Đồng bộ cấu hình động) -->
+            <div class="shrink-0 flex items-center gap-1.5">
+                <button type="button" 
+                        id="btn-install-pwa" 
+                        onclick="D2CStoreFrontController.handleInstallPwaClick()" 
+                        class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold shadow-sm transition active:scale-95">
+                    <i class="fa-solid fa-arrow-down-to-bracket text-xs text-amber-400"></i>
+                    <span>Ghim App</span>
+                </button>
+
+                <a id="link-store-phone" href="tel:0934220585" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-white text-xs font-mono font-bold shadow-sm transition active:scale-95 group">
+                    <span class="w-5 h-5 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-[10px] group-hover:bg-red-500 group-hover:text-white transition">
+                        <i class="fa-solid fa-phone"></i>
+                    </span>
+                    <span id="disp-store-phone" class="tracking-tight text-slate-200 group-hover:text-amber-300 transition">0934.220.585</span>
+                </a>
+            </div>
+
+        </div>
+    </header>
+    
+    <!-- ========================================================================= -->
+    <!-- 2. HERO BANNER CAROUSEL ĐỘNG (TỰ ĐỘNG CHẠY TẤT CẢ MÓN TRONG MENU)          -->
+    <!-- ========================================================================= -->
+    <section id="hero-banner-section" class="relative w-full max-w-5xl mx-auto px-3 sm:px-4 pt-3 pb-2 select-none">
+        
+        <div id="carousel-viewport" class="relative w-full overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl aspect-[16/9] sm:aspect-[21/9] md:aspect-[24/9] flex items-center">
+            
+            <div id="carousel-track" class="flex h-full w-full transition-transform duration-500 ease-out">
+                <div class="relative flex-shrink-0 w-full h-full bg-slate-950 flex flex-col items-center justify-center gap-2 text-slate-500 text-xs font-bold">
+                    <i class="fa-solid fa-circle-notch fa-spin text-amber-400 text-base"></i>
+                    <span>Đang tải thực đơn Bếp Thím 5...</span>
+                </div>
+            </div>
+
+            <!-- Cụm Nút Điều Hướng Trái / Phải -->
+            <button type="button" 
+                    onclick="D2CStoreFrontController.prevSlide()" 
+                    aria-label="Slide Trước"
+                    class="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-slate-950/70 hover:bg-slate-900 text-slate-300 hover:text-white border border-slate-700/80 backdrop-blur-md flex items-center justify-center transition active:scale-90 z-20 shadow-lg">
+                <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+
+            <button type="button" 
+                    onclick="D2CStoreFrontController.nextSlide()" 
+                    aria-label="Slide Sau"
+                    class="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-slate-950/70 hover:bg-slate-900 text-slate-300 hover:text-white border border-slate-700/80 backdrop-blur-md flex items-center justify-center transition active:scale-90 z-20 shadow-lg">
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+
+            <!-- Thanh Chấm Điều Hướng Phân Trang -->
+            <div id="carousel-dots" class="absolute bottom-2.5 sm:bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 bg-slate-950/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-slate-800/80">
+            </div>
+
+        </div>
+
+    </section>
+    <!-- ========================================================================= -->
+    <!-- 3. THANH TÌM KIẾM MÓN ĂN & BỘ LỌC DANH MỤC MA TRẬN ĐA NGÀNH HÀNG         -->
+    <!-- ========================================================================= -->
+    <section class="w-full max-w-md mx-auto px-3 pt-3 space-y-2.5">
+        
+        <!-- Ô Tìm Kiếm Nhanh -->
+        <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+            </span>
+            <input type="text" 
+                   id="inp-search-dish" 
+                   placeholder="Tìm tô mì trộn tóp mỡ, cơm sườn bò viên hay trà đào..." 
+                   oninput="D2CStoreFrontController.onSearchInput(this.value)"
+                   class="w-full bg-slate-900 border border-slate-800 rounded-2xl pl-9 pr-8 py-2.5 text-xs text-slate-100 placeholder-slate-500 font-medium focus:outline-none focus:border-amber-500/80 transition shadow-inner">
+            <button type="button" 
+                    id="btn-clear-search" 
+                    onclick="D2CStoreFrontController.clearSearch()" 
+                    class="hidden absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300">
+                <i class="fa-solid fa-circle-xmark text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Thanh Trượt Bộ Lọc Danh Mục Ngang -->
+        <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll pb-1 -mx-3 px-3 select-none" id="categories-filter-bar">
+            <button type="button" 
+                    data-cat="all" 
+                    onclick="D2CStoreFrontController.filterCategory('all', this)" 
+                    class="cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-sm active">
+                <i class="fa-solid fa-fire text-xs"></i>
+                <span>Tất Cả Món</span>
+            </button>
+
+            <button type="button" 
+                    data-cat="cơm" 
+                    onclick="D2CStoreFrontController.filterCategory('cơm', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-bowl-rice text-xs text-amber-400"></i>
+                <span>Món Cơm</span>
+            </button>
+
+            <button type="button" 
+                    data-cat="combo" 
+                    onclick="D2CStoreFrontController.filterCategory('combo', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-crown text-xs text-amber-400"></i>
+                <span>Combo Đại Tiệc</span>
+            </button>
+
+            <button type="button" 
+                    data-cat="kho" 
+                    onclick="D2CStoreFrontController.filterCategory('kho', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-bowl-food text-xs text-red-400"></i>
+                <span>Mì Trộn (Khô)</span>
+            </button>
+
+            <button type="button" 
+                    data-cat="nuoc" 
+                    onclick="D2CStoreFrontController.filterCategory('nuoc', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-spoon text-xs text-sky-400"></i>
+                <span>Món Nước Súp</span>
+            </button>
+
+            <button type="button" 
+                    data-cat="an-kem" 
+                    onclick="D2CStoreFrontController.filterCategory('an-kem', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-cookie-bite text-xs text-amber-400"></i>
+                <span>Ăn Kèm &amp; Topping</span>
+            </button>
+
+            <button type="button" 
+                    data-cat="giai-khat" 
+                    onclick="D2CStoreFrontController.filterCategory('giai-khat', this)" 
+                    class="cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-bottle-water text-xs text-emerald-400"></i>
+                <span>Giải Khát (1L)</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 4. KHU VỰC MENU GRID HIỂN THỊ DANH SÁCH MÓN ĂN THỰC TẾ (13 CỘT REVERSE)   -->
+    <!-- ========================================================================= -->
+    <main class="w-full max-w-md mx-auto px-3 pt-2 pb-28 space-y-3">
+        
+        <div class="flex items-center justify-between pt-1">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-utensils text-amber-400"></i> Danh Sách Món Đang Phục Vụ
+            </h3>
+            <span id="disp-dish-count-label" class="text-[10px] font-mono text-slate-400 font-bold bg-slate-900 px-2 py-0.5 rounded-full border border-slate-800">
+                0 món
+            </span>
+        </div>
+
+        <!-- Khung Chứa Menu Thực Đơn -->
+        <div id="dish-menu-grid" class="grid grid-cols-1 gap-2.5">
+            <div class="p-8 text-center text-slate-500 space-y-2 col-span-full">
+                <i class="fa-solid fa-circle-notch fa-spin text-amber-400 text-xl"></i>
+                <p class="text-xs font-medium">Đang nạp thực đơn Bếp Thím 5...</p>
+            </div>
+        </div>
+
+    </main>
+    <!-- ========================================================================= -->
+    <!-- 5. MODAL TÙY CHỌN MÓN ĐA NĂNG (TÁCH BIỆT MÌ TRỘN CAY VS MÓN CƠM NƯỚC CHẤM) -->
+    <!-- ========================================================================= -->
+    <div id="modal-dish-customizer" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/85 backdrop-blur-md p-0 sm:p-4 select-none">
+        
+        <div class="bg-slate-900 border-t sm:border-2 border-slate-800 sm:border-amber-500/40 w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] animate-in slide-in-from-bottom-5 duration-200">
+            
+            <!-- Header Modal Tùy Chọn Món -->
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/70 shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <img id="cust-dish-img" src="" alt="Món Ăn" class="w-12 h-12 rounded-2xl object-cover border border-slate-700 shrink-0 shadow-md">
+                    <div class="min-w-0">
+                        <h4 id="cust-dish-name" class="text-sm font-black text-white truncate">Tên Món Ăn</h4>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span id="cust-dish-base-price" class="text-xs font-mono font-black text-amber-400">39.000 đ</span>
+                            <span id="cust-dish-app-price" class="text-[10px] font-mono text-slate-500 line-through hidden">45.000 đ</span>
+                            <span id="cust-dish-cat-badge" class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-400 border border-slate-700">Món Khô</span>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" 
+                        onclick="D2CStoreFrontController.closeCustomizerModal()" 
+                        class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center border border-slate-700 transition active:scale-90">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Thân Modal: Cuộn Nội Dung Tùy Chọn -->
+            <div class="p-4 space-y-4 overflow-y-auto custom-scroll text-xs">
+                
+                <!-- KHỐI 1: KHẨU VỊ CAY SA TẾ (DÀNH CHO MÌ TRỘN & MÓN NƯỚC, ẨN VỚI MÓN CƠM/NƯỚC UỐNG) -->
+                <div id="box-taste-selector" class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
+                            <i class="fa-solid fa-pepper-hot text-red-500"></i> Khẩu Vị Cay Sa Tế:
+                        </label>
+                        <span class="text-[9.5px] font-mono text-amber-400 font-bold bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
+                            Bắt buộc
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2">
+                        <!-- Tùy chọn: Không Cay -->
+                        <button type="button" 
+                                data-taste="Không Cay" 
+                                onclick="D2CStoreFrontController.selectTaste('Không Cay', this)" 
+                                class="btn-taste-option p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-center transition flex flex-col items-center gap-1">
+                            <span class="text-base">🥣</span>
+                            <span class="font-bold text-[11px] text-slate-300">Không Cay</span>
+                        </button>
+
+                        <!-- Tùy chọn: Cay Nhẹ (MẶC ĐỊNH CHUẨN VỊ THÍM 5) -->
+                        <button type="button" 
+                                data-taste="Cay Nhẹ" 
+                                onclick="D2CStoreFrontController.selectTaste('Cay Nhẹ', this)" 
+                                class="btn-taste-option p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-center transition flex flex-col items-center gap-1 active">
+                            <span class="text-base">🌶️</span>
+                            <span class="font-black text-[11px] text-amber-300">Cay Nhẹ</span>
+                            <span class="text-[9px] text-amber-400/80 font-mono">Chuẩn vị</span>
+                        </button>
+
+                        <!-- Tùy chọn: Cay Xé Lưỡi -->
+                        <button type="button" 
+                                data-taste="Cay Xé Lưỡi" 
+                                onclick="D2CStoreFrontController.selectTaste('Cay Xé Lưỡi', this)" 
+                                class="btn-taste-option p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-center transition flex flex-col items-center gap-1">
+                            <span class="text-base">🔥</span>
+                            <span class="font-bold text-[11px] text-slate-300">Cay Xé Lưỡi</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KHỐI 2: CHỌN NƯỚC CHẤM ĐẤT THÁNH (DÀNH CHO MÓN CƠM - TƯƠNG DÃ TAY THU PHÍ 2.000đ) -->
+                <div id="box-sauce-selector" class="hidden space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
+                            <i class="fa-solid fa-jar text-amber-400"></i> Nước Chấm Đi Kèm:
+                        </label>
+                        <span class="text-[9.5px] font-mono text-amber-400 font-bold bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/20">
+                            Chọn 1 loại
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <!-- Tùy chọn: Nước Tương Dã Tay Đặc Chế Thím 5 (+2.000đ) -->
+                        <button type="button" 
+                                data-sauce="Nước Tương Ớt Tỏi Dã Tay" 
+                                data-sauce-fee="2000"
+                                onclick="D2CStoreFrontController.selectSauce('Nước Tương Ớt Tỏi Dã Tay', 2000, this)" 
+                                class="btn-sauce-option p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-left transition flex flex-col justify-between active">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-[11px] text-amber-300">Tương Tỏi Ớt Dã Tay</span>
+                                <i class="fa-solid fa-check text-xs text-amber-400 check-icon"></i>
+                            </div>
+                            <span class="text-[10px] font-mono font-bold text-emerald-400 mt-1">+2.000 đ (Đậm vị)</span>
+                        </button>
+
+                        <!-- Tùy chọn: Nước Tương Ngọt Không Cay (0đ) -->
+                        <button type="button" 
+                                data-sauce="Nước Tương Ngọt (Không Cay)" 
+                                data-sauce-fee="0"
+                                onclick="D2CStoreFrontController.selectSauce('Nước Tương Ngọt (Không Cay)', 0, this)" 
+                                class="btn-sauce-option p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-left transition flex flex-col justify-between">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-[11px] text-slate-300">Tương Ngọt Dịu</span>
+                                <i class="fa-solid fa-check text-xs text-amber-400 check-icon hidden"></i>
+                            </div>
+                            <span class="text-[10px] text-slate-500 mt-1">Miễn phí (0đ)</span>
+                        </button>
+
+                        <!-- Tùy chọn: Tương Ớt Chua Cay (0đ) -->
+                        <button type="button" 
+                                data-sauce="Tương Ớt Chua Cay" 
+                                data-sauce-fee="0"
+                                onclick="D2CStoreFrontController.selectSauce('Tương Ớt Chua Cay', 0, this)" 
+                                class="btn-sauce-option p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-left transition flex flex-col justify-between">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-[11px] text-slate-300">Tương Ớt Chua Cay</span>
+                                <i class="fa-solid fa-check text-xs text-amber-400 check-icon hidden"></i>
+                            </div>
+                            <span class="text-[10px] text-slate-500 mt-1">Miễn phí (0đ)</span>
+                        </button>
+
+                        <!-- Tùy chọn: Tương Cà (0đ) -->
+                        <button type="button" 
+                                data-sauce="Tương Cà Dịu Nhẹ" 
+                                data-sauce-fee="0"
+                                onclick="D2CStoreFrontController.selectSauce('Tương Cà Dịu Nhẹ', 0, this)" 
+                                class="btn-sauce-option p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-left transition flex flex-col justify-between">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-[11px] text-slate-300">Tương Cà Trẻ Em</span>
+                                <i class="fa-solid fa-check text-xs text-amber-400 check-icon hidden"></i>
+                            </div>
+                            <span class="text-[10px] text-slate-500 mt-1">Miễn phí (0đ)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KHỐI 3: BẢNG TOPPING CHỌN THÊM ĐỘC LẬP CÓ TÍNH TIỀN (TICKET BOOSTER) -->
+                <div id="box-topping-selector" class="space-y-2 pt-1 border-t border-slate-800/80">
+                    <div class="flex items-center justify-between">
+                        <label class="font-bold text-slate-200 flex items-center gap-1.5 text-xs">
+                            <i class="fa-solid fa-plus-circle text-emerald-400"></i> Thêm Topping Đậm Đà:
+                        </label>
+                        <span class="text-[10px] text-slate-400 font-mono">Chọn nhiều món</span>
+                    </div>
+
+                    <!-- Danh Sách Topping Thực Tế Độc Lập Được Nạp Tự Động Từ Backend -->
+                    <div class="grid grid-cols-1 gap-1.5" id="customizer-toppings-list">
+                        <!-- Render Toppings List Dynamically -->
+                    </div>
+                </div>
+
+                <!-- KHỐI 4: GHI CHÚ BẾP -->
+                <div class="space-y-1.5 pt-1 border-t border-slate-800/80">
+                    <label class="font-bold text-slate-300 text-[11px]">Ghi chú cho Bếp (Không bắt buộc):</label>
+                    <input type="text" 
+                           id="cust-dish-note" 
+                           placeholder="VD: Nhiều sốt trộn, hành phi để riêng, ít béo..." 
+                           class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition">
+                </div>
+
+            </div>
+
+            <!-- Footer Modal: Số Lượng & Nút Thêm Kèm Tổng Giá Động -->
+            <div class="p-3.5 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-3 shrink-0">
+                <!-- Tăng giảm số lượng -->
+                <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 gap-2">
+                    <button type="button" 
+                            onclick="D2CStoreFrontController.adjustCustomizerQty(-1)" 
+                            class="w-7 h-7 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 flex items-center justify-center font-bold transition active:scale-95">
+                        <i class="fa-solid fa-minus text-[10px]"></i>
+                    </button>
+                    <span id="cust-dish-qty" class="w-6 text-center font-mono font-bold text-xs text-white">1</span>
+                    <button type="button" 
+                            onclick="D2CStoreFrontController.adjustCustomizerQty(1)" 
+                            class="w-7 h-7 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 flex items-center justify-center font-bold transition active:scale-95">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                    </button>
+                </div>
+
+                <!-- Nút Xác Nhận Thêm Với Tổng Tiền Đã Cộng Topping & Nước Chấm -->
+                <button type="button" 
+                        onclick="D2CStoreFrontController.confirmAddToCart()" 
+                        class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-600 via-amber-600 to-amber-500 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-600/20 transition flex items-center justify-center gap-2 active:scale-95">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                    <span>Thêm Vào Giỏ • </span>
+                    <span id="cust-total-btn-price" class="font-mono">39.000 đ</span>
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+    <!-- ========================================================================= -->
+    <!-- 6. THANH KÉO AOV ĐỘNG STICKY (KÍCH THÍCH MỞ KHÓA VÒNG QUAY >= 79K)        -->
+    <!-- ========================================================================= -->
+    <div id="aov-booster-sticky-bar" class="fixed bottom-16 inset-x-0 z-30 px-3 pointer-events-none transition-all duration-300">
+        <div class="max-w-md mx-auto pointer-events-auto">
+            <div id="aov-bar-container" 
+                 onclick="D2CStoreFrontController.onAovBarClick()" 
+                 class="relative overflow-hidden bg-slate-900/95 border border-amber-500/30 rounded-2xl p-2.5 shadow-2xl backdrop-blur-md cursor-pointer group hover:border-amber-400 transition">
+                
+                <!-- Hiệu ứng hào quang khi giỏ hàng đạt mốc >= 79k -->
+                <div id="aov-glow-effect" class="hidden absolute inset-0 bg-gradient-to-r from-amber-500/20 via-emerald-500/20 to-amber-500/20 animate-pulse pointer-events-none"></div>
+
+                <div class="relative z-10 flex items-center justify-between gap-2.5">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div id="aov-icon-box" class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm font-black shadow-inner shrink-0 group-hover:rotate-45 transition duration-300">
+                            <i id="aov-icon-symbol" class="fa-solid fa-dharmachakra"></i>
+                        </div>
+
+                        <div class="min-w-0 space-y-0.5">
+                            <div class="flex items-center gap-1.5">
+                                <span id="aov-title-text" class="text-[11px] font-black uppercase tracking-wider text-amber-300 truncate">
+                                    Vòng Quay Thần Vị
+                                </span>
+                                <span id="aov-badge-status" class="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-extrabold bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
+                                    100% Trúng
+                                </span>
+                            </div>
+                            <p id="aov-desc-text" class="text-[10px] text-slate-300 font-medium leading-tight truncate">
+                                Thêm <strong class="text-amber-400 font-mono" id="txt-aov-gap-amount">79.000đ</strong> để nhận 1 lượt quay miễn phí!
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="shrink-0">
+                        <button type="button" 
+                                id="btn-aov-action" 
+                                class="px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-[10.5px] font-bold border border-slate-700 shadow transition flex items-center gap-1 group-hover:bg-amber-500 group-hover:text-slate-950 group-hover:border-amber-400">
+                            <span id="txt-aov-btn-label">Chi Tiết</span>
+                            <i class="fa-solid fa-chevron-right text-[8px]"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Thanh Track Tiến Trình Chạy Theo % Giỏ Hàng -->
+                <div class="w-full bg-slate-950 rounded-full h-1.5 mt-2 overflow-hidden border border-slate-800/80">
+                    <div id="aov-progress-fill" 
+                         class="bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-400 h-full rounded-full transition-all duration-500" 
+                         style="width: 0%;"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 7. THANH BOTTOM BAR GIỎ HÀNG NỔI (FLOATING CART BAR)                      -->
+    <!-- ========================================================================= -->
+    <div id="floating-cart-bar" class="hidden fixed bottom-0 inset-x-0 z-40 bg-slate-950/95 border-t border-slate-800 backdrop-blur-md px-3 py-2.5 transition-transform duration-200">
+        <div class="max-w-md mx-auto flex items-center justify-between gap-3">
+            
+            <div class="flex items-center gap-2.5 cursor-pointer" onclick="D2CStoreFrontController.openCartDrawer()">
+                <div class="relative w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base font-black shadow-inner">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                    <span id="badge-cart-total-qty" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-600 text-white text-[10px] font-mono font-black flex items-center justify-center border-2 border-slate-950 shadow">
+                        0
+                    </span>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-400 block font-medium">Tạm Tính Đơn Hàng:</span>
+                    <strong id="disp-bottom-cart-subtotal" class="text-sm font-mono font-black text-white">0 đ</strong>
+                </div>
+            </div>
+
+            <button type="button" 
+                    onclick="D2CStoreFrontController.openCartDrawer()" 
+                    class="py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-red-600/20 transition flex items-center gap-2 active:scale-95">
+                <span>Xem Giỏ Hàng</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 8. DRAWER CHI TIẾT GIỎ HÀNG (TRƯỢT TỪ ĐÁY LÊN - BẬC THANG RÕ RÀNG)        -->
+    <!-- ========================================================================= -->
+    <div id="drawer-cart-detail" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-slate-950/80 backdrop-blur-sm p-0 sm:p-4 select-none">
+        
+        <div class="bg-slate-900 border-t sm:border-2 border-slate-800 sm:border-amber-500/40 w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-5 duration-200">
+            
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 shrink-0">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs shadow-inner">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-black text-white uppercase tracking-wider">Giỏ Hàng Món Ăn</h4>
+                        <p class="text-[10px] text-slate-400" id="disp-drawer-cart-items-count">0 món trong giỏ</p>
+                    </div>
+                </div>
+                <button type="button" 
+                        onclick="D2CStoreFrontController.closeCartDrawer()" 
+                        class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center border border-slate-700 transition active:scale-90">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Danh Sách Các Món Trong Giỏ Dạng Bậc Thang -->
+            <div class="p-3.5 space-y-2.5 overflow-y-auto custom-scroll flex-1 text-xs">
+                
+                <div id="cart-items-list-container" class="space-y-2"></div>
+
+                <!-- Template Món Quà 0đ Nhận Từ Vòng Quay -->
+                <div id="cart-gift-reward-box" class="hidden p-2.5 rounded-2xl bg-amber-500/5 border border-amber-500/30 space-y-1.5 animate-in fade-in duration-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-7 h-7 rounded-xl bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center text-white text-xs shrink-0 shadow">
+                                <i class="fa-solid fa-gift"></i>
+                            </span>
+                            <div class="min-w-0">
+                                <span class="text-xs font-black text-white block truncate" id="disp-cart-gift-name">
+                                    Quà Tặng May Mắn
+                                </span>
+                                <span class="text-[9.5px] font-mono text-amber-400/80 block truncate" id="disp-cart-gift-token">
+                                    Token: GIFT_VERIFIED
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-black border border-emerald-500/30">
+                                0 đ
+                            </span>
+                            <button type="button" 
+                                    onclick="D2CStoreFrontController.removeGiftFromCart()" 
+                                    class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 hover:text-red-400 flex items-center justify-center text-[10px] border border-slate-700" 
+                                    title="Xóa quà tặng">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng Tóm Tắt Dòng Tiền & Bù Ship -->
+                <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5 text-[11px]">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Tiền Món Ăn:</span>
+                        <span id="disp-cart-subtotal" data-alias="disp-drawer-subtotal" class="font-mono font-bold text-white">0 đ</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Trợ Giá Ship (Ước Tính):</span>
+                        <span id="disp-drawer-shipping-subsidy" class="font-mono font-bold text-emerald-400">-0 đ</span>
+                    </div>
+                    <div class="pt-1.5 border-t border-slate-800 flex justify-between items-center text-xs">
+                        <span class="font-bold text-white">Tổng Tạm Tính:</span>
+                        <strong id="disp-cart-final-total" data-alias="disp-drawer-final-total" class="font-mono font-black text-amber-400 text-sm">0 đ</strong>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="p-3.5 border-t border-slate-800 bg-slate-950 shrink-0">
+                <button type="button" 
+                        onclick="D2CStoreFrontController.proceedToCheckoutModal()" 
+                        class="w-full py-3 rounded-2xl bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2 active:scale-95">
+                    <i class="fa-solid fa-motorcycle text-sm"></i>
+                    <span>Tiến Hành Đặt Món Giao Tận Nơi</span>
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+    <!-- ========================================================================= -->
+    <!-- 9. MODAL FORM ĐẶT HÀNG D2C & KIỂM TRA BILL BẬC THANG TRƯỚC KHI GỬI BẾP     -->
+    <!-- ========================================================================= -->
+    <div id="modal-checkout-order" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/85 backdrop-blur-md p-0 sm:p-4 select-none">
+        
+        <div class="bg-slate-900 border-t sm:border-2 border-slate-800 sm:border-amber-500/40 w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in slide-in-from-bottom-5 duration-200">
+            
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60 shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs shadow-inner">
+                        <i class="fa-solid fa-truck-ramp-box"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-black text-white uppercase tracking-wider">Thông Tin Giao Hàng</h4>
+                        <p class="text-[10px] text-slate-400">Giao nhanh nóng giòn • Trực tiếp từ Bếp Thím 5</p>
+                    </div>
+                </div>
+                <button type="button" 
+                        onclick="D2CStoreFrontController.closeCheckoutModal()" 
+                        class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center border border-slate-700 transition active:scale-90">
+                    <i class="fa-solid fa-xmark text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Thân Modal Checkout -->
+            <div class="p-4 space-y-4 overflow-y-auto custom-scroll text-xs">
+                
+                <!-- BẪY HONEYPOT ẨN CHỐNG BOT SPAM ĐƠN ẢO TỰ ĐỘNG (NGƯỜI THẬT KHÔNG THẤY) -->
+                <div style="opacity: 0; position: absolute; top: 0; left: 0; height: 0; width: 0; z-index: -1; overflow: hidden;" aria-hidden="true" tabindex="-1">
+                    <label for="chk-hp-token">Fax Number Security Verification</label>
+                    <input type="text" id="chk-hp-token" name="hp_token" value="" autocomplete="off" tabindex="-1">
+                </div>
+
+                <!-- Người Nhận Đơn -->
+                <div class="space-y-2.5">
+                    <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-user text-amber-400"></i> Người Nhận Đơn:
+                    </span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-1">Họ và Tên (*):</label>
+                            <input type="text" 
+                                   id="chk-customer-name" 
+                                   placeholder="VD: Anh Tuấn" 
+                                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-slate-400 mb-1">Số Điện Thoại (*):</label>
+                            <input type="tel" 
+                                   id="chk-customer-phone" 
+                                   maxlength="11" 
+                                   oninput="D2CStoreFrontController.onPhoneInput(this.value)"
+                                   placeholder="09xx xxx xxx" 
+                                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500 transition">
+                        </div>
+                    </div>
+                    <!-- BANNER KHÁCH VIP AUTO-CONFIRM TỰ ĐỘNG HIỆN KHI NHẬP SĐT VIP -->
+                    <div id="box-vip-status-banner" class="hidden p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-semibold flex items-center gap-2 mt-1 animate-in fade-in duration-200">
+                        <i class="fa-solid fa-crown text-amber-400 text-sm shrink-0"></i>
+                        <div class="min-w-0">
+                            <span id="txt-vip-status-title" class="font-bold text-amber-300 block">✨ Khách Hàng Thân Thiết VIP</span>
+                            <span id="txt-vip-status-msg" class="text-[9.5px] text-amber-200/80 block">Đơn hàng được Bếp AUTO-CONFIRM &amp; Nấu Ngay không cần gọi xác nhận!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KHỐI ĐỊA CHỈ GIAO HÀNG ĐỊNH VỊ GPS VỆ TINH CHÍNH XÁC & TÌM KIẾM ĐỊA DANH -->
+                <div class="space-y-1.5 pt-1 border-t border-slate-800/80 relative">
+                    <div class="flex items-center justify-between">
+                        <label class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-location-dot text-rose-500"></i> Địa Chỉ Giao Hàng:
+                        </label>
+                        <button type="button" 
+                                id="btn-detect-gps"
+                                onclick="D2CStoreFrontController.detectCustomerGps()" 
+                                class="px-2.5 py-1 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[10.5px] font-bold transition flex items-center gap-1 active:scale-95">
+                            <i class="fa-solid fa-crosshairs"></i> Lấy Vị Trí Hiện Tại
+                        </button>
+                    </div>
+
+                    <!-- CHỌN NHANH CỰ LY THỬ NGHIỆM CHUẨN DOD -->
+                    <div class="flex items-center gap-1.5 pt-0.5 pb-1 text-[10px] overflow-x-auto custom-scroll">
+                        <span class="text-slate-400 shrink-0 font-medium">Cự ly mẫu:</span>
+                        <button type="button" onclick="D2CStoreFrontController.setManualDistance(1.0, 'Nội ô Hòa Thành (1.0 km)')" class="px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 hover:text-amber-400 border border-slate-700 shrink-0 transition">1.0 km</button>
+                        <button type="button" onclick="D2CStoreFrontController.setManualDistance(3.0, 'Chợ Long Hoa (3.0 km)')" class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 hover:text-white border border-amber-500/40 font-bold shrink-0 transition">★ 3.0 km (Cước 15k)</button>
+                        <button type="button" onclick="D2CStoreFrontController.setManualDistance(5.0, 'Tòa Thánh Tây Ninh (5.0 km)')" class="px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 hover:text-amber-400 border border-slate-700 shrink-0 transition">5.0 km</button>
+                    </div>
+
+                    <!-- Ô NHẬP TỰ DO: HỖ TRỢ TÊN ĐƯỜNG, QUÁN XÁ, CÔNG TY, TRƯỜNG HỌC -->
+                    <div class="relative">
+                        <input type="text" 
+                               id="chk-customer-address" 
+                               oninput="D2CStoreFrontController.onAddressInput(this.value)" 
+                               onfocus="D2CStoreFrontController.onAddressFocus()"
+                               autocomplete="off"
+                               placeholder="Gõ tên quán, cửa hàng, công ty hoặc số nhà, tên đường..." 
+                               class="w-full px-3.5 py-2.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 font-bold focus:border-amber-500 focus:outline-none transition pr-8">
+                        <div id="addr-search-spinner" class="hidden absolute right-3 top-3 text-amber-400 text-xs">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i>
+                        </div>
+                    </div>
+
+                    <!-- DROPDOWN SỔ XUỐNG KẾT QUẢ ĐỊA ĐIỂM / HÀNG QUÁN THỜI GIAN THỰC -->
+                    <div id="address-suggestions-box" 
+                         class="hidden absolute left-0 right-0 top-full mt-1.5 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-800/80">
+                    </div>
+
+                    <div class="flex items-center justify-between text-[10px] text-slate-500 px-1">
+                        <span>💡 Gợi ý: Bấm lấy GPS hoặc gõ tên địa danh để Shipper mở Google Maps dẫn đường</span>
+                    </div>
+
+                    <!-- KHUNG HIỂN THỊ CỰ LY & CƯỚC SHIP (LÀM TRÒN MỐC 0.5KM CẠNH TRANH GIÁ) -->
+                    <div class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 text-xs">
+                        <span class="text-slate-400 flex items-center gap-1.5 font-bold" id="txt-calc-distance">
+                            <i class="fa-solid fa-route text-amber-400"></i> Cự ly: ~1.2 km (Tính cước: 1.5 km)
+                        </span>
+                        <div class="flex items-center gap-1.5 font-mono">
+                            <span class="font-black text-white" id="txt-calc-shipping-fee">12.000 đ</span>
+                            <span class="text-[10px] text-emerald-400 font-bold hidden" id="txt-calc-subsidy-tag"></span>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <!-- HỘP VOUCHER TRỢ GIÁ SHIP ĐỘNG THEO LỢI NHUẬN RÒNG -->
+                <div id="box-smart-ship-voucher" class="p-3 rounded-2xl bg-gradient-to-r from-emerald-950/60 to-slate-900 border border-emerald-500/40 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-xs text-emerald-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-gift text-amber-400"></i> Voucher Trợ Giá Ship Dành Riêng Cho Đơn Của Bạn
+                        </span>
+                        <span id="badge-ship-voucher-status" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            KIỂM TRA ĐIỀU KIỆN
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div id="txt-ship-voucher-title" class="text-xs font-bold text-white">Chưa đủ điều kiện trợ giá</div>
+                            <div id="txt-ship-voucher-desc" class="text-[10px] text-slate-400">Tài trợ từ Lợi Nhuận Ròng thặng dư của Bếp</div>
+                        </div>
+                        <button type="button" 
+                                id="btn-apply-ship-voucher" 
+                                onclick="D2CStoreFrontController.toggleSmartShipVoucher()" 
+                                class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition flex items-center gap-1 shadow-lg shadow-emerald-500/20">
+                            <i class="fa-solid fa-check"></i> <span id="txt-btn-apply-ship">Áp Dụng</span>
+                        </button>
+                    </div>
+
+                    <!-- THANH GỢI Ý UPSELL MUA THÊM TOPPING / NƯỚC UỐNG ĐỂ NÂNG BẬC SHIP -->
+                    <div id="box-ship-upsell-nudge" class="hidden p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-[11px]">
+                        <span id="txt-ship-upsell-nudge" class="text-amber-300 font-medium"></span>
+                        <button type="button" 
+                                id="btn-quick-add-upsell" 
+                                onclick="D2CStoreFrontController.quickAddBooster()" 
+                                class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 whitespace-nowrap transition">
+                            + Thêm Ngay
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KHUNG XEM LẠI MÓN ĂN TRƯỚC KHI GỬI BẾP (CẤU TRÚC BẬC THANG RÕ RÀNG) -->
+                <div class="space-y-2 pt-1 border-t border-slate-800/80">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-list-check text-amber-400"></i> Chi Tiết Món &amp; Topping (Kiểm Tra Trước Khi Nấu):
+                        </span>
+                        <span class="text-[10px] text-slate-400 font-mono" id="chk-review-items-count">0 món</span>
+                    </div>
+
+                    <!-- Vùng kết xuất các khối món ăn phân cấp rõ ràng -->
+                    <div id="checkout-items-tree-review" class="space-y-2 max-h-48 overflow-y-auto custom-scroll p-1">
+                        <!-- Render danh sách bậc thang: Món chính in đậm -> xuống dòng Topping -> xuống dòng Nước chấm -->
+                    </div>
+                </div>
+                <!-- Phương Thức Thanh Toán (COD MẶC ĐỊNH HOẶC VIETQR / VÍ MOMO) -->
+                <div class="space-y-2 pt-1 border-t border-slate-800/80">
+                    <span class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-credit-card text-emerald-400"></i> Phương Thức Thanh Toán:
+                    </span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" 
+                                data-method="COD" 
+                                onclick="D2CStoreFrontController.selectPaymentMethod('COD', this)" 
+                                class="btn-pay-method p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-left transition flex flex-col gap-1 active">
+                            <div class="flex items-center justify-between">
+                                <span class="font-black text-xs text-amber-300">Tiền Mặt (COD)</span>
+                                <i class="fa-solid fa-money-bill-wave text-emerald-400"></i>
+                            </div>
+                            <span class="text-[9.5px] text-slate-400">Shipper gọi chốt ➔ Thu tiền</span>
+                        </button>
+
+                        <button type="button" 
+                                data-method="VIETQR" 
+                                onclick="D2CStoreFrontController.selectPaymentMethod('VIETQR', this)" 
+                                class="btn-pay-method p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-left transition flex flex-col gap-1">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-slate-300">Quét Mã VietQR</span>
+                                <i class="fa-solid fa-qrcode text-amber-400"></i>
+                            </div>
+                            <span class="text-[9.5px] text-slate-400">Napas247 / MB / MoMo</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Khung Mã VietQR Khóa Cứng Số Tiền & Khóa Đúng Mã Đơn -->
+                <div id="box-vietqr-container" class="hidden p-3.5 rounded-2xl bg-slate-950 border border-amber-500/30 space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                        <div class="flex items-center gap-2">
+                            <img src="https://api.vietqr.io/img/ICONS/VIETQR.png" alt="VietQR" class="h-4 object-contain">
+                            <span class="text-[11px] font-bold text-slate-300">Quét Để Chuyển Khoản Nhanh</span>
+                        </div>
+                        <span class="text-[9px] font-mono font-bold text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
+                            Khóa Cứng Tiền &amp; Mã Đơn
+                        </span>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center gap-3">
+                        <div class="p-1.5 bg-white rounded-xl border border-slate-700 shrink-0">
+                            <img id="img-checkout-vietqr" src="" alt="Mã VietQR Thanh Toán" class="w-32 h-32 object-contain">
+                        </div>
+                        <div class="space-y-1.5 text-[11px] w-full min-w-0">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Ngân Hàng:</span>
+                                <strong id="disp-qr-bank-name" class="text-white font-mono">MB BANK</strong>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-400">Số Tài Khoản:</span>
+                                <div class="flex items-center gap-1 font-mono font-bold text-sky-400">
+                                    <span id="disp-qr-account-no">3939388888</span>
+                                    <button type="button" onclick="D2CStoreFrontController.copyBankAcc()" class="text-slate-400 hover:text-white" title="Sao chép">
+                                        <i class="fa-solid fa-copy text-[10px]"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Chủ Tài Khoản:</span>
+                                <strong id="disp-qr-account-holder" class="text-white font-mono uppercase">NGUYEN HAI AU</strong>
+                            </div>
+                            <div class="flex justify-between items-center pt-1 border-t border-slate-800/60">
+                                <span class="text-slate-400">Nội Dung:</span>
+                                <strong id="disp-qr-payment-memo" class="text-amber-400 font-mono font-black">DH...</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bảng Tổng Kết Dòng Tiền -->
+                <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5 text-xs">
+                    <div class="flex justify-between text-slate-400 text-[11px]">
+                        <span>Tổng Tiền Món:</span>
+                        <span id="chk-summary-subtotal" class="font-mono font-bold text-white">0 đ</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400 text-[11px]">
+                        <span>Phí Giao Hàng:</span>
+                        <span id="disp-cart-shipping" data-alias="chk-summary-shipping-fee" class="font-mono font-bold text-white">0 đ</span>
+                    </div>
+                    <div class="flex justify-between text-emerald-400 text-[11px]">
+                        <span>Trợ Giá Cước Giao Hàng:</span>
+                        <span id="disp-cart-subsidy" data-alias="chk-summary-subsidy" class="font-mono font-bold">-0 đ</span>
+                    </div>
+                    <div id="chk-summary-vip-discount-row" class="hidden flex justify-between text-amber-400 text-[11px]">
+                        <span>Ưu Đãi Hội Viên VIP:</span>
+                        <span id="chk-summary-vip-discount" class="font-mono font-bold">-0 đ</span>
+                    </div>
+                    <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-sm">
+                        <span class="font-black text-white">TỔNG THANH TOÁN:</span>
+                        <strong id="chk-summary-final-total" class="font-mono font-black text-amber-400 text-base">0 đ</strong>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="p-3.5 border-t border-slate-800 bg-slate-950 shrink-0">
+                <button type="button" 
+                        id="btn-submit-order"
+                        onclick="D2CStoreFrontController.submitFinalOrder()" 
+                        class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-red-600 via-amber-600 to-emerald-600 hover:opacity-95 text-white text-xs sm:text-sm font-black uppercase tracking-wider shadow-xl shadow-red-600/30 transition flex items-center justify-center gap-2 active:scale-95">
+                    <i class="fa-solid fa-paper-plane text-sm"></i>
+                    <span>XÁC NHẬN GỬI ĐƠN • NẤU NGAY</span>
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 10. MODAL THÔNG BÁO ĐẶT HÀNG THÀNH CÔNG                                  -->
+    <!-- ========================================================================= -->
+    <div id="modal-order-success" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 select-none">
+        
+        <div class="bg-slate-900 border-2 border-emerald-500/50 w-full max-w-sm rounded-3xl p-6 text-center space-y-4 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div class="w-16 h-16 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-3xl mx-auto shadow-inner animate-bounce">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            
+            <div class="space-y-1">
+                <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-widest font-mono">Bếp Đã Nhận Đơn</span>
+                <h4 class="text-base sm:text-lg font-black text-white">Đặt Món Thành Công!</h4>
+                <p class="text-xs text-slate-300 pt-1">
+                    Đơn hàng của quý khách đang được Bếp Thím 5 chuẩn bị nóng hổi.
+                </p>
+                <div id="box-success-vip-badge" class="hidden p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 mt-1">
+                    <i class="fa-solid fa-crown text-amber-400"></i>
+                    <span>✨ Đơn hàng đã được AUTO-CONFIRM &amp; Bếp nấu ngay!</span>
+                </div>
+            </div>
+
+            <div class="p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-1 text-xs">
+                <span class="text-[10px] text-slate-500 block">Mã Tra Cứu Đơn Hàng:</span>
+                <strong id="disp-success-order-code" class="text-sm font-mono font-black text-amber-400">DH261004_XXXX</strong>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button type="button" 
+                        onclick="D2CStoreFrontController.viewLiveOrderTracking()" 
+                        class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow active:scale-95">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                    <span>Theo Dõi Đơn</span>
+                </button>
+                <button type="button" 
+                        onclick="D2CStoreFrontController.resetAndNewOrder()" 
+                        class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition active:scale-95">
+                    Đặt Thêm Món
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Khe cắm Vòng Quay May Mắn Tri Ân nạp động từ wheel.html -->
+    <div id="wheel-mount-point"></div>
+
+    <!-- ========================================================================= -->
+    <!-- 11. NẠP THƯ VIỆN ĐIỀU PHỐI API TRUNG TÂM THÍM 5                           -->
+    <!-- ========================================================================= -->
+    <script src="api.js?v=20261004"></script>
+
+    <!-- ========================================================================= -->
+    <!-- 12. BỘ NÃO JAVASCRIPT ĐIỀU HÀNH MẶT TIỀN D2C THÍM 5 (ENTERPRISE CORE)     -->
+    <!-- ========================================================================= -->
+    <script>
+    /**
+     * =========================================================================
+     * CONTROLLER: D2C STOREFRONT SUITE (MẶT TIỀN D2C THÍM 5 v3.5 MASTER GHOST)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+     * =========================================================================
+     */
+    var D2CStoreFrontController = (function() {
+        // CẤU HÌNH GỐC ĐỘNG THUẦN KHIẾT (ĐƯỢC GHI ĐÈ 100% TỪ SYS_CONFIG QUA API getConfig)
+        var STORE_BASE_CONFIG = {
+            storeName: "Mì Trộn Thím 5",
+            phone: "0934220585",
+            address: "125 Hùng Vương, KP4, TT. Hòa Thành, Tây Ninh",
+            coords: { lat: 11.285267, lng: 106.133347 },
+            bankCode: "MBBANK",
+            bankBin: "970422",
+            bankAccount: "3939388888",
+            accountHolder: "NGUYEN HAI AU",
+            momoPhone: "0934220585",
+            minAovThreshold: 79000,
+            shippingRateCustomerPerKm: 5000,   // Nạp động từ SYS_CONFIG: SHIPPING_RATE_CUSTOMER_PER_KM
+            shippingMinCustomerFee: 5000,      // Nạp động từ SYS_CONFIG: SHIPPING_MIN_CUSTOMER_FEE
+            shippingLocalWalkMeters: 300,      // Nạp động từ SYS_CONFIG: SHIPPING_LOCAL_WALK_METERS (< 300m = 0đ)
+            freeshipMinSubtotal: 149000,       // Nạp động từ SYS_CONFIG: FREESHIP_MIN_SUBTOTAL
+            maxShippingSubsidy: 20000,         // Nạp động từ SYS_CONFIG: MAX_SHIPPING_SUBSIDY
+            maxPromotionRate: 15,              // Nạp động từ SYS_CONFIG: MAX_PROMOTION_RATE (<= 15% doanh thu gộp)
+            masterPlatformFeePct: 5.0,         // Nạp động từ SYS_CONFIG: MASTER_PLATFORM_FEE_PCT (5% Master)
+            activeSkin: "DEFAULT",
+            metaPixelId: "",
+            tiktokPixelId: "",
+            ga4MeasurementId: ""
+        };
+
+        // BỘ NHỚ ĐỆM TRẠNG THÁI ỨNG DỤNG (APPLICATION STATE)
+        var appState = {
+            cartItems: [],
+            appliedGift: null,
+            currentCategory: "all",
+            searchKeyword: "",
+            carouselIndex: 0,
+            carouselTimer: null,
+            heroSlides: [],
+            deferredPwaPrompt: null,
+            isWheelLoaded: false,
+            customerLocation: null,
+            calculatedDistanceKm: 0,
+            billedDistanceKm: 0,
+            shippingFee: 0,
+            shippingSubsidy: 0,
+            smartShipVoucher: null,
+            isSmartShipVoucherApplied: true,
+            subsidyReason: "",
+            vipCustomer: null,
+            tierDiscountAmount: 0,
+            selectedPaymentMethod: "COD",
+            currentCustomizingDish: null,
+            currentTaste: "Cay Nhẹ",
+            currentSauce: "Nước Tương Ngọt (Không Cay)",
+            currentSauceFee: 0,
+            currentSoup: "",
+            customizerQty: 1,
+            storeStatus: "OPEN",
+            closedMessage: "",
+            menuCatalog: [],
+            toppingCatalog: []
+        };
+
+        var activeCustomizerToppingIds = [];
+
+        // DANH MỤC TOPPING HẠT GIỐNG DỰ PHÒNG CHO FIRST-PAINT 20MS
+        var TOPPING_PRESETS = [
+            { id: "TOP_TRUNG", name: "Trứng Lòng Đào Béo Ngậy", price: 6000, icon: "🥚" },
+            { id: "TOP_TOP_MO", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn", price: 10000, icon: "🥓" },
+            { id: "TOP_BO_VIEN", name: "Bò Viên Gân Giòn (3 Viên)", price: 12000, icon: "🍡" },
+            { id: "TOP_XA_XIU", name: "Xá Xíu Mềm Thơm Thêm", price: 15000, icon: "🥩" },
+            { id: "TOP_DUI_GA", name: "Đùi Gà Nướng Mật Ong", price: 25000, icon: "🍗" },
+            { id: "TOP_TOM", name: "Topping Tôm Tươi Rim Mặn Ngọt", price: 15000, icon: "🦐" },
+            { id: "TOP_VAT_MI", name: "Thêm 1 Vắt Mì Trộn", price: 8000, icon: "🍜" }
+        ];
+
+        // DANH MỤC THỰC ĐƠN HẠT GIỐNG DỰ PHÒNG CHUẨN 13 CỘT REVERSE-PRICING
+        var FALLBACK_MENU = [
+            { id: "C01", cat: "cơm", name: "Cơm Tấm Sườn Bì Chả Thím 5", price: 45000, appPrice: 52000, img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400", desc: "Cơm tấm hạt dẻo thơm, sườn nướng mật ong thảo mộc, chả trứng hấp béo ngậy.", isHot: true },
+            { id: "C02", cat: "cơm", name: "Cơm Phủ Trứng Thịt Bằm Đất Thánh", price: 42000, appPrice: 49000, img: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400", desc: "Cơm nóng phủ lớp trứng chiên mềm xốp, thịt bằm xào nấm sốt tương đậm đà.", isHot: true },
+            { id: "M01", cat: "combo", name: "Combo Đại Tiệc Thím 5", price: 89000, appPrice: 105000, img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400", desc: "Mì trộn xá xíu tóp mỡ + 1 chén súp bò viên + 1 ly trà đào 1L.", isHot: true },
+            { id: "M02", cat: "combo", name: "Combo No Say Đôi Lứa", price: 119000, appPrice: 139000, img: "https://images.unsplash.com/photo-1552611052-33e04de081de?w=400", desc: "2 tô mì trộn thập cẩm đặc biệt + 2 chén súp trứng cút + 2 nước ngọt.", isHot: true },
+            { id: "M03", cat: "kho", name: "Mì Trộn Xá Xíu Tóp Mỡ", price: 39000, appPrice: 45000, img: "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400", desc: "Mì dai giòn trộn sốt sa tế cay độc bản, xá xíu mềm thơm, tóp mỡ giòn rụm.", isHot: true },
+            { id: "M04", cat: "kho", name: "Mì Trộn Bò Viên Gân Giòn", price: 42000, appPrice: 48000, img: "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=400", desc: "Bò viên gân loại 1 dai giòn sần sật, phủ sốt sa tế tóp mỡ hành phi.", isHot: false },
+            { id: "M05", cat: "kho", name: "Mì Trộn Thập Cẩm Đặc Biệt", price: 49000, appPrice: 58000, img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=400", desc: "Đầy đặn xá xíu, bò viên gân, trứng lòng đào béo ngậy và tóp mỡ vàng ươm.", isHot: true },
+            { id: "M06", cat: "nuoc", name: "Mì Súp Bò Mỹ Sa Tế Cay", price: 45000, appPrice: 52000, img: "https://images.unsplash.com/photo-1594998893017-36147cbcae05?w=400", desc: "Nước súp hầm xương thanh ngọt đậm đà, thịt bò Mỹ béo ngậy the the sa tế.", isHot: false },
+            { id: "M07", cat: "an-kem", name: "Tóp Mỡ Tỏi Ớt Chiên Giòn (Hũ)", price: 16000, appPrice: 20000, img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=400", desc: "Tóp mỡ nóng giòn ráo dầu, lắc tỏi ớt sa tế cay tê nhức nách.", isHot: false },
+            { id: "M08", cat: "an-kem", name: "Trứng Lòng Đào Béo Ngậy (Quả)", price: 6000, appPrice: 8000, img: "https://images.unsplash.com/photo-1582169296194-e4d644c48063?w=400", desc: "Trứng gà luộc chuẩn canh giờ, lòng đào dẻo quánh hòa quyện sốt mì.", isHot: false },
+            { id: "M09", cat: "giai-khat", name: "Trà Đào Mát Lạnh Khổng Lồ 1L", price: 25000, appPrice: 30000, img: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400", desc: "Ly khổng lồ 1000ml mát lạnh, kèm miếng đào giòn ngọt giải ngấy cực đã.", isHot: true },
+            { id: "M10", cat: "giai-khat", name: "Nước Suối Tinh Khiết Ướp Lạnh", price: 10000, appPrice: 12000, img: "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400", desc: "Chai 500ml ướp lạnh đập tan cơn khát tức thì.", isHot: false }
+        ];
+
+        /**
+         * KHỞI ĐỘNG HỆ THỐNG MẶT TIỀN D2C - TỐI ƯU FIRST-PAINT 20MS
+         */
+        function init() {
+            restoreLocalCacheInstant();
+            applySeasonalSkinTheme(STORE_BASE_CONFIG.activeSkin);
+            initHeroCarousel();
+            bindHeroCarouselEvents();
+            initPwaInstaller();
+            initGiftEventListener();
+            renderMenuGrid();
+            updateAovAndCartUI();
+            trackMarketingEvent("PageView", {});
+            syncBackendDataAsync();
+        }
+        /**
+         * BẮT SỰ KIỆN MARKETING TRACKING (META PIXEL, TIKTOK PIXEL, GA4)
+         */
+        function trackMarketingEvent(eventName, eventData) {
+            try {
+                // Meta Pixel (Facebook)
+                if (typeof window.fbq === "function") {
+                    window.fbq("track", eventName, eventData);
+                }
+                // TikTok Pixel
+                if (typeof window.ttq === "object" && typeof window.ttq.track === "function") {
+                    window.ttq.track(eventName, eventData);
+                }
+                // Google Analytics 4
+                if (typeof window.gtag === "function") {
+                    window.gtag("event", eventName, eventData);
+                }
+            } catch (err) {
+                console.warn("⚠️ [TrackingEngine] Lỗi bắn sự kiện marketing:", err);
+            }
+        }
+
+        /**
+         * NẠP TỨC THÌ TỪ LOCALSTORAGE TRONG 20MS (CHỐNG TRỄ MẠNG COLD START)
+         */
+        function restoreLocalCacheInstant() {
+            try {
+                var cachedCfg = JSON.parse(localStorage.getItem("T5_CACHED_CONFIG") || "{}");
+                if (cachedCfg && cachedCfg.storeName) {
+                    Object.assign(STORE_BASE_CONFIG, cachedCfg);
+                }
+                var cachedMenu = JSON.parse(localStorage.getItem("T5_CACHED_MENU") || "[]");
+                if (Array.isArray(cachedMenu) && cachedMenu.length > 0) {
+                    FALLBACK_MENU = cachedMenu;
+                }
+                var cachedToppings = JSON.parse(localStorage.getItem("T5_CACHED_TOPPINGS") || "[]");
+                if (Array.isArray(cachedToppings) && cachedToppings.length > 0) {
+                    TOPPING_PRESETS = cachedToppings;
+                }
+            } catch (e) {
+                console.warn("⚠️ [CacheReader] Không thể đọc cache local:", e);
+            }
+            updateHeaderDomElements();
+        }
+
+        /**
+         * ÁP DỤNG THEME & SKIN THEO MÙA LỄ HỘI (HALLOWEEN, XMAS, TẾT)
+         */
+        function applySeasonalSkinTheme(skinCode) {
+            var htmlEl = document.documentElement;
+            htmlEl.classList.remove("skin-halloween", "skin-xmas", "skin-tet");
+
+            var code = String(skinCode || "DEFAULT").toUpperCase().trim();
+            if (code === "HALLOWEEN") {
+                htmlEl.classList.add("skin-halloween");
+            } else if (code === "XMAS" || code === "NOEL") {
+                htmlEl.classList.add("skin-xmas");
+            } else if (code === "TET") {
+                htmlEl.classList.add("skin-tet");
+            }
+        }
+
+        /**
+         * GỌI NGẦM ĐỒNG BỘ CẤU HÌNH & MENU TỪ BACKEND APPS SCRIPT
+         * ĐỒNG BỘ 100% THAM SỐ CƯỚC SHIP ĐỘNG TỪ SYS_CONFIG (ZERO-HARDCODE)
+         */
+        async function syncBackendDataAsync() {
+            try {
+                if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                    // 1. Đồng bộ cấu hình động SYS_CONFIG (Biểu phí ship, hotline, tọa độ bếp)
+                    var resCfg = await Thim5API.callGAS("getConfig", {});
+                    var cfg = (resCfg && resCfg.data) ? resCfg.data : resCfg;
+                    if (cfg) {
+                        STORE_BASE_CONFIG.storeName = cfg.STORE_NAME || cfg.storeName || STORE_BASE_CONFIG.storeName;
+                        STORE_BASE_CONFIG.phone = cfg.STORE_HOTLINE || cfg.phone || STORE_BASE_CONFIG.phone;
+                        STORE_BASE_CONFIG.address = cfg.STORE_ADDRESS || cfg.address || STORE_BASE_CONFIG.address;
+                        STORE_BASE_CONFIG.bankCode = cfg.BANK_CODE || STORE_BASE_CONFIG.bankCode;
+                        STORE_BASE_CONFIG.bankBin = cfg.BANK_BIN || STORE_BASE_CONFIG.bankBin;
+                        STORE_BASE_CONFIG.bankAccount = cfg.BANK_ACCOUNT_NO || STORE_BASE_CONFIG.bankAccount;
+                        STORE_BASE_CONFIG.accountHolder = cfg.BANK_ACCOUNT_NAME || STORE_BASE_CONFIG.accountHolder;
+                        STORE_BASE_CONFIG.momoPhone = cfg.MOMO_PHONE || STORE_BASE_CONFIG.momoPhone;
+                        STORE_BASE_CONFIG.activeSkin = cfg.ACTIVE_SEASON_SKIN || "DEFAULT";
+
+                        // Nạp động 100% biểu phí cước giao hàng từ bảng SYS_CONFIG
+                        if (cfg.SHIPPING_RATE_CUSTOMER_PER_KM !== undefined) {
+                            STORE_BASE_CONFIG.shippingRateCustomerPerKm = Number(cfg.SHIPPING_RATE_CUSTOMER_PER_KM);
+                        }
+                        if (cfg.SHIPPING_MIN_CUSTOMER_FEE !== undefined) {
+                            STORE_BASE_CONFIG.shippingMinCustomerFee = Number(cfg.SHIPPING_MIN_CUSTOMER_FEE);
+                        }
+                        if (cfg.SHIPPING_LOCAL_WALK_METERS !== undefined) {
+                            STORE_BASE_CONFIG.shippingLocalWalkMeters = Number(cfg.SHIPPING_LOCAL_WALK_METERS);
+                        }
+                        if (cfg.FREESHIP_MIN_SUBTOTAL !== undefined) {
+                            STORE_BASE_CONFIG.freeshipMinSubtotal = Number(cfg.FREESHIP_MIN_SUBTOTAL);
+                        }
+                        if (cfg.MAX_SHIPPING_SUBSIDY !== undefined) {
+                            STORE_BASE_CONFIG.maxShippingSubsidy = Number(cfg.MAX_SHIPPING_SUBSIDY);
+                        }
+                        if (cfg.MAX_PROMOTION_RATE !== undefined) {
+                            STORE_BASE_CONFIG.maxPromotionRate = Number(cfg.MAX_PROMOTION_RATE);
+                        } else if (cfg.MAX_PROMO_CAP_PCT !== undefined) {
+                            STORE_BASE_CONFIG.maxPromotionRate = Number(cfg.MAX_PROMO_CAP_PCT);
+                        }
+                        if (cfg.MASTER_PLATFORM_FEE_PCT !== undefined) {
+                            STORE_BASE_CONFIG.masterPlatformFeePct = Number(cfg.MASTER_PLATFORM_FEE_PCT);
+                        }
+
+                        if (cfg.STORE_LATITUDE && cfg.STORE_LONGITUDE) {
+                            STORE_BASE_CONFIG.coords.lat = Number(cfg.STORE_LATITUDE);
+                            STORE_BASE_CONFIG.coords.lng = Number(cfg.STORE_LONGITUDE);
+                        }
+
+                        appState.storeStatus = (cfg.STORE_STATUS) ? String(cfg.STORE_STATUS).toUpperCase().trim() : "OPEN";
+                        appState.closedMessage = cfg.CLOSED_MESSAGE || "Bếp Thím 5 tạm dừng nhận đơn ít phút!";
+
+                        localStorage.setItem("T5_CACHED_CONFIG", JSON.stringify(STORE_BASE_CONFIG));
+                        applySeasonalSkinTheme(STORE_BASE_CONFIG.activeSkin);
+                        updateHeaderDomElements();
+                    }
+
+                    // 2. Đồng bộ thực đơn 13 cột từ DATA_MENU
+                    var resMenu = await Thim5API.callGAS("getAdminMenuCatalog", {});
+                    if (resMenu && resMenu.status === "success" && Array.isArray(resMenu.data && resMenu.data.items)) {
+                        var parsedItems = resMenu.data.items.map(function(item) {
+                            return {
+                                id: item.code,
+                                cat: String(item.category || "").toLowerCase(),
+                                name: item.name,
+                                price: Number(item.d2cPrice || item.price || 0),
+                                appPrice: Number(item.appPrice || 0),
+                                img: item.imageUrl || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400",
+                                desc: item.description || "Hương vị thơm ngon độc quyền chuẩn vị Đất Thánh.",
+                                isHot: String(item.tag || "").indexOf("BEST_SELLER") !== -1
+                            };
+                        });
+
+                        if (parsedItems.length > 0) {
+                            FALLBACK_MENU = parsedItems;
+                            localStorage.setItem("T5_CACHED_MENU", JSON.stringify(FALLBACK_MENU));
+                            initHeroCarousel();
+                            renderMenuGrid();
+                        }
+                    }
+
+                    // 3. Đồng bộ danh mục Topping độc lập
+                    var resToppings = await Thim5API.callGAS("getToppingCatalog", {});
+                    if (resToppings && resToppings.status === "success" && Array.isArray(resToppings.data)) {
+                        TOPPING_PRESETS = resToppings.data;
+                        localStorage.setItem("T5_CACHED_TOPPINGS", JSON.stringify(TOPPING_PRESETS));
+                    }
+                }
+            } catch (e) {
+                console.warn("⚠️ [SyncBackend] Không thể đồng bộ ngầm dữ liệu Backend:", e);
+            }
+        }
+
+        function updateHeaderDomElements() {
+            var elPhone = document.getElementById("disp-store-phone");
+            var linkPhone = document.getElementById("link-store-phone");
+            var elName = document.getElementById("disp-store-name");
+            if (elPhone) elPhone.innerText = STORE_BASE_CONFIG.phone;
+            if (linkPhone) linkPhone.href = "tel:" + STORE_BASE_CONFIG.phone;
+            if (elName) elName.innerText = STORE_BASE_CONFIG.storeName;
+
+            var dotStatus = document.getElementById("disp-store-status-dot");
+            var txtStatus = document.getElementById("disp-store-status-text");
+            var btnSubmitOrder = document.getElementById("btn-submit-order");
+
+            if (appState.storeStatus === "CLOSED") {
+                if (dotStatus) dotStatus.className = "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-rose-500 border-2 border-slate-950";
+                if (txtStatus) {
+                    txtStatus.className = "text-rose-400 font-bold flex items-center gap-1 truncate";
+                    txtStatus.innerHTML = '<i class="fa-solid fa-circle text-[6px]"></i> Tạm Nghỉ (' + appState.closedMessage + ')';
+                }
+                if (btnSubmitOrder) {
+                    btnSubmitOrder.disabled = true;
+                    btnSubmitOrder.className = "w-full py-3.5 rounded-2xl bg-slate-800 text-slate-500 text-xs sm:text-sm font-black uppercase tracking-wider cursor-not-allowed flex items-center justify-center gap-2";
+                    btnSubmitOrder.innerHTML = '<i class="fa-solid fa-ban"></i> BẾP TẠM DỪNG NHẬN ĐƠN';
+                }
+            } else {
+                if (dotStatus) dotStatus.className = "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-slate-950";
+                if (txtStatus) {
+                    txtStatus.className = "text-emerald-400 font-bold flex items-center gap-1 truncate";
+                    txtStatus.innerHTML = '<i class="fa-solid fa-circle text-[6px] animate-pulse"></i> Đang Nhận Đơn Nóng Hổi';
+                }
+                if (btnSubmitOrder) {
+                    btnSubmitOrder.disabled = false;
+                    btnSubmitOrder.className = "w-full py-3.5 rounded-2xl bg-gradient-to-r from-red-600 via-amber-600 to-emerald-600 hover:opacity-95 text-white text-xs sm:text-sm font-black uppercase tracking-wider shadow-xl shadow-red-600/30 transition flex items-center justify-center gap-2 active:scale-95";
+                    btnSubmitOrder.innerHTML = '<i class="fa-solid fa-paper-plane text-sm"></i> <span>XÁC NHẬN GỬI ĐƠN • NẤU NGAY</span>';
+                }
+            }
+        }
+
+        /**
+         * RENDER HERO BANNER CAROUSEL
+         */
+        function initHeroCarousel() {
+            var track = document.getElementById("carousel-track");
+            if (!track) return;
+
+            appState.heroSlides = FALLBACK_MENU.filter(function(d) { return d.isHot; });
+            if (appState.heroSlides.length === 0) appState.heroSlides = FALLBACK_MENU.slice(0, 4);
+
+            renderHeroSlides(appState.heroSlides);
+            renderHeroDots(appState.heroSlides.length);
+
+            if (appState.carouselTimer) clearInterval(appState.carouselTimer);
+            appState.carouselTimer = setInterval(function() {
+                var next = (appState.carouselIndex + 1) % appState.heroSlides.length;
+                goToSlide(next);
+            }, 4500);
+        }
+
+        function renderHeroSlides(dishes) {
+            var track = document.getElementById("carousel-track");
+            if (!track || !dishes || dishes.length === 0) return;
+
+            track.innerHTML = dishes.map(function(dish, idx) {
+                var safeImg = dish.img || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
+                var safeDesc = dish.desc || "Hương vị đậm đà độc quyền chuẩn vị Đất Thánh.";
+                var safePrice = Number(dish.price || 0).toLocaleString("vi-VN");
+
+                return `
+                    <div class="relative flex-shrink-0 w-full h-full bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 flex items-center p-4 sm:p-7 overflow-hidden select-none" data-slide-index="${idx}">
+                        <div class="absolute -right-8 -bottom-8 w-56 h-56 sm:w-80 sm:h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="absolute right-2 sm:right-10 top-1/2 -translate-y-1/2 w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full border-4 border-amber-500/20 p-1 shadow-2xl overflow-hidden shrink-0">
+                            <img src="${safeImg}" alt="${dish.name}" class="w-full h-full object-cover rounded-full hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'" />
+                        </div>
+                        <div class="relative z-10 max-w-[62%] sm:max-w-md space-y-1.5 sm:space-y-2.5">
+                            <span class="px-2.5 py-0.5 rounded-lg text-[9.5px] sm:text-[10px] font-mono font-bold border uppercase tracking-widest inline-block bg-amber-500/10 text-amber-400 border-amber-500/30">
+                                Món Bán Chạy Đất Thánh
+                            </span>
+                            <h2 class="text-sm sm:text-xl md:text-2xl font-black text-white leading-tight uppercase line-clamp-1">
+                                ${dish.name}
+                            </h2>
+                            <p class="text-[10.5px] sm:text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                                ${safeDesc}
+                            </p>
+                            <div class="pt-1 flex items-center gap-2.5 sm:gap-4">
+                                <span class="text-sm sm:text-lg font-black font-mono text-amber-400 shrink-0">
+                                    ${safePrice}đ
+                                </span>
+                                <button type="button" 
+                                        onclick="D2CStoreFrontController.openCustomizerModal('${dish.id}')" 
+                                        class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-95 text-slate-950 font-black text-[11px] sm:text-xs uppercase tracking-wider transition shadow-lg shadow-orange-500/25 active:scale-95 flex items-center gap-1.5 shrink-0">
+                                    <i class="fa-solid fa-cart-plus text-[10px]"></i>
+                                    <span>Đặt Món</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function renderHeroDots(total) {
+            var dotsBox = document.getElementById("carousel-dots");
+            if (!dotsBox || total <= 1) return;
+            var html = "";
+            for (var i = 0; i < total; i++) {
+                var activeClass = (i === 0) ? "w-5 bg-amber-400" : "w-1.5 bg-slate-700 hover:bg-slate-500";
+                html += `<button type="button" onclick="D2CStoreFrontController.goToSlide(${i})" class="carousel-dot h-1.5 rounded-full transition-all duration-300 ${activeClass}"></button>`;
+            }
+            dotsBox.innerHTML = html;
+        }
+
+        function goToSlide(index) {
+            var track = document.getElementById("carousel-track");
+            var dots = document.querySelectorAll(".carousel-dot");
+            if (!track || !appState.heroSlides.length) return;
+            appState.carouselIndex = index;
+            track.style.transform = "translateX(-" + (index * 100) + "%)";
+            dots.forEach(function(dot, idx) {
+                if (idx === index) dot.className = "carousel-dot h-1.5 rounded-full bg-amber-400 w-5 transition-all duration-300";
+                else dot.className = "carousel-dot h-1.5 rounded-full bg-slate-700 w-1.5 hover:bg-slate-500 transition-all duration-300";
+            });
+        }
+
+        function nextSlide() {
+            if (!appState.heroSlides.length) return;
+            var next = (appState.carouselIndex + 1) % appState.heroSlides.length;
+            goToSlide(next);
+        }
+
+        function prevSlide() {
+            if (!appState.heroSlides.length) return;
+            var prev = (appState.carouselIndex - 1 + appState.heroSlides.length) % appState.heroSlides.length;
+            goToSlide(prev);
+        }
+
+        function bindHeroCarouselEvents() {
+            var viewport = document.getElementById("carousel-viewport");
+            if (!viewport) return;
+            viewport.addEventListener("mouseenter", function() {
+                if (appState.carouselTimer) clearInterval(appState.carouselTimer);
+            });
+            viewport.addEventListener("mouseleave", function() {
+                if (appState.carouselTimer) clearInterval(appState.carouselTimer);
+                appState.carouselTimer = setInterval(nextSlide, 4500);
+            });
+        }
+
+        /**
+         * RENDER DANH SÁCH MÓN ĂN TRÊN MENU GRID (NEO TÂM LÝ GIÁ APP)
+         */
+        function renderMenuGrid() {
+            var grid = document.getElementById("dish-menu-grid");
+            var countLabel = document.getElementById("disp-dish-count-label");
+            if (!grid) return;
+
+            var list = FALLBACK_MENU.filter(function(item) {
+                var currentCat = String(appState.currentCategory || "all").toLowerCase().trim();
+                var itemCat = String(item.cat || "").toLowerCase().trim();
+
+                var matchCat = (currentCat === "all") || (itemCat === currentCat);
+                if (currentCat === "cơm" || currentCat === "com") {
+                    matchCat = (itemCat === "cơm" || itemCat === "com");
+                }
+
+                var matchSearch = true;
+                if (appState.searchKeyword) {
+                    var kw = String(appState.searchKeyword).toLowerCase().trim();
+                    var itemName = String(item.name || "").toLowerCase();
+                    var itemDesc = String(item.desc || "").toLowerCase();
+                    matchSearch = (itemName.indexOf(kw) !== -1 || itemDesc.indexOf(kw) !== -1);
+                }
+
+                return matchCat && matchSearch;
+            });
+
+            if (countLabel) countLabel.innerText = list.length + " món";
+
+            if (list.length === 0) {
+                grid.innerHTML = '<div class="p-8 text-center text-slate-500 text-xs">Không tìm thấy món phù hợp. Quý khách vui lòng chọn tab "Tất Cả Món"!</div>';
+                return;
+            }
+
+            grid.innerHTML = list.map(function(dish) {
+                var priceNum = Number(dish.price) || 0;
+                var appPriceNum = Number(dish.appPrice) || Math.round(priceNum * 1.15);
+                var safeDesc = dish.desc || "Hương vị thơm ngon đặc trưng Bếp Thím 5.";
+                var safeImg = dish.img || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
+                var isHotBadge = dish.isHot ? '<span class="px-1.5 py-0.2 rounded-md bg-red-500/20 text-red-400 text-[9px] font-bold border border-red-500/30 shrink-0">Bán Chạy</span>' : '';
+
+                return `
+                    <div class="p-3 rounded-2xl bg-slate-900 border border-slate-800/80 hover:border-slate-700 transition flex gap-3 shadow-sm">
+                        <img src="${safeImg}" alt="${dish.name}" class="w-20 h-20 rounded-xl object-cover shrink-0 border border-slate-800" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'">
+                        <div class="flex-1 flex flex-col justify-between min-w-0">
+                            <div>
+                                <div class="flex items-center gap-1.5">
+                                    <h4 class="text-xs font-black text-white truncate">${dish.name}</h4>
+                                    ${isHotBadge}
+                                </div>
+                                <p class="text-[10px] text-slate-400 line-clamp-2 mt-0.5">${safeDesc}</p>
+                            </div>
+                            <div class="flex items-center justify-between pt-1">
+                                <div class="flex items-baseline gap-1.5">
+                                    <span class="text-xs font-mono font-black text-amber-400">${priceNum.toLocaleString("vi-VN")} đ</span>
+                                    <span class="text-[9.5px] font-mono text-slate-500 line-through">${appPriceNum.toLocaleString("vi-VN")}đ</span>
+                                </div>
+                                <button type="button" 
+                                        onclick="D2CStoreFrontController.openCustomizerModal('${dish.id}')" 
+                                        class="px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-black uppercase tracking-wider transition shadow flex items-center gap-1 active:scale-95">
+                                    <i class="fa-solid fa-plus text-[9px]"></i> Thêm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function filterCategory(cat, btnEl) {
+            appState.currentCategory = cat;
+            document.querySelectorAll(".cat-tab-btn").forEach(function(b) {
+                b.className = "cat-tab-btn shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 bg-slate-900 border border-slate-800 hover:text-white transition flex items-center gap-1.5";
+            });
+            if (btnEl) {
+                btnEl.className = "cat-tab-btn shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-slate-950 shadow-sm active";
+            }
+            renderMenuGrid();
+        }
+
+        function onSearchInput(val) {
+            appState.searchKeyword = val || "";
+            var btnClear = document.getElementById("btn-clear-search");
+            if (btnClear) {
+                if (appState.searchKeyword) btnClear.classList.remove("hidden");
+                else btnClear.classList.add("hidden");
+            }
+            renderMenuGrid();
+        }
+
+        function clearSearch() {
+            var inp = document.getElementById("inp-search-dish");
+            if (inp) inp.value = "";
+            onSearchInput("");
+        }
+        /**
+         * MỞ MODAL TÙY CHỌN MÓN ĐA NĂNG
+         */
+        function openCustomizerModal(dishId) {
+            var dish = FALLBACK_MENU.find(function(d) { return d.id === dishId; });
+            if (!dish) return;
+
+            trackMarketingEvent("ViewContent", {
+                content_name: dish.name,
+                content_ids: [dish.id],
+                content_type: "product",
+                value: dish.price,
+                currency: "VND"
+            });
+
+            if (dish.cat === "giai-khat" && dish.id === "M10") {
+                appState.cartItems.push({
+                    id: dish.id + "_" + Date.now(),
+                    dishId: dish.id,
+                    name: dish.name,
+                    basePrice: Number(dish.price) || 10000,
+                    price: Number(dish.price) || 10000,
+                    quantity: 1,
+                    taste: "Không Cay",
+                    sauce: "",
+                    sauceFee: 0,
+                    toppings: [],
+                    note: "",
+                    isGift: false
+                });
+                updateAovAndCartUI();
+                alert("💧 Đã thêm \"" + dish.name + "\" vào giỏ hàng thành công!");
+                return;
+            }
+
+            appState.currentCustomizingDish = dish;
+            appState.customizerQty = 1;
+            activeCustomizerToppingIds = [];
+
+            var modal = document.getElementById("modal-dish-customizer");
+            var elImg = document.getElementById("cust-dish-img");
+            var elName = document.getElementById("cust-dish-name");
+            var elBasePrice = document.getElementById("cust-dish-base-price");
+            var elAppPrice = document.getElementById("cust-dish-app-price");
+            var elCatBadge = document.getElementById("cust-dish-cat-badge");
+            var elQty = document.getElementById("cust-dish-qty");
+            var boxTaste = document.getElementById("box-taste-selector");
+            var boxSauce = document.getElementById("box-sauce-selector");
+            var boxTopping = document.getElementById("box-topping-selector");
+            var noteEl = document.getElementById("cust-dish-note");
+
+            var dishPriceNum = Number(dish.price) || 0;
+            var dishAppPriceNum = Number(dish.appPrice) || Math.round(dishPriceNum * 1.15);
+
+            if (elImg) elImg.src = dish.img || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400";
+            if (elName) elName.innerText = dish.name;
+            if (elBasePrice) elBasePrice.innerText = dishPriceNum.toLocaleString("vi-VN") + " đ";
+            if (elAppPrice) {
+                elAppPrice.innerText = dishAppPriceNum.toLocaleString("vi-VN") + " đ";
+                elAppPrice.classList.remove("hidden");
+            }
+            if (elQty) elQty.innerText = "1";
+            if (noteEl) noteEl.value = "";
+
+            var catLower = String(dish.cat || "").toLowerCase().trim();
+
+            if (catLower === "cơm" || catLower === "com") {
+                if (elCatBadge) elCatBadge.innerText = "Món Cơm Đất Thánh";
+                if (boxTaste) boxTaste.classList.add("hidden");
+                if (boxSauce) boxSauce.classList.remove("hidden");
+                if (boxTopping) boxTopping.classList.remove("hidden");
+                selectSauce("Nước Tương Ớt Tỏi Dã Tay", 2000);
+                renderCustomizerToppingsList();
+            } else if (catLower === "giai-khat") {
+                if (elCatBadge) elCatBadge.innerText = "Giải Khát (1L)";
+                if (boxTaste) boxTaste.classList.add("hidden");
+                if (boxSauce) boxSauce.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.add("hidden");
+                appState.currentTaste = "Không Cay";
+                appState.currentSauce = "";
+                appState.currentSauceFee = 0;
+            } else if (catLower === "an-kem") {
+                if (elCatBadge) elCatBadge.innerText = "Món Ăn Kèm";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                if (boxSauce) boxSauce.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.add("hidden");
+                selectTaste("Cay Nhẹ");
+            } else {
+                if (elCatBadge) elCatBadge.innerText = (catLower === "combo") ? "Combo Đại Tiệc" : "Mì Trộn Khô";
+                if (boxTaste) boxTaste.classList.remove("hidden");
+                if (boxSauce) boxSauce.classList.add("hidden");
+                if (boxTopping) boxTopping.classList.remove("hidden");
+                appState.currentSauce = "";
+                appState.currentSauceFee = 0;
+                selectTaste("Cay Nhẹ");
+                renderCustomizerToppingsList();
+            }
+
+            updateCustomizerPrice();
+            if (modal) modal.classList.remove("hidden");
+        }
+
+        function closeCustomizerModal() {
+            var modal = document.getElementById("modal-dish-customizer");
+            if (modal) modal.classList.add("hidden");
+        }
+
+        function renderCustomizerToppingsList() {
+            var container = document.getElementById("customizer-toppings-list");
+            if (!container) return;
+
+            container.innerHTML = TOPPING_PRESETS.map(function(top) {
+                var isChecked = activeCustomizerToppingIds.indexOf(top.id) !== -1;
+                var safeIcon = top.icon || "🥗";
+                return `
+                    <label class="p-2.5 rounded-xl bg-slate-950 border ${isChecked ? 'border-amber-500 bg-amber-500/10' : 'border-slate-800'} hover:border-slate-700 transition flex items-center justify-between cursor-pointer select-none">
+                        <div class="flex items-center gap-2.5">
+                            <input type="checkbox" 
+                                   value="${top.id}" 
+                                   ${isChecked ? 'checked' : ''} 
+                                   onchange="D2CStoreFrontController.toggleCustomizerTopping('${top.id}', this.checked)"
+                                   class="w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-0 cursor-pointer">
+                            <span class="text-base">${safeIcon}</span>
+                            <span class="text-xs font-bold text-slate-200">${top.name}</span>
+                        </div>
+                        <span class="text-xs font-mono font-bold text-emerald-400">+${Number(top.price).toLocaleString("vi-VN")} đ</span>
+                    </label>
+                `;
+            }).join("");
+        }
+
+        function toggleCustomizerTopping(topId, isChecked) {
+            var idx = activeCustomizerToppingIds.indexOf(topId);
+            if (isChecked && idx === -1) activeCustomizerToppingIds.push(topId);
+            else if (!isChecked && idx !== -1) activeCustomizerToppingIds.splice(idx, 1);
+            renderCustomizerToppingsList();
+            updateCustomizerPrice();
+        }
+
+        function selectTaste(taste, btnEl) {
+            appState.currentTaste = taste;
+            document.querySelectorAll(".btn-taste-option").forEach(function(b) {
+                var t = b.getAttribute("data-taste");
+                if (t === taste) b.className = "btn-taste-option p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-center transition flex flex-col items-center gap-1 active";
+                else b.className = "btn-taste-option p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-center transition flex flex-col items-center gap-1";
+            });
+        }
+
+        function selectSauce(sauceName, sauceFee, btnEl) {
+            appState.currentSauce = sauceName;
+            appState.currentSauceFee = Number(sauceFee) || 0;
+
+            document.querySelectorAll(".btn-sauce-option").forEach(function(b) {
+                var s = b.getAttribute("data-sauce");
+                var checkIcon = b.querySelector(".check-icon");
+                if (s === sauceName) {
+                    b.className = "btn-sauce-option p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-left transition flex flex-col justify-between active";
+                    if (checkIcon) checkIcon.classList.remove("hidden");
+                } else {
+                    b.className = "btn-sauce-option p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-left transition flex flex-col justify-between";
+                    if (checkIcon) checkIcon.classList.add("hidden");
+                }
+            });
+
+            updateCustomizerPrice();
+        }
+
+        function adjustCustomizerQty(delta) {
+            var n = appState.customizerQty + delta;
+            if (n < 1) n = 1;
+            appState.customizerQty = n;
+            var elQty = document.getElementById("cust-dish-qty");
+            if (elQty) elQty.innerText = String(n);
+            updateCustomizerPrice();
+        }
+
+        function updateCustomizerPrice() {
+            if (!appState.currentCustomizingDish) return;
+
+            var basePrice = Number(appState.currentCustomizingDish.price) || 0;
+            var sauceFee = Number(appState.currentSauceFee) || 0;
+            var toppingsTotal = 0;
+
+            activeCustomizerToppingIds.forEach(function(topId) {
+                var top = TOPPING_PRESETS.find(function(t) { return t.id === topId; });
+                if (top) toppingsTotal += Number(top.price) || 0;
+            });
+
+            var unitPriceWithExtras = basePrice + sauceFee + toppingsTotal;
+            var grandTotal = unitPriceWithExtras * appState.customizerQty;
+
+            var elBtnPrice = document.getElementById("cust-total-btn-price");
+            if (elBtnPrice) elBtnPrice.innerText = grandTotal.toLocaleString("vi-VN") + " đ";
+        }
+
+        function confirmAddToCart() {
+            if (!appState.currentCustomizingDish) return;
+
+            var noteEl = document.getElementById("cust-dish-note");
+            var noteVal = noteEl ? noteEl.value.trim() : "";
+
+            var basePrice = Number(appState.currentCustomizingDish.price) || 0;
+            var sauceFee = Number(appState.currentSauceFee) || 0;
+            var toppingsTotalUnit = 0;
+            var selectedToppingObjects = [];
+
+            activeCustomizerToppingIds.forEach(function(topId) {
+                var top = TOPPING_PRESETS.find(function(t) { return t.id === topId; });
+                if (top) {
+                    toppingsTotalUnit += Number(top.price) || 0;
+                    selectedToppingObjects.push(top);
+                }
+            });
+
+            var finalUnitPrice = basePrice + sauceFee + toppingsTotalUnit;
+
+            var cartItem = {
+                id: appState.currentCustomizingDish.id + "_" + Date.now(),
+                dishId: appState.currentCustomizingDish.id,
+                name: appState.currentCustomizingDish.name,
+                basePrice: basePrice,
+                price: finalUnitPrice,
+                quantity: appState.customizerQty,
+                taste: appState.currentTaste,
+                sauce: appState.currentSauce,
+                sauceFee: sauceFee,
+                toppings: selectedToppingObjects,
+                note: noteVal,
+                isGift: false
+            };
+
+            appState.cartItems.push(cartItem);
+
+            trackMarketingEvent("AddToCart", {
+                content_name: cartItem.name,
+                content_ids: [cartItem.dishId],
+                content_type: "product",
+                value: cartItem.price * cartItem.quantity,
+                currency: "VND"
+            });
+
+            closeCustomizerModal();
+            updateAovAndCartUI();
+
+            var floatingBar = document.getElementById("floating-cart-bar");
+            if (floatingBar) {
+                floatingBar.classList.add("scale-105");
+                setTimeout(function() { floatingBar.classList.remove("scale-105"); }, 200);
+            }
+        }
+
+        /**
+         * CẬP NHẬT GIỎ HÀNG & TIẾN TRÌNH AOV VÒNG QUAY
+         */
+        function updateAovAndCartUI() {
+            var subtotal = 0;
+            var totalQty = 0;
+
+            appState.cartItems.forEach(function(item) {
+                if (!item.isGift) {
+                    subtotal += (item.price * item.quantity);
+                    totalQty += item.quantity;
+                }
+            });
+
+            if (subtotal < STORE_BASE_CONFIG.minAovThreshold && appState.appliedGift) {
+                appState.appliedGift = null;
+                alert("⚠️ Đơn hàng chưa đạt mốc 79.000đ. Phần quà tặng may mắn đã tạm thời được gỡ bỏ khỏi giỏ hàng!");
+            }
+
+            var floatingBar = document.getElementById("floating-cart-bar");
+            var badgeQty = document.getElementById("badge-cart-total-qty");
+            var dispSubtotal = document.getElementById("disp-bottom-cart-subtotal");
+
+            if (totalQty > 0) {
+                if (floatingBar) floatingBar.classList.remove("hidden");
+                if (badgeQty) badgeQty.innerText = String(totalQty);
+                if (dispSubtotal) dispSubtotal.innerText = subtotal.toLocaleString("vi-VN") + " đ";
+            } else {
+                if (floatingBar) floatingBar.classList.add("hidden");
+            }
+
+            var targetAov = STORE_BASE_CONFIG.minAovThreshold;
+            var pct = Math.min(Math.round((subtotal / targetAov) * 100), 100);
+            var fillBar = document.getElementById("aov-progress-fill");
+            var glow = document.getElementById("aov-glow-effect");
+            var titleTxt = document.getElementById("aov-title-text");
+            var descTxt = document.getElementById("aov-desc-text");
+            var btnLabel = document.getElementById("txt-aov-btn-label");
+
+            if (fillBar) fillBar.style.width = pct + "%";
+
+            if (subtotal >= targetAov) {
+                if (glow) glow.classList.remove("hidden");
+                if (titleTxt) titleTxt.innerText = "🎉 ĐÃ MỞ KHÓA VÒNG QUAY!";
+                if (descTxt) descTxt.innerHTML = '<span class="text-emerald-400 font-bold">100% Nhận Trứng Đào / Trà Đào 1L Miễn Phí!</span>';
+                if (btnLabel) btnLabel.innerText = "Quay Ngay";
+            } else {
+                var gap = targetAov - subtotal;
+                if (glow) glow.classList.add("hidden");
+                if (titleTxt) titleTxt.innerText = "VÒNG QUAY THẦN VỊ";
+                if (descTxt) descTxt.innerHTML = 'Thêm <strong class="text-amber-400 font-mono">' + gap.toLocaleString("vi-VN") + 'đ</strong> để nhận 1 lượt quay!';
+                if (btnLabel) btnLabel.innerText = "Chi Tiết";
+            }
+
+            renderCartDrawerItems(subtotal);
+            renderCheckoutReviewTree(subtotal);
+        }
+
+        function renderCartDrawerItems(subtotal) {
+            var container = document.getElementById("cart-items-list-container");
+            var countTxt = document.getElementById("disp-drawer-cart-items-count");
+            var drawerSubtotal = document.getElementById("disp-drawer-subtotal");
+            var drawerSubsidy = document.getElementById("disp-drawer-shipping-subsidy");
+            var drawerFinal = document.getElementById("disp-drawer-final-total");
+            var giftBox = document.getElementById("cart-gift-reward-box");
+
+            if (countTxt) countTxt.innerText = appState.cartItems.length + " món trong giỏ";
+
+            if (container) {
+                container.innerHTML = appState.cartItems.map(function(item, idx) {
+                    var sauceHtml = item.sauce ? `<div class="text-[10px] text-amber-300 font-bold ml-2">↳ Nước chấm: ${item.sauce} ${item.sauceFee > 0 ? '(+' + item.sauceFee.toLocaleString('vi-VN') + 'đ)' : ''}</div>` : '';
+                    var tasteHtml = item.taste ? `<span class="text-amber-400 font-semibold ml-2">• Khẩu vị: ${item.taste}</span>` : '';
+                    var toppingsHtml = (item.toppings && item.toppings.length > 0)
+                        ? item.toppings.map(function(t) { return `<div class="text-[10px] text-emerald-400 ml-2">↳ 1x ${t.name} (+${Number(t.price).toLocaleString('vi-VN')}đ)</div>`; }).join("")
+                        : "";
+
+                    return `
+                        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+                            <div class="flex items-center justify-between gap-2 border-b border-slate-900 pb-1.5">
+                                <div class="min-w-0 flex-1">
+                                    <h5 class="font-black text-white text-xs truncate">
+                                        <span class="text-amber-400 font-mono">${item.quantity}x</span> ${item.name}
+                                    </h5>
+                                    <span class="text-[10px] font-mono text-slate-400">Đơn giá món: ${Number(item.basePrice).toLocaleString('vi-VN')}đ</span>
+                                </div>
+                                <div class="flex items-center gap-2.5 shrink-0">
+                                    <span class="font-mono font-black text-xs text-amber-400">${(item.price * item.quantity).toLocaleString("vi-VN")} đ</span>
+                                    <div class="flex items-center bg-slate-900 rounded-lg border border-slate-800">
+                                        <button type="button" onclick="D2CStoreFrontController.changeCartQty(${idx}, -1)" class="w-5 h-5 flex items-center justify-center text-slate-300 font-bold text-[10px] active:scale-90">-</button>
+                                        <span class="w-5 text-center font-mono font-bold text-[11px] text-white">${item.quantity}</span>
+                                        <button type="button" onclick="D2CStoreFrontController.changeCartQty(${idx}, 1)" class="w-5 h-5 flex items-center justify-center text-slate-300 font-bold text-[10px] active:scale-90">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="space-y-0.5 pt-0.5">
+                                ${tasteHtml}
+                                ${sauceHtml}
+                                ${toppingsHtml}
+                                ${item.note ? `<div class="text-[9.5px] text-slate-400 italic ml-2">Ghi chú: "${item.note}"</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join("");
+            }
+
+            if (appState.appliedGift && giftBox) {
+                giftBox.classList.remove("hidden");
+                var nameEl = document.getElementById("disp-cart-gift-name");
+                var tokenEl = document.getElementById("disp-cart-gift-token");
+                if (nameEl) nameEl.innerText = appState.appliedGift.name;
+                if (tokenEl) tokenEl.innerText = "Mã xác thực: " + appState.appliedGift.giftToken;
+            } else if (giftBox) {
+                giftBox.classList.add("hidden");
+            }
+
+            if (drawerSubtotal) drawerSubtotal.innerText = subtotal.toLocaleString("vi-VN") + " đ";
+            if (drawerSubsidy) drawerSubsidy.innerText = "-" + appState.shippingSubsidy.toLocaleString("vi-VN") + " đ";
+            if (drawerFinal) drawerFinal.innerText = subtotal.toLocaleString("vi-VN") + " đ";
+        }
+
+        function renderCheckoutReviewTree(subtotal) {
+            var treeBox = document.getElementById("checkout-items-tree-review");
+            var countLabel = document.getElementById("chk-review-items-count");
+            if (!treeBox) return;
+
+            if (countLabel) countLabel.innerText = appState.cartItems.length + " món";
+
+            if (appState.cartItems.length === 0) {
+                treeBox.innerHTML = '<div class="text-slate-500 text-center py-2 text-xs font-medium">Chưa có món nào được chọn.</div>';
+                return;
+            }
+
+            treeBox.innerHTML = appState.cartItems.map(function(item, idx) {
+                var sauceLine = item.sauce ? `<div class="text-[10.5px] text-amber-300 font-bold ml-3">↳ Nước chấm: ${item.sauce} ${item.sauceFee > 0 ? '(+' + item.sauceFee.toLocaleString('vi-VN') + 'đ)' : ''}</div>` : '';
+                var tasteLine = item.taste ? `<div class="text-[10px] text-slate-400 ml-3">• Khẩu vị: ${item.taste}</div>` : '';
+                var toppingLines = (item.toppings && item.toppings.length > 0)
+                    ? item.toppings.map(function(t) { return `<div class="text-[10.5px] text-emerald-400 font-medium ml-3">↳ 1x ${t.name} (+${Number(t.price).toLocaleString('vi-VN')}đ)</div>`; }).join("")
+                    : "";
+
+                return `
+                    <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                        <div class="flex justify-between items-center text-xs">
+                            <strong class="font-black text-white text-xs">
+                                <span class="text-amber-400 font-mono">${item.quantity}x</span> ${item.name}
+                            </strong>
+                            <strong class="font-mono font-black text-amber-400">${(item.price * item.quantity).toLocaleString('vi-VN')} đ</strong>
+                        </div>
+                        <div class="space-y-0.5 pt-0.5 border-t border-slate-900">
+                            ${tasteLine}
+                            ${sauceLine}
+                            ${toppingLines}
+                            ${item.note ? `<div class="text-[10px] text-slate-400 italic ml-3">Ghi chú: ${item.note}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function changeCartQty(index, delta) {
+            var item = appState.cartItems[index];
+            if (!item) return;
+            item.quantity += delta;
+            if (item.quantity <= 0) appState.cartItems.splice(index, 1);
+            updateAovAndCartUI();
+        }
+
+        function removeGiftFromCart() {
+            appState.appliedGift = null;
+            updateAovAndCartUI();
+        }
+
+        function openCartDrawer() {
+            var drawer = document.getElementById("drawer-cart-detail");
+            if (drawer) drawer.classList.remove("hidden");
+        }
+
+        function closeCartDrawer() {
+            var drawer = document.getElementById("drawer-cart-detail");
+            if (drawer) drawer.classList.add("hidden");
+        }
+
+        function onAovBarClick() {
+            openLuckyWheelModal();
+        }
+
+        async function openLuckyWheelModal() {
+            var mountPoint = document.getElementById("wheel-mount-point");
+            if (!mountPoint) return;
+
+            var subtotal = 0;
+            appState.cartItems.forEach(function(i) { subtotal += (i.price * i.quantity); });
+
+            if (!appState.isWheelLoaded) {
+                try {
+                    var res = await fetch("wheel.html");
+                    var rawHtml = await res.text();
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(rawHtml, "text/html");
+
+                    mountPoint.innerHTML = "";
+                    var scripts = [];
+                    Array.from(doc.body.children).forEach(function(el) {
+                        if (el.tagName.toLowerCase() === "script") scripts.push(el);
+                        else mountPoint.appendChild(el);
+                    });
+
+                    scripts.forEach(function(s) {
+                        var ns = document.createElement("script");
+                        ns.textContent = s.textContent;
+                        document.body.appendChild(ns);
+                    });
+
+                    appState.isWheelLoaded = true;
+                } catch (e) {
+                    console.error("❌ Lỗi nạp wheel.html:", e);
+                }
+            }
+
+            if (window.WheelComponentController && typeof window.WheelComponentController.openModal === "function") {
+                var phoneEl = document.getElementById("chk-customer-phone");
+                var phone = phoneEl ? phoneEl.value.trim() : "";
+                window.WheelComponentController.openModal(subtotal, phone);
+            }
+        }
+
+        function initGiftEventListener() {
+            window.addEventListener("t5_gift_injected", function(evt) {
+                if (evt && evt.detail) {
+                    appState.appliedGift = evt.detail;
+                    updateAovAndCartUI();
+                }
+            });
+        }
+
+        function initPwaInstaller() {
+            var btnInstall = document.getElementById("btn-install-pwa");
+            window.addEventListener("beforeinstallprompt", function(e) {
+                e.preventDefault();
+                appState.deferredPwaPrompt = e;
+                if (btnInstall) btnInstall.classList.remove("hidden");
+            });
+            var isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            var isStandalone = window.navigator.standalone || window.matchMedia("(display-mode: standalone)").matches;
+            if (isIos && !isStandalone && btnInstall) {
+                btnInstall.classList.remove("hidden");
+            }
+        }
+
+        function handleInstallPwaClick() {
+            if (appState.deferredPwaPrompt) {
+                appState.deferredPwaPrompt.prompt();
+                appState.deferredPwaPrompt.userChoice.then(function() {
+                    appState.deferredPwaPrompt = null;
+                });
+            } else {
+                alert("Để ghim ứng dụng lên màn hình chính:\n- Trên Safari iOS: Bấm nút Chia sẻ (biểu tượng mũi tên) ➔ Chọn 'Thêm vào MH chính'.\n- Trên Chrome Android: Bấm menu 3 chấm ➔ Chọn 'Cài đặt ứng dụng'.");
+            }
+        }
+
+        /**
+         * THUẬT TOÁN HAVERSINE ĐO KHOẢNG CÁCH CHUẨN VỆ TINH SSOT
+         */
+        function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+            var R = 6371;
+            var dLat = (lat2 - lat1) * (Math.PI / 180);
+            var dLon = (lon2 - lon1) * (Math.PI / 180);
+            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return Number((R * c).toFixed(2));
+        }
+
+        /**
+         * LẤY ĐỊNH VỊ VỆ TINH GPS CHÍNH XÁC CỦA KHÁCH HÀNG
+         */
+        function detectCustomerGps() {
+            if (!navigator.geolocation) {
+                alert("⚠️ Thiết bị của quý khách không hỗ trợ cảm biến GPS!");
+                return;
+            }
+
+            var btn = document.getElementById("btn-detect-gps");
+            var origText = btn ? btn.innerHTML : "";
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-satellite-dish fa-spin text-amber-400"></i> Đang bắt vệ tinh...';
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                async function(pos) {
+                    var uLat = Number(pos.coords.latitude);
+                    var uLng = Number(pos.coords.longitude);
+
+                    appState.customerLocation = { lat: uLat, lng: uLng };
+                    appState.calculatedDistanceKm = calculateHaversineDistance(
+                        STORE_BASE_CONFIG.coords.lat, STORE_BASE_CONFIG.coords.lng,
+                        uLat, uLng
+                    );
+
+                    var addrEl = document.getElementById("chk-customer-address");
+                    if (addrEl) addrEl.value = `Vị trí vệ tinh GPS: ${uLat.toFixed(5)}, ${uLng.toFixed(5)} (Tây Ninh)`;
+
+                    recalculateShippingFee();
+
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Đã Có Vị Trí';
+                        setTimeout(function() { if (btn) btn.innerHTML = origText; }, 3000);
+                    }
+                },
+                function(err) {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = origText;
+                    }
+                    alert("❌ Không thể lấy GPS: Quý khách vui lòng cấp quyền vị trí hoặc gõ địa chỉ vào ô bên dưới!");
+                },
+                { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+            );
+        }
+
+        var addressDebounceTimer = null;
+
+        function onAddressInput(val) {
+            var query = String(val || "").trim();
+            var box = document.getElementById("address-suggestions-box");
+            var spinner = document.getElementById("addr-search-spinner");
+
+            if (addressDebounceTimer) clearTimeout(addressDebounceTimer);
+            if (query.length < 2) {
+                if (box) { box.classList.add("hidden"); box.innerHTML = ""; }
+                if (spinner) spinner.classList.add("hidden");
+                return;
+            }
+
+            if (spinner) spinner.classList.remove("hidden");
+
+            addressDebounceTimer = setTimeout(async function() {
+                try {
+                    var searchUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(query + ' Tây Ninh')}&lat=11.285267&lon=106.133347&lang=vi&limit=6`;
+                    var res = await fetch(searchUrl);
+                    var data = await res.json();
+                    if (spinner) spinner.classList.add("hidden");
+
+                    if (data && data.features && data.features.length > 0) {
+                        renderAddressSuggestions(data.features);
+                    } else if (box) {
+                        box.classList.remove("hidden");
+                        box.innerHTML = '<div class="p-3 text-center text-slate-500 text-xs">Không tìm thấy địa điểm quanh Tây Ninh. Quý khách vui lòng nhập số nhà, tên đường cụ thể.</div>';
+                    }
+                } catch (err) {
+                    if (spinner) spinner.classList.add("hidden");
+                }
+            }, 350);
+        }
+
+        function renderAddressSuggestions(features) {
+            var box = document.getElementById("address-suggestions-box");
+            if (!box) return;
+
+            var itemsHtml = features.map(function(item) {
+                var props = item.properties || {};
+                var coords = item.geometry ? item.geometry.coordinates : null;
+                if (!coords || coords.length < 2) return "";
+
+                var lon = Number(coords[0]);
+                var lat = Number(coords[1]);
+
+                var mainName = props.name || props.street || "Địa điểm Tây Ninh";
+                var detailParts = [];
+                if (props.housenumber && props.street) detailParts.push(`${props.housenumber} ${props.street}`);
+                else if (props.street && props.street !== mainName) detailParts.push(props.street);
+                if (props.district) detailParts.push(props.district);
+                if (props.city) detailParts.push(props.city);
+
+                var detailText = detailParts.join(", ") || "Tây Ninh, Việt Nam";
+                var safeName = mainName.replace(/'/g, "\\'");
+                var safeDetail = detailText.replace(/'/g, "\\'");
+
+                return `
+                    <div onclick="D2CStoreFrontController.selectSuggestedAddress('${safeName}', '${safeDetail}', ${lat}, ${lon})" 
+                         class="p-2.5 hover:bg-slate-800/90 cursor-pointer transition flex items-start gap-2.5 select-none">
+                        <i class="fa-solid fa-store text-amber-400 text-xs mt-1 shrink-0"></i>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-bold text-white truncate">${mainName}</div>
+                            <div class="text-[10px] text-slate-400 truncate">${detailText}</div>
+                        </div>
+                    </div>
+                `;
+            }).filter(Boolean).join("");
+
+            if (itemsHtml.length > 0) {
+                box.innerHTML = itemsHtml;
+                box.classList.remove("hidden");
+            } else {
+                box.classList.add("hidden");
+            }
+        }
+
+        function selectSuggestedAddress(mainName, detailText, lat, lng) {
+            var addrEl = document.getElementById("chk-customer-address");
+            var box = document.getElementById("address-suggestions-box");
+
+            if (addrEl) addrEl.value = `${mainName} (${detailText})`;
+            if (box) { box.classList.add("hidden"); box.innerHTML = ""; }
+
+            appState.customerLocation = { lat: Number(lat), lng: Number(lng) };
+            appState.calculatedDistanceKm = calculateHaversineDistance(
+                STORE_BASE_CONFIG.coords.lat, STORE_BASE_CONFIG.coords.lng,
+                Number(lat), Number(lng)
+            );
+
+            recalculateShippingFee();
+        }
+
+        function onAddressFocus() {
+            var addrEl = document.getElementById("chk-customer-address");
+            if (addrEl && addrEl.value.trim().length >= 2) {
+                onAddressInput(addrEl.value);
+            }
+        }
+
+        document.addEventListener("click", function(e) {
+            var box = document.getElementById("address-suggestions-box");
+            var input = document.getElementById("chk-customer-address");
+            if (box && input && !box.contains(e.target) && e.target !== input) {
+                box.classList.add("hidden");
+            }
+        });
+
+        /**
+         * CHỌN NHANH CỰ LY THỬ NGHIỆM CHUẨN DOD
+         */
+        function setManualDistance(km, label) {
+            appState.calculatedDistanceKm = Number(km);
+            var addrInput = document.getElementById("chk-customer-address");
+            if (addrInput) {
+                addrInput.value = label || (`Cự ly: ${km} km`);
+            }
+            recalculateShippingFee();
+        }
+
+        var phoneDebounceTimer = null;
+        function onPhoneInput(val) {
+            var phone = String(val || "").replace(/\D/g, '');
+            if (phoneDebounceTimer) clearTimeout(phoneDebounceTimer);
+            if (phone.length >= 10) {
+                phoneDebounceTimer = setTimeout(function() {
+                    checkCustomerCrmAndVip(phone);
+                }, 350);
+            } else {
+                var banner = document.getElementById("box-vip-status-banner");
+                if (banner) banner.classList.add("hidden");
+                appState.vipCustomer = null;
+                appState.tierDiscountAmount = 0;
+                recalculateShippingFee();
+            }
+        }
+
+        async function checkCustomerCrmAndVip(phone) {
+            try {
+                if (typeof Thim5API !== "undefined" && typeof Thim5API.callGAS === "function") {
+                    var res = await Thim5API.callGAS("lookupCustomerProfile", { phone: phone });
+                    if (res && res.status === "success" && res.data) {
+                        appState.vipCustomer = res.data;
+                        var banner = document.getElementById("box-vip-status-banner");
+                        var titleEl = document.getElementById("txt-vip-status-title");
+                        var msgEl = document.getElementById("txt-vip-status-msg");
+                        if (res.data.canAutoConfirm && banner) {
+                            banner.classList.remove("hidden");
+                            if (titleEl) titleEl.innerText = `✨ ${res.data.tierTitle} (${res.data.tasteName || 'Hội viên VIP'})`;
+                            if (msgEl) msgEl.innerText = `Đơn hàng được Bếp AUTO-CONFIRM & Nấu Ngay! (Giảm thêm ${res.data.tierDiscountPercent || 0}% VIP)`;
+                        } else if (banner) {
+                            banner.classList.add("hidden");
+                        }
+                        recalculateShippingFee();
+                    }
+                }
+            } catch (err) {
+                console.warn("⚠️ [CRM] Không thể tra cứu hội viên:", err);
+            }
+        }
+
+        /**
+         * TÍNH TOÁN CƯỚC SHIP ĐỘNG THUẦN KHIẾT TỪ SYS_CONFIG
+         * QUY TẮC CỐT TỬ: CỰ LY < 300m (0.3km) = 0đ (TẠI QUÁN / ĐI BỘ)
+         * CỰ LY >= 300m: TÍNH THEO ĐƠN GIÁ ĐỘNG (VD: 5.000đ/km) LÀM TRÒN LÊN
+         */
+        function recalculateShippingFee() {
+            var dist = (appState.calculatedDistanceKm !== undefined && appState.calculatedDistanceKm !== null) 
+                       ? Number(appState.calculatedDistanceKm) 
+                       : 1.8;
+
+            var walkThresholdKm = (Number(STORE_BASE_CONFIG.shippingLocalWalkMeters) || 300) / 1000;
+            var billedDist = Math.max(1, Math.ceil(dist));
+            appState.billedDistanceKm = billedDist;
+
+            var ratePerKm = Number(STORE_BASE_CONFIG.shippingRateCustomerPerKm) || 5000;
+            var minCustomerFee = Number(STORE_BASE_CONFIG.shippingMinCustomerFee) || 5000;
+
+            var calcFee = 0;
+            var sub = 0;
+            var reason = "";
+
+            if (dist < walkThresholdKm) {
+                calcFee = 0;
+                sub = 0;
+                reason = "Miễn phí tại quán (< 300m)";
+            } else {
+                calcFee = Math.max(minCustomerFee, Math.round(billedDist * ratePerKm));
+
+                var subtotal = 0;
+                var hasHighMarginItem = false;
+                appState.cartItems.forEach(function(i) {
+                    if (!i.isGift) {
+                        subtotal += (i.price * i.quantity);
+                        var dId = String(i.dishId || "");
+                        if (dId === "M09" || i.name.indexOf("Trà Đào") !== -1 || i.name.indexOf("Combo") !== -1) {
+                            hasHighMarginItem = true;
+                        }
+                    }
+                });
+
+                // ĐÁNH GIÁ CHIẾN DỊCH VOUCHER & TRỢ GIÁ SHIP ĐỘNG THUẦN KHIẾT SSOT
+                var promoEval = null;
+                if (window.Thim5Dictionary && typeof window.Thim5Dictionary.evaluateOrderPromoCampaigns === "function") {
+                    promoEval = window.Thim5Dictionary.evaluateOrderPromoCampaigns({
+                        cartItems: appState.cartItems,
+                        shippingFee: calcFee,
+                        campaigns: appState.promoCampaigns,
+                        masterFeePct: Number(STORE_BASE_CONFIG.masterPlatformFeeRate) || 5,
+                        taxPct: Number(STORE_BASE_CONFIG.taxHkdRate) || 4.5,
+                        maxPromoCapPct: Number(STORE_BASE_CONFIG.maxPromotionRate) || 15
+                    });
+                }
+
+                if (promoEval && promoEval.appliedCampaign) {
+                    sub = promoEval.shipDiscount || 0;
+                    reason = promoEval.appliedCampaign.name || "Voucher Trợ Giá Ship";
+                    appState.smartShipVoucher = {
+                        unlocked: true,
+                        campaign: promoEval.appliedCampaign,
+                        giftReward: promoEval.giftReward,
+                        shipDiscount: sub
+                    };
+                } else {
+                    // Fallback theo ngưỡng giá trị giỏ hàng truyền thống
+                    var freeshipThreshold = Number(STORE_BASE_CONFIG.freeshipMinSubtotal) || 149000;
+                    var maxSubsidy = Number(STORE_BASE_CONFIG.maxShippingSubsidy) || 20000;
+                    if (subtotal >= freeshipThreshold && subtotal > 0) {
+                        sub = Math.min(calcFee, maxSubsidy);
+                        reason = "Freeship đơn từ " + (freeshipThreshold / 1000) + "k";
+                    } else if (billedDist >= 4.0 && (subtotal >= 110000 && hasHighMarginItem)) {
+                        sub = Math.min(calcFee, Math.min(15000, maxSubsidy));
+                        reason = "Hỗ trợ đơn xa > 4km";
+                    } else if (billedDist >= 3.5 && subtotal >= 120000) {
+                        sub = Math.min(calcFee, Math.min(10000, maxSubsidy));
+                        reason = "Hỗ trợ đơn xa > 3.5km";
+                    }
+                    appState.smartShipVoucher = { unlocked: sub > 0, campaign: null, giftReward: null, shipDiscount: sub };
+                }
+
+                // Cập nhật giao diện Smart Voucher Box & Upsell Nudge
+                var badgeVoucher = document.getElementById("badge-ship-voucher-status");
+                var txtVoucherTitle = document.getElementById("txt-ship-voucher-title");
+                var txtVoucherDesc = document.getElementById("txt-ship-voucher-desc");
+                var boxNudge = document.getElementById("box-ship-upsell-nudge");
+                var txtNudge = document.getElementById("txt-ship-upsell-nudge");
+
+                if (promoEval && promoEval.appliedCampaign) {
+                    if (badgeVoucher) {
+                        badgeVoucher.className = "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                        badgeVoucher.innerText = "ĐÃ MỞ KHÓA: " + promoEval.appliedCampaign.name;
+                    }
+                    if (txtVoucherTitle) {
+                        var giftText = promoEval.giftReward ? " + 🎁 " + (promoEval.giftReward.desc || "Quà Tặng") : "";
+                        txtVoucherTitle.innerText = "Giảm " + (sub.toLocaleString("vi-VN")) + "đ ship" + giftText;
+                    }
+                    if (txtVoucherDesc) {
+                        txtVoucherDesc.innerText = "Trợ giá bảo vệ Lợi Nhuận Ròng (LNR) từ Bếp Thím 5";
+                    }
+                } else {
+                    if (badgeVoucher) {
+                        badgeVoucher.className = "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700";
+                        badgeVoucher.innerText = sub > 0 ? "ƯU ĐÃI ĐƠN HÀNG" : "CHƯA ĐẠT ĐIỀU KIỆN";
+                    }
+                    if (txtVoucherTitle) {
+                        txtVoucherTitle.innerText = sub > 0 ? ("Giảm " + sub.toLocaleString("vi-VN") + "đ ship") : "Chưa đủ điều kiện trợ giá";
+                    }
+                    if (txtVoucherDesc) {
+                        txtVoucherDesc.innerText = sub > 0 ? reason : "Tài trợ từ Lợi Nhuận Ròng thặng dư của Bếp";
+                    }
+                }
+
+                if (boxNudge && txtNudge) {
+                    if (promoEval && promoEval.primaryUpsellHint) {
+                        boxNudge.classList.remove("hidden");
+                        txtNudge.innerText = promoEval.primaryUpsellHint;
+                        appState.lastUpsellHint = promoEval.primaryUpsellHint;
+                    } else {
+                        boxNudge.classList.add("hidden");
+                    }
+                }
+            }
+
+            // KHÓA CỨNG TRẦN KHUYẾN MÃI TOÀN ĐƠN <= 15% DOANH THU GỘP (SYS_CONFIG)
+            var subtotalAmount = 0;
+            appState.cartItems.forEach(function(i) { if (!i.isGift) subtotalAmount += (i.price * i.quantity); });
+            var maxPromoPct = Number(STORE_BASE_CONFIG.maxPromotionRate) || 15;
+            var maxAllowedPromo = subtotalAmount > 0 ? Math.round(subtotalAmount * (maxPromoPct / 100)) : 0;
+
+            // Tính ưu đãi VIP Hội viên nếu có
+            var vipDiscount = 0;
+            if (appState.vipCustomer && appState.vipCustomer.tierDiscountPercent > 0 && subtotalAmount > 0) {
+                vipDiscount = Math.round(subtotalAmount * (Number(appState.vipCustomer.tierDiscountPercent) / 100));
+            }
+
+            var totalPromo = sub + vipDiscount;
+            if (totalPromo > maxAllowedPromo) {
+                var excess = totalPromo - maxAllowedPromo;
+                if (sub >= excess) {
+                    sub -= excess;
+                } else {
+                    excess -= sub;
+                    sub = 0;
+                    vipDiscount = Math.max(0, vipDiscount - excess);
+                }
+                reason = (reason ? reason + " • " : "") + "Khóa trần KM " + maxPromoPct + "%";
+            }
+
+            appState.tierDiscountAmount = vipDiscount;
+
+            var custPayShip = Math.max(0, calcFee - sub);
+
+            appState.shippingFee = calcFee;
+            appState.shippingSubsidy = sub;
+            appState.subsidyReason = reason;
+
+            var txtDist = document.getElementById("txt-calc-distance");
+            var txtFee = document.getElementById("txt-calc-shipping-fee");
+            var tagSubsidy = document.getElementById("txt-calc-subsidy-tag");
+
+            if (txtDist) {
+                if (dist < walkThresholdKm) {
+                    txtDist.innerHTML = '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-location-dot"></i> Tại quán (< 300m)</span>';
+                } else {
+                    txtDist.innerText = `Cự ly: ~${dist.toFixed(1)} km (Tính cước: ${billedDist.toFixed(1)} km)`;
+                }
+            }
+
+            if (txtFee) txtFee.innerText = custPayShip.toLocaleString("vi-VN") + " đ";
+
+            if (tagSubsidy) {
+                if (sub > 0) {
+                    tagSubsidy.classList.remove("hidden");
+                    tagSubsidy.innerText = custPayShip === 0 
+                        ? `(Freeship -${sub.toLocaleString('vi-VN')}đ)`
+                        : `(Trợ giá -${sub.toLocaleString('vi-VN')}đ)`;
+                } else {
+                    tagSubsidy.classList.add("hidden");
+                }
+            }
+
+            updateCheckoutSummary();
+        }
+
+        function updateCheckoutSummary() {
+            var subtotal = 0;
+            appState.cartItems.forEach(function(i) {
+                if (!i.isGift) subtotal += (i.price * i.quantity);
+            });
+
+            var fee = Number(appState.shippingFee) || 0;
+            var sub = Number(appState.shippingSubsidy) || 0;
+            var vipDisc = Number(appState.tierDiscountAmount) || 0;
+            var actualShip = Math.max(0, fee - sub);
+            var finalTotal = Math.max(0, subtotal - vipDisc) + actualShip;
+
+            var elSub = document.getElementById("chk-summary-subtotal");
+            var elFee = document.getElementById("chk-summary-shipping-fee");
+            var elSubTag = document.getElementById("chk-summary-subsidy");
+            var elFinal = document.getElementById("chk-summary-final-total");
+            var elVipRow = document.getElementById("chk-summary-vip-discount-row");
+            var elVipDisc = document.getElementById("chk-summary-vip-discount");
+
+            if (elSub) elSub.innerText = subtotal.toLocaleString("vi-VN") + " đ";
+            if (elFee) elFee.innerText = fee.toLocaleString("vi-VN") + " đ";
+            if (elSubTag) elSubTag.innerText = sub > 0 ? ("-" + sub.toLocaleString("vi-VN") + " đ" + (appState.subsidyReason ? " (" + appState.subsidyReason + ")" : "")) : "-0 đ";
+            if (elFinal) elFinal.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
+
+            if (elVipRow && elVipDisc) {
+                if (vipDisc > 0) {
+                    elVipRow.classList.remove("hidden");
+                    elVipDisc.innerText = "-" + vipDisc.toLocaleString("vi-VN") + " đ (" + (appState.vipCustomer ? appState.vipCustomer.tierTitle : "VIP") + ")";
+                } else {
+                    elVipRow.classList.add("hidden");
+                }
+            }
+
+            if (appState.selectedPaymentMethod === "VIETQR") {
+                renderDynamicVietQr(finalTotal);
+            }
+        }
+
+        function renderDynamicVietQr(amount) {
+            var now = new Date();
+            var yearStr = String(now.getFullYear()).slice(-2);
+            var monthStr = String(now.getMonth() + 1).padStart(2, '0');
+            var dayStr = String(now.getDate()).padStart(2, '0');
+            var randSuffix = Math.floor(1000 + Math.random() * 9000);
+            var tempMemo = "DH" + yearStr + monthStr + dayStr + "_" + randSuffix;
+
+            var bankBin = STORE_BASE_CONFIG.bankBin;
+            var bankAcc = STORE_BASE_CONFIG.bankAccount;
+            var qrUrl = `https://api.vietqr.io/image/${bankBin}-${bankAcc}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(tempMemo)}&accountName=${encodeURIComponent(STORE_BASE_CONFIG.accountHolder)}`;
+
+            var qrImg = document.getElementById("img-checkout-vietqr");
+            var memoEl = document.getElementById("disp-qr-payment-memo");
+            var bankEl = document.getElementById("disp-qr-bank-name");
+            var accEl = document.getElementById("disp-qr-account-no");
+            var holderEl = document.getElementById("disp-qr-account-holder");
+
+            if (qrImg) qrImg.src = qrUrl;
+            if (memoEl) memoEl.innerText = tempMemo;
+            if (bankEl) bankEl.innerText = STORE_BASE_CONFIG.bankCode;
+            if (accEl) accEl.innerText = STORE_BASE_CONFIG.bankAccount;
+            if (holderEl) holderEl.innerText = STORE_BASE_CONFIG.accountHolder;
+        }
+
+        
+        function toggleSmartShipVoucher() {
+            if (appState.smartShipVoucher && appState.smartShipVoucher.unlocked) {
+                appState.isSmartShipVoucherApplied = !appState.isSmartShipVoucherApplied;
+                if (!appState.isSmartShipVoucherApplied) {
+                    appState.shippingSubsidy = 0;
+                    appState.subsidyReason = "";
+                }
+                updateCheckoutSummary();
+            }
+        }
+
+        function quickAddBooster() {
+            var hint = appState.lastUpsellHint || "";
+            var itemToAdd = null;
+
+            if (hint.indexOf("Nước") !== -1 || hint.indexOf("Đồ Uống") !== -1) {
+                itemToAdd = {
+                    dishId: "D_TRA_DAO",
+                    name: "Trà Đào Cam Sả Mát Lạnh",
+                    price: 20000,
+                    d2cPrice: 20000,
+                    cogs: 4000,
+                    quantity: 1,
+                    isGift: false,
+                    toppingIds: [],
+                    taste: "Thơm Ngọt Dịu",
+                    soup: "",
+                    sauce: "",
+                    sauceFee: 0
+                };
+            } else {
+                var booster = (typeof TOPPING_PRESETS !== "undefined" && TOPPING_PRESETS.length > 0) ? TOPPING_PRESETS[0] : null;
+                itemToAdd = {
+                    dishId: booster ? booster.id : "TP_TRUNG_LONG_DAO",
+                    name: booster ? booster.name : "Trứng Lòng Đào",
+                    price: booster ? booster.price : 6000,
+                    d2cPrice: booster ? booster.price : 6000,
+                    cogs: booster ? Math.round(booster.price * 0.20) : 1500,
+                    quantity: 1,
+                    isGift: false,
+                    toppingIds: [],
+                    taste: "",
+                    soup: "",
+                    sauce: "",
+                    sauceFee: 0
+                };
+            }
+
+            if (itemToAdd) {
+                appState.cartItems.push(itemToAdd);
+                renderCartDrawerItems(0);
+                renderCheckoutReviewTree(0);
+                recalculateShippingFee();
+                if (window.showToastNotification) {
+                    window.showToastNotification("Đã thêm: " + itemToAdd.name + "!", "success");
+                }
+            }
+        }
+
+        function selectPaymentMethod(method) {
+            appState.selectedPaymentMethod = method;
+            document.querySelectorAll(".btn-pay-method").forEach(function(b) {
+                var m = b.getAttribute("data-method");
+                if (m === method) b.className = "btn-pay-method p-2.5 rounded-xl bg-amber-500/10 border-2 border-amber-500 text-left transition flex flex-col gap-1 active";
+                else b.className = "btn-pay-method p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-left transition flex flex-col gap-1";
+            });
+
+            var qrBox = document.getElementById("box-vietqr-container");
+            if (qrBox) {
+                if (method === "VIETQR") qrBox.classList.remove("hidden");
+                else qrBox.classList.add("hidden");
+            }
+            updateCheckoutSummary();
+        }
+
+        function copyBankAcc() {
+            navigator.clipboard.writeText(STORE_BASE_CONFIG.bankAccount).then(function() {
+                alert("📋 Đã sao chép số tài khoản MBBank: " + STORE_BASE_CONFIG.bankAccount);
+            });
+        }
+
+        function proceedToCheckoutModal() {
+            if (appState.storeStatus === "CLOSED") {
+                alert("⛔ BẾP ĐANG TẠM NGHỈ:\n" + appState.closedMessage + "\nQuý khách vui lòng quay lại sau ít phút nhé!");
+                return;
+            }
+            if (appState.cartItems.length === 0) {
+                alert("⚠️ Giỏ hàng đang trống. Quý khách vui lòng chọn món trước!");
+                return;
+            }
+
+            var subtotal = 0;
+            appState.cartItems.forEach(function(i) { if (!i.isGift) subtotal += (i.price * i.quantity); });
+
+            trackMarketingEvent("InitiateCheckout", {
+                num_items: appState.cartItems.length,
+                value: subtotal,
+                currency: "VND"
+            });
+
+            closeCartDrawer();
+            var modal = document.getElementById("modal-checkout-order");
+            if (modal) modal.classList.remove("hidden");
+            recalculateShippingFee();
+        }
+
+        function closeCheckoutModal() {
+            var modal = document.getElementById("modal-checkout-order");
+            if (modal) modal.classList.add("hidden");
+            var box = document.getElementById("address-suggestions-box");
+            if (box) box.classList.add("hidden");
+        }
+
+        /**
+         * XÁC NHẬN GỬI ĐƠN VỀ BẾP - TRUYỀN TỌA ĐỘ GPS, BẪY HONEYPOT & BẢO VỆ CHỐNG SPAM
+         */
+        async function submitFinalOrder() {
+            var nameEl = document.getElementById("chk-customer-name");
+            var phoneEl = document.getElementById("chk-customer-phone");
+            var addrEl = document.getElementById("chk-customer-address");
+            var hpEl = document.getElementById("chk-hp-token");
+
+            var name = nameEl ? nameEl.value.trim() : "";
+            var phone = phoneEl ? phoneEl.value.trim().replace(/\D/g, '') : "";
+            var addr = addrEl ? addrEl.value.trim() : "";
+            var honeypotToken = hpEl ? hpEl.value.trim() : "";
+
+            if (!name) {
+                alert("⚠️ Quý khách vui lòng nhập Họ và Tên người nhận!");
+                if (nameEl) nameEl.focus();
+                return;
+            }
+
+            if (!phone || phone.length < 9) {
+                alert("⚠️ Quý khách vui lòng nhập Số Điện Thoại hợp lệ để Bếp và Shipper liên hệ!");
+                if (phoneEl) phoneEl.focus();
+                return;
+            }
+
+            if (!addr) {
+                alert("⚠️ Quý khách vui lòng nhập Địa Chỉ Giao Hàng hoặc bấm nút lấy vị trí GPS!");
+                if (addrEl) addrEl.focus();
+                return;
+            }
+
+            if (appState.cartItems.length === 0) {
+                alert("⚠️ Giỏ hàng đang trống!");
+                return;
+            }
+
+            var subtotal = 0;
+            appState.cartItems.forEach(function(i) {
+                if (!i.isGift) subtotal += (i.price * i.quantity);
+            });
+
+            var vipDisc = Number(appState.tierDiscountAmount) || 0;
+            var actualShip = Math.max(0, appState.shippingFee - appState.shippingSubsidy);
+            var finalTotal = Math.max(0, subtotal - vipDisc) + actualShip;
+
+            var now = new Date();
+            var yearStr = String(now.getFullYear()).slice(-2);
+            var monthStr = String(now.getMonth() + 1).padStart(2, '0');
+            var dayStr = String(now.getDate()).padStart(2, '0');
+            var randSuffix = Math.floor(1000 + Math.random() * 9000);
+            var orderCode = "DH" + yearStr + monthStr + dayStr + "_" + randSuffix;
+
+            var hierarchicalItemsTree = appState.cartItems.map(function(item) {
+                var lines = [];
+                lines.push("• " + item.quantity + "x " + item.name + " (" + Number(item.basePrice).toLocaleString("vi-VN") + "đ)");
+                if (item.sauce) lines.push("  ↳ Nước chấm: " + item.sauce + (item.sauceFee > 0 ? " (+" + item.sauceFee.toLocaleString("vi-VN") + "đ)" : ""));
+                if (item.taste) lines.push("  • Khẩu vị: " + item.taste);
+                if (item.toppings && item.toppings.length > 0) {
+                    item.toppings.forEach(function(t) {
+                        lines.push("  ↳ 1x " + t.name + " (+" + Number(t.price).toLocaleString("vi-VN") + "đ)");
+                    });
+                }
+                if (item.note) lines.push("  Ghi chú: " + item.note);
+                return lines.join("\n");
+            }).join("\n\n");
+
+            var gpsTag = "";
+            if (appState.customerLocation && appState.customerLocation.lat && appState.customerLocation.lng) {
+                gpsTag = `\n[GPS:${appState.customerLocation.lat},${appState.customerLocation.lng}]`;
+            }
+
+            var orderPayload = {
+                orderCode: orderCode,
+                orderId: orderCode,
+                customer: {
+                    name: name,
+                    phone: phone,
+                    address: addr,
+                    location: appState.customerLocation
+                },
+                items: appState.cartItems,
+                gift: appState.appliedGift,
+                giftName: appState.appliedGift ? appState.appliedGift.name : "",
+                subtotal: subtotal,
+                voucherDiscount: vipDisc,
+                tierDiscountAmount: vipDisc,
+                isVipAutoConfirmed: Boolean(appState.vipCustomer && appState.vipCustomer.canAutoConfirm),
+                distanceKm: appState.calculatedDistanceKm,
+                billedDistanceKm: appState.billedDistanceKm,
+                shippingFee: appState.shippingFee,
+                shippingSubsidy: appState.shippingSubsidy,
+                subsidyReason: appState.subsidyReason || "",
+                finalTotal: finalTotal,
+                paymentMethod: appState.selectedPaymentMethod,
+                serviceType: "FOOD_DELIVERY",
+                note: hierarchicalItemsTree + gpsTag,
+                hp_token: honeypotToken,
+                timestamp: now.toISOString()
+            };
+
+            var btnSubmit = document.getElementById("btn-submit-order");
+            var origText = btnSubmit ? btnSubmit.innerHTML : "";
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-base"></i> ĐANG TRUYỀN ĐƠN VỀ BẾP...';
+            }
+
+            try {
+                if (typeof Thim5API === "undefined" || typeof Thim5API.callGAS !== "function") {
+                    throw new Error("Không tìm thấy kết nối Thim5API (file api.js chưa nạp đúng)!");
+                }
+
+                var res = await Thim5API.callGAS("createD2COrder", orderPayload);
+
+                if (!res || (res.status !== "success" && res.code !== 200)) {
+                    throw new Error((res && res.message) ? res.message : "Máy chủ Bếp từ chối tiếp nhận đơn hàng!");
+                }
+
+                trackMarketingEvent("Purchase", {
+                    content_name: "Đơn hàng Thím 5",
+                    content_type: "product",
+                    value: finalTotal,
+                    currency: "VND",
+                    num_items: appState.cartItems.length,
+                    order_id: orderCode
+                });
+
+                sessionStorage.setItem("thim5_last_order", JSON.stringify(orderPayload));
+
+                closeCheckoutModal();
+                var successModal = document.getElementById("modal-order-success");
+                var codeEl = document.getElementById("disp-success-order-code");
+                var vipBadge = document.getElementById("box-success-vip-badge");
+
+                if (codeEl) codeEl.innerText = orderCode;
+                if (vipBadge) {
+                    if (res.data && res.data.isVipAutoConfirmed) {
+                        vipBadge.classList.remove("hidden");
+                    } else {
+                        vipBadge.classList.add("hidden");
+                    }
+                }
+                if (successModal) successModal.classList.remove("hidden");
+
+                appState.cartItems = [];
+                appState.appliedGift = null;
+                appState.vipCustomer = null;
+                appState.tierDiscountAmount = 0;
+                updateAovAndCartUI();
+
+            } catch (err) {
+                alert("⛔ KHÔNG THỂ GỬI ĐƠN HÀNG VỀ MÁY CHỦ!\n\nLỗi: " + err.message);
+            } finally {
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = origText;
+                }
+            }
+        }
+
+        function viewLiveOrderTracking() {
+            var codeEl = document.getElementById("disp-success-order-code");
+            var code = codeEl ? codeEl.innerText.trim() : "";
+            if (code) {
+                window.location.href = "tracking.html?order=" + encodeURIComponent(code);
+            }
+        }
+
+        function resetAndNewOrder() {
+            var successModal = document.getElementById("modal-order-success");
+            if (successModal) successModal.classList.add("hidden");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        return {
+            init: init,
+            goToSlide: goToSlide,
+            nextSlide: nextSlide,
+            prevSlide: prevSlide,
+            handleInstallPwaClick: handleInstallPwaClick,
+            filterCategory: filterCategory,
+            onSearchInput: onSearchInput,
+            clearSearch: clearSearch,
+            openCustomizerModal: openCustomizerModal,
+            closeCustomizerModal: closeCustomizerModal,
+            selectTaste: selectTaste,
+            selectSauce: selectSauce,
+            adjustCustomizerQty: adjustCustomizerQty,
+            confirmAddToCart: confirmAddToCart,
+            changeCartQty: changeCartQty,
+            removeGiftFromCart: removeGiftFromCart,
+            openCartDrawer: openCartDrawer,
+            closeCartDrawer: closeCartDrawer,
+            onAovBarClick: onAovBarClick,
+            openLuckyWheelModal: openLuckyWheelModal,
+            detectCustomerGps: detectCustomerGps,
+            setManualDistance: setManualDistance,
+            onPhoneInput: onPhoneInput,
+            onAddressInput: onAddressInput,
+            onAddressFocus: onAddressFocus,
+            selectSuggestedAddress: selectSuggestedAddress,
+            selectPaymentMethod: selectPaymentMethod,
+            copyBankAcc: copyBankAcc,
+            proceedToCheckoutModal: proceedToCheckoutModal,
+            closeCheckoutModal: closeCheckoutModal,
+            submitFinalOrder: submitFinalOrder,
+            viewLiveOrderTracking: viewLiveOrderTracking,
+            resetAndNewOrder: resetAndNewOrder,
+            toggleCustomizerTopping: toggleCustomizerTopping
+        };
+    })();
+
+    document.addEventListener("DOMContentLoaded", function() {
+        D2CStoreFrontController.init();
+    });
+    </script>
+</body>
+</html>
