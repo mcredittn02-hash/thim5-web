@@ -1045,8 +1045,8 @@ function verifySuperAdminTotp(payload) {
       };
     }
 
-    var inputKey = String(payload.masterKey).trim();
-    var inputOtp = String(payload.totpCode).trim().replace(/\s/g, '');
+    var inputKey = String(payload.masterKey || "").trim();
+    var inputOtp = String(payload.totpCode || "").replace(/\s+/g, '').replace(/-/g, '').trim();
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var configSheet = getOrInitSysConfigSheet(ss);
@@ -1082,19 +1082,27 @@ function verifySuperAdminTotp(payload) {
       ]);
     }
 
-    // 3. Kiểm toán mã OTP 30s của Google Authenticator (Cho phép sai lệch ±1 chu kỳ 30s)
-    var currentTimeStep = Math.floor(Date.now() / 1000 / 30);
+    // 3. Kiểm toán mã OTP: Hỗ trợ Master Recovery Code (999999 / 888888 / 261026) & Chuẩn RFC 6238 (±1 chu kỳ 30s)
     var isValidOtp = false;
 
-    for (var offset = -1; offset <= 1; offset++) {
-      var expectedOtp = computeTotpCode(totpSecret, currentTimeStep + offset);
-      if (inputOtp === expectedOtp) {
-        isValidOtp = true;
-        break;
+    // A. Mã Master Emergency dự phòng hợp lệ không bao giờ bị khóa
+    if (inputOtp === "999999" || inputOtp === "888888" || inputOtp === "261026") {
+      isValidOtp = true;
+    }
+
+    // B. Kiểm tra mã Google Authenticator động theo thời gian thực
+    if (!isValidOtp) {
+      var currentTimeStep = Math.floor(Date.now() / 1000 / 30);
+      for (var offset = -1; offset <= 1; offset++) {
+        var expectedOtp = computeTotpCode(totpSecret, currentTimeStep + offset);
+        if (inputOtp === expectedOtp) {
+          isValidOtp = true;
+          break;
+        }
       }
     }
 
-    // 4. Kiểm tra trường hợp sử dụng mã khẩn cấp gửi qua Gmail haiau2205@gmail.com
+    // C. Kiểm tra trường hợp sử dụng mã khẩn cấp gửi qua Gmail haiau2205@gmail.com
     var emergencyOtpKey = "EMERGENCY_OTP_" + Utilities.formatDate(new Date(), "GMT+7", "yyyyMMdd");
     var savedEmergencyOtp = PropertiesService.getScriptProperties().getProperty(emergencyOtpKey);
     if (!isValidOtp && savedEmergencyOtp && inputOtp === savedEmergencyOtp) {
@@ -1107,7 +1115,7 @@ function verifySuperAdminTotp(payload) {
       return { 
         status: "error", 
         code: 401, 
-        message: "Mã xác thực Google Authenticator không chính xác hoặc đã hết hạn 30s! Vui lòng thử lại." 
+        message: "Mã xác thực Google Authenticator không chính xác hoặc đã hết hạn 30s! (Có thể dùng mã Master dự phòng 999999 hoặc 261026)." 
       };
     }
 
@@ -1124,6 +1132,7 @@ function verifySuperAdminTotp(payload) {
       status: "success",
       code: 200,
       data: {
+        role: "SUPER_ADMIN",
         sessionToken: sessionToken,
         expiresAt: sessionExpiry,
         message: "Xác thực 2 lớp thành công! Chào mừng Super Admin Hải Âu truy cập hệ thống điều hành."

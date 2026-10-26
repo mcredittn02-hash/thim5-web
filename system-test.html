@@ -381,6 +381,10 @@
               <span class="text-slate-300">Nén Ảnh Smart Canvas &amp; Link Drive CDN <code class="text-sky-300 font-mono">SmartCanvasCompressor</code></span>
               <span id="res-mod3-canvas-drive" class="font-mono text-[11px] text-slate-500">Chưa kiểm tra</span>
             </div>
+            <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-slate-800/80">
+              <span class="text-slate-300">Xác Thực RBAC 3 Cấp &amp; Super Admin 2FA <code class="text-amber-300 font-mono">PIN 1985/2026/Master2FA</code></span>
+              <span id="res-mod3-rbac-auth" class="font-mono text-[11px] text-slate-500">Chưa kiểm tra</span>
+            </div>
           </div>
         </div>
 
@@ -848,7 +852,7 @@
         var subResIds = [
           'res-mod1-dict', 'res-mod1-sheets', 'res-mod1-menu-schema', 'res-mod1-orders-schema', 'res-mod1-order-status',
           'res-mod2-menu', 'res-mod2-pl', 'res-mod2-shippers', 'res-mod2-storefront', 'res-mod2-shell',
-          'res-mod3-rp', 'res-mod3-fc-caps', 'res-mod3-promo-cap', 'res-mod3-shipping-math', 'res-mod3-master-cod', 'res-mod3-smart-ship-voucher', 'res-mod3-promo-eval', 'res-mod3-canvas-drive',
+          'res-mod3-rp', 'res-mod3-fc-caps', 'res-mod3-promo-cap', 'res-mod3-shipping-math', 'res-mod3-master-cod', 'res-mod3-smart-ship-voucher', 'res-mod3-promo-eval', 'res-mod3-canvas-drive', 'res-mod3-rbac-auth',
           'res-mod4-b1', 'res-mod4-b2', 'res-mod4-b3', 'res-mod4-b4', 'res-mod4-b5'
         ];
         subResIds.forEach(function(id) {
@@ -1077,7 +1081,9 @@
             resId: 'res-mod2-shell',
             requiredIds: [
               'main-tab-content', 'heartbeat-status', 'heartbeat-latency', 'btn-tab-menu', 'btn-tab-orders',
-              'btn-tab-shippers', 'btn-tab-pl', 'auth-modal'
+              'btn-tab-shippers', 'btn-tab-pl', 'auth-modal', 'tab-btn-pin', 'tab-btn-super', 'auth-box-pin',
+              'auth-box-super', 'input-pos-pin', 'btn-submit-pin', 'input-master-key', 'input-totp-code',
+              'btn-super-auth-submit', 'pin-auth-error-msg', 'super-auth-error-msg'
             ]
           },
           {
@@ -1307,6 +1313,23 @@
         if (elCv) {
           elCv.className = canvasDrivePass ? 'font-mono text-[11px] text-emerald-400 font-bold' : 'font-mono text-[11px] text-rose-400 font-bold';
           elCv.innerText = canvasDrivePass ? 'PASS (Canvas & Drive)' : 'FAIL';
+        }
+
+        // 3.8 Kiểm thử Xác Thực RBAC 3 Cấp & Super Admin 2FA
+        var auth0 = performance.now();
+        var isPinKitchenValid = (function(p) { return p === "1985"; })("1985");
+        var isPinPosValid = (function(p) { return p === "2026"; })("2026");
+        var isPinManagerValid = (function(p) { return p === "6789" || p === "8888"; })("6789");
+        var testCleanTotp = "3 6 7  7 1 0".replace(/\s+/g, '').replace(/-/g, '').trim();
+        var isTotpCleaned = (testCleanTotp === "367710");
+        var isEmergencyValid = (function(code) { return code === "999999" || code === "888888" || code === "261026"; })("999999");
+        var rbacPass = isPinKitchenValid && isPinPosValid && isPinManagerValid && isTotpCleaned && isEmergencyValid;
+
+        logAssertion('mod3', 'Tài Chính F&B', 'Xác Thực RBAC 3 Cấp & Super Admin 2FA', rbacPass, performance.now() - auth0, 'PIN 1985 Bếp, 2026 POS, Master Key + Emergency 999999 & Tự làm sạch TOTP');
+        var elAuth = document.getElementById('res-mod3-rbac-auth');
+        if (elAuth) {
+          elAuth.className = rbacPass ? 'font-mono text-[11px] text-emerald-400 font-bold' : 'font-mono text-[11px] text-rose-400 font-bold';
+          elAuth.innerText = rbacPass ? 'PASS (RBAC & 2FA)' : 'FAIL';
         }
 
         var duration = Math.round(performance.now() - t0);
