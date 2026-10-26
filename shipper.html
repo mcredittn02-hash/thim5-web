@@ -1,0 +1,1069 @@
+<!-- ==========================================================================
+   FILE: shipper.html - PHẦN [1/2]
+   BẮT ĐẦU TỪ: Khai báo DOCTYPE, Khung Mobile PWA Header, Màn hình Numpad 4 số
+   KẾT THÚC TẠI: Thẻ đóng </nav> và bộ phát âm thanh Web Audio API
+   HƯỚNG DẪN: Tạo file mới shipper.html và dán toàn bộ Phần 1/2 vào đầu file
+   ========================================================================== -->
+<!DOCTYPE html>
+<html lang="vi" class="dark h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#020617">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Thím 5 • Driver Terminal (1-Touch PWA)</title>
+  
+  <!-- Tailwind CSS CDN & FontAwesome 6 Pro Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Phông chữ Google Fonts Mobile First -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              850: '#131c2e',
+              900: '#0f172a',
+              950: '#020617'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html, body {
+      overscroll-behavior-y: none;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .custom-scroll::-webkit-scrollbar { display: none; }
+    .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    @keyframes radar-pulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .radar-active {
+      animation: radar-pulse 1.8s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col bg-slate-950 text-slate-100 font-sans antialiased overflow-hidden">
+
+  <!-- ========================================================================= -->
+  <!-- 1. MÀN HÌNH ĐĂNG NHẬP 1 CHẠM NUMPAD 4 SỐ ĐUÔI (#view-quick-login)         -->
+  <!-- ========================================================================= -->
+  <div id="view-quick-login" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4 transition-all duration-300">
+    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-xs rounded-3xl shadow-2xl p-5 space-y-4">
+      
+      <div class="text-center space-y-1.5">
+        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl mx-auto shadow-inner">
+          <i class="fa-solid fa-motorcycle"></i>
+        </div>
+        <h1 class="text-base font-black text-white uppercase tracking-wider">Driver Vào Ca</h1>
+        <p class="text-[11px] text-slate-400">Nhập 4 số đuôi điện thoại để nhận cuốc</p>
+      </div>
+
+      <!-- Hiển thị 4 ô số cảm ứng -->
+      <div class="flex justify-center items-center gap-2.5 py-1">
+        <div id="pin-slot-0" class="w-12 h-14 rounded-2xl bg-slate-950 border-2 border-slate-800 flex items-center justify-center text-xl font-mono font-black text-amber-400 shadow-inner">_</div>
+        <div id="pin-slot-1" class="w-12 h-14 rounded-2xl bg-slate-950 border-2 border-slate-800 flex items-center justify-center text-xl font-mono font-black text-amber-400 shadow-inner">_</div>
+        <div id="pin-slot-2" class="w-12 h-14 rounded-2xl bg-slate-950 border-2 border-slate-800 flex items-center justify-center text-xl font-mono font-black text-amber-400 shadow-inner">_</div>
+        <div id="pin-slot-3" class="w-12 h-14 rounded-2xl bg-slate-950 border-2 border-slate-800 flex items-center justify-center text-xl font-mono font-black text-amber-400 shadow-inner">_</div>
+      </div>
+
+      <!-- Bàn phím số Numpad cảm ứng to bản cho tài xế ngoài đường -->
+      <div class="grid grid-cols-3 gap-2 pt-1 font-mono text-lg font-bold">
+        <button type="button" onclick="DriverTerminalController.pressDigit('1')" class="h-12 rounded-2xl bg-slate-950 hover:bg-slate-800 active:scale-90 border border-slate-800/80 text-white transition flex items-center justify-center">1</button>
+        <button type="button" onclick="DriverTerminalController.pressDigit('2')" class="h-12 rounded-2xl bg-slate-950 hover:bg-slate-800 active:scale-90 border border-slate-800/80 text-white transition flex items-center justify-center">2</button>
+        <button type="button" onclick="DriverTerminalController.pressDigit('3')" class="h-12 rounded-2xl bg-slate-950 hover:bg-slate-800 active:scale-90 border border-slate-800/80 text-white transition flex items-center justify-center">3</button>
+        <button type="button" onclick="DriverTerminalController.pressDigit('4')" class="h-12 rounded-2xl bg-slate-950 hover:bg-slate-800 active:scale-90 border border-slate-800/80 text-white transition flex items-center justify-center">4</button>
+        <button type="button" onclick="DriverTerminalController.pressDigit('5')" class="h-12 rounded-2xl bg-slate-950 hover:bg-slate-800 active:scale-90 border border-slate-800/80 text-white transition flex items-center justify-center">5</button>
+        <button type="button" onclick="DriverTerminalController.pressDigit('6')" class="h-12 rounded-2xl bg-slate-950 hover:bg-slate-800 active:scale-90 border border-slate-800/80 text-white transition flex items-center justify-center">6</button>
+        <button type="button" onclick="DriverTerminalController.pressDigit('7')" class="h-12 rounded-2xl bg-slate-950 hover:bg-slate-800 active:scale-90 border border-slate-800/80 text-white transition flex items-center justify-center">7</button>
+        <button type="button" onclick="DriverTerminalController.pressDigit('8')" class="h-12 rounded-2xl bg-slate-950 hover:bg-slate-800 active:scale-90 border border-slate-800/80 text-white transition flex items-center justify-center">8</button>
+        <button type="button" onclick="DriverTerminalController.pressDigit('9')" class="h-12 rounded-2xl bg-slate-950 hover:bg-slate-800 active:scale-90 border border-slate-800/80 text-white transition flex items-center justify-center">9</button>
+        <button type="button" onclick="DriverTerminalController.clearDigits()" class="h-12 rounded-2xl bg-slate-950 hover:bg-rose-950/40 active:scale-90 border border-slate-800/80 text-rose-400 transition flex items-center justify-center text-xs font-sans font-bold">XÓA</button>
+        <button type="button" onclick="DriverTerminalController.pressDigit('0')" class="h-12 rounded-2xl bg-slate-950 hover:bg-slate-800 active:scale-90 border border-slate-800/80 text-white transition flex items-center justify-center">0</button>
+        <button type="button" onclick="DriverTerminalController.deleteDigit()" class="h-12 rounded-2xl bg-slate-950 hover:bg-slate-800 active:scale-90 border border-slate-800/80 text-amber-400 transition flex items-center justify-center"><i class="fa-solid fa-delete-left text-sm"></i></button>
+      </div>
+
+      <div id="login-spinner-box" class="hidden text-center py-1 text-xs text-amber-400 font-mono flex items-center justify-center gap-2">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+        <span>Đang kiểm tra ca trực...</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL XỬ LÝ TRÙNG 4 SỐ ĐUÔI (#modal-candidate-picker) -->
+  <div id="modal-candidate-picker" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-xs rounded-3xl p-5 space-y-3">
+      <div class="text-center">
+        <h3 class="text-xs font-black text-white uppercase tracking-wider">Xác Nhận Danh Tính Tài Xế</h3>
+        <p class="text-[10.5px] text-slate-400 mt-0.5">Chọn đúng tên &amp; biển số của bạn để vào ca:</p>
+      </div>
+      <div id="list-candidate-shippers" class="space-y-2 max-h-56 overflow-y-auto custom-scroll">
+        <!-- Render động danh sách tài xế trùng đuôi -->
+      </div>
+      <button type="button" onclick="DriverTerminalController.closeCandidateModal()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">Quay Lại</button>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. HEADER TERMINAL & THANH ĐO NỢ TRẦN COD (#driver-topbar)                 -->
+  <!-- ========================================================================= -->
+  <header class="bg-slate-900 border-b border-slate-800 shrink-0 z-30 pt-safe select-none">
+    <div class="px-4 py-2.5 flex items-center justify-between gap-3">
+      
+      <div class="flex items-center gap-2 min-w-0">
+        <div class="w-9 h-9 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-amber-400 text-sm shrink-0">
+          <i class="fa-solid fa-helmet-safety"></i>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <h2 id="txt-shipper-name" class="text-xs font-black text-white truncate uppercase tracking-tight">Tài Xế</h2>
+            <span id="txt-shipper-plate" class="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">...</span>
+          </div>
+          <div class="flex items-center gap-1 text-[10px] text-slate-400 mt-0.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="txt-driver-shift-status">Đang trực ca (24h)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <button type="button" 
+                id="btn-toggle-shift" 
+                onclick="DriverTerminalController.toggleShiftStatus()" 
+                class="px-2.5 py-1 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold transition active:scale-95 flex items-center gap-1">
+          <i class="fa-solid fa-power-off text-[9px]"></i>
+          <span id="txt-btn-shift">Nhận Đơn</span>
+        </button>
+
+        <button type="button" 
+                onclick="DriverTerminalController.handleLogout()" 
+                class="p-1.5 rounded-xl bg-slate-950 border border-slate-800 text-rose-400 hover:text-rose-300 active:scale-95 transition" 
+                title="Đăng xuất ca">
+          <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- BANNER GHIM RA MÀN HÌNH CHÍNH (PWA ADD TO HOME SCREEN) -->
+    <div id="banner-install-pwa" class="hidden px-3.5 py-1.5 bg-gradient-to-r from-amber-500/15 to-orange-500/15 border-t border-amber-500/30 text-[10.5px] flex items-center justify-between text-amber-300">
+      <div class="flex items-center gap-1.5 truncate">
+        <i class="fa-solid fa-mobile-screen-button text-amber-400 text-xs shrink-0"></i>
+        <span class="truncate">Ghim App ra màn hình chính để vào nhanh 1 chạm!</span>
+      </div>
+      <button type="button" onclick="DriverTerminalController.triggerPwaInstall()" class="px-2.5 py-0.5 rounded-lg bg-amber-500 text-slate-950 font-black text-[10px] uppercase shrink-0 active:scale-95 shadow">Ghim Ngay</button>
+    </div>
+
+    <!-- WIDGET ĐỐI SOÁT NỢ COD VÀ TRẦN 300K -->
+    <div class="px-4 py-1.5 bg-slate-950/70 border-t border-slate-800/80 flex items-center justify-between text-[10.5px]">
+      <div class="flex items-center gap-1.5 min-w-0">
+        <i class="fa-solid fa-vault text-amber-500 text-xs"></i>
+        <span class="text-slate-400">Nợ COD Đang Giữ:</span>
+        <strong id="txt-current-cod-debt" class="font-mono text-white text-xs">0 đ</strong>
+      </div>
+      <div class="flex items-center gap-1 shrink-0 font-mono text-[10px]">
+        <span class="text-slate-500">Trần:</span>
+        <span id="txt-max-debt-cap" class="text-slate-300 font-bold">300.000 đ</span>
+      </div>
+    </div>
+
+    <!-- Cảnh Báo Khóa Nhận Đơn Do Chạm Trần Nợ -->
+    <div id="banner-debt-locked" class="hidden px-4 py-1.5 bg-rose-500/15 border-t border-rose-500/40 text-rose-300 text-[10px] flex items-center justify-between">
+      <div class="flex items-center gap-1.5">
+        <i class="fa-solid fa-triangle-exclamation text-rose-400 text-xs shrink-0"></i>
+        <span>Đã chạm trần nợ 300k! Vui lòng nộp tiền Bếp để mở khóa.</span>
+      </div>
+      <button type="button" onclick="DriverTerminalController.switchTab('wallet')" class="text-amber-400 font-bold underline shrink-0 ml-1">Nộp Ngay</button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 3. KHUNG VIEWPORT CHÍNH (#driver-main-viewport)                           -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 overflow-y-auto custom-scroll p-3.5 space-y-4 pb-24">
+
+    <!-- TAB 1: SÀN TÌM CUỐC MỚI (#view-available-orders) -->
+    <section id="view-available-orders" class="space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-400 radar-active"></span>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">Đơn Chờ Giao (Sẵn Sàng)</h3>
+        </div>
+        <button type="button" onclick="DriverTerminalController.loadAvailableOrders(true)" class="text-slate-400 hover:text-white text-xs p-1">
+          <i id="icon-refresh-orders" class="fa-solid fa-rotate-right"></i>
+        </button>
+      </div>
+
+      <div id="list-available-orders" class="space-y-3">
+        <div class="p-8 text-center text-slate-500 space-y-2">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-500/70"></i>
+          <p class="text-xs font-mono">Đang quét sàn điều phối Bếp...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: ĐƠN HÀNG ĐANG GIAO (#view-active-deliveries) -->
+    <section id="view-active-deliveries" class="space-y-3 hidden">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-box-open text-sky-400"></i>
+          <span>Cuốc Xe Đang Thực Hiện</span>
+        </h3>
+        <span id="badge-active-count" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">0 đơn</span>
+      </div>
+
+      <div id="list-active-deliveries" class="space-y-3">
+        <div class="p-8 text-center text-slate-500">
+          <i class="fa-solid fa-motorcycle text-3xl text-slate-700 mb-2"></i>
+          <p class="text-xs">Hiện chưa có đơn đang giao. Hãy qua sàn nhận cuốc mới!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: VÍ THU NHẬP & NỘP TIỀN KÉT (#view-wallet) -->
+    <section id="view-wallet" class="space-y-4 hidden">
+      <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 shadow-xl">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-slate-400 font-bold uppercase tracking-wider">Thu Nhập Ca Hôm Nay</span>
+          <span class="text-emerald-400 font-bold flex items-center gap-1 text-[11px]">
+            <i class="fa-solid fa-circle-check text-[10px]"></i> Đã Đối Soát
+          </span>
+        </div>
+        <div class="flex items-baseline justify-between">
+          <strong id="txt-wallet-today-earned" class="text-2xl font-mono font-black text-emerald-400">0 đ</strong>
+          <span id="txt-wallet-delivered-count" class="text-xs font-mono text-slate-400">0 cuốc hoàn tất</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-3xl bg-slate-900/60 border border-amber-500/30 space-y-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-sm font-bold">
+            <i class="fa-solid fa-hand-holding-dollar"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-black uppercase text-white tracking-wider">Nộp Tiền Mặt COD Tại Quầy Bếp</h4>
+            <p class="text-[10.5px] text-slate-400">Nguyên tắc: Tiền trao cháo múc • Mở trần 300.000đ</p>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs space-y-1.5">
+          <div class="flex justify-between text-slate-400">
+            <span>Tiền COD đang cầm:</span>
+            <strong id="txt-wallet-holding-cod" class="text-rose-400 font-mono font-bold">0 đ</strong>
+          </div>
+          <div class="flex justify-between text-slate-400">
+            <span>Hạn mức trần cho phép:</span>
+            <span class="font-mono text-slate-300">300.000 đ</span>
+          </div>
+        </div>
+
+        <p class="text-[10.5px] text-slate-400 leading-relaxed">
+          Tài xế giao xong mang tiền mặt nộp lại cho Quản lý ca hoặc Trưởng bếp. Bếp xác nhận trên hệ thống sẽ giải phóng nợ tồn tức thì.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- 4. BOTTOM NAVIGATION TÁC VỤ 3 TAB CHO ĐIỆN THOẠI                          -->
+  <!-- ========================================================================= -->
+  <nav class="fixed bottom-0 inset-x-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-40 px-3 py-2 flex items-center justify-around pb-safe">
+    
+    <button type="button" 
+            onclick="DriverTerminalController.switchTab('available')" 
+            id="tab-nav-available" 
+            class="flex-1 py-1 flex flex-col items-center gap-1 text-amber-400 font-bold transition">
+      <div class="relative">
+        <i class="fa-solid fa-radar text-base"></i>
+        <span id="badge-available-dot" class="w-2 h-2 rounded-full bg-amber-400 absolute -top-0.5 -right-1 hidden"></span>
+      </div>
+      <span class="text-[10px]">Sàn Cuốc</span>
+    </button>
+
+    <button type="button" 
+            onclick="DriverTerminalController.switchTab('active')" 
+            id="tab-nav-active" 
+            class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
+      <div class="relative">
+        <i class="fa-solid fa-motorcycle text-base"></i>
+        <span id="badge-nav-active-count" class="hidden absolute -top-1 -right-2 px-1 py-0.2 rounded-full bg-sky-500 text-slate-950 font-mono text-[9px] font-black">0</span>
+      </div>
+      <span class="text-[10px]">Đang Giao</span>
+    </button>
+
+    <button type="button" 
+            onclick="DriverTerminalController.switchTab('wallet')" 
+            id="tab-nav-wallet" 
+            class="flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition">
+      <i class="fa-solid fa-wallet text-base"></i>
+      <span class="text-[10px]">Ví &amp; Công Nợ</span>
+    </button>
+
+  </nav>
+
+  <!-- BỘ PHÁT ÂM THANH CHUÔNG BÍP WEB AUDIO API TỔNG HỢP -->
+  <script>
+    window.playNotificationBeep = function() {
+      try {
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
+      } catch (e) {
+        console.warn("Audio Context fallback:", e);
+      }
+    };
+  </script>
+  <!-- ==========================================================================
+   FILE: shipper.html - PHẦN [2/2] (PHẦN CUỐI CÙNG - HOÀN TẤT FILE)
+   BẮT ĐẦU TỪ: Thẻ mở <script> của DriverTerminalController
+   KẾT THÚC TẠI: Thẻ đóng </html> hoàn tất trọn vẹn Web App shipper.html
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [1/2] của file shipper.html
+   ========================================================================== -->
+  <script>
+    /**
+     * =========================================================================
+     * CONTROLLER: DRIVER TERMINAL PWA CLIENT (v3.5 MODULAR LOGISTICS)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+     * Kiến trúc: 1-Touch Numpad 4 số, Session 24h, PWA Add-to-Home-Screen,
+     *            Chặn trần nợ COD 300k, Khóa đơn LockService & Quét sàn tự động
+     * =========================================================================
+     */
+    var DriverTerminalController = (function() {
+      var currentShipper = null;
+      var activeTab = "available";
+      var pollingTimer = null;
+      var availableOrdersCache = [];
+      var activeOrdersCache = [];
+      var isSyncing = false;
+      var pinBuffer = [];
+      var deferredPwaPrompt = null;
+
+      function parseSafeNum(val) {
+        if (typeof val === "number") return isNaN(val) ? 0 : val;
+        if (!val) return 0;
+        var cleaned = String(val).replace(/[^\d.-]/g, "");
+        var num = parseFloat(cleaned);
+        return isNaN(num) ? 0 : num;
+      }
+
+      function formatMoneyVnd(amount) {
+        var val = parseSafeNum(amount);
+        return val.toLocaleString("vi-VN") + " đ";
+      }
+
+      function resolveActionName(defaultAction) {
+        if (window.T5_DICT && window.T5_DICT.ACTIONS && window.T5_DICT.ACTIONS[defaultAction]) {
+          return window.T5_DICT.ACTIONS[defaultAction];
+        }
+        return defaultAction;
+      }
+
+      /**
+       * 1. KHỞI TẠO BỘ ĐIỀU PHỐI & KIỂM TRA PHIÊN 24H (AUTO-LOGIN)
+       */
+      function init() {
+        setupPwaListener();
+        checkPersistentSession();
+      }
+
+      function setupPwaListener() {
+        window.addEventListener("beforeinstallprompt", function(e) {
+          e.preventDefault();
+          deferredPwaPrompt = e;
+          var banner = document.getElementById("banner-install-pwa");
+          if (banner) banner.classList.remove("hidden");
+        });
+      }
+
+      function triggerPwaInstall() {
+        if (!deferredPwaPrompt) {
+          alert("Để ghim ứng dụng:\n- Trên iPhone (Safari): Bấm nút Chia Sẻ (Share) -> Chọn 'Thêm vào MH chính'.\n- Trên Android (Chrome): Bấm dấu 3 chấm góc phải -> Chọn 'Cài đặt ứng dụng' hoặc 'Thêm vào màn hình chính'.");
+          return;
+        }
+        deferredPwaPrompt.prompt();
+        deferredPwaPrompt.userChoice.then(function(choice) {
+          if (choice.outcome === "accepted") {
+            var banner = document.getElementById("banner-install-pwa");
+            if (banner) banner.classList.add("hidden");
+          }
+          deferredPwaPrompt = null;
+        });
+      }
+
+      function checkPersistentSession() {
+        var savedPhone = localStorage.getItem("thim5_shipper_phone");
+        var expireAt = parseSafeNum(localStorage.getItem("thim5_shipper_session_expire"));
+        var now = Date.now();
+
+        if (savedPhone && expireAt && now < expireAt) {
+          currentShipper = {
+            phone: savedPhone,
+            name: localStorage.getItem("thim5_shipper_name") || "Tài Xế",
+            plateNumber: localStorage.getItem("thim5_shipper_plate") || "70-F1",
+            currentDebt: parseSafeNum(localStorage.getItem("thim5_shipper_debt")),
+            maxDebtLimit: parseSafeNum(localStorage.getItem("thim5_shipper_max_debt")) || 300000,
+            status: localStorage.getItem("thim5_shipper_status") || "ACTIVE",
+            todayEarned: parseSafeNum(localStorage.getItem("thim5_shipper_today_earned")),
+            deliveredCount: parseSafeNum(localStorage.getItem("thim5_shipper_delivered_count"))
+          };
+          unlockTerminal();
+        } else {
+          showLoginView();
+        }
+      }
+
+      function showLoginView() {
+        var loginView = document.getElementById("view-quick-login");
+        if (loginView) loginView.classList.remove("hidden");
+        clearDigits();
+      }
+
+      /**
+       * 2. LOGIC BÀN PHÍM SỐ CẢM ỨNG NUMPAD 4 SỐ ĐUÔI
+       */
+      function renderPinSlots() {
+        for (var i = 0; i < 4; i++) {
+          var slot = document.getElementById("pin-slot-" + i);
+          if (slot) {
+            if (i < pinBuffer.length) {
+              slot.innerText = pinBuffer[i];
+              slot.className = "w-12 h-14 rounded-2xl bg-amber-500/10 border-2 border-amber-500 flex items-center justify-center text-xl font-mono font-black text-amber-400 shadow-inner scale-105 transition-all";
+            } else {
+              slot.innerText = "_";
+              slot.className = "w-12 h-14 rounded-2xl bg-slate-950 border-2 border-slate-800 flex items-center justify-center text-xl font-mono font-black text-slate-600 shadow-inner transition-all";
+            }
+          }
+        }
+      }
+
+      function pressDigit(d) {
+        if (pinBuffer.length >= 4) return;
+        pinBuffer.push(String(d));
+        renderPinSlots();
+
+        if (pinBuffer.length === 4) {
+          var last4 = pinBuffer.join("");
+          submitQuickLogin(last4);
+        }
+      }
+
+      function deleteDigit() {
+        if (pinBuffer.length > 0) {
+          pinBuffer.pop();
+          renderPinSlots();
+        }
+      }
+
+      function clearDigits() {
+        pinBuffer = [];
+        renderPinSlots();
+      }
+
+      /**
+       * 3. GỌI API ĐĂNG NHẬP 1 CHẠM 4 SỐ ĐUÔI (quickLoginShipperByLast4Digits)
+       */
+      async function submitQuickLogin(last4) {
+        var spinner = document.getElementById("login-spinner-box");
+        if (spinner) spinner.classList.remove("hidden");
+
+        try {
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+            throw new Error("Mất kết nối Thim5API Gateway!");
+          }
+
+          var action = resolveActionName("quickLoginShipperByLast4Digits");
+          var res = await window.Thim5API.callGAS(action, { last4Digits: last4 });
+
+          if (res && res.status === "success" && res.data) {
+            setupShipperSession(res.data);
+          } else if (res && res.status === "require_selection" && Array.isArray(res.candidates)) {
+            showCandidateModal(res.candidates);
+          } else {
+            throw new Error((res && res.message) ? res.message : "4 số đuôi chưa được đăng ký trong danh bạ!");
+          }
+        } catch (err) {
+          alert("⛔ Lỗi vào ca: " + err.message);
+          clearDigits();
+        } finally {
+          if (spinner) spinner.classList.add("hidden");
+        }
+      }
+
+      function showCandidateModal(candidates) {
+        var modal = document.getElementById("modal-candidate-picker");
+        var listEl = document.getElementById("list-candidate-shippers");
+        if (!modal || !listEl) return;
+
+        var html = "";
+        candidates.forEach(function(c) {
+          html += '<button type="button" onclick="DriverTerminalController.selectCandidate(\'' + c.phone + '\', \'' + c.fullName + '\', \'' + c.plateNumber + '\')" class="w-full p-3 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 flex items-center justify-between transition active:scale-95 text-left">' +
+            '<div>' +
+              '<strong class="text-xs text-white block">' + c.fullName + '</strong>' +
+              '<span class="text-[10.5px] font-mono text-slate-400">' + c.phone + '</span>' +
+            '</div>' +
+            '<span class="text-xs font-mono font-bold text-amber-400 px-2 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20">' + c.plateNumber + '</span>' +
+          '</button>';
+        });
+
+        listEl.innerHTML = html;
+        modal.classList.remove("hidden");
+      }
+
+      function closeCandidateModal() {
+        var modal = document.getElementById("modal-candidate-picker");
+        if (modal) modal.classList.add("hidden");
+        clearDigits();
+      }
+
+      async function selectCandidate(phone, name, plate) {
+        closeCandidateModal();
+        var spinner = document.getElementById("login-spinner-box");
+        if (spinner) spinner.classList.remove("hidden");
+
+        try {
+          var action = resolveActionName("verifyShipperAuth");
+          var res = await window.Thim5API.callGAS(action, { phone: phone, pin: phone.slice(-4) });
+          if (res && res.status === "success" && res.data) {
+            setupShipperSession(res.data);
+          } else {
+            throw new Error((res && res.message) ? res.message : "Xác nhận hồ sơ tài xế thất bại!");
+          }
+        } catch (e) {
+          alert("⛔ Lỗi: " + e.message);
+        } finally {
+          if (spinner) spinner.classList.add("hidden");
+        }
+      }
+
+      function setupShipperSession(data) {
+        var expireTime = Date.now() + (24 * 60 * 60 * 1000); // 24 Giờ
+
+        currentShipper = {
+          phone: data.phone,
+          name: data.fullName || data.name || "Tài Xế",
+          plateNumber: data.plateNumber || data.plate || "70-F1",
+          currentDebt: parseSafeNum(data.currentDebt),
+          maxDebtLimit: parseSafeNum(data.maxDebtLimit) || 300000,
+          status: data.status || "ACTIVE",
+          todayEarned: parseSafeNum(data.todayEarned),
+          deliveredCount: parseSafeNum(data.deliveredCount)
+        };
+
+        localStorage.setItem("thim5_shipper_phone", currentShipper.phone);
+        localStorage.setItem("thim5_shipper_name", currentShipper.name);
+        localStorage.setItem("thim5_shipper_plate", currentShipper.plateNumber);
+        localStorage.setItem("thim5_shipper_debt", currentShipper.currentDebt);
+        localStorage.setItem("thim5_shipper_max_debt", currentShipper.maxDebtLimit);
+        localStorage.setItem("thim5_shipper_status", currentShipper.status);
+        localStorage.setItem("thim5_shipper_session_expire", expireTime);
+
+        unlockTerminal();
+      }
+
+      /**
+       * 4. MỞ KHÓA MÀN HÌNH CHÍNH & BẬT POLLING RADAR
+       */
+      function unlockTerminal() {
+        var loginView = document.getElementById("view-quick-login");
+        if (loginView) loginView.classList.add("hidden");
+
+        updateHeaderUI();
+        loadAvailableOrders(true);
+        loadActiveDeliveries();
+        loadWalletSummary();
+
+        if (pollingTimer) clearInterval(pollingTimer);
+        pollingTimer = setInterval(function() {
+          if (currentShipper && currentShipper.status === "ACTIVE") {
+            loadAvailableOrders(false);
+            loadActiveDeliveries();
+          }
+        }, 15000);
+      }
+
+      function updateHeaderUI() {
+        if (!currentShipper) return;
+
+        var txtName = document.getElementById("txt-shipper-name");
+        var txtPlate = document.getElementById("txt-shipper-plate");
+        var txtDebt = document.getElementById("txt-current-cod-debt");
+        var txtCap = document.getElementById("txt-max-debt-cap");
+        var bannerLock = document.getElementById("banner-debt-locked");
+        var btnShift = document.getElementById("btn-toggle-shift");
+        var txtBtnShift = document.getElementById("txt-btn-shift");
+        var txtShiftStatus = document.getElementById("txt-driver-shift-status");
+
+        if (txtName) txtName.innerText = currentShipper.name;
+        if (txtPlate) txtPlate.innerText = currentShipper.plateNumber;
+        if (txtDebt) {
+          txtDebt.innerText = formatMoneyVnd(currentShipper.currentDebt);
+          txtDebt.className = (currentShipper.currentDebt >= currentShipper.maxDebtLimit)
+            ? "font-mono text-rose-400 text-xs font-black animate-pulse"
+            : "font-mono text-white text-xs";
+        }
+        if (txtCap) txtCap.innerText = formatMoneyVnd(currentShipper.maxDebtLimit);
+
+        var isLocked = currentShipper.currentDebt >= currentShipper.maxDebtLimit;
+        if (bannerLock) bannerLock.classList.toggle("hidden", !isLocked);
+
+        var isActive = currentShipper.status === "ACTIVE";
+        if (btnShift && txtBtnShift) {
+          if (isActive) {
+            btnShift.className = "px-2.5 py-1 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold transition active:scale-95 flex items-center gap-1";
+            txtBtnShift.innerText = "Nhận Đơn";
+            if (txtShiftStatus) txtShiftStatus.innerText = "Đang trực ca (24h)";
+          } else {
+            btnShift.className = "px-2.5 py-1 rounded-xl border border-rose-500/40 bg-rose-500/10 text-rose-400 text-[10px] font-bold transition active:scale-95 flex items-center gap-1";
+            txtBtnShift.innerText = "Nghỉ Ca";
+            if (txtShiftStatus) txtShiftStatus.innerText = "Tạm dừng ca";
+          }
+        }
+      }
+
+      async function toggleShiftStatus() {
+        if (!currentShipper) return;
+        var nextStatus = (currentShipper.status === "ACTIVE") ? "OFFLINE" : "ACTIVE";
+
+        try {
+          if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+            var action = resolveActionName("toggleShipperStatus");
+            await window.Thim5API.callGAS(action, { phone: currentShipper.phone, status: nextStatus });
+          }
+          currentShipper.status = nextStatus;
+          localStorage.setItem("thim5_shipper_status", nextStatus);
+          updateHeaderUI();
+        } catch (e) {
+          console.warn("⚠️ Không thể cập nhật trạng thái ca:", e);
+        }
+      }
+
+      function switchTab(tabKey) {
+        activeTab = tabKey;
+        var viewAvailable = document.getElementById("view-available-orders");
+        var viewActive = document.getElementById("view-active-deliveries");
+        var viewWallet = document.getElementById("view-wallet");
+
+        var navAvailable = document.getElementById("tab-nav-available");
+        var navActive = document.getElementById("tab-nav-active");
+        var navWallet = document.getElementById("tab-nav-wallet");
+
+        if (viewAvailable) viewAvailable.classList.toggle("hidden", tabKey !== "available");
+        if (viewActive) viewActive.classList.toggle("hidden", tabKey !== "active");
+        if (viewWallet) viewWallet.classList.toggle("hidden", tabKey !== "wallet");
+
+        if (navAvailable) navAvailable.className = (tabKey === "available")
+          ? "flex-1 py-1 flex flex-col items-center gap-1 text-amber-400 font-bold transition"
+          : "flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition";
+
+        if (navActive) navActive.className = (tabKey === "active")
+          ? "flex-1 py-1 flex flex-col items-center gap-1 text-sky-400 font-bold transition"
+          : "flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition";
+
+        if (navWallet) navWallet.className = (tabKey === "wallet")
+          ? "flex-1 py-1 flex flex-col items-center gap-1 text-emerald-400 font-bold transition"
+          : "flex-1 py-1 flex flex-col items-center gap-1 text-slate-400 hover:text-white transition";
+
+        if (tabKey === "available") loadAvailableOrders(true);
+        if (tabKey === "active") loadActiveDeliveries();
+        if (tabKey === "wallet") loadWalletSummary();
+      }
+
+      /**
+       * 5. QUÉT SÀN CUỐC XE & ĐIỀU PHỐI ĐƠN HÀNG
+       */
+      async function loadAvailableOrders(showSpinner) {
+        if (isSyncing) return;
+        isSyncing = true;
+
+        var listEl = document.getElementById("list-available-orders");
+        var badgeDot = document.getElementById("badge-available-dot");
+        var iconRefresh = document.getElementById("icon-refresh-orders");
+
+        if (iconRefresh) iconRefresh.classList.add("fa-spin");
+        if (showSpinner && listEl) {
+          listEl.innerHTML = '<div class="p-8 text-center text-slate-500 space-y-2"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-500/70"></i><p class="text-xs font-mono">Đang quét sàn điều phối Bếp...</p></div>';
+        }
+
+        try {
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+            throw new Error("Mất kết nối Thim5API!");
+          }
+
+          var action = resolveActionName("getShipperAvailableOrders");
+          var res = await window.Thim5API.callGAS(action, { phone: currentShipper ? currentShipper.phone : "" });
+
+          var orders = (res && res.data && Array.isArray(res.data.availableOrders)) ? res.data.availableOrders : [];
+          
+          if (orders.length > availableOrdersCache.length && typeof window.playNotificationBeep === "function") {
+            window.playNotificationBeep();
+          }
+          availableOrdersCache = orders;
+
+          if (badgeDot) badgeDot.classList.toggle("hidden", orders.length === 0);
+          renderAvailableOrders(orders);
+        } catch (err) {
+          if (listEl) {
+            listEl.innerHTML = '<div class="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center">Không thể nạp sàn cuốc xe: ' + err.message + '</div>';
+          }
+        } finally {
+          isSyncing = false;
+          if (iconRefresh) iconRefresh.classList.remove("fa-spin");
+        }
+      }
+
+      function renderAvailableOrders(orders) {
+        var container = document.getElementById("list-available-orders");
+        if (!container) return;
+
+        if (!orders || orders.length === 0) {
+          container.innerHTML = '<div class="p-8 text-center text-slate-500 space-y-1 rounded-3xl bg-slate-900/40 border border-slate-800"><i class="fa-solid fa-mug-hot text-2xl text-slate-700 mb-1"></i><p class="text-xs font-medium text-slate-400">Hiện chưa có cuốc xe mới cần giao.</p><p class="text-[10.5px] text-slate-600 font-mono">Hệ thống tự động quét mỗi 15 giây...</p></div>';
+          return;
+        }
+
+        var isDebtLocked = currentShipper && (currentShipper.currentDebt >= currentShipper.maxDebtLimit);
+        var html = "";
+
+        orders.forEach(function(od) {
+          var orderId = od.orderId || od.id || "ORD";
+          var customerName = od.customerName || "Khách hàng";
+          var address = od.deliveryAddress || od.address || "Địa chỉ giao hàng";
+          var distanceKm = od.distanceKm ? (parseSafeNum(od.distanceKm).toFixed(1) + " km") : "Gần Bếp";
+          var shipFee = parseSafeNum(od.shippingFee || od.shipFee);
+          var paymentMethod = od.paymentMethod || "COD";
+          var codCollect = (paymentMethod === "VIETQR" || paymentMethod === "PAID") ? 0 : parseSafeNum(od.totalAmount || od.cod);
+
+          var paymentBadge = (codCollect === 0)
+            ? '<span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">ĐÃ TRẢ QR (0đ)</span>'
+            : '<span class="px-2 py-0.5 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] font-mono font-black">THU COD: ' + formatMoneyVnd(codCollect) + '</span>';
+
+          html += '<div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 shadow-lg hover:border-slate-700 transition">' +
+            '<div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">' +
+              '<div class="flex items-center gap-2">' +
+                '<span class="w-7 h-7 rounded-xl bg-amber-500/10 text-amber-400 font-mono font-black text-xs flex items-center justify-center border border-amber-500/20">#' + orderId.slice(-4) + '</span>' +
+                '<strong class="text-xs font-bold text-white truncate">' + customerName + '</strong>' +
+              '</div>' +
+              paymentBadge +
+            '</div>' +
+            '<div class="space-y-1.5 text-xs">' +
+              '<div class="flex items-start gap-2 text-slate-300">' +
+                '<i class="fa-solid fa-location-dot text-amber-500 text-xs mt-0.5 shrink-0"></i>' +
+                '<span class="line-clamp-2 leading-relaxed text-[11.5px]">' + address + '</span>' +
+              '</div>' +
+              '<div class="flex items-center justify-between text-[11px] pt-1 text-slate-400 font-mono">' +
+                '<span>Khoảng cách: <strong class="text-white">' + distanceKm + '</strong></span>' +
+                '<span>Công ship: <strong class="text-emerald-400">' + formatMoneyVnd(shipFee) + '</strong></span>' +
+              '</div>' +
+            '</div>' +
+            '<button type="button" ' +
+                    (isDebtLocked ? 'disabled ' : '') +
+                    'onclick="DriverTerminalController.claimOrder(\'' + orderId + '\')" ' +
+                    'class="w-full py-2.5 rounded-2xl ' + (isDebtLocked ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:opacity-95 active:scale-95') + ' font-black text-xs uppercase tracking-wider transition shadow flex items-center justify-center gap-2">' +
+              '<i class="fa-solid fa-hand-holding text-xs"></i>' +
+              '<span>' + (isDebtLocked ? 'Khóa Do Chạm Trần Nợ 300k' : 'Nhận Giao Cuốc Này') + '</span>' +
+            '</button>' +
+          '</div>';
+        });
+
+        container.innerHTML = html;
+      }
+
+      async function claimOrder(orderId) {
+        if (!currentShipper) return;
+        if (currentShipper.currentDebt >= currentShipper.maxDebtLimit) {
+          alert("⛔ Bạn đã chạm trần nợ COD 300.000đ. Vui lòng nộp tiền về Bếp để nhận cuốc tiếp!");
+          return;
+        }
+
+        try {
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+            throw new Error("Không tìm thấy kết nối Thim5API!");
+          }
+
+          var action = resolveActionName("claimOrder");
+          var res = await window.Thim5API.callGAS(action, {
+            orderId: orderId,
+            phone: currentShipper.phone,
+            shipperName: currentShipper.name,
+            plateNumber: currentShipper.plateNumber
+          });
+
+          if (res && res.status === "success") {
+            alert("🛵 Nhận cuốc thành công! Chuyển sang danh sách đơn đang giao.");
+            switchTab("active");
+          } else {
+            alert("⛔ " + ((res && res.message) ? res.message : "Đơn này đã được tài xế khác nhận!"));
+            loadAvailableOrders(true);
+          }
+        } catch (e) {
+          alert("❌ Lỗi khi nhận cuốc: " + e.message);
+        }
+      }
+
+      /**
+       * 6. QUẢN LÝ ĐƠN HÀNG ĐANG GIAO & HOÀN TẤT THU TIỀN
+       */
+      async function loadActiveDeliveries() {
+        if (!currentShipper) return;
+
+        try {
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") return;
+
+          var action = resolveActionName("getShipperAvailableOrders");
+          var res = await window.Thim5API.callGAS(action, { phone: currentShipper.phone });
+
+          var activeList = (res && res.data && Array.isArray(res.data.myActiveOrders)) ? res.data.myActiveOrders : [];
+          activeOrdersCache = activeList;
+
+          var badgeCount = document.getElementById("badge-active-count");
+          var navBadge = document.getElementById("badge-nav-active-count");
+
+          if (badgeCount) badgeCount.innerText = activeList.length + " đơn";
+          if (navBadge) {
+            navBadge.innerText = activeList.length;
+            navBadge.classList.toggle("hidden", activeList.length === 0);
+          }
+
+          renderActiveDeliveries(activeList);
+        } catch (e) {
+          console.warn("Lỗi tải đơn đang giao:", e);
+        }
+      }
+
+      function renderActiveDeliveries(orders) {
+        var container = document.getElementById("list-active-deliveries");
+        if (!container) return;
+
+        if (!orders || orders.length === 0) {
+          container.innerHTML = '<div class="p-8 text-center text-slate-500 rounded-3xl bg-slate-900/40 border border-slate-800 space-y-2"><i class="fa-solid fa-motorcycle text-3xl text-slate-700"></i><p class="text-xs">Hiện không có đơn nào đang giao.</p></div>';
+          return;
+        }
+
+        var html = "";
+        orders.forEach(function(od) {
+          var orderId = od.orderId || od.id || "ORD";
+          var customerName = od.customerName || "Khách Hàng";
+          var customerPhone = od.customerPhone || "";
+          var address = od.deliveryAddress || od.address || "";
+          var status = od.status || "PICKED_UP";
+          var paymentMethod = od.paymentMethod || "COD";
+          var codCollect = (paymentMethod === "VIETQR" || paymentMethod === "PAID") ? 0 : parseSafeNum(od.totalAmount || od.cod);
+          var itemsDesc = od.itemsSummary || od.itemsDesc || "Chi tiết món ăn";
+
+          var isPickedUp = (status === "PICKED_UP" || status === "IN_TRANSIT");
+
+          html += '<div class="p-4 rounded-3xl bg-slate-900 border border-sky-500/30 space-y-3.5 shadow-xl">' +
+            '<div class="flex items-center justify-between border-b border-slate-800 pb-2.5">' +
+              '<div>' +
+                '<span class="text-[10px] font-mono text-sky-400 font-bold">ĐƠN ĐANG THỰC HIỆN</span>' +
+                '<h4 class="text-xs font-black text-white">#' + orderId + ' • ' + customerName + '</h4>' +
+              '</div>' +
+              '<span class="px-2 py-0.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-mono font-bold">' +
+                (isPickedUp ? 'Đang Giao' : 'Chờ Rời Bếp') +
+              '</span>' +
+            '</div>' +
+            '<div class="p-3 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-1.5 text-xs">' +
+              '<div class="flex items-start gap-2 text-slate-200">' +
+                '<i class="fa-solid fa-location-dot text-rose-400 text-xs mt-0.5 shrink-0"></i>' +
+                '<span class="text-[11.5px] leading-relaxed">' + address + '</span>' +
+              '</div>' +
+              '<div class="text-[11px] text-slate-400 pl-4 border-l border-slate-800 ml-1.5">' + itemsDesc + '</div>' +
+            '</div>' +
+            '<div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">' +
+              '<span class="text-slate-400 font-medium">Tiền Cần Thu Khách:</span>' +
+              (codCollect === 0 
+                ? '<strong class="text-emerald-400 font-mono font-bold">ĐÃ TRẢ ONLINE (0 đ)</strong>' 
+                : '<strong class="text-amber-400 font-mono font-black text-sm">' + formatMoneyVnd(codCollect) + '</strong>') +
+            '</div>' +
+            '<div class="grid grid-cols-2 gap-2">' +
+              '<a href="tel:' + customerPhone + '" class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95">' +
+                '<i class="fa-solid fa-phone text-emerald-400 text-xs"></i> Gọi Điện' +
+              '</a>' +
+              '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address) + '" target="_blank" class="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95">' +
+                '<i class="fa-solid fa-diamond-turn-right text-sky-400 text-xs"></i> Chỉ Đường' +
+              '</a>' +
+            '</div>' +
+            '<div>' +
+              (!isPickedUp ? (
+                '<button type="button" onclick="DriverTerminalController.confirmPickup(\'' + orderId + '\')" class="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider transition shadow active:scale-95 flex items-center justify-center gap-1.5">' +
+                  '<i class="fa-solid fa-check text-xs"></i> 1. Đã Lấy Món (Rời Bếp)' +
+                '</button>'
+              ) : (
+                '<button type="button" onclick="DriverTerminalController.completeDelivery(\'' + orderId + '\', ' + codCollect + ')" class="w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase tracking-wider transition shadow active:scale-95 flex items-center justify-center gap-1.5">' +
+                  '<i class="fa-solid fa-circle-check text-xs"></i> 2. Đã Giao Khách &amp; Thu Tiền' +
+                '</button>'
+              )) +
+            '</div>' +
+          '</div>';
+        });
+
+        container.innerHTML = html;
+      }
+
+      async function confirmPickup(orderId) {
+        if (!confirm("Xác nhận bạn đã nhận đủ món của đơn #" + orderId + " và bắt đầu giao?")) return;
+
+        try {
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") return;
+          var action = resolveActionName("confirmOrderPickup");
+          var res = await window.Thim5API.callGAS(action, { orderId: orderId, phone: currentShipper.phone });
+
+          if (res && res.status === "success") {
+            loadActiveDeliveries();
+          } else {
+            alert("⛔ " + ((res && res.message) ? res.message : "Cập nhật rời Bếp thất bại!"));
+          }
+        } catch (e) {
+          alert("Lỗi kết nối: " + e.message);
+        }
+      }
+
+      async function completeDelivery(orderId, codAmount) {
+        var msg = (codAmount > 0)
+          ? ("Xác nhận đã giao đơn #" + orderId + " và THU ĐỦ " + formatMoneyVnd(codAmount) + " tiền mặt?")
+          : ("Xác nhận đã giao thành công đơn #" + orderId + " (Đơn đã trả trực tuyến 0đ)?");
+
+        if (!confirm(msg)) return;
+
+        try {
+          if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") return;
+          var action = resolveActionName("completeOrderDelivery");
+          var res = await window.Thim5API.callGAS(action, {
+            orderId: orderId,
+            phone: currentShipper.phone,
+            codCollected: codAmount
+          });
+
+          if (res && res.status === "success") {
+            alert("🎉 Cuốc xe hoàn tất thành công!");
+            if (currentShipper) {
+              currentShipper.currentDebt += codAmount;
+              localStorage.setItem("thim5_shipper_debt", currentShipper.currentDebt);
+              updateHeaderUI();
+            }
+            loadActiveDeliveries();
+            loadWalletSummary();
+          } else {
+            alert("⛔ " + ((res && res.message) ? res.message : "Ghi nhận giao hàng thất bại!"));
+          }
+        } catch (e) {
+          alert("Lỗi kết nối hoàn tất đơn: " + e.message);
+        }
+      }
+
+      /**
+       * 7. TẢI VÍ THU NHẬP VÀ ĐỐI SOÁT CÔNG NỢ TẠI BẾP
+       */
+      async function loadWalletSummary() {
+        if (!currentShipper) return;
+
+        var txtEarned = document.getElementById("txt-wallet-today-earned");
+        var txtCount = document.getElementById("txt-wallet-delivered-count");
+        var txtHolding = document.getElementById("txt-wallet-holding-cod");
+
+        try {
+          if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+            var action = resolveActionName("getShipperWalletSummary");
+            var res = await window.Thim5API.callGAS(action, { phone: currentShipper.phone });
+
+            if (res && res.status === "success" && res.data) {
+              currentShipper.currentDebt = parseSafeNum(res.data.currentDebt);
+              currentShipper.todayEarned = parseSafeNum(res.data.todayEarned);
+              currentShipper.deliveredCount = parseSafeNum(res.data.deliveredCount);
+
+              localStorage.setItem("thim5_shipper_debt", currentShipper.currentDebt);
+              localStorage.setItem("thim5_shipper_today_earned", currentShipper.todayEarned);
+              localStorage.setItem("thim5_shipper_delivered_count", currentShipper.deliveredCount);
+
+              updateHeaderUI();
+            }
+          }
+        } catch (e) {
+          console.warn("Lỗi tải ví:", e);
+        }
+
+        if (txtEarned) txtEarned.innerText = formatMoneyVnd(currentShipper.todayEarned);
+        if (txtCount) txtCount.innerText = currentShipper.deliveredCount + " cuốc hoàn tất";
+        if (txtHolding) txtHolding.innerText = formatMoneyVnd(currentShipper.currentDebt);
+      }
+
+      /**
+       * 8. ĐĂNG XUẤT CA TRỰC TÀI XẾ
+       */
+      function handleLogout() {
+        if (confirm("Anh Hải Âu có chắc chắn muốn đăng xuất tài xế khỏi ca trực này?")) {
+          if (pollingTimer) clearInterval(pollingTimer);
+          localStorage.removeItem("thim5_shipper_phone");
+          localStorage.removeItem("thim5_shipper_name");
+          localStorage.removeItem("thim5_shipper_plate");
+          localStorage.removeItem("thim5_shipper_debt");
+          localStorage.removeItem("thim5_shipper_max_debt");
+          localStorage.removeItem("thim5_shipper_status");
+          localStorage.removeItem("thim5_shipper_session_expire");
+          currentShipper = null;
+          showLoginView();
+        }
+      }
+
+      return {
+        init: init,
+        pressDigit: pressDigit,
+        deleteDigit: deleteDigit,
+        clearDigits: clearDigits,
+        selectCandidate: selectCandidate,
+        closeCandidateModal: closeCandidateModal,
+        triggerPwaInstall: triggerPwaInstall,
+        toggleShiftStatus: toggleShiftStatus,
+        switchTab: switchTab,
+        loadAvailableOrders: loadAvailableOrders,
+        claimOrder: claimOrder,
+        confirmPickup: confirmPickup,
+        completeDelivery: completeDelivery,
+        handleLogout: handleLogout
+      };
+    })();
+
+    document.addEventListener("DOMContentLoaded", function() {
+      DriverTerminalController.init();
+    });
+  </script>
+
+  <!-- ========================================================================= -->
+  <!-- 5. NẠP BỘ ĐÔI THƯ VIỆN ĐIỀU PHỐI DỮ LIỆU CHUẨN SSOT TẬP TRUNG             -->
+  <!-- ========================================================================= -->
+  <script src="thim5-master-dictionary.js?v=20261007"></script>
+  <script src="api.js?v=20261007"></script>
+
+</body>
+</html>

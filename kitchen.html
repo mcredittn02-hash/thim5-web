@@ -1,0 +1,1798 @@
+<!-- ==========================================================================
+   FILE: kitchen.html - PHẦN [1/6]
+   BẮT ĐẦU TỪ: Khai báo DOCTYPE, Header HTML, CSS & Cấu hình Tailwind, Màn hình khóa PIN trạm Bếp KDS
+   KẾT THÚC TẠI: Thẻ đóng </div> của Thanh bộ lọc nhanh trạng thái đơn hàng (KDS Filter Tabs)
+   HƯỚNG DẪN: Tạo mới file kitchen.html và dán toàn bộ Phần [1/6] vào đầu file
+   ========================================================================== -->
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🍳 Bếp KDS • Mì Trộn Thím 5</title>
+  
+  <!-- PWA Metadata & Favicon -->
+  <meta name="theme-color" content="#020617">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍳</text></svg>">
+
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            slate: {
+              850: '#131c2e',
+              900: '#0f172a',
+              950: '#020617'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    body { background-color: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .custom-scroll::-webkit-scrollbar { display: none; }
+    .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    @keyframes pulseCardBorder {
+      0%, 100% { border-color: rgba(239, 68, 68, 0.8); box-shadow: 0 0 15px rgba(239, 68, 68, 0.25); }
+      50% { border-color: rgba(245, 158, 11, 0.9); box-shadow: 0 0 25px rgba(245, 158, 11, 0.4); }
+    }
+    .order-card-urgent {
+      animation: pulseCardBorder 2s infinite ease-in-out;
+    }
+
+    @keyframes pulsePartnerBadge {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.03); opacity: 0.85; }
+    }
+    .partner-badge-active {
+      animation: pulsePartnerBadge 2.2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 p-2.5 sm:p-4 text-xs select-none">
+
+  <!-- ========================================================================= -->
+  <!-- 1. MÀN HÌNH KHÓA PIN QUẢN TRỊ TRẠM BẾP (AUTO-LOGIN PERSISTENT)             -->
+  <!-- ========================================================================= -->
+  <div id="kdsAuthOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-amber-500/50 rounded-3xl p-6 sm:p-8 text-center space-y-4 shadow-2xl max-w-sm w-full animate-in zoom-in-95 duration-200">
+      <div class="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-3xl mx-auto shadow-inner">
+        <i class="fa-solid fa-fire-burner"></i>
+      </div>
+      
+      <div class="space-y-1">
+        <h2 class="text-base sm:text-lg font-black text-white uppercase tracking-wider">Trạm Bếp KDS Thím 5</h2>
+        <p class="text-[11px] text-slate-400">Nhập mã PIN Quản lý (1985 hoặc 2026) để mở phiên:</p>
+      </div>
+
+      <div class="pt-2">
+        <input type="password" 
+               id="kdsPinInput" 
+               maxlength="6" 
+               placeholder="••••" 
+               class="w-48 mx-auto bg-slate-950 border-2 border-slate-700 focus:border-amber-500 rounded-2xl py-2.5 text-center text-2xl font-mono font-black text-amber-400 tracking-[0.4em] outline-none transition shadow-inner" 
+               autofocus />
+      </div>
+
+      <button type="button" 
+              id="btnSubmitKdsPin"
+              onclick="KitchenKdsController.handleKdsAuthLogin()" 
+              class="w-full max-w-[200px] mx-auto py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 hover:opacity-95 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 transition active:scale-95 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-lock-open text-xs"></i>
+        <span>Mở Trạm Bếp</span>
+      </button>
+
+      <p id="kdsAuthError" class="hidden text-rose-400 text-[11px] font-bold"></p>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. GIAO DIỆN CHÍNH TRẠM BẾP KDS (MAIN KDS WORKSPACE)                      -->
+  <!-- ========================================================================= -->
+  <div id="kdsMainWorkspace" class="space-y-3">
+    
+    <!-- TOPBAR ĐIỀU HÀNH BẾP -->
+    <header class="p-3 sm:p-3.5 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between shadow-lg gap-2 flex-wrap">
+      
+      <!-- Thương hiệu & Số lượng đơn đang nấu -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-red-600 flex items-center justify-center text-white text-lg shadow-md shrink-0">
+          <i class="fa-solid fa-utensils"></i>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider truncate flex items-center gap-1.5">
+            <span>Bếp KDS Thím 5</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          </h1>
+          <span id="dispOrderCount" class="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-tight">
+            0 Đơn Đang Xử Lý
+          </span>
+        </div>
+      </div>
+
+      <!-- Cụm Điều Khiển: Chuông báo đa năng, Đồng hồ LED, Nút làm mới, Khóa màn hình -->
+      <div class="flex items-center gap-2 shrink-0">
+        
+        <!-- NÚT MỞ BẢNG ĐIỀU KHIỂN & CHỌN ÂM BÁO KDS -->
+        <button type="button" 
+                id="btnSoundToggle" 
+                onclick="KitchenKdsController.openSoundConfigModal()" 
+                class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-sm">
+          <i id="soundIcon" class="fa-solid fa-bell"></i>
+          <span id="soundLabel">Âm Báo: Zalo (BẬT)</span>
+          <i class="fa-solid fa-sliders text-[10px] text-emerald-400/80 ml-0.5"></i>
+        </button>
+
+        <!-- Đồng hồ thời gian thực Bếp -->
+        <div id="kdsLiveClock" class="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 font-mono font-black text-amber-400 text-xs sm:text-sm tracking-wider shadow-inner">
+          00:00:00
+        </div>
+
+        <!-- Nút Làm Mới Thủ Công Khi Cần Thiết -->
+        <button type="button" 
+                id="btnManualRefreshKds"
+                onclick="KitchenKdsController.loadKitchenOrders(false)" 
+                class="w-9 h-9 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-amber-400 border border-slate-800 flex items-center justify-center text-xs transition active:scale-95" 
+                title="Quét lại đơn hàng ngay lập tức">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+
+        <!-- Nút Khóa Màn Hình Bếp (Khi muốn đổi ca hoặc bảo mật) -->
+        <button type="button" 
+                onclick="KitchenKdsController.handleKdsLockOut()" 
+                class="w-9 h-9 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 flex items-center justify-center text-xs transition active:scale-95" 
+                title="Khóa trạm Bếp">
+          <i class="fa-solid fa-lock"></i>
+        </button>
+      </div>
+
+    </header>
+
+    <!-- THANH BỘ LỌC NHANH TRẠNG THÁI (KDS FILTER TABS) -->
+    <div class="flex items-center gap-2 overflow-x-auto custom-scroll pb-1">
+      <button type="button" 
+              data-filter="all" 
+              onclick="KitchenKdsController.changeFilter('all', this)" 
+              class="kds-filter-tab px-3.5 py-2 rounded-xl font-bold text-[11px] transition bg-amber-500 text-slate-950 shrink-0 shadow active">
+        🌐 Tất Cả Đơn (<span id="countAll">0</span>)
+      </button>
+
+      <button type="button" 
+              data-filter="need_cook" 
+              onclick="KitchenKdsController.changeFilter('need_cook', this)" 
+              class="kds-filter-tab px-3.5 py-2 rounded-xl font-bold text-[11px] transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white shrink-0">
+        🔥 Cần Nấu Ngay (<span id="countNeedCook" class="text-rose-400 font-mono font-black">0</span>)
+      </button>
+
+      <button type="button" 
+              data-filter="packed" 
+              onclick="KitchenKdsController.changeFilter('packed', this)" 
+              class="kds-filter-tab px-3.5 py-2 rounded-xl font-bold text-[11px] transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white shrink-0">
+        📦 Chờ Gán Shipper (<span id="countPacked" class="text-amber-400 font-mono font-black">0</span>)
+      </button>
+
+      <button type="button" 
+              data-filter="delivering" 
+              onclick="KitchenKdsController.changeFilter('delivering', this)" 
+              class="kds-filter-tab px-3.5 py-2 rounded-xl font-bold text-[11px] transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white shrink-0">
+        🛵 Đang Đi Giao (<span id="countDelivering" class="text-sky-400 font-mono font-black">0</span>)
+      </button>
+
+      <button type="button" 
+              data-filter="wait_cod" 
+              onclick="KitchenKdsController.changeFilter('wait_cod', this)" 
+              class="kds-filter-tab px-3.5 py-2 rounded-xl font-bold text-[11px] transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white shrink-0">
+        ⏳ Chờ Xác Minh COD (<span id="countWaitCod" class="text-amber-400 font-mono font-bold">0</span>)
+      </button>
+    </div>
+    <!-- ==========================================================================
+   FILE: kitchen.html - PHẦN [2/6]
+   BẮT ĐẦU TỪ: Khung lưới danh sách đơn hàng KDS (#kitchenOrdersGrid)
+   KẾT THÚC TẠI: Thẻ đóng </div> của Modal Cấu hình Âm báo Trạm Bếp (#modalKdsSoundConfig)
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [1/6] của file kitchen.html
+   ========================================================================== -->
+
+    <!-- KHUNG LƯỚI DANH SÁCH ĐƠN HÀNG (KDS ORDERS GRID) -->
+    <main id="kitchenOrdersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+      <div class="col-span-full p-12 rounded-3xl bg-slate-900/60 border border-slate-800 text-center text-slate-400 space-y-3">
+        <i class="fa-solid fa-spinner fa-spin text-2xl text-amber-400"></i>
+        <p class="text-xs font-bold text-slate-300">Đang đồng bộ dữ liệu Bếp KDS thời gian thực...</p>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL CẤU HÌNH & CHỌN ÂM BÁO TRẠM BẾP KDS (SOUND SETTINGS POPUP)          -->
+  <!-- ========================================================================= -->
+  <div id="modalKdsSoundConfig" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div class="relative w-full max-w-sm rounded-3xl bg-slate-900 border-2 border-amber-500/40 shadow-2xl p-5 space-y-4">
+      
+      <!-- NÚT ĐÓNG MODAL -->
+      <button type="button" 
+              onclick="KitchenKdsController.closeSoundConfigModal()" 
+              class="absolute top-4 right-4 w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-90"
+              title="Đóng bảng cài đặt">
+        <i class="fa-solid fa-xmark text-xs"></i>
+      </button>
+
+      <!-- TIÊU ĐỀ BẢNG CÀI ĐẶT -->
+      <div class="space-y-1">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-black text-amber-400 uppercase font-mono">
+          <i class="fa-solid fa-volume-high"></i> Cảnh Báo Trạm Bếp
+        </div>
+        <h3 class="text-sm sm:text-base font-black text-white uppercase tracking-wider">Cấu Hình Chuông Báo Đơn</h3>
+        <p class="text-[11px] text-slate-400">Chọn kiểu chuông to rõ để không bỏ lỡ đơn nóng hổi khi Bếp ồn ào:</p>
+      </div>
+
+      <!-- CÔNG TẮC BẬT / TẮT TỔNG -->
+      <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-200">Trạng Thái Chuông:</span>
+          <span id="cfgSoundStatusBadge" class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300">ĐANG BẬT</span>
+        </div>
+        <button type="button" 
+                onclick="KitchenKdsController.toggleSoundMaster()" 
+                class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-white transition active:scale-95">
+          Bật/Tắt
+        </button>
+      </div>
+
+      <!-- DANH SÁCH CÁC KIỂU CHUÔNG HẤP DẪN -->
+      <div class="space-y-2">
+        <label class="text-[11px] font-black text-slate-300 uppercase tracking-wider block">
+          Chọn Kiểu Âm Báo:
+        </label>
+
+        <!-- Kiểu 1: Zalo Ting Ting -->
+        <label class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/40 cursor-pointer transition select-none">
+          <div class="flex items-center gap-2.5">
+            <input type="radio" name="kdsSoundChoice" value="zalo" class="accent-amber-500" checked onchange="KitchenKdsController.onSoundChoiceChange('zalo')" />
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>💬 Âm Tin Nhắn Zalo</span>
+                <span class="px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 text-[9px] font-mono">Quen Thuộc</span>
+              </div>
+              <div class="text-[10px] text-slate-400">Tiếng Ting Ting nhẹ bén, dễ nhận diện</div>
+            </div>
+          </div>
+          <button type="button" onclick="KitchenKdsController.testPlaySound('zalo')" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold transition active:scale-95 shrink-0">
+            <i class="fa-solid fa-play"></i> Thử
+          </button>
+        </label>
+
+        <!-- Kiểu 2: Ding Dong Đơn Mới (Grab/Shopee) -->
+        <label class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/40 cursor-pointer transition select-none">
+          <div class="flex items-center gap-2.5">
+            <input type="radio" name="kdsSoundChoice" value="dingdong" class="accent-amber-500" onchange="KitchenKdsController.onSoundChoiceChange('dingdong')" />
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>🔔 Ding Dong Đơn Mới</span>
+                <span class="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-mono">Bắt Tai</span>
+              </div>
+              <div class="text-[10px] text-slate-400">Chuông Pos chuẩn F&B vang ngân 2 hồi</div>
+            </div>
+          </div>
+          <button type="button" onclick="KitchenKdsController.testPlaySound('dingdong')" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold transition active:scale-95 shrink-0">
+            <i class="fa-solid fa-play"></i> Thử
+          </button>
+        </label>
+
+        <!-- Kiểu 3: Chuông Điện Thoại Bàn Reo Gấp -->
+        <label class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/40 cursor-pointer transition select-none">
+          <div class="flex items-center gap-2.5">
+            <input type="radio" name="kdsSoundChoice" value="phone" class="accent-amber-500" onchange="KitchenKdsController.onSoundChoiceChange('phone')" />
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>☎️ Chuông Điện Thoại Reo</span>
+                <span class="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 text-[9px] font-mono">Khẩn Cấp</span>
+              </div>
+              <div class="text-[10px] text-slate-400">Reng liên hồi, cực kỳ to, trị ngủ gật</div>
+            </div>
+          </div>
+          <button type="button" onclick="KitchenKdsController.testPlaySound('phone')" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold transition active:scale-95 shrink-0">
+            <i class="fa-solid fa-play"></i> Thử
+          </button>
+        </label>
+
+        <!-- Kiểu 4: Bíp Kép Điện Tử (Mặc định) -->
+        <label class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/40 cursor-pointer transition select-none">
+          <div class="flex items-center gap-2.5">
+            <input type="radio" name="kdsSoundChoice" value="beep" class="accent-amber-500" onchange="KitchenKdsController.onSoundChoiceChange('beep')" />
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>📻 Bíp Điện Tử Tần Số Cao</span>
+                <span class="px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 text-[9px] font-mono">Mặc Định</span>
+              </div>
+              <div class="text-[10px] text-slate-400">Tiếng bíp đơn âm gốc của Bếp Thím 5</div>
+            </div>
+          </div>
+          <button type="button" onclick="KitchenKdsController.testPlaySound('beep')" class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold transition active:scale-95 shrink-0">
+            <i class="fa-solid fa-play"></i> Thử
+          </button>
+        </label>
+      </div>
+
+      <!-- NÚT LƯU VÀ XÁC NHẬN -->
+      <div class="pt-2">
+        <button type="button" 
+                onclick="KitchenKdsController.saveSoundConfig()" 
+                class="w-full py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/30 transition active:scale-95">
+          Áp Dụng Cho Trạm Bếp
+        </button>
+      </div>
+
+    </div>
+  </div>
+  <!-- ==========================================================================
+   FILE: kitchen.html - PHẦN [3/6]
+   BẮT ĐẦU TỪ: Modal Điều phối Giao hàng Đa kênh (#dispatchModalOverlay)
+   KẾT THÚC TẠI: Thẻ đóng ngoặc nhọn } của hàm checkKdsAuth() trong KitchenKdsController
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [2/6] của file kitchen.html
+   ========================================================================== -->
+
+  <!-- ========================================================================= -->
+  <!-- MODAL ĐIỀU PHỐI GIAO HÀNG & MỞ KHÓA BẾP NẤU (DUAL VERIFICATION GATE)        -->
+  <!-- Tích hợp đa đối tác: Hỗ trợ Shipper Quán hoặc Đẩy Sang Grab / Xanh / Vill -->
+  <!-- ========================================================================= -->
+  <div id="dispatchModalOverlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-4 select-none">
+    <div class="relative bg-slate-900 border-2 border-amber-500/50 w-full max-w-md rounded-3xl shadow-2xl p-5 sm:p-6 space-y-4 animate-in zoom-in-95 duration-200 text-xs">
+      
+      <!-- Tiêu Đề Modal -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base shrink-0">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div>
+            <h3 id="modalDispatchTitle" class="text-sm font-black text-white uppercase tracking-wider">Điều Phối &amp; Gán Đơn Giao Hàng</h3>
+            <p id="modalDispatchSub" class="text-[10px] text-slate-400">Chọn Shipper Quán hoặc gọi đối tác Grab/Xanh/Vill ngoài</p>
+          </div>
+        </div>
+        <button type="button" 
+                onclick="KitchenKdsController.closeDispatchModal()" 
+                class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-90"
+                title="Đóng bảng điều phối">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="modalOrderId" value="">
+      <input type="hidden" id="modalCustomerShipFee" value="0">
+      <input type="hidden" id="modalSubtotal" value="0">
+      <input type="hidden" id="modalDispatchMode" value="VERIFY_AND_COOK">
+
+      <!-- Thông Tin Đơn Hàng Tóm Tắt -->
+      <div class="p-3 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400 text-[11px]">Mã Đơn Hàng:</span>
+          <span id="modalDisplayOrderId" class="font-mono font-black text-amber-400 text-xs">-</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400 text-[11px]">Khách Hàng:</span>
+          <span id="modalDisplayCustomer" class="font-bold text-white text-xs truncate max-w-[200px]">-</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-400 text-[11px]">Cước Quán Đã Thu Khách:</span>
+          <span id="modalDisplayCustomerShip" class="font-mono font-bold text-emerald-400 text-xs">0 đ</span>
+        </div>
+        <div class="flex justify-between items-center pt-1 border-t border-slate-900">
+          <span class="text-slate-300 font-bold text-[11px]">Tiền Thu Khách Khi Nhận:</span>
+          <span id="modalDisplayCodAmount" class="font-mono font-black text-amber-300 text-sm">0 đ</span>
+        </div>
+      </div>
+
+      <!-- Tùy Chọn Kênh Vận Chuyển: Nội Bộ Quán vs Gọi Đối Tác Sàn Ngoài -->
+      <div class="space-y-2">
+        <label class="font-bold text-slate-300 text-[11px] block">Chọn Kênh Vận Chuyển:</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" 
+                  id="btnModalTypeInternal" 
+                  onclick="KitchenKdsController.selectDeliveryChannel('INTERNAL')" 
+                  class="py-2.5 px-3 rounded-xl border-2 border-amber-500 bg-amber-500/10 text-amber-400 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-motorcycle"></i>
+            <span>Đội Xe Quán (Thím 5)</span>
+          </button>
+          <button type="button" 
+                  id="btnModalTypeExternal" 
+                  onclick="KitchenKdsController.selectDeliveryChannel('EXTERNAL')" 
+                  class="py-2.5 px-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold text-xs hover:text-white transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-cube"></i>
+            <span>Gọi Grab / Xanh / Vill</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Phân Hệ 1: Shipper Nội Bộ (Đọc từ sheet DATA_SHIPPERS) -->
+      <div id="sectionModalInternal" class="space-y-2">
+        <label class="font-bold text-slate-400 text-[10.5px] block">Chỉ Định Tài Xế Phụ Trách:</label>
+        <select id="modalSelectShipper" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 text-xs font-bold outline-none focus:border-amber-500 transition">
+          <option value="">-- Chưa chỉ định (Mở cho toàn đội nhận trên sàn PWA) --</option>
+        </select>
+        <span class="text-[10px] text-slate-500 block">Tài xế nhận đơn sẽ chịu trách nhiệm thu tiền và đối soát két Bếp theo trần nợ 300k.</span>
+      </div>
+
+      <!-- Phân Hệ 2: Đẩy App Ngoài (GrabExpress / Xanh SM / VillShip / Ahamove / beDelivery) -->
+      <div id="sectionModalExternal" class="hidden space-y-2.5">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-bold text-slate-400 text-[10.5px] block mb-1">Đơn Vị App Ngoài:</label>
+            <select id="modalExternalProvider" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-slate-200 text-xs font-bold outline-none focus:border-amber-500">
+              <option value="GRAB">GrabExpress</option>
+              <option value="XANH_SM">Xanh SM Bike</option>
+              <option value="VILL">VillShip</option>
+              <option value="AHAMOVE">Ahamove</option>
+              <option value="BE">beDelivery</option>
+            </select>
+          </div>
+          <div>
+            <label class="font-bold text-slate-400 text-[10.5px] block mb-1">Mã Chuyến / Mã Đơn App:</label>
+            <input type="text" 
+                   id="modalExternalTracking" 
+                   placeholder="VD: GR-8892" 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white font-mono uppercase focus:border-amber-500 outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-bold text-slate-400 text-[10.5px] block mb-1">Tên &amp; SĐT Tài Xế App:</label>
+            <input type="text" 
+                   id="modalExternalDriverInfo" 
+                   placeholder="VD: Tuấn (0901...)" 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-amber-500 outline-none">
+          </div>
+          <div>
+            <label class="font-bold text-slate-400 text-[10.5px] block mb-1">Cước Sàn Báo Thực Tế (VNĐ):</label>
+            <input type="number" 
+                   id="modalExternalFee" 
+                   oninput="KitchenKdsController.calculateModalSubsidy()" 
+                   placeholder="VD: 25000" 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-amber-400 focus:border-amber-500 outline-none">
+          </div>
+        </div>
+
+        <!-- Cảnh Báo Tài Chính Phí Bù Ship Bảo Vệ Biên Lợi Nhuận -->
+        <div class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-between text-[11px]">
+          <span class="text-rose-300 font-medium">Quán phải bù tiền ship sàn:</span>
+          <strong id="modalDisplaySubsidyFee" class="font-mono font-black text-rose-400 text-xs">0 đ</strong>
+        </div>
+      </div>
+
+      <!-- Cụm Nút Hành Động -->
+      <div class="pt-2 border-t border-slate-800 flex items-center gap-2">
+        <button type="button" 
+                onclick="KitchenKdsController.closeDispatchModal()" 
+                class="flex-1 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 font-bold transition active:scale-95">
+          Đóng
+        </button>
+        <button type="button" 
+                id="btnModalConfirmCook" 
+                onclick="KitchenKdsController.executeDispatchAction()" 
+                class="flex-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 font-black uppercase tracking-wider transition active:scale-95 shadow-lg shadow-orange-600/20 flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-check"></i>
+          <span id="btnModalConfirmCookText">Xác Nhận &amp; Bắt Đầu</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Adapter kết nối Headless GAS API Gateway v3.5 -->
+  <script src="api.js?v=20261004"></script>
+
+  <script>
+/**
+ * =========================================================================
+ * CONTROLLER: KITCHEN DISPLAY SYSTEM (TRẠM BẾP KDS THÍM 5 v3.5 ENTERPRISE)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+ * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+ * Kiến trúc: Dual Verification Gate, Tự động mở khóa đơn COD, Modal Grab/Xanh/Vill
+ * =========================================================================
+ */
+var KitchenKdsController = (function() {
+    var isSoundEnabled = true;
+    var currentSoundType = "zalo";
+    var audioCtx = null;
+    var knownOrderCodes = [];
+    var isInitialLoad = true;
+    var rawOrdersCache = [];
+    var currentFilter = 'all';
+    var kdsPollingTimer = null;
+    var isCallingApi = false;
+    var localCancelledOrders = [];
+
+    var currentSelectedDeliveryChannel = "INTERNAL";
+    var activeTargetOrder = null;
+
+    // Danh bạ tài xế nội bộ nạp động từ sheet DATA_SHIPPERS
+    var cachedShippers = [];
+
+    function isRunningInsideGAS() {
+        return typeof google !== 'undefined' && google.script && typeof google.script.run !== 'undefined';
+    }
+
+    function callBackend(gasFunctionName, gasArgsArray, apiActionName, apiPayloadObj) {
+        return new Promise(function(resolve, reject) {
+            if (isRunningInsideGAS()) {
+                var runner = google.script.run
+                    .withSuccessHandler(function(res) { resolve(res); })
+                    .withFailureHandler(function(err) { reject(err); });
+                if (typeof runner[gasFunctionName] === 'function') {
+                    runner[gasFunctionName].apply(runner, gasArgsArray || []);
+                } else {
+                    reject(new Error("Hàm " + gasFunctionName + " không tồn tại trong GAS!"));
+                }
+            } else if (window.Thim5API && typeof window.Thim5API.callGAS === 'function') {
+                window.Thim5API.callGAS(apiActionName, apiPayloadObj || {})
+                    .then(function(res) { resolve(res); })
+                    .catch(function(err) { reject(err); });
+            } else {
+                reject(new Error("Không tìm thấy cổng kết nối Thim5API!"));
+            }
+        });
+    }
+
+    function checkKdsAuth() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var authParam = urlParams.get("auth");
+        var savedPin = localStorage.getItem("thim5_kds_auth");
+        var overlay = document.getElementById("kdsAuthOverlay");
+
+        if (authParam === "1985" || authParam === "2026" || savedPin === "1985" || savedPin === "2026") {
+            if (authParam) {
+                localStorage.setItem("thim5_kds_auth", authParam);
+            }
+            if (overlay) {
+                overlay.style.display = "none";
+            }
+            initKDS();
+        } else {
+            if (overlay) {
+                overlay.style.display = "flex";
+            }
+            var pinInput = document.getElementById("kdsPinInput");
+            if (pinInput) {
+                pinInput.value = "";
+                pinInput.focus();
+                pinInput.onkeydown = function(e) {
+                    if (e.key === "Enter") handleKdsAuthLogin();
+                };
+            }
+        }
+    }
+    /* ==========================================================================
+   FILE: kitchen.html - PHẦN [4/6]
+   BẮT ĐẦU TỪ: Hàm handleKdsAuthLogin()
+   KẾT THÚC TẠI: Thẻ đóng ngoặc nhọn } của hàm syncSoundModalUI()
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [3/6] của file kitchen.html
+   ========================================================================== */
+
+    function handleKdsAuthLogin() {
+        var pinInput = document.getElementById("kdsPinInput");
+        var pin = pinInput ? pinInput.value.trim() : "";
+        var err = document.getElementById("kdsAuthError");
+        var overlay = document.getElementById("kdsAuthOverlay");
+
+        if (err) err.style.display = "none";
+
+        if (pin === "1985" || pin === "2026") {
+            localStorage.setItem("thim5_kds_auth", pin);
+            if (overlay) {
+                overlay.style.display = "none";
+            }
+
+            try { 
+                initAudioContext(); 
+                playToneSynthesis("zalo"); 
+            } catch(e) {
+                console.warn("⚠️ [Audio Unlock Warn]:", e);
+            }
+
+            initKDS();
+        } else {
+            if (err) {
+                err.innerText = "❌ Sai mã PIN Bếp! Vui lòng nhập đúng PIN Quản lý (1985 hoặc 2026).";
+                err.style.display = "block";
+            }
+            if (pinInput) {
+                pinInput.value = "";
+                pinInput.focus();
+            }
+        }
+    }
+
+    function handleKdsLockOut() {
+        if (confirm("Khóa màn hình trạm Bếp KDS?")) {
+            localStorage.removeItem("thim5_kds_auth");
+            if (kdsPollingTimer) {
+                clearInterval(kdsPollingTimer);
+                kdsPollingTimer = null;
+            }
+            var pinInput = document.getElementById("kdsPinInput");
+            if (pinInput) pinInput.value = "";
+            var overlay = document.getElementById("kdsAuthOverlay");
+            if (overlay) overlay.style.display = "flex";
+        }
+    }
+
+    function initKDS() {
+        updateLiveClock();
+        setInterval(updateLiveClock, 1000);
+        loadSoundSettingsFromStorage();
+        loadActiveShippersDirectory();
+        loadKitchenOrders(false);
+        
+        if (!kdsPollingTimer) {
+            kdsPollingTimer = setInterval(function() {
+                loadKitchenOrders(true);
+            }, 10000);
+        }
+
+        document.body.addEventListener('click', function() {
+            try { initAudioContext(); } catch(e) {}
+        }, { once: true });
+    }
+
+    /**
+     * NẠP DANH BẠ TÀI XẾ ĐỘNG TỪ SHEET CSDL DATA_SHIPPERS
+     * Thay thế hoàn toàn mảng cứng cũ, đảm bảo đồng bộ thời gian thực
+     */
+    async function loadActiveShippersDirectory() {
+        try {
+            var res = await callBackend("getActiveShippersList", [], "getActiveShippersList", {});
+            var list = [];
+            if (res && res.status === "success" && Array.isArray(res.data)) {
+                list = res.data;
+            } else if (Array.isArray(res)) {
+                list = res;
+            } else if (res && Array.isArray(res.shippers)) {
+                list = res.shippers;
+            }
+
+            if (list.length > 0) {
+                cachedShippers = list.map(function(s) {
+                    var sName = s.fullName || s.name || s.shipperName || "Tài Xế";
+                    var sPhone = s.phone || s.shipperPhone || "";
+                    var sPlate = s.plateNumber || s.plate || "";
+                    return {
+                        name: sName,
+                        phone: sPhone,
+                        plate: sPlate,
+                        label: sName + (sPlate ? (" [" + sPlate + "]") : "") + (sPhone ? (" - " + sPhone) : "")
+                    };
+                });
+            } else {
+                // Fallback dự phòng nếu chưa có tài xế mới kích hoạt
+                cachedShippers = [
+                    { name: "Nguyễn Hải Âu", phone: "0934220585", plate: "70F1-889.92", label: "Nguyễn Hải Âu [70F1-889.92] - 0934220585" },
+                    { name: "Tài xế Hoàng (Đội 1)", phone: "0934220585", plate: "70-B1 123.45", label: "Tài xế Hoàng (Đội 1) - 0934220585" },
+                    { name: "Tài xế Tuấn (Đội 2)", phone: "0979531213", plate: "70-F1 678.90", label: "Tài xế Tuấn (Đội 2) - 0979531213" }
+                ];
+            }
+        } catch (e) {
+            console.warn("⚠️ [KDS] Không thể tải danh bạ tài xế động, kích hoạt fallback:", e);
+            cachedShippers = [
+                { name: "Nguyễn Hải Âu", phone: "0934220585", plate: "70F1-889.92", label: "Nguyễn Hải Âu [70F1-889.92] - 0934220585" },
+                { name: "Tài xế Hoàng (Đội 1)", phone: "0934220585", plate: "70-B1 123.45", label: "Tài xế Hoàng (Đội 1) - 0934220585" },
+                { name: "Tài xế Tuấn (Đội 2)", phone: "0979531213", plate: "70-F1 678.90", label: "Tài xế Tuấn (Đội 2) - 0979531213" }
+            ];
+        }
+    }
+
+    function initAudioContext() {
+        try {
+            if (!audioCtx) {
+                var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) audioCtx = new AudioContextClass();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        } catch(e) {}
+    }
+
+    function updateLiveClock() {
+        var now = new Date();
+        var h = String(now.getHours()).padStart(2, '0');
+        var m = String(now.getMinutes()).padStart(2, '0');
+        var s = String(now.getSeconds()).padStart(2, '0');
+        var el = document.getElementById("kdsLiveClock");
+        if (el) el.innerText = h + ":" + m + ":" + s;
+    }
+
+    function playToneSynthesis(type) {
+        if (!isSoundEnabled) return;
+        try {
+            initAudioContext();
+            if (!audioCtx) return;
+
+            var now = audioCtx.currentTime;
+
+            if (type === "zalo") {
+                var osc1 = audioCtx.createOscillator();
+                var gain1 = audioCtx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(1760, now);
+                gain1.gain.setValueAtTime(0.35, now);
+                gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc1.connect(gain1);
+                gain1.connect(audioCtx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.15);
+
+                var osc2 = audioCtx.createOscillator();
+                var gain2 = audioCtx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(2637, now + 0.12);
+                gain2.gain.setValueAtTime(0.4, now + 0.12);
+                gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                osc2.connect(gain2);
+                gain2.connect(audioCtx.destination);
+                osc2.start(now + 0.12);
+                osc2.stop(now + 0.45);
+            } else if (type === "dingdong") {
+                var oscD1 = audioCtx.createOscillator();
+                var gainD1 = audioCtx.createGain();
+                oscD1.type = 'triangle';
+                oscD1.frequency.setValueAtTime(587.33, now);
+                gainD1.gain.setValueAtTime(0.45, now);
+                gainD1.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                oscD1.connect(gainD1);
+                gainD1.connect(audioCtx.destination);
+                oscD1.start(now);
+                oscD1.stop(now + 0.35);
+
+                var oscD2 = audioCtx.createOscillator();
+                var gainD2 = audioCtx.createGain();
+                oscD2.type = 'sine';
+                oscD2.frequency.setValueAtTime(880, now + 0.28);
+                gainD2.gain.setValueAtTime(0.5, now + 0.28);
+                gainD2.gain.exponentialRampToValueAtTime(0.005, now + 0.85);
+                oscD2.connect(gainD2);
+                gainD2.connect(audioCtx.destination);
+                oscD2.start(now + 0.28);
+                oscD2.stop(now + 0.85);
+            } else if (type === "phone") {
+                for (var pulse = 0; pulse < 3; pulse++) {
+                    var pulseStart = now + (pulse * 0.14);
+                    var oA = audioCtx.createOscillator();
+                    var oB = audioCtx.createOscillator();
+                    var gP = audioCtx.createGain();
+                    oA.type = 'square';
+                    oB.type = 'sine';
+                    oA.frequency.setValueAtTime(853, pulseStart);
+                    oB.frequency.setValueAtTime(960, pulseStart);
+                    gP.gain.setValueAtTime(0.18, pulseStart);
+                    gP.gain.exponentialRampToValueAtTime(0.01, pulseStart + 0.1);
+                    oA.connect(gP);
+                    oB.connect(gP);
+                    gP.connect(audioCtx.destination);
+                    oA.start(pulseStart);
+                    oB.start(pulseStart);
+                    oA.stop(pulseStart + 0.1);
+                    oB.stop(pulseStart + 0.1);
+                }
+            } else {
+                var oscB1 = audioCtx.createOscillator();
+                var gainB1 = audioCtx.createGain();
+                oscB1.type = 'sine';
+                oscB1.frequency.setValueAtTime(880, now);
+                gainB1.gain.setValueAtTime(0.3, now);
+                gainB1.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+                oscB1.connect(gainB1);
+                gainB1.connect(audioCtx.destination);
+                oscB1.start(now);
+                oscB1.stop(now + 0.22);
+
+                var oscB2 = audioCtx.createOscillator();
+                var gainB2 = audioCtx.createGain();
+                oscB2.type = 'sine';
+                oscB2.frequency.setValueAtTime(1174.66, now + 0.18);
+                gainB2.gain.setValueAtTime(0.3, now + 0.18);
+                gainB2.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                oscB2.connect(gainB2);
+                gainB2.connect(audioCtx.destination);
+                oscB2.start(now + 0.18);
+                oscB2.stop(now + 0.45);
+            }
+        } catch(e) {
+            console.warn("⚠ [KDS Sound Synthesis Error]:", e);
+        }
+    }
+
+    function playNewOrderAlert() {
+        var targetType = currentSoundType || localStorage.getItem("thim5_kds_sound_type") || "zalo";
+        playToneSynthesis(targetType);
+    }
+
+    function openSoundConfigModal() {
+        initAudioContext();
+        var modal = document.getElementById("modalKdsSoundConfig");
+        if (modal) modal.classList.remove("hidden");
+        syncSoundModalUI();
+    }
+
+    function closeSoundConfigModal() {
+        var modal = document.getElementById("modalKdsSoundConfig");
+        if (modal) modal.classList.add("hidden");
+    }
+
+    function toggleSoundMaster() {
+        isSoundEnabled = !isSoundEnabled;
+        localStorage.setItem("thim5_kds_sound_enabled", isSoundEnabled ? "true" : "false");
+        syncSoundModalUI();
+        updateTopbarSoundButton();
+        if (isSoundEnabled) {
+            playNewOrderAlert();
+        }
+    }
+
+    function onSoundChoiceChange(val) {
+        currentSoundType = String(val || "zalo").trim();
+    }
+
+    function testPlaySound(val) {
+        initAudioContext();
+        var t = String(val || currentSoundType || "zalo").trim();
+        playToneSynthesis(t);
+    }
+
+    function saveSoundConfig() {
+        var radios = document.querySelectorAll("input[name='kdsSoundChoice']");
+        radios.forEach(function(r) {
+            if (r.checked) currentSoundType = r.value;
+        });
+        localStorage.setItem("thim5_kds_sound_type", currentSoundType);
+        localStorage.setItem("thim5_kds_sound_enabled", isSoundEnabled ? "true" : "false");
+        updateTopbarSoundButton();
+        closeSoundConfigModal();
+        playNewOrderAlert();
+    }
+
+    function loadSoundSettingsFromStorage() {
+        var savedEnabled = localStorage.getItem("thim5_kds_sound_enabled");
+        if (savedEnabled !== null) {
+            isSoundEnabled = (savedEnabled === "true");
+        }
+        var savedType = localStorage.getItem("thim5_kds_sound_type");
+        if (savedType) {
+            currentSoundType = savedType;
+        }
+        updateTopbarSoundButton();
+    }
+
+    function syncSoundModalUI() {
+        var badge = document.getElementById("cfgSoundStatusBadge");
+        if (badge) {
+            if (isSoundEnabled) {
+                badge.className = "px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300";
+                badge.innerText = "ĐANG BẬT";
+            } else {
+                badge.className = "px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-rose-500/20 text-rose-300";
+                badge.innerText = "ĐÃ TẮT";
+            }
+        }
+        var radio = document.querySelector("input[name='kdsSoundChoice'][value='" + currentSoundType + "']");
+        if (radio) radio.checked = true;
+    }
+    /* ==========================================================================
+   FILE: kitchen.html - PHẦN [5/6]
+   BẮT ĐẦU TỪ: Hàm updateTopbarSoundButton()
+   KẾT THÚC TẠI: Thẻ đóng ngoặc nhọn } của hàm renderKitchenUI()
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [4/6] của file kitchen.html
+   ========================================================================== */
+
+    function updateTopbarSoundButton() {
+        var btn = document.getElementById("btnSoundToggle");
+        var label = document.getElementById("soundLabel");
+        var icon = document.getElementById("soundIcon");
+
+        var soundNameMap = {
+            zalo: "Zalo",
+            dingdong: "DingDong",
+            phone: "Chuông ĐT",
+            beep: "Bíp Kép"
+        };
+        var curName = soundNameMap[currentSoundType] || "Zalo";
+
+        if (isSoundEnabled) {
+            if (btn) btn.className = "px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 active:scale-95 shadow-sm";
+            if (label) label.innerText = "Âm Báo: " + curName + " (BẬT)";
+            if (icon) icon.className = "fa-solid fa-bell";
+        } else {
+            if (btn) btn.className = "px-3 py-1.5 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 text-xs font-bold transition flex items-center gap-1.5 active:scale-95";
+            if (label) label.innerText = "Âm Báo: TẮT";
+            if (icon) icon.className = "fa-solid fa-bell-slash";
+        }
+    }
+
+    function unwrapOrdersArray(res) {
+        if (!res) return [];
+        if (Array.isArray(res)) return res;
+        if (Array.isArray(res.orders)) return res.orders;
+        if (res.data) {
+            if (Array.isArray(res.data)) return res.data;
+            if (Array.isArray(res.data.orders)) return res.data.orders;
+        }
+        return [];
+    }
+
+    async function loadKitchenOrders(isSilent) {
+        if (isCallingApi) return;
+        isCallingApi = true;
+
+        var refreshBtnIcon = document.querySelector("#btnManualRefreshKds i");
+        if (refreshBtnIcon && !isSilent) refreshBtnIcon.classList.add("fa-spin");
+
+        try {
+            var res = await callBackend("getKitchenKdsOrders", [], "getKitchenKdsOrders", {});
+            var orders = unwrapOrdersArray(res);
+
+            rawOrdersCache = orders.filter(function(o) {
+                var code = String(o.code || o.orderCode || o.orderId || "").trim();
+                var isCancelledStatus = (o.status === "CANCELLED" || o.status === "Đã Hủy" || Number(o.step) === -1);
+                var isLocallyCancelled = (localCancelledOrders.indexOf(code) !== -1);
+                return !isCancelledStatus && !isLocallyCancelled;
+            });
+
+            updateFilterCounts(rawOrdersCache);
+            renderKitchenUI();
+        } catch (err) {
+            console.error("❌ Lỗi nạp Bếp KDS:", err);
+        } finally {
+            isCallingApi = false;
+            if (refreshBtnIcon) refreshBtnIcon.classList.remove("fa-spin");
+        }
+    }
+
+    function updateFilterCounts(orders) {
+        var activeOrders = (orders || []).filter(function(o) {
+            var stepVal = Number(o.step !== undefined ? o.step : 0);
+            return o.status !== "CANCELLED" && o.status !== "Đã Hủy" && stepVal >= 0 && stepVal <= 3;
+        });
+
+        var cNeed = 0, cPacked = 0, cDelivering = 0, cWait = 0;
+        activeOrders.forEach(function(o) {
+            var st = Number(o.step !== undefined ? o.step : 0);
+            if (st === 2) cNeed++;
+            else if (st === 2.5) cPacked++;
+            else if (st === 3) cDelivering++;
+            else if (st === 0) cWait++;
+        });
+
+        var elAll = document.getElementById("countAll");
+        var elNeed = document.getElementById("countNeedCook");
+        var elPacked = document.getElementById("countPacked");
+        var elDelivering = document.getElementById("countDelivering");
+        var elWait = document.getElementById("countWaitCod");
+        var elDisp = document.getElementById("dispOrderCount");
+
+        if (elAll) elAll.innerText = activeOrders.length;
+        if (elNeed) elNeed.innerText = cNeed;
+        if (elPacked) elPacked.innerText = cPacked;
+        if (elDelivering) elDelivering.innerText = cDelivering;
+        if (elWait) elWait.innerText = cWait;
+        if (elDisp) elDisp.innerText = activeOrders.length + " ĐƠN ĐANG XỬ LÝ";
+    }
+
+    function changeFilter(filterKey, btnElement) {
+        currentFilter = filterKey;
+        document.querySelectorAll(".kds-filter-tab").forEach(function(b) {
+            b.className = "kds-filter-tab px-3.5 py-2 rounded-xl font-bold text-[11px] transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white shrink-0";
+        });
+        if (btnElement) {
+            btnElement.className = "kds-filter-tab px-3.5 py-2 rounded-xl font-bold text-[11px] transition bg-amber-500 text-slate-950 shrink-0 shadow active";
+        }
+        renderKitchenUI();
+    }
+
+    /**
+     * RENDER GIAO DIỆN BẾP KDS CHUẨN MASTER VÀ MỞ CỔNG DUYỆT ĐƠN COD
+     * TÍCH HỢP CHỐT CHẶN DUAL VERIFICATION GATE VÀ ĐIỀU PHỐI ĐA KÊNH SHIPPER
+     */
+    function renderKitchenUI() {
+        var grid = document.getElementById("kitchenOrdersGrid");
+        if (!grid) return;
+
+        var activeOrders = (rawOrdersCache || []).filter(function(o) {
+            var code = String(o.code || o.orderCode || o.orderId || "").trim();
+            var stepVal = Number(o.step !== undefined ? o.step : 0);
+            var isCancelledStatus = (o.status === "CANCELLED" || o.status === "Đã Hủy" || stepVal === -1);
+            var isLocallyCancelled = (localCancelledOrders.indexOf(code) !== -1);
+            return !isCancelledStatus && !isLocallyCancelled && stepVal >= 0 && stepVal <= 3;
+        });
+
+        var displayOrders = activeOrders;
+        if (currentFilter === 'need_cook') {
+            displayOrders = activeOrders.filter(function(o) { return Number(o.step) === 2; });
+        } else if (currentFilter === 'packed') {
+            displayOrders = activeOrders.filter(function(o) { return Number(o.step) === 2.5; });
+        } else if (currentFilter === 'delivering') {
+            displayOrders = activeOrders.filter(function(o) { return Number(o.step) === 3; });
+        } else if (currentFilter === 'wait_cod') {
+            displayOrders = activeOrders.filter(function(o) { return Number(o.step) === 0; });
+        }
+
+        var currentCodes = activeOrders.map(function(o) { return String(o.code || o.orderCode || o.orderId || '').trim(); });
+        if (!isInitialLoad) {
+            var hasNewOrder = currentCodes.some(function(code) { return knownOrderCodes.indexOf(code) === -1; });
+            if (hasNewOrder) {
+                playNewOrderAlert();
+            }
+        } else {
+            isInitialLoad = false;
+        }
+        knownOrderCodes = currentCodes;
+
+        if (displayOrders.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full p-12 rounded-3xl bg-slate-900/60 border border-slate-800 text-center text-slate-400 space-y-2 select-none">
+                    <div class="text-4xl">🎉</div>
+                    <h3 class="text-sm font-black text-emerald-400 uppercase tracking-wider">Không Có Đơn Nào Trong Mục Này</h3>
+                    <p class="text-[11px] text-slate-500">Bếp KDS đang tự động lắng nghe đơn hàng mới từ Web D2C...</p>
+                </div>
+            `;
+            return;
+        }
+
+        var html = "";
+        displayOrders.forEach(function(o) {
+            var cleanCode = String(o.code || o.orderCode || o.orderId || '').trim();
+            var stepNum = Number(o.step !== undefined ? o.step : 0);
+            var isCod = (o.method === "COD" || o.paymentMethod === "COD");
+            var isPaidOnline = !isCod;
+            var isNeedCook = (stepNum === 2);
+            var isPacked = (stepNum === 2.5);
+            var isWaitCod = (stepNum === 0);
+            var isDelivering = (stepNum === 3);
+
+            var rawPhone = String(o.phone || "").replace(/\D/g, "");
+            var assignedShipperName = String(o.shipper || o.shipperInfo || "").trim();
+            var isShipperLocked = (assignedShipperName.length > 0);
+
+            var formattedItemsHtml = (o.items || '').split(" | ").map(function(itemText) {
+                return `<div class="py-1 border-b border-slate-800/80 last:border-none text-slate-200 font-bold">• ${itemText}</div>`;
+            }).join("");
+
+            var shipperOptionsHtml = cachedShippers.map(function(s) {
+                var isSelected = (assignedShipperName.indexOf(s.name) !== -1 || assignedShipperName.indexOf(s.phone) !== -1) ? "selected" : "";
+                return `<option value="${s.name}|${s.phone}|${s.plate}" ${isSelected}>🛵 ${s.label || (s.name + ' (' + s.phone + ')')}</option>`;
+            }).join("");
+
+            var timerComponentHtml = (typeof KDSTimerController !== "undefined" && typeof KDSTimerController.buildTimerHtml === "function")
+                ? KDSTimerController.buildTimerHtml(o)
+                : `<span class="text-[10.5px] font-mono text-slate-400">⏰ ${o.time || 'Vừa xong'}</span>`;
+
+            html += `
+                <div class="p-4 rounded-3xl bg-slate-900 border-2 ${isNeedCook ? 'border-orange-500/80 order-card-urgent' : (isWaitCod ? 'border-amber-500/50 bg-amber-950/15' : 'border-slate-800')} shadow-xl flex flex-col justify-between space-y-3">
+                    <div>
+                        <div class="border-b border-slate-800/80 pb-2 mb-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono font-black text-amber-400 text-base">${cleanCode}</span>
+                            </div>
+                            ${timerComponentHtml}
+                        </div>
+
+                        <div class="mb-2">
+                            ${isPaidOnline ? `
+                                <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                    💳 Đã Quét VietQR • Tiền Đã Vào Két • NẤU NGAY
+                                </span>
+                            ` : (isWaitCod ? `
+                                <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
+                                    ⚠ ĐƠN COD CHỜ GỌI XÁC MINH • CHƯA ĐƯỢC NẤU
+                                </span>
+                            ` : `
+                                <span class="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                    💵 Tiền Mặt COD: Thu ${Number(o.total || o.finalTotal || 0).toLocaleString('vi-VN')} đ
+                                </span>
+                            `)}
+                        </div>
+
+                        <div class="text-[11px] text-slate-400 space-y-0.5">
+                            <div>Khách: <strong class="text-white">${o.name || 'Khách vãng lai'}</strong> • SĐT: <strong class="text-slate-200">${o.phone || 'N/A'}</strong></div>
+                            <div class="truncate">Nơi nhận: <strong class="text-slate-300">${o.address || 'Hòa Thành, Tây Ninh'}</strong></div>
+                        </div>
+
+                        <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 my-2">
+                            <div class="text-[9.5px] font-black uppercase tracking-widest text-slate-500 mb-1">Món Ăn & Topping Đã Đặt:</div>
+                            <div class="text-xs space-y-0.5 leading-relaxed">${formattedItemsHtml}</div>
+                        </div>
+
+                        <div class="p-2 rounded-xl bg-orange-500/10 border border-orange-500/30 text-[11px] text-orange-300">
+                            🌶️ <strong>Khẩu vị:</strong> ${o.taste || 'Cay Nhẹ (Chuẩn vị Thím 5)'}
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5 pt-1">
+                        ${isWaitCod ? `
+                            <!-- CHỐT CHẶN DUAL VERIFICATION: GỌI ĐIỆN VÀ DUYỆT ĐƠN COD -->
+                            <div class="space-y-1.5">
+                                ${rawPhone ? `
+                                    <a href="tel:${rawPhone}" 
+                                       class="w-full py-2.5 px-3 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-black text-xs uppercase tracking-wider transition shadow-lg shadow-sky-600/25 flex items-center justify-center gap-2 active:scale-95">
+                                        <i class="fa-solid fa-phone-volume text-sm animate-bounce"></i>
+                                        <span>📞 GỌI KHÁCH: ${o.phone}</span>
+                                    </a>
+                                ` : ''}
+
+                                <div class="grid grid-cols-2 gap-1.5">
+                                    <button type="button" 
+                                            id="btn_quick_verify_${cleanCode}" 
+                                            onclick="KitchenKdsController.quickVerifyCodOrder('${cleanCode}')" 
+                                            class="py-2.5 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[11px] uppercase tracking-wider transition active:scale-95 shadow flex items-center justify-center gap-1">
+                                        <i class="fa-solid fa-circle-check"></i>
+                                        <span>Khách OK ➔ Nấu</span>
+                                    </button>
+
+                                    <button type="button" 
+                                            id="btn_dispatch_${cleanCode}" 
+                                            onclick="KitchenKdsController.openDispatchModal('${cleanCode}', 'VERIFY_AND_COOK')" 
+                                            class="py-2.5 px-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-[11px] uppercase tracking-wider transition active:scale-95 shadow flex items-center justify-center gap-1">
+                                        <i class="fa-solid fa-bolt"></i>
+                                        <span>Điều Phối Ship</span>
+                                    </button>
+                                </div>
+
+                                <button type="button" 
+                                        onclick="KitchenKdsController.handleKitchenCancel('${cleanCode}', 'Số ảo / Khách không nghe máy')" 
+                                        class="w-full py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10.5px] font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
+                                    <i class="fa-solid fa-ban"></i>
+                                    <span>Hủy Đơn Ảo (SĐT Rác / Thuê Bao)</span>
+                                </button>
+                            </div>
+                        ` : (isNeedCook ? `
+                            ${isShipperLocked ? `
+                                <div class="p-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center text-amber-400 text-[10.5px] font-bold">
+                                    🛵 Đơn đã gán vận chuyển: <strong>${assignedShipperName}</strong>
+                                </div>
+                            ` : ''}
+                            <button type="button" id="btn_cook_${cleanCode}" onclick="KitchenKdsController.handleCookDone('${cleanCode}')" class="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 hover:opacity-95 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 transition flex items-center justify-center gap-1.5 active:scale-95">
+                                <i class="fa-solid fa-fire-burner"></i>
+                                <span>ĐÃ NẤU XONG ➔ ĐÓNG GÓI CHỜ SHIP</span>
+                            </button>
+                        ` : (isPacked ? `
+                            <div class="space-y-1.5">
+                                ${isShipperLocked ? `
+                                    <div class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-center text-emerald-300 text-[11px]">
+                                        📦 Món đã đóng hộp giữ nhiệt! Chờ tài xế:
+                                        <div class="font-black text-amber-400 text-xs mt-0.5">🛵 ${assignedShipperName}</div>
+                                    </div>
+                                    <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', true)" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition active:scale-95 shadow">
+                                        BÀN GIAO CHO ${assignedShipperName.split('(')[0].trim().toUpperCase()}
+                                    </button>
+                                ` : `
+                                    <div class="p-1.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[10.5px]">
+                                        📦 Đã đóng gói xong! Bếp trưởng điều phối:
+                                    </div>
+                                    <div class="flex gap-1.5">
+                                        <select id="ship_select_${cleanCode}" class="flex-1 bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2 py-2 font-bold outline-none focus:border-amber-500">
+                                            ${shipperOptionsHtml}
+                                        </select>
+                                        <button type="button" onclick="KitchenKdsController.handleAssignShipper('${cleanCode}', false)" class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition active:scale-95 shadow shrink-0">
+                                            Gán Quán
+                                        </button>
+                                    </div>
+                                    <button type="button" 
+                                            onclick="KitchenKdsController.openDispatchModal('${cleanCode}', 'DISPATCH_PACKED_ORDER')" 
+                                            class="w-full py-2 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-300 font-bold text-[11px] transition active:scale-95 flex items-center justify-center gap-1.5">
+                                        <i class="fa-solid fa-cube text-xs"></i>
+                                        <span>🛵 Hoặc Gọi Grab / Xanh SM / Vill / Ahamove</span>
+                                    </button>
+                                `}
+                            </div>
+                        ` : (isDelivering ? `
+                            <div class="p-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-center font-bold text-sky-300 text-[11px]">
+                                🛵 Đang giao bởi: <strong>${assignedShipperName || 'Shipper'}</strong>
+                            </div>
+                        ` : '')))}
+
+                        ${!isWaitCod ? `
+                            <button type="button" onclick="KitchenKdsController.handleKitchenCancel('${cleanCode}')" class="w-full py-1.5 rounded-xl bg-slate-950 hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 border border-slate-800 text-[10.5px] font-bold transition">
+                                🚫 Hủy Đơn (Khách Báo Zalo / Hết Nguyên Liệu)
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        grid.innerHTML = html;
+    }
+    /* ==========================================================================
+   FILE: kitchen.html - PHẦN [6/6] (PHẦN CUỐI CÙNG - HOÀN TẤT FILE)
+   BẮT ĐẦU TỪ: Hàm quickVerifyCodOrder()
+   KẾT THÚC TẠI: Thẻ đóng </html> hoàn tất trọn vẹn tệp kitchen.html
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [5/6] của file kitchen.html
+   ========================================================================== */
+
+    /**
+     * DUYỆT NHANH ĐƠN HÀNG COD SAU KHI GỌI ĐIỆN THOẠI XÁC NHẬN KHÁCH THẬT
+     * Chuyển trạng thái đơn sang COOKING và tự động phát âm thanh thông báo
+     */
+    async function quickVerifyCodOrder(orderCode) {
+        var cleanCode = String(orderCode || "").trim();
+        if (!cleanCode) return;
+
+        var btn = document.getElementById("btn_quick_verify_" + cleanCode);
+        var origText = btn ? btn.innerHTML : "";
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang duyệt...';
+        }
+
+        try {
+            var payload = {
+                orderCode: cleanCode,
+                action: "VERIFY_AND_COOK",
+                note: "Đã gọi điện chốt khách thật qua trạm Bếp KDS"
+            };
+
+            await callBackend(
+                "kitchenVerifyCodOrder",
+                [cleanCode, payload.note],
+                "kitchenVerifyCodOrder",
+                payload
+            );
+
+            var target = rawOrdersCache.find(function(o) {
+                return String(o.code || o.orderCode || o.orderId || "").trim() === cleanCode;
+            });
+            if (target) {
+                target.step = 2;
+                target.status = "COOKING";
+            }
+
+            updateFilterCounts(rawOrdersCache);
+            changeFilter('need_cook', document.querySelector('[data-filter="need_cook"]'));
+            playNewOrderAlert();
+
+        } catch (err) {
+            alert("❌ Lỗi duyệt đơn COD: " + err.message);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        }
+    }
+
+    /**
+     * MỞ MODAL ĐIỀU PHỐI VÀ GÁN SHIPPER TOÀN DIỆN
+     * Hỗ trợ 2 chế độ: VERIFY_AND_COOK (Duyệt đơn COD) & DISPATCH_PACKED_ORDER (Món nấu xong đóng gói)
+     */
+    function openDispatchModal(orderCode, mode) {
+        var cleanCode = String(orderCode || "").trim();
+        var target = rawOrdersCache.find(function(o) { 
+            return String(o.code || o.orderCode || o.orderId || "").trim() === cleanCode; 
+        });
+
+        if (!target) {
+            alert("Không tìm thấy thông tin đơn " + cleanCode);
+            return;
+        }
+
+        activeTargetOrder = target;
+        var modal = document.getElementById("dispatchModalOverlay");
+        if (!modal) return;
+
+        var currentMode = mode || "VERIFY_AND_COOK";
+        document.getElementById("modalDispatchMode").value = currentMode;
+        document.getElementById("modalOrderId").value = cleanCode;
+        document.getElementById("modalDisplayOrderId").innerText = cleanCode;
+        document.getElementById("modalDisplayCustomer").innerText = (target.name || "Khách") + " (" + (target.phone || "N/A") + ")";
+
+        var customerShip = Number(target.customerShipFee || target.shipFee || target.finalShipFee || 12000);
+        var codAmount = Number(target.total || target.finalTotal || 0);
+        var subtotal = Number(target.subtotal || 0);
+
+        document.getElementById("modalCustomerShipFee").value = customerShip;
+        document.getElementById("modalSubtotal").value = subtotal;
+        document.getElementById("modalDisplayCustomerShip").innerText = customerShip.toLocaleString("vi-VN") + " đ";
+        document.getElementById("modalDisplayCodAmount").innerText = codAmount.toLocaleString("vi-VN") + " đ";
+
+        var titleEl = document.getElementById("modalDispatchTitle");
+        var subEl = document.getElementById("modalDispatchSub");
+        var confirmBtnText = document.getElementById("btnModalConfirmCookText");
+
+        if (currentMode === "DISPATCH_PACKED_ORDER") {
+            if (titleEl) titleEl.innerText = "Bàn Giao Cuốc Xe • Món Đã Đóng Hộp";
+            if (subEl) subEl.innerText = "Chỉ định tài xế quán hoặc điều xe Grab / Xanh SM / Vill / Ahamove";
+            if (confirmBtnText) confirmBtnText.innerText = "Xác Nhận Bàn Giao Ship";
+        } else {
+            if (titleEl) titleEl.innerText = "Bếp Duyệt Nấu & Điều Phối Ship";
+            if (subEl) subEl.innerText = "Mở khóa đơn COD tức thì • Tính phí bù ship minh bạch";
+            if (confirmBtnText) confirmBtnText.innerText = "Xác Nhận & Bắt Đầu";
+        }
+
+        var selectEl = document.getElementById("modalSelectShipper");
+        if (selectEl) {
+            selectEl.innerHTML = '<option value="">-- Chưa chỉ định (Mở cho toàn đội nhận trên sàn PWA) --</option>';
+            cachedShippers.forEach(function(s) {
+                var opt = document.createElement("option");
+                opt.value = s.name + "|" + s.phone + "|" + s.plate;
+                opt.textContent = "🛵 " + (s.label || (s.name + " (" + s.phone + ")"));
+                selectEl.appendChild(opt);
+            });
+        }
+
+        document.getElementById("modalExternalTracking").value = "";
+        document.getElementById("modalExternalDriverInfo").value = "";
+        document.getElementById("modalExternalFee").value = "";
+
+        selectDeliveryChannel("INTERNAL");
+        modal.classList.remove("hidden");
+    }
+
+    function closeDispatchModal() {
+        var modal = document.getElementById("dispatchModalOverlay");
+        if (modal) modal.classList.add("hidden");
+        activeTargetOrder = null;
+    }
+
+    function selectDeliveryChannel(channel) {
+        currentSelectedDeliveryChannel = channel;
+        var btnInternal = document.getElementById("btnModalTypeInternal");
+        var btnExternal = document.getElementById("btnModalTypeExternal");
+        var secInternal = document.getElementById("sectionModalInternal");
+        var secExternal = document.getElementById("sectionModalExternal");
+
+        if (channel === "INTERNAL") {
+            if (btnInternal) btnInternal.className = "py-2.5 px-3 rounded-xl border-2 border-amber-500 bg-amber-500/10 text-amber-400 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm";
+            if (btnExternal) btnExternal.className = "py-2.5 px-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold text-xs hover:text-white transition flex items-center justify-center gap-1.5";
+            if (secInternal) secInternal.classList.remove("hidden");
+            if (secExternal) secExternal.classList.add("hidden");
+        } else {
+            if (btnInternal) btnInternal.className = "py-2.5 px-3 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 font-bold text-xs hover:text-white transition flex items-center justify-center gap-1.5";
+            if (btnExternal) btnExternal.className = "py-2.5 px-3 rounded-xl border-2 border-amber-500 bg-amber-500/10 text-amber-400 font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm";
+            if (secInternal) secInternal.classList.add("hidden");
+            if (secExternal) secExternal.classList.remove("hidden");
+        }
+        calculateModalSubsidy();
+    }
+
+    function calculateModalSubsidy() {
+        var dispSubsidy = document.getElementById("modalDisplaySubsidyFee");
+        if (!dispSubsidy) return;
+
+        if (currentSelectedDeliveryChannel === "INTERNAL") {
+            dispSubsidy.innerText = "0 đ (Đội Xe Quán)";
+            dispSubsidy.className = "font-mono font-black text-emerald-400 text-xs";
+            return;
+        }
+
+        var customerShip = Number(document.getElementById("modalCustomerShipFee").value) || 0;
+        var externalCost = Number(document.getElementById("modalExternalFee").value) || 0;
+        var subsidy = Math.max(0, externalCost - customerShip);
+
+        dispSubsidy.innerText = subsidy.toLocaleString("vi-VN") + " đ";
+        dispSubsidy.className = (subsidy > 15000) 
+            ? "font-mono font-black text-rose-400 text-xs animate-pulse" 
+            : "font-mono font-black text-amber-400 text-xs";
+    }
+
+    /**
+     * THỰC THI HÀNH ĐỘNG ĐIỀU PHỐI ĐA KÊNH SHIPPER (NỘI BỘ HOẶC GRAB/XANH/VILL/AHAMOVE)
+     */
+    async function executeDispatchAction() {
+        if (!activeTargetOrder) return;
+
+        var orderCode = String(document.getElementById("modalOrderId").value || "").trim();
+        var dispatchMode = String(document.getElementById("modalDispatchMode").value || "VERIFY_AND_COOK").trim();
+        var btn = document.getElementById("btnModalConfirmCook");
+        var origText = btn ? btn.innerHTML : "";
+
+        var shipperName = "";
+        var shipperPhone = "";
+        var trackingCode = "";
+        var externalFee = 0;
+        var partnerCode = "INTERNAL";
+
+        if (currentSelectedDeliveryChannel === "INTERNAL") {
+            var rawInternal = document.getElementById("modalSelectShipper").value;
+            if (rawInternal) {
+                var pParts = rawInternal.split("|");
+                shipperName = pParts[0] || "";
+                shipperPhone = pParts[1] || "";
+                var pPlate = pParts[2] || "";
+                if (pPlate) shipperName += " (" + pPlate + ")";
+            }
+        } else {
+            partnerCode = document.getElementById("modalExternalProvider").value;
+            trackingCode = document.getElementById("modalExternalTracking").value.trim();
+            var driverContact = document.getElementById("modalExternalDriverInfo").value.trim();
+            externalFee = Number(document.getElementById("modalExternalFee").value) || 0;
+
+            var partnerLabelMap = {
+                GRAB: "GrabExpress",
+                XANH_SM: "Xanh SM Bike",
+                VILL: "VillShip",
+                AHAMOVE: "Ahamove",
+                BE: "beDelivery"
+            };
+            var pLabel = partnerLabelMap[partnerCode] || partnerCode;
+            shipperName = "[" + pLabel + "] " + (driverContact || "Tài xế sàn") + (trackingCode ? (" (Mã: " + trackingCode + ")") : "");
+            shipperPhone = driverContact.replace(/[^\d]/g, "") || partnerCode;
+        }
+
+        var customerShipFee = Number(document.getElementById("modalCustomerShipFee").value) || 0;
+        var subsidizedAmount = (currentSelectedDeliveryChannel === "EXTERNAL") ? Math.max(0, externalFee - customerShipFee) : 0;
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang điều phối...';
+        }
+
+        try {
+            if (dispatchMode === "VERIFY_AND_COOK") {
+                var payloadVerify = {
+                    orderCode: orderCode,
+                    orderId: orderCode,
+                    verifiedBy: "KITCHEN",
+                    deliveryChannel: currentSelectedDeliveryChannel,
+                    partnerCode: partnerCode,
+                    shipperName: shipperName,
+                    shipperPhone: shipperPhone,
+                    trackingCode: trackingCode,
+                    externalShipFee: externalFee,
+                    subsidizedShipFee: subsidizedAmount,
+                    note: "Duyệt nấu (" + currentSelectedDeliveryChannel + (shipperName ? " - " + shipperName : "") + ")"
+                };
+
+                await callBackend(
+                    "kitchenVerifyCodOrder",
+                    [orderCode, payloadVerify.note],
+                    "kitchenVerifyCodOrder",
+                    payloadVerify
+                );
+
+                if (shipperName) {
+                    try {
+                        await callBackend(
+                            "kitchenAssignShipper",
+                            [orderCode, shipperName, shipperPhone],
+                            "kitchenAssignShipper",
+                            { orderCode: orderCode, shipperName: shipperName, shipperPhone: shipperPhone }
+                        );
+                    } catch(assignErr) {
+                        console.warn("⚠️ Gán shipper tự động bị trễ:", assignErr);
+                    }
+                }
+
+                activeTargetOrder.step = 2;
+                activeTargetOrder.status = "COOKING";
+                activeTargetOrder.shipper = shipperName;
+
+                closeDispatchModal();
+                updateFilterCounts(rawOrdersCache);
+                changeFilter('need_cook', document.querySelector('[data-filter="need_cook"]'));
+                playNewOrderAlert();
+
+            } else {
+                var payloadAssign = {
+                    orderCode: orderCode,
+                    orderId: orderCode,
+                    deliveryType: currentSelectedDeliveryChannel,
+                    partnerCode: partnerCode,
+                    shipperName: shipperName || "Đội xe điều phối",
+                    shipperPhone: shipperPhone,
+                    trackingCode: trackingCode,
+                    externalShipFee: externalFee,
+                    subsidizedShipFee: subsidizedAmount
+                };
+
+                await callBackend(
+                    "kitchenAssignShipper",
+                    [orderCode, payloadAssign.shipperName, shipperPhone],
+                    "kitchenAssignShipper",
+                    payloadAssign
+                );
+
+                activeTargetOrder.step = 3;
+                activeTargetOrder.status = "DELIVERING";
+                activeTargetOrder.shipper = payloadAssign.shipperName;
+
+                closeDispatchModal();
+                updateFilterCounts(rawOrdersCache);
+                changeFilter('delivering', document.querySelector('[data-filter="delivering"]'));
+                alert("🛵 Đã bàn giao đơn #" + orderCode + " cho " + payloadAssign.shipperName + " đi giao!");
+            }
+
+        } catch (err) {
+            alert("❌ Lỗi xử lý điều phối: " + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        }
+    }
+
+    async function handleCookDone(orderCode) {
+        var cleanCode = String(orderCode || "").trim();
+        var btn = document.getElementById("btn_cook_" + cleanCode);
+        if (btn) {
+            btn.innerText = "⏳ Đang cập nhật trạng thái đóng gói...";
+            btn.disabled = true;
+        }
+
+        try {
+            await callBackend(
+                "kitchenUpdateStatus", 
+                [cleanCode, "COOK_DONE", ""], 
+                "kitchenUpdateStatus", 
+                { orderCode: cleanCode, action: "COOK_DONE", note: "" }
+            );
+
+            var target = rawOrdersCache.find(function(o) {
+                return String(o.code || o.orderCode || o.orderId || "").trim() === cleanCode;
+            });
+            if (target) {
+                target.step = 2.5;
+                target.status = "PACKED";
+            }
+
+            updateFilterCounts(rawOrdersCache);
+            changeFilter('packed', document.querySelector('[data-filter="packed"]'));
+        } catch (err) {
+            alert("❌ Lỗi cập nhật Bếp: " + err.message);
+            if (btn) {
+                btn.innerText = "ĐÃ NẤU XONG ➔ ĐÓNG GÓI CHỜ SHIP";
+                btn.disabled = false;
+            }
+        }
+    }
+
+    async function handleAssignShipper(orderCode, isPreLocked) {
+        var cleanCode = String(orderCode || "").trim();
+        var shipName = "";
+        var shipPhone = "";
+
+        if (isPreLocked) {
+            var matched = rawOrdersCache.find(function(o) { return String(o.code || o.orderCode || o.orderId || "").trim() === cleanCode; });
+            var fullLabel = matched ? String(matched.shipper || matched.shipperInfo || "") : "";
+            shipName = fullLabel.split("(")[0].trim() || "Tài Xế";
+            shipPhone = (fullLabel.match(/\((.*?)\)/) || ["", ""])[1];
+        } else {
+            var select = document.getElementById("ship_select_" + cleanCode);
+            if (!select) return;
+            var parts = select.value.split("|");
+            shipName = parts[0] || "Tài Xế Quán";
+            shipPhone = parts[1] || "";
+            var plate = parts[2] || "";
+            if (plate) shipName += " (" + plate + ")";
+        }
+
+        try {
+            await callBackend(
+                "kitchenAssignShipper", 
+                [cleanCode, shipName, shipPhone], 
+                "kitchenAssignShipper", 
+                { orderCode: cleanCode, shipperName: shipName, shipperPhone: shipPhone }
+            );
+
+            var target = rawOrdersCache.find(function(o) {
+                return String(o.code || o.orderCode || o.orderId || "").trim() === cleanCode;
+            });
+            if (target) {
+                target.step = 3;
+                target.status = "DELIVERING";
+                target.shipper = shipName;
+            }
+
+            updateFilterCounts(rawOrdersCache);
+            changeFilter('delivering', document.querySelector('[data-filter="delivering"]'));
+            alert("✅ Đã bàn giao đơn " + cleanCode + " cho " + shipName + " đi giao!");
+        } catch (err) {
+            alert("❌ Lỗi bàn giao Shipper: " + err.message);
+        }
+    }
+
+    async function handleKitchenCancel(orderCode, defaultReason) {
+        var cleanCode = String(orderCode || "").trim();
+        if (!cleanCode) return;
+
+        var reason = defaultReason;
+        if (!reason) {
+            reason = prompt("Nhập lý do hủy đơn " + cleanCode + " (VD: Khách nhắn Zalo hủy, Hết topping...):", "Khách nhắn Zalo hủy");
+            if (reason === null || !reason.trim()) return;
+        } else {
+            if (!confirm("Xác nhận hủy đơn ảo " + cleanCode + " (" + defaultReason + ")?")) return;
+        }
+
+        if (localCancelledOrders.indexOf(cleanCode) === -1) {
+            localCancelledOrders.push(cleanCode);
+        }
+
+        rawOrdersCache = rawOrdersCache.filter(function(o) {
+            return String(o.code || o.orderCode || o.orderId || "").trim() !== cleanCode;
+        });
+
+        updateFilterCounts(rawOrdersCache);
+        renderKitchenUI();
+
+        try {
+            await callBackend(
+                "kitchenUpdateStatus", 
+                [cleanCode, "CANCEL", reason], 
+                "kitchenUpdateStatus", 
+                { orderCode: cleanCode, action: "CANCEL", note: reason }
+            );
+        } catch (err) {
+            console.warn("⚠️ Lỗi đồng bộ lệnh hủy về máy chủ:", err.message);
+        }
+    }
+
+    return {
+        checkKdsAuth: checkKdsAuth,
+        handleKdsAuthLogin: handleKdsAuthLogin,
+        handleKdsLockOut: handleKdsLockOut,
+        openSoundConfigModal: openSoundConfigModal,
+        closeSoundConfigModal: closeSoundConfigModal,
+        toggleSoundMaster: toggleSoundMaster,
+        onSoundChoiceChange: onSoundChoiceChange,
+        testPlaySound: testPlaySound,
+        saveSoundConfig: saveSoundConfig,
+        loadKitchenOrders: loadKitchenOrders,
+        changeFilter: changeFilter,
+        handleCookDone: handleCookDone,
+        handleAssignShipper: handleAssignShipper,
+        handleKitchenCancel: handleKitchenCancel,
+        openDispatchModal: openDispatchModal,
+        closeDispatchModal: closeDispatchModal,
+        selectDeliveryChannel: selectDeliveryChannel,
+        calculateModalSubsidy: calculateModalSubsidy,
+        executeDispatchAction: executeDispatchAction,
+        quickVerifyCodOrder: quickVerifyCodOrder
+    };
+})();
+
+window.onload = function() {
+    KitchenKdsController.checkKdsAuth();
+};
+
+/**
+ * =========================================================================
+ * BỘ ĐIỀU KHIỂN HẸN GIỜ RA MÓN BẾP KDS (JUST-IN-TIME DISPATCH ENGINE)
+ * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+ * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+ * =========================================================================
+ */
+var KDSTimerController = (function() {
+    var prepTimeOverrides = {};
+
+    function formatOrderShortTime(timestampRaw) {
+        try {
+            var d = new Date(timestampRaw);
+            if (isNaN(d.getTime())) return "Vừa đặt";
+            var hh = String(d.getHours()).padStart(2, '0');
+            var mm = String(d.getMinutes()).padStart(2, '0');
+            return hh + ":" + mm;
+        } catch (e) {
+            return "Vừa đặt";
+        }
+    }
+
+    function calculateDefaultPrepMinutes(items) {
+        if (!Array.isArray(items) || items.length === 0) return 8;
+        var totalQty = 0;
+        var hasComboOrRice = false;
+
+        items.forEach(function(item) {
+            var q = Number(item.quantity) || 1;
+            totalQty += q;
+            var nameLower = String(item.name || "").toLowerCase();
+            var catLower = String(item.cat || "").toLowerCase();
+            if (nameLower.indexOf("combo") !== -1 || nameLower.indexOf("cơm") !== -1 || catLower === "cơm") {
+                hasComboOrRice = true;
+            }
+        });
+
+        if (hasComboOrRice || totalQty >= 3) return 12;
+        if (totalQty === 2) return 9;
+        return 7;
+    }
+
+    function buildTimerHtml(order) {
+        var orderCode = order.orderCode || order.code || order.id || "";
+        var createdAt = new Date(order.timestamp || order.createdAt || Date.now()).getTime();
+        
+        var prepMinutes = prepTimeOverrides[orderCode] || calculateDefaultPrepMinutes(order.items);
+        var targetReadyMs = createdAt + (prepMinutes * 60 * 1000);
+        var nowMs = Date.now();
+        var diffSecs = Math.floor((targetReadyMs - nowMs) / 1000);
+
+        var shortCreatedTime = formatOrderShortTime(order.timestamp || order.createdAt);
+        var targetDate = new Date(targetReadyMs);
+        var shortTargetTime = String(targetDate.getHours()).padStart(2, '0') + ":" + String(targetDate.getMinutes()).padStart(2, '0');
+
+        var isOverdue = diffSecs < 0;
+        var absSecs = Math.abs(diffSecs);
+        var mm = String(Math.floor(absSecs / 60)).padStart(2, '0');
+        var ss = String(absSecs % 60).padStart(2, '0');
+
+        var statusBadgeClass = "";
+        var statusText = "";
+
+        if (isOverdue) {
+            statusBadgeClass = "bg-rose-600/20 text-rose-400 border-rose-500/40 animate-pulse";
+            statusText = '<i class="fa-solid fa-triangle-exclamation"></i> <span>TRỄ HẸN +' + mm + ':' + ss + '</span>';
+        } else if (diffSecs <= 180) {
+            statusBadgeClass = "bg-amber-500/20 text-amber-300 border-amber-500/40";
+            statusText = '<i class="fa-solid fa-fire text-amber-400"></i> <span>GẤP: CÒN ' + mm + ':' + ss + '</span>';
+        } else {
+            statusBadgeClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+            statusText = '<i class="fa-regular fa-clock"></i> <span>HẸN XONG: ' + mm + ':' + ss + '</span>';
+        }
+
+        return `
+            <div class="mt-2 p-2 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5" id="timer-box-${orderCode}">
+                <div class="flex items-center justify-between text-[11px]">
+                    <div class="flex items-center gap-1.5 text-slate-400 font-mono">
+                        <span>Vào: <strong class="text-white">${shortCreatedTime}</strong></span>
+                        <span>➔ Ra: <strong class="text-amber-400">${shortTargetTime}</strong></span>
+                    </div>
+                    <div class="px-2 py-0.5 rounded-full border text-[10px] font-mono font-black flex items-center gap-1 shadow-sm ${statusBadgeClass}">
+                        ${statusText}
+                    </div>
+                </div>
+
+                <!-- THANH NÚT BẤM GIA HẠN THỜI GIAN DÀNH CHO BẾP TRƯỞNG -->
+                <div class="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px]">
+                    <span class="text-slate-500 font-mono">Khung giờ: ${prepMinutes}p</span>
+                    <div class="flex items-center gap-1">
+                        <button type="button" 
+                                onclick="KDSTimerController.extendPrepTime('${orderCode}', 3)" 
+                                class="px-2 py-0.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white font-mono active:scale-95 transition">
+                            +3p
+                        </button>
+                        <button type="button" 
+                                onclick="KDSTimerController.extendPrepTime('${orderCode}', 5)" 
+                                class="px-2 py-0.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white font-mono active:scale-95 transition">
+                            +5p
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function extendPrepTime(orderCode, extraMinutes) {
+        var current = prepTimeOverrides[orderCode] || 10;
+        prepTimeOverrides[orderCode] = current + extraMinutes;
+        
+        var box = document.getElementById("timer-box-" + orderCode);
+        if (box) {
+            box.outerHTML = buildTimerHtml({ orderCode: orderCode, timestamp: Date.now() });
+        }
+    }
+
+    return {
+        buildTimerHtml: buildTimerHtml,
+        extendPrepTime: extendPrepTime,
+        formatOrderShortTime: formatOrderShortTime
+    };
+})();
+</script>
+</body>
+</html>

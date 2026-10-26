@@ -1,0 +1,786 @@
+<!-- =============================================================================
+  HỆ THỐNG ĐIỀU HÀNH BẾP TRUNG TÂM LONGHOAFOOD MASTER & MÌ TRỘN THÍM 5
+  MODULE VIEW: tab-menu.html — BÀN ĐIỀU KHIỂN THỰC ĐƠN & MA TRẬN 13 CHỈ SỐ REVERSE-PRICING
+  PHIÊN BẢN: v3.5 Modular SaaS Control Plane (Chuẩn SSOT 7 Sheet)
+  QUY CHUẨN: Đồng bộ 100% DOM ID với tab-menu.js & Đủ 13 Cột Table Header
+============================================================================= -->
+
+<div id="tab-menu-root" class="space-y-6 animate-in fade-in-50 duration-200 text-slate-100">
+
+  <!-- ========================================================================= -->
+  <!-- 1. BẢNG CHỈ SỐ KPI VẬN HÀNH & TÀI CHÍNH THỰC ĐƠN REVERSE-PRICING          -->
+  <!-- ========================================================================= -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    
+    <!-- KPI 1: Tỷ Lệ Món Hoạt Động (ACTIVE / TOTAL) -->
+    <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-lg space-y-1">
+      <div class="flex items-center justify-between text-slate-400">
+        <span class="text-xs font-medium">Món Đang Phục Vụ</span>
+        <i class="fa-solid fa-bowl-food text-emerald-400 text-sm"></i>
+      </div>
+      <div class="flex items-baseline gap-1.5">
+        <span id="kpi-active-items" class="text-2xl font-black text-white font-mono">0</span>
+        <span class="text-xs text-slate-400 font-mono">/ <span id="kpi-total-items">0</span> món</span>
+      </div>
+      <div class="text-[11px] text-slate-400 font-medium">
+        Trạng thái bếp hoạt động
+      </div>
+    </div>
+
+    <!-- KPI 2: Food Cost Trung Bình Hệ Thống -->
+    <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-lg space-y-1">
+      <div class="flex items-center justify-between text-slate-400">
+        <span class="text-xs font-medium">Food Cost Trung Bình</span>
+        <i class="fa-solid fa-chart-pie text-amber-400 text-sm"></i>
+      </div>
+      <div class="flex items-baseline gap-1.5">
+        <span id="kpi-avg-foodcost" class="text-2xl font-black text-amber-400 font-mono">0.0%</span>
+      </div>
+      <div class="text-[11px] text-slate-400 font-medium">
+        Định mức biên an toàn 35-45%
+      </div>
+    </div>
+
+    <!-- KPI 3: Số Món Kéo AOV (Booster / Topping / Nước) -->
+    <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-lg space-y-1">
+      <div class="flex items-center justify-between text-slate-400">
+        <span class="text-xs font-medium">Món Đòn Bẩy (AOV)</span>
+        <i class="fa-solid fa-rocket text-sky-400 text-sm"></i>
+      </div>
+      <div class="flex items-baseline gap-1.5">
+        <span id="kpi-booster-count" class="text-2xl font-black text-sky-400 font-mono">0</span>
+        <span class="text-xs text-slate-400">SKU</span>
+      </div>
+      <div class="text-[11px] text-slate-400 font-medium">
+        Booster súp, topping, đồ uống 1L
+      </div>
+    </div>
+
+    <!-- KPI 4: Khóa Trần Food Cost Kiểm Soát Danh Mục -->
+    <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-lg space-y-1">
+      <div class="flex items-center justify-between text-slate-400">
+        <span class="text-xs font-medium">Trần FC Danh Mục</span>
+        <i class="fa-solid fa-shield-halved text-rose-400 text-sm"></i>
+      </div>
+      <div class="flex items-baseline gap-1.5">
+        <span id="kpi-max-fc-limit" class="text-2xl font-black text-rose-400 font-mono">38.0%</span>
+      </div>
+      <div class="text-[11px] text-slate-400 font-medium">
+        Kiểm soát trần theo danh mục
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. THANH CÔNG CỤ TÌM KIẾM, LỌC VAI TRÒ & NÚT ĐIỀU HƯỚNG TÁC VỤ            -->
+  <!-- ========================================================================= -->
+  <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800/80">
+    
+    <!-- Ô Tìm kiếm nhanh & Bộ lọc vai trò chiến lược -->
+    <div class="flex items-center gap-2 flex-1">
+      <div class="relative flex-1">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" 
+               id="menuSearchInput" 
+               placeholder="Tìm kiếm theo Tên món, Mã SKU, Topping, Nước..." 
+               class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition font-sans">
+      </div>
+
+      <select id="menuRoleFilterSelect" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 font-medium focus:outline-none focus:border-amber-500">
+        <option value="ALL">Tất Cả Vai Trò</option>
+        <option value="CORE">⭐ Chủ Lực (CORE)</option>
+        <option value="TRAFFIC">🎯 Mồi Vé (TRAFFIC)</option>
+        <option value="BOOSTER">🚀 Kéo AOV (BOOSTER)</option>
+        <option value="COMBO">🎁 Đại Tiệc (COMBO)</option>
+      </select>
+    </div>
+
+    <!-- Cụm Nút Tác Vụ: Làm Mới, Quản Trị Danh Mục, Nạp Đa Kênh, Thêm Món Mới -->
+    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <button type="button" 
+              id="btnRefreshMenuCatalog"
+              class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition border border-slate-700 active:scale-95 shadow-sm"
+              title="Tải lại từ CSDL Google Sheets (Bỏ qua Cache)">
+        <i class="fa-solid fa-rotate"></i>
+      </button>
+
+      <button type="button" 
+              class="menu-subnav-btn px-3.5 py-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-xs font-medium transition flex items-center gap-1.5 shrink-0 border border-slate-700/60 active:scale-95"
+              data-tab="CATEGORIES">
+        <i class="fa-solid fa-tags text-amber-400"></i>
+        <span>Quản Lý Danh Mục</span>
+      </button>
+
+      <button type="button" 
+              class="menu-subnav-btn px-3.5 py-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-xs font-medium transition flex items-center gap-1.5 shrink-0 border border-slate-700/60 active:scale-95"
+              data-tab="OMNI_INGESTION">
+        <i class="fa-solid fa-cloud-arrow-up text-sky-400"></i>
+        <span>Nạp Đa Kênh (Excel / AI)</span>
+      </button>
+
+      <button type="button" 
+              id="btnOpenCreateDishModal"
+              class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shrink-0 shadow-lg shadow-amber-500/10 active:scale-95">
+        <i class="fa-solid fa-plus"></i>
+        <span>+ TẠO MÓN MỚI</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Banner thông báo lỗi nếu có lỗi từ hệ thống -->
+  <div id="menuErrorAlertBanner" class="hidden p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <i class="fa-solid fa-circle-exclamation text-rose-400 text-sm"></i>
+      <span id="menuErrorAlertText">Đã xảy ra lỗi khi kết nối CSDL Google Sheets.</span>
+    </div>
+    <button type="button" onclick="this.parentElement.classList.add('hidden')" class="text-rose-400 hover:text-rose-200 text-sm">&times;</button>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 3. SUB-WORKSPACE 1: MA TRẬN THỰC ĐƠN 13 CỘT REVERSE-PRICING CHUẨN SSOT   -->
+  <!-- ========================================================================= -->
+  <div id="subWorkspaceMenuItems" class="space-y-4">
+    
+    <!-- Bộ Lọc Tabs Danh Mục Đa Ngành (Nạp động từ sheet SYS_CATEGORIES) -->
+    <div id="menuCategoryTabsContainer" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+      <!-- tab-menu.js sẽ render tự động các nút tab danh mục kèm badge đếm số lượng tại đây -->
+    </div>
+
+    <!-- Khung Bảng Ma Trận 13 Cột Reverse-Pricing Chuẩn SSOT -->
+    <div class="rounded-2xl bg-slate-900/40 border border-slate-800 overflow-hidden shadow-xl">
+      
+      <!-- Skeleton Loading khi đang nạp dữ liệu từ Apps Script -->
+      <div id="menuTableSkeleton" class="hidden p-10 text-center text-slate-400">
+        <div class="inline-flex items-center gap-2.5 text-xs font-mono">
+          <i class="fa-solid fa-circle-notch fa-spin text-amber-500 text-lg"></i>
+          <span>Đang nạp thực đơn 13 cột và cấu trúc giá Reverse-Pricing từ CSDL DATA_MENU...</span>
+        </div>
+      </div>
+
+      <!-- Khung cuộn ngang bảng thực đơn đủ 13 cột -->
+      <div id="menuTableContentWrapper" class="overflow-x-auto custom-scroll transition-opacity duration-200">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-950/90 text-slate-400 font-bold border-b border-slate-800 text-[10.5px] uppercase tracking-wider font-mono">
+              <th class="py-3 px-3.5">1. Món Ăn &amp; Ảnh</th>
+              <th class="py-3 px-2">2. Mã SKU</th>
+              <th class="py-3 px-3">3. Danh Mục</th>
+              <th class="py-3 px-2 text-center">4. Vai Trò</th>
+              <th class="py-3 px-3 text-right">5. Giá App (+25%)</th>
+              <th class="py-3 px-2 text-right text-emerald-400">6. % Giảm D2C</th>
+              <th class="py-3 px-3 text-right text-amber-400 font-bold">7. Giá Web D2C</th>
+              <th class="py-3 px-3 text-right">8. Giá Vốn COGS</th>
+              <th class="py-3 px-2 text-center">9. % Food Cost</th>
+              <th class="py-3 px-3 text-right text-emerald-400 font-bold">10. Lợi Nhuận Ròng</th>
+              <th class="py-3 px-3 text-center">11. Súp Bán Kèm</th>
+              <th class="py-3 px-2 text-center">12. Trạng Thái Bếp</th>
+              <th class="py-3 px-3.5 text-right">13. Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="menuItemsTableBody" class="divide-y divide-slate-800/60 font-sans">
+            <!-- tab-menu.js sẽ render tự động các dòng 13 cột khớp chính xác với 13 header ở trên -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Chân trang hiển thị số lượng món ăn sau khi lọc -->
+      <div class="p-3 bg-slate-950/80 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-table-cells text-amber-400 text-xs"></i>
+          <span>Bảng ma trận 13 chỉ số Reverse-Pricing chuẩn hóa SSOT DATA_MENU</span>
+        </div>
+        <span id="menuFilteredCountBadge" class="font-mono font-bold text-amber-400">0 món</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 4. SUB-WORKSPACE 2: BẢNG ĐIỀU KHIỂN QUẢN TRỊ 8 DANH MỤC (SYS_CATEGORIES)  -->
+  <!-- ========================================================================= -->
+  <div id="subWorkspaceCategories" class="space-y-4 hidden">
+    <div class="flex items-center justify-between bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+      <div class="flex items-center gap-2.5">
+        <button type="button" 
+                onclick="TabMenuController.switchSubTab('MENU_ITEMS')" 
+                class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1.5 border border-slate-700">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Về Thực Đơn</span>
+        </button>
+        <span class="text-xs font-black uppercase tracking-wider text-slate-200">Quản Trị 8 Danh Mục Đa Ngành (SYS_CATEGORIES)</span>
+      </div>
+
+      <button type="button" 
+              onclick="TabMenuController.openCategoryModal(null)" 
+              class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow-md shadow-amber-500/10 active:scale-95">
+        <i class="fa-solid fa-plus"></i>
+        <span>+ Thêm Danh Mục</span>
+      </button>
+    </div>
+
+    <!-- Bảng danh sách danh mục CSDL -->
+    <div class="rounded-2xl bg-slate-900/40 border border-slate-800 overflow-hidden shadow-xl">
+      <div class="overflow-x-auto custom-scroll">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-950/90 text-slate-400 font-bold border-b border-slate-800 text-[10.5px] uppercase tracking-wider font-mono">
+              <th class="py-3 px-4">Icon</th>
+              <th class="py-3 px-4">Mã Danh Mục</th>
+              <th class="py-3 px-4">Tên Danh Mục</th>
+              <th class="py-3 px-4">Slug D2C</th>
+              <th class="py-3 px-4 text-center">Trần Food Cost</th>
+              <th class="py-3 px-4 text-right">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="categoriesManagerTableBody" class="divide-y divide-slate-800/60 font-sans">
+            <!-- tab-menu.js sẽ render tự động các dòng danh mục từ SYS_CATEGORIES -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 5. SUB-WORKSPACE 3: SMART VISUAL OMNI-INGESTION (NHẬP THỰC ĐƠN NHANH TRỰC QUAN) -->
+  <!-- ========================================================================= -->
+  <div id="subWorkspaceIngestion" class="space-y-4 hidden">
+    <!-- Header Điều Hướng -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
+      <div class="flex items-center gap-2.5">
+        <button type="button" 
+                onclick="TabMenuController.switchSubTab('MENU_ITEMS')" 
+                class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1.5 border border-slate-700">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Về Thực Đơn</span>
+        </button>
+        <div>
+          <h3 class="text-xs font-black uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+            <span class="text-amber-400">⚡</span> Nhập Thực Đơn Nhanh Bằng Canvas &amp; Google Drive (Smart Visual Omni-Ingestion)
+          </h3>
+          <p class="text-[10.5px] text-slate-400">Tự động nén Canvas &lt; 80KB, đẩy lên Drive và suy luận 13 cột Reverse-Pricing cho hàng chục món cùng lúc.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" 
+                id="btnModeOcrMenu" 
+                onclick="TabMenuController.switchIngestionMode('OCR_MENU')" 
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-sky-500/20 text-sky-300 border border-sky-500/40">
+          <i class="fa-solid fa-camera-retro"></i>
+          <span>1. Quét Tờ Menu Bằng AI</span>
+        </button>
+        <button type="button" 
+                id="btnModeBatchImages" 
+                onclick="TabMenuController.switchIngestionMode('BATCH_IMAGES')" 
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-slate-800 text-slate-400 hover:text-white border border-slate-700">
+          <i class="fa-solid fa-images"></i>
+          <span>2. Tải Chùm Ảnh Món Ăn</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- BƯỚC 1: VÙNG KÉO THẢ ĐA NĂNG & DÁN NHANH CTRL+V -->
+    <div id="ingestionDropZoneMulti" 
+         class="relative p-6 rounded-3xl bg-gradient-to-br from-slate-900/90 to-slate-950 border-2 border-dashed border-amber-500/40 hover:border-amber-400 transition text-center space-y-4 shadow-xl">
+      
+      <!-- Chế độ 1: Quét Ảnh Tờ Menu Giấy / Scan Bằng Gemini OCR -->
+      <div id="boxModeOcrMenu" class="space-y-3">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xl shadow-inner">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-white">Chế Độ 1: Quét Ảnh Tờ Menu / Bảng Giá Giấy Bằng AI</h4>
+          <p class="text-xs text-slate-400 max-w-md mx-auto mt-1">
+            Kéo thả ảnh tờ menu, bấm nút bên dưới hoặc <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 font-mono text-[10px]">Ctrl+V</kbd> để dán ảnh trực tiếp từ màn hình/Zalo. AI sẽ tự đọc ra 10 - 30 món ăn cùng lúc!
+          </p>
+        </div>
+        <div class="flex items-center justify-center gap-3">
+          <label class="cursor-pointer px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-sky-600/20 active:scale-95">
+            <i class="fa-solid fa-camera"></i>
+            <span>Chọn Ảnh Tờ Menu Giấy</span>
+            <input type="file" id="inputMenuOcrImage" accept="image/*" onchange="TabMenuController.triggerGeminiVisionOcr(event)" class="hidden">
+          </label>
+        </div>
+        <div id="ingestionOcrStatus" class="text-xs font-mono text-slate-400">Sẵn sàng nhận ảnh tờ menu (Canvas tự nén chuẩn 1280px &lt; 150KB)...</div>
+      </div>
+
+      <!-- Chế độ 2: Tải Lên Hàng Loạt Ảnh Món Ăn (Tách tên món & giá từ file) -->
+      <div id="boxModeBatchImages" class="space-y-3 hidden">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl shadow-inner">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-white">Chế Độ 2: Tải Lên Hàng Loạt Nhiều Ảnh Món Ăn Cùng Lúc</h4>
+          <p class="text-xs text-slate-400 max-w-lg mx-auto mt-1">
+            Chọn 5, 10, 20 ảnh món ăn. Canvas tự động nén siêu nhẹ &lt; 80KB, đẩy lên Google Drive và tự động tách tên món &amp; giá tiền từ tên file (Ví dụ: <code class="text-amber-300 font-mono">Hu Tieu Nam Vang 55k.jpg</code>).
+          </p>
+        </div>
+        <div class="flex items-center justify-center gap-3">
+          <label class="cursor-pointer px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-600/20 active:scale-95">
+            <i class="fa-solid fa-images"></i>
+            <span>Chọn Nhiều Ảnh Món Ăn</span>
+            <input type="file" id="inputBatchDishImages" multiple accept="image/*" onchange="TabMenuController.handleBatchImageUpload(event)" class="hidden">
+          </label>
+        </div>
+        
+        <!-- Khung tiến trình nén & tải ảnh -->
+        <div id="batchImageProgressBox" class="hidden max-w-md mx-auto space-y-2 text-left">
+          <div class="flex justify-between text-[11px] font-mono text-slate-300">
+            <span id="batchImageProgressText">Đang xử lý ảnh: 0/0...</span>
+            <span id="batchImageProgressPct" class="text-amber-400 font-bold">0%</span>
+          </div>
+          <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+            <div id="batchImageProgressBar" class="bg-gradient-to-r from-amber-500 to-emerald-500 h-2 rounded-full transition-all duration-150" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kênh Bổ Trợ (Thu Gọn): Excel & URL (Giữ nguyên DOM ID SSOT) -->
+      <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
+        <div class="flex items-center gap-2 bg-slate-950/60 px-3 py-1.5 rounded-xl border border-slate-800">
+          <i class="fa-solid fa-file-excel text-emerald-400"></i>
+          <span>Excel:</span>
+          <input type="file" id="inputMenuExcelFile" accept=".xlsx,.xls,.csv" onchange="TabMenuController.handleExcelFileSelect(event)" class="text-[11px] file:mr-1 file:py-0.5 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:bg-emerald-500/20 file:text-emerald-300 file:cursor-pointer">
+          <span id="ingestionExcelStatus" class="text-[10px] text-slate-500 font-mono">Chưa chọn</span>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-950/60 px-3 py-1.5 rounded-xl border border-slate-800">
+          <i class="fa-solid fa-globe text-amber-400"></i>
+          <span>Link Menu:</span>
+          <input type="url" id="ingestionTargetUrl" placeholder="https://..." class="bg-slate-900 border border-slate-800 rounded-lg px-2 py-0.5 text-[11px] text-white w-36">
+          <button type="button" onclick="TabMenuController.handleUrlExtraction()" class="px-2 py-0.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] rounded-lg">Quét</button>
+          <span id="ingestionUrlStatus" class="text-[10px] text-slate-500 font-mono hidden">Sẵn sàng</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BƯỚC 2: THANH CÔNG CỤ ÁP DỤNG HÀNG LOẠT 1-CHẠM (BULK PRICING TOOLBAR) -->
+    <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+        <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Thanh Công Cụ Áp Dụng Hàng Loạt 1-Chạm (Bulk Pricing Toolbar)</span>
+        </span>
+        <span class="text-[10.5px] text-slate-400">Tự động hóa giá bán và biên lợi nhuận toàn bảng nháp</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+        <!-- Chỉnh % Giảm D2C chung -->
+        <div class="flex items-center gap-1.5 bg-slate-950 p-2 rounded-xl border border-slate-800">
+          <span class="text-slate-400 text-[11px] shrink-0">% Giảm D2C:</span>
+          <input type="number" id="inpBulkDiscount" value="15" min="0" max="90" class="w-14 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-center font-mono font-bold text-emerald-400">
+          <button type="button" id="btnBulkApplyDiscount" onclick="TabMenuController.bulkApplyDiscount()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-[10.5px] transition">Áp dụng</button>
+        </div>
+
+        <!-- Gán Danh Mục chung -->
+        <div class="flex items-center gap-1.5 bg-slate-950 p-2 rounded-xl border border-slate-800">
+          <span class="text-slate-400 text-[11px] shrink-0">Danh mục:</span>
+          <select id="selBulkCategory" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white">
+            <!-- Nạp động qua JS -->
+          </select>
+          <button type="button" id="btnBulkApplyCategory" onclick="TabMenuController.bulkApplyCategory()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-[10.5px] transition">Gán</button>
+        </div>
+
+        <!-- Gán Tag Chiến Lược chung -->
+        <div class="flex items-center gap-1.5 bg-slate-950 p-2 rounded-xl border border-slate-800">
+          <span class="text-slate-400 text-[11px] shrink-0">Tag:</span>
+          <select id="selBulkRole" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white font-mono">
+            <option value="CORE">CORE (Chủ Lực ~38% FC)</option>
+            <option value="TRAFFIC">TRAFFIC (Mồi Vé ~48% FC)</option>
+            <option value="BOOSTER">BOOSTER (Nước/Top ~18% FC)</option>
+          </select>
+          <button type="button" id="btnBulkApplyRole" onclick="TabMenuController.bulkApplyRole()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-[10.5px] transition">Gán</button>
+        </div>
+
+        <!-- Nút Tự Động Tính Reverse-Pricing Toàn Bảng -->
+        <button type="button" 
+                id="btnBulkCalculateReversePricing" 
+                onclick="TabMenuController.bulkCalculateReversePricing()" 
+                class="px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/20 active:scale-95">
+          <span>⚡</span>
+          <span>Tự Động Tính Giá Vốn &amp; LNR Toàn Bảng</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- BƯỚC 3: BẢNG NHÁP KIỂM DUYỆT TRỰC QUAN (INTERACTIVE 13-COLUMN STAGING GRID) -->
+    <div class="rounded-3xl bg-slate-900/60 border border-slate-800 overflow-hidden shadow-2xl space-y-3 p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-800/80 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xs font-black uppercase tracking-wider text-slate-200">Bảng Nháp Kiểm Duyệt (Interactive Staging Grid)</span>
+          <span id="ingestionPreviewCountBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">0 món chờ nạp</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" 
+                  id="btnStagingAddRow" 
+                  onclick="TabMenuController.addEmptyStagingRow()" 
+                  class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1 border border-slate-700">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>+ Thêm Dòng</span>
+          </button>
+          <button type="button" 
+                  id="btnStagingClear" 
+                  onclick="TabMenuController.clearStagingBuffer()" 
+                  class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold transition border border-rose-500/30">
+            <span>🧹 Xóa Hết</span>
+          </button>
+          <button type="button" 
+                  id="btnCommitBatchImport" 
+                  onclick="TabMenuController.commitBatchImport()" 
+                  disabled 
+                  class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs transition flex items-center gap-1.5 shadow-lg shadow-emerald-600/30 active:scale-95">
+            <span>🚀</span>
+            <span id="btnCommitText">Lưu Tất Cả Vào Thực Đơn (0 Món)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto custom-scroll border border-slate-800/80 rounded-2xl bg-slate-950/40">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-950 text-slate-400 font-bold border-b border-slate-800 text-[10px] uppercase tracking-wider font-mono">
+              <th class="py-2.5 px-2.5 text-center w-10">STT</th>
+              <th class="py-2.5 px-2 text-center w-20">Ảnh Món</th>
+              <th class="py-2.5 px-2 w-24">Mã SKU</th>
+              <th class="py-2.5 px-3 min-w-[160px]">Tên Món Ăn (*)</th>
+              <th class="py-2.5 px-2 min-w-[120px]">Danh Mục</th>
+              <th class="py-2.5 px-2 text-right w-24">Giá App</th>
+              <th class="py-2.5 px-2 text-center w-16">% Giảm</th>
+              <th class="py-2.5 px-2 text-right w-24 text-amber-400">Giá Web D2C</th>
+              <th class="py-2.5 px-2 text-right w-24">Giá Vốn COGS</th>
+              <th class="py-2.5 px-2 text-right w-24 text-emerald-400">Lợi Nhuận (LNR)</th>
+              <th class="py-2.5 px-2 w-28">Tag Chiến Lược</th>
+              <th class="py-2.5 px-2 text-center w-24">Food Cost %</th>
+              <th class="py-2.5 px-2 text-center w-10">Xóa</th>
+            </tr>
+          </thead>
+          <tbody id="ingestionPreviewTableBody" class="divide-y divide-slate-800/60 font-sans">
+            <tr>
+              <td colspan="13" class="py-12 text-center text-slate-500 text-xs">
+                Chưa có dữ liệu nào trong bảng nháp. Vui lòng quét ảnh menu AI, tải chùm ảnh hoặc dán ảnh (Ctrl+V).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 6. MODAL CHỈNH SỬA & TẠO MÓN MỚI (13 CỘT CHUẨN REVERSE-PRICING)            -->
+  <!-- ========================================================================= -->
+  <div id="dishEditModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm p-4 sm:p-6 flex items-center justify-center">
+    <div class="w-full max-w-3xl rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+      
+      <!-- Header Modal -->
+      <div class="px-6 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-sm font-bold">
+            🍽️
+          </div>
+          <div>
+            <h3 id="dishModalTitle" class="text-sm font-bold text-white">Chỉnh Sửa Món Ăn</h3>
+            <p class="text-[11px] text-slate-400">Đồng bộ 13 trường dữ liệu Reverse-Pricing vào Sheet DATA_MENU</p>
+          </div>
+        </div>
+
+        <button type="button" 
+                onclick="TabMenuController.closeEditModal()" 
+                class="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition flex items-center justify-center text-lg">
+          &times;
+        </button>
+      </div>
+
+      <!-- Form Body Modal -->
+      <div class="p-6 space-y-4 max-h-[78vh] overflow-y-auto custom-scroll">
+        
+        <!-- Hàng 1: Mã SKU, Tên Món Ăn, Danh Mục -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Mã Món (SKU) <span class="text-rose-400">*</span></label>
+            <input type="text" 
+                   id="modalDishCode" 
+                   required 
+                   placeholder="M_01" 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Tên Món Ăn / Topping <span class="text-rose-400">*</span></label>
+            <input type="text" 
+                   id="modalDishName" 
+                   required 
+                   placeholder="Mì Trộn Xá Xíu Thím 5..." 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <!-- Hàng 2: Danh Mục, Vai Trò Chiến Lược, Trạng Thái Bếp, Súp Kèm -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Nhóm Danh Mục</label>
+            <select id="modalDishCategory" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              <!-- Nạp động từ SYS_CATEGORIES qua tab-menu.js -->
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Vai Trò Chiến Lược</label>
+            <select id="modalDishRole" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              <option value="CORE">⭐ Chủ Lực (CORE)</option>
+              <option value="TRAFFIC">🎯 Mồi Vé (TRAFFIC)</option>
+              <option value="BOOSTER">🚀 Kéo AOV (BOOSTER)</option>
+              <option value="COMBO">🎁 Đại Tiệc (COMBO)</option>
+              <option value="EXTENDED">📦 Mở Rộng (EXTENDED)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Trạng Thái Bếp</label>
+            <select id="modalDishStatus" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+              <option value="ACTIVE">🟢 Còn Phục Vụ (ACTIVE)</option>
+              <option value="OUT_OF_STOCK">🔴 Tạm Hết Hàng (OUT_OF_STOCK)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Súp Kèm / Bán Kèm</label>
+            <input type="text" 
+                   id="modalDishBoosterSoup" 
+                   placeholder="Súp sườn / Trứng lòng đào" 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <!-- Hàng 3: CƠ CẤU GIÁ REVERSE-PRICING 4 CHIỀU TƯƠNG TÁC LIVE -->
+        <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/80 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-calculator"></i>
+              <span>Cơ Cấu Giá Reverse-Pricing &amp; Ràng Buộc Biên Lợi Nhuận</span>
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">Tự động tính 4 chiều thời gian thực</span>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-[10.5px] font-mono text-slate-400 uppercase mb-1">Giá App Niêm Yết (+25%)</label>
+              <input type="number" 
+                     id="modalDishAppPrice" 
+                     step="1000" 
+                     min="0" 
+                     placeholder="55000" 
+                     class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs font-mono text-slate-300 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div>
+              <label class="block text-[10.5px] font-mono text-emerald-400 uppercase mb-1">% Giảm Web D2C</label>
+              <input type="number" 
+                     id="modalDishDiscountPercent" 
+                     step="1" 
+                     min="0" 
+                     max="90" 
+                     value="20" 
+                     placeholder="20" 
+                     class="w-full bg-slate-900 border border-emerald-500/40 rounded-xl px-3 py-2 text-xs font-mono font-bold text-emerald-400 focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div>
+              <label class="block text-[10.5px] font-mono text-amber-400 uppercase mb-1">Giá Bán Web D2C <span class="text-rose-400">*</span></label>
+              <input type="number" 
+                     id="modalDishD2cPrice" 
+                     required 
+                     step="1000" 
+                     min="0" 
+                     placeholder="44000" 
+                     class="w-full bg-slate-900 border border-amber-500/50 rounded-xl px-3 py-2 text-xs font-mono font-black text-amber-400 focus:outline-none focus:border-amber-500">
+            </div>
+
+            <div>
+              <label class="block text-[10.5px] font-mono text-slate-400 uppercase mb-1">Giá Vốn COGS <span class="text-rose-400">*</span></label>
+              <input type="number" 
+                     id="modalDishCogs" 
+                     required 
+                     step="1000" 
+                     min="0" 
+                     placeholder="15000" 
+                     class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs font-mono text-slate-300 focus:outline-none focus:border-amber-500">
+            </div>
+          </div>
+
+          <!-- Bảng hiển thị kết quả tính toán tài chính & Cảnh báo an toàn -->
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span class="text-[11px] text-slate-400">Lợi Nhuận Ròng (LNR):</span>
+              <span id="modalDishProfitDisplay" class="font-mono font-bold text-sm text-emerald-400">0đ (0% LNR)</span>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
+              <span class="text-[11px] text-slate-400">Food Cost Thực Tế:</span>
+              <span id="modalDishFcPercentDisplay" class="font-mono font-bold text-sm text-emerald-400">0%</span>
+            </div>
+          </div>
+
+          <!-- Khung cảnh báo vi phạm trần Food Cost động -->
+          <div id="modalDishFcWarningBox" class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+            <span id="modalDishFcWarningText"></span>
+          </div>
+        </div>
+
+        <!-- Hàng 4: Hình Ảnh CDN & Tải Ảnh Trực Tiếp -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-start">
+          <div class="md:col-span-2 space-y-2">
+            <label class="block text-[11px] font-mono text-slate-400 uppercase">Đường Dẫn Ảnh Trực Tiếp (Google Drive / CDN)</label>
+            <input type="url" 
+                   id="modalDishImageUrl" 
+                   placeholder="https://drive.google.com/..." 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500">
+            
+            <div class="flex items-center gap-2">
+              <input type="file" 
+                     id="modalDishImageFileInput" 
+                     accept="image/*" 
+                     onchange="TabMenuController.handleDishImageUpload(event)" 
+                     class="block w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-bold file:bg-slate-800 file:text-slate-300 hover:file:bg-slate-700 file:cursor-pointer">
+              <span id="modalDishImageUploadStatus" class="text-[10px] text-slate-500 font-mono shrink-0"></span>
+            </div>
+          </div>
+
+          <!-- Xem trước ảnh món ăn -->
+          <div class="w-full h-24 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center">
+            <img id="modalDishImagePreview" 
+                 src="" 
+                 alt="Xem trước ảnh món" 
+                 class="hidden w-full h-full object-cover">
+            <span class="text-slate-600 text-xs font-mono text-center px-2">Chưa có ảnh</span>
+          </div>
+        </div>
+
+        <!-- Hàng 5: Mô Tả Món Ăn -->
+        <div>
+          <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Mô Tả Chi Tiết (Thành phần, hương vị, lưu ý bếp)</label>
+          <textarea id="modalDishDesc" 
+                    rows="2" 
+                    placeholder="Mì trộn xá xíu đậm vị truyền thống, kèm tóp mỡ giòn rụm và sốt thím 5 độc quyền..." 
+                    class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 font-sans"></textarea>
+        </div>
+
+      </div>
+
+      <!-- Footer Modal -->
+      <div class="px-6 py-4 bg-slate-950 border-t border-slate-800 flex items-center justify-end gap-2.5">
+        <button type="button" 
+                onclick="TabMenuController.closeEditModal()" 
+                class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+          Hủy Bỏ
+        </button>
+
+        <button type="button" 
+                id="btnSubmitSaveDish" 
+                onclick="TabMenuController.saveDishForm()" 
+                class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow-lg shadow-amber-500/10 active:scale-95">
+          <span>💾</span>
+          <span>Lưu Món Ăn</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 7. MODAL THÊM & SỬA DANH MỤC (5 CỘT CHUẨN SYS_CATEGORIES)                  -->
+  <!-- ========================================================================= -->
+  <div id="categoryEditModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="w-full max-w-md rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+      
+      <div class="px-5 py-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <h3 id="categoryModalTitle" class="text-sm font-bold text-white">Quản Trị Danh Mục</h3>
+        <button type="button" 
+                onclick="TabMenuController.closeCategoryModal()" 
+                class="w-7 h-7 rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition flex items-center justify-center text-base">
+          &times;
+        </button>
+      </div>
+
+      <div class="p-5 space-y-3">
+        <div>
+          <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Mã Danh Mục (Code) <span class="text-rose-400">*</span></label>
+          <input type="text" 
+                 id="modalCatCode" 
+                 required 
+                 placeholder="CAT_COM" 
+                 class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Icon Emoji</label>
+            <input type="text" 
+                   id="modalCatIcon" 
+                   value="🍛" 
+                   placeholder="🍛" 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-center text-white focus:outline-none focus:border-amber-500">
+          </div>
+
+          <div class="col-span-2">
+            <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Tên Danh Mục <span class="text-rose-400">*</span></label>
+            <input type="text" 
+                   id="modalCatName" 
+                   required 
+                   placeholder="Món Cơm Thím 5" 
+                   class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Slug URL Kênh D2C</label>
+          <input type="text" 
+                 id="modalCatSlug" 
+                 placeholder="mon-com" 
+                 class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-amber-500">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-mono text-slate-400 uppercase mb-1">Trần Food Cost Cho Phép (%)</label>
+          <input type="number" 
+                 id="modalCatMaxFc" 
+                 step="1" 
+                 min="1" 
+                 max="100" 
+                 value="38" 
+                 placeholder="38" 
+                 class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-amber-400 font-bold focus:outline-none focus:border-amber-500">
+        </div>
+      </div>
+
+      <div class="px-5 py-3.5 bg-slate-950 border-t border-slate-800 flex items-center justify-end gap-2">
+        <button type="button" 
+                onclick="TabMenuController.closeCategoryModal()" 
+                class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+          Hủy
+        </button>
+
+        <button type="button" 
+                id="btnSubmitSaveCategory" 
+                onclick="TabMenuController.saveCategoryForm()" 
+                class="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow-md shadow-amber-500/10 active:scale-95">
+          <span>Lưu Danh Mục</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 8. NẠP CONTROLLER JAVASCRIPT & KÍCH HOẠT VÒNG ĐỜI INIT TỰ ĐỘNG             -->
+  <!-- ========================================================================= -->
+  <script src="tab-menu.js?v=20261015"></script>
+  <script>
+    (function() {
+      // Tự động khởi chạy Controller khi component được nạp vào DOM
+      if (window.TabMenuController && typeof window.TabMenuController.init === "function") {
+        window.TabMenuController.init();
+      }
+    })();
+  </script>
+
+</div>

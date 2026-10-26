@@ -1,0 +1,1085 @@
+<!-- ==========================================================================
+   FILE: tab-config.html - PHẦN [1/3]
+   BẮT ĐẦU TỪ: Khung Tiêu Đề Control Plane, Form Cấu Hình Hệ Thống
+   KẾT THÚC TẠI: Thẻ đóng </div> của Phân Hệ 3 (Bảo Mật Phân Tầng & Mã PIN)
+   HƯỚNG DẪN: Tạo file mới tab-config.html và dán Phần [1/3] này vào đầu file
+   ========================================================================== -->
+<div class="space-y-4 max-w-5xl mx-auto pb-10 select-none text-xs">
+  
+  <!-- BANNER TIÊU ĐỀ BẢNG ĐIỀU KHIỂN CẤU HÌNH TRUNG TÂM -->
+  <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3 shadow-md">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-orange-600 flex items-center justify-center text-white text-lg font-black shadow-lg shadow-rose-600/20">
+        <i class="fa-solid fa-sliders"></i>
+      </div>
+      <div>
+        <h2 class="text-sm font-black text-white uppercase tracking-wider">Bộ Não Cấu Hình Super Admin Toàn Năng</h2>
+        <p class="text-[10.5px] text-slate-400">Điều chỉnh thông số vận hành chuỗi thời gian thực • Kiến trúc Multi-Tenant Dynamic SSOT</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <span class="px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
+        Multi-tenant Engine v3.5
+      </span>
+    </div>
+  </div>
+
+  <!-- FORM CẤU HÌNH THAM SỐ ĐỘNG TOÀN SÀN -->
+  <form id="form-system-config" onsubmit="TabConfigController.handleSaveSystemConfig(event)" class="space-y-4">
+    
+    <!-- ================================================================= -->
+    <!-- PHÂN HỆ 1: NHẬN DIỆN QUÁN & TỌA ĐỘ ĐỊNH VỊ GPS BẾP TRUNG TÂM      -->
+    <!-- ================================================================= -->
+    <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs">
+            <i class="fa-solid fa-store"></i>
+          </span>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">1. Nhận Diện Quán &amp; Định Vị GPS Bếp</h3>
+        </div>
+        <span class="text-[10px] text-slate-400 font-mono">Hiển thị Web D2C &amp; Tính Cự Ly Giao Hàng</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- Tên Quán -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Tên Thương Hiệu (*)</label>
+          <input type="text" 
+                 id="cfg-store-name" 
+                 required 
+                 placeholder="Mì Trộn Xá Xíu Thím 5" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 outline-none transition font-medium" />
+        </div>
+
+        <!-- Slogan Quán -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Slogan Thương Hiệu</label>
+          <input type="text" 
+                 id="cfg-store-slogan" 
+                 placeholder="Hương vị Đất Thánh Hòa Thành" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 outline-none transition font-medium" />
+        </div>
+
+        <!-- Hotline CSKH -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Hotline CSKH / Đặt Đơn (*)</label>
+          <input type="text" 
+                 id="cfg-store-hotline" 
+                 required 
+                 placeholder="0934220585" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-amber-400 font-mono font-bold placeholder-slate-600 outline-none transition" />
+        </div>
+
+        <!-- Biểu Tượng Icon -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Biểu Tượng (Emoji Icon)</label>
+          <input type="text" 
+                 id="cfg-store-icon" 
+                 placeholder="🍜" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-center text-lg outline-none transition" />
+        </div>
+      </div>
+
+      <!-- Tọa độ GPS & Nút cập nhật vị trí nhanh -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Vĩ Độ Bếp (Latitude) (*)</label>
+          <input type="number" 
+                 step="any" 
+                 id="cfg-store-lat" 
+                 required 
+                 placeholder="11.285267" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 outline-none transition" />
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Kinh Độ Bếp (Longitude) (*)</label>
+          <input type="number" 
+                 step="any" 
+                 id="cfg-store-lng" 
+                 required 
+                 placeholder="106.133347" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 outline-none transition" />
+        </div>
+
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Cập Nhật Định Vị Nhanh</label>
+          <button type="button" 
+                  onclick="TabConfigController.fetchCurrentBrowserGps()" 
+                  class="w-full py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-sky-400 border border-slate-800 font-bold transition flex items-center justify-center gap-1.5 active:scale-95 shadow">
+            <i class="fa-solid fa-location-crosshairs text-xs"></i>
+            <span>Lấy GPS Trình Duyệt</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <label class="font-bold text-slate-300 text-[11px] block">Địa Chỉ Đặt Bếp Trung Tâm (*)</label>
+        <input type="text" 
+               id="cfg-store-address" 
+               required 
+               placeholder="125 Hùng Vương, KP4, TT. Hòa Thành, Tây Ninh" 
+               class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 outline-none transition font-medium" />
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- PHÂN HỆ 2: CỔNG THANH TOÁN BANK, VÍ MOMO & TEST VIETQR ĐỘNG      -->
+    <!-- ================================================================= -->
+    <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs">
+            <i class="fa-solid fa-qrcode"></i>
+          </span>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">2. Cổng Thanh Toán, Ngân Hàng &amp; Mã VietQR</h3>
+        </div>
+        <span class="text-[10px] text-slate-400 font-mono">Chuẩn Napas247 EMVCo</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        <!-- Cột Cấu Hình Thông Tin Ngân Hàng & Ví MoMo -->
+        <div class="lg:col-span-2 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Chọn Ngân Hàng Thụ Hưởng -->
+            <div class="space-y-1">
+              <label class="font-bold text-slate-300 text-[11px] block">Ngân Hàng Nhận Tiền (*)</label>
+              <select id="cfg-payment-bank-bin" 
+                      onchange="TabConfigController.updateLiveQrPreview()" 
+                      class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none transition font-medium">
+                <option value="970422">MBBank (Ngân Hàng Quân Đội - 970422)</option>
+                <option value="970436">Vietcombank (970436)</option>
+                <option value="970407">Techcombank (970407)</option>
+                <option value="970415">VietinBank (970415)</option>
+                <option value="970416">ACB (970416)</option>
+                <option value="970432">VPBank (970432)</option>
+              </select>
+            </div>
+
+            <!-- Số Tài Khoản Thụ Hưởng -->
+            <div class="space-y-1">
+              <label class="font-bold text-slate-300 text-[11px] block">Số Tài Khoản Thụ Hưởng (*)</label>
+              <input type="text" 
+                     id="cfg-payment-account-no" 
+                     required 
+                     placeholder="3939388888" 
+                     oninput="TabConfigController.updateLiveQrPreview()" 
+                     class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-emerald-400 outline-none transition" />
+            </div>
+          </div>
+
+          <!-- Tên Chủ Tài Khoản Ngân Hàng -->
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Tên Chủ Tài Khoản (In hoa không dấu) (*)</label>
+            <input type="text" 
+                   id="cfg-payment-account-name" 
+                   required 
+                   placeholder="NGUYEN HAI AU" 
+                   oninput="this.value = this.value.toUpperCase(); TabConfigController.updateLiveQrPreview();" 
+                   class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-white outline-none transition" />
+          </div>
+
+          <!-- Cấu hình Ví MoMo Nhận Tiền -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div class="space-y-1">
+              <label class="font-bold text-slate-300 text-[11px] block">Số Điện Thoại Ví MoMo</label>
+              <input type="text" 
+                     id="cfg-payment-momo-phone" 
+                     placeholder="0934220585" 
+                     class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 outline-none transition" />
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-bold text-slate-300 text-[11px] block">Tên Chủ Ví MoMo</label>
+              <input type="text" 
+                     id="cfg-payment-momo-name" 
+                     placeholder="NGUYEN HAI AU" 
+                     oninput="this.value = this.value.toUpperCase()" 
+                     class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono text-slate-200 outline-none transition" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột Hiển Thị Trực Quan & Quét Thử Mã VietQR Động -->
+        <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col items-center justify-center text-center space-y-2">
+          <span class="text-[10.5px] font-bold text-slate-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-mobile-screen-button text-emerald-400"></i>
+            <span>Mã VietQR Thử Nghiệm Trực Tiếp</span>
+          </span>
+          
+          <div class="w-36 h-36 bg-white rounded-xl p-1.5 flex items-center justify-center shadow-inner overflow-hidden">
+            <img id="live-qr-preview-img" 
+                 src="https://img.vietqr.io/image/970422-3939388888-compact2.png?amount=10000&addInfo=TEST%20THIM%205" 
+                 alt="VietQR Preview" 
+                 class="w-full h-full object-contain" />
+          </div>
+
+          <p class="text-[9.5px] text-slate-400 leading-tight">
+            Quét thử bằng app ngân hàng kiểm tra tiền nổ đúng két trước khi lưu!
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- PHÂN HỆ 3: BẢO MẬT PHÂN TẦNG & MÃ PIN ĐIỀU HÀNH                   -->
+    <!-- ================================================================= -->
+    <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-xs">
+            <i class="fa-solid fa-key"></i>
+          </span>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">3. Bảo Mật Phân Tầng &amp; Mã PIN Vận Hành</h3>
+        </div>
+        <span class="text-[10px] text-slate-400 font-mono">RBAC Security Control</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <!-- Đổi Master Key Super Admin -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Khóa Master Super Key Mới</label>
+          <input type="text" 
+                 id="cfg-sec-master-key" 
+                 placeholder="Để trống nếu không đổi..." 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-rose-500 rounded-xl px-3 py-2 text-xs font-mono text-rose-400 placeholder-slate-600 outline-none transition" />
+          <span class="text-[9.5px] text-slate-500 block">Quyền sinh sát tối cao toàn chuỗi.</span>
+        </div>
+
+        <!-- Đổi Mã PIN Admin Level 1 (Bếp KDS) -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Mã PIN Admin Lv1 (Trạm Bếp KDS) (*)</label>
+          <input type="text" 
+                 id="cfg-sec-pin-lv1" 
+                 required 
+                 maxlength="6" 
+                 placeholder="1985" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 tracking-wider outline-none transition" />
+          <span class="text-[9.5px] text-slate-500 block">Mở khóa trạm Bếp nấu nướng.</span>
+        </div>
+
+        <!-- Đổi Mã PIN Admin Level 2 (Thu ngân/Điều phối) -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Mã PIN Admin Lv2 (Thu Ngân / Điều Phối) (*)</label>
+          <input type="text" 
+                 id="cfg-sec-pin-lv2" 
+                 required 
+                 maxlength="6" 
+                 placeholder="2026" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-sky-400 tracking-wider outline-none transition" />
+          <span class="text-[9.5px] text-slate-500 block">Quyền quản lý ca &amp; điều xe.</span>
+        </div>
+      </div>
+
+      <!-- Nút Quét Lại Mã QR Cài Đặt Google Authenticator -->
+      <div class="pt-1 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/60">
+        <span class="text-[10px] text-slate-400">
+          Email nhận mã giải cứu khẩn cấp: <strong class="text-amber-400 font-mono">haiau2205@gmail.com</strong>
+        </span>
+        <button type="button" 
+                onclick="TabConfigController.openTotpSetupModal()" 
+                class="px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 font-bold text-[11px] transition flex items-center gap-1.5 shadow active:scale-95">
+          <i class="fa-solid fa-qrcode text-amber-400"></i>
+          <span>Xem Mã QR Cài Google Authenticator 2FA</span>
+        </button>
+      </div>
+
+    </div>
+    <!-- ==========================================================================
+   FILE: tab-config.html - PHẦN [2/3]
+   BẮT ĐẦU TỪ: Phân Hệ 4 (Tỷ Lệ Khấu Trừ Nền Tảng & Thuế Khoán)
+   KẾT THÚC TẠI: Thẻ đóng </form> & Modal Quét Mã Cài Đặt Google Authenticator 2FA
+   HƯỚNG DẪN: Copy nối tiếp ngay sau thẻ đóng </div> của Phân Hệ 3 trong tab-config.html
+   ========================================================================== -->
+    <!-- ================================================================= -->
+    <!-- PHÂN HỆ 4: CHIẾT KHẤU SÀN MASTER & THUẾ KHOÁN HKD                -->
+    <!-- ================================================================= -->
+    <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xs">
+            <i class="fa-solid fa-percent"></i>
+          </span>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">4. Tỷ Lệ Khấu Trừ Nền Tảng &amp; Thuế Khoán</h3>
+        </div>
+        <span class="text-[10px] text-slate-400 font-mono">Hạch toán tự động vào P&amp;L Dòng Tiền</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- Phí Master SaaS Động (Mặc định 5% = 0.05) -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Phí Nền Tảng Master SaaS (Hệ số thập phân) (*)</label>
+          <div class="relative">
+            <input type="number" 
+                   step="0.001" 
+                   min="0" 
+                   max="0.5" 
+                   id="cfg-fin-master-fee" 
+                   required 
+                   placeholder="0.05" 
+                   class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl pl-3 pr-20 py-2 text-xs font-mono font-bold text-sky-400 outline-none transition" />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400">0.05 = 5%</span>
+          </div>
+          <span class="text-[9.5px] text-slate-500 block">Doanh thu trích lại cho nền tảng quản trị chuỗi (Thiết lập động tùy chi nhánh).</span>
+        </div>
+
+        <!-- Thuế Khoán HKD (Mặc định 4.5% = 0.045) -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Tỷ Lệ Thuế Khoán Hộ Kinh Doanh (Hệ số thập phân) (*)</label>
+          <div class="relative">
+            <input type="number" 
+                   step="0.001" 
+                   min="0" 
+                   max="0.5" 
+                   id="cfg-fin-tax-hkd" 
+                   required 
+                   placeholder="0.045" 
+                   class="w-full bg-slate-950 border border-slate-800 focus:border-sky-500 rounded-xl pl-3 pr-20 py-2 text-xs font-mono font-bold text-sky-400 outline-none transition" />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400">0.045 = 4.5%</span>
+          </div>
+          <span class="text-[9.5px] text-slate-500 block">Mức thuế GTGT và TNCN khoán theo quy định pháp luật.</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- PHÂN HỆ 5: ĐỘNG CƠ VẬN CHUYỂN & CƯỚC SHIP LINH HOẠT              -->
+    <!-- ================================================================= -->
+    <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs">
+            <i class="fa-solid fa-route"></i>
+          </span>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">5. Động Cơ Vận Chuyển &amp; Cước Phí Linh Hoạt</h3>
+        </div>
+        <span class="text-[10px] text-slate-400 font-mono">Dynamic Logistics Rule Engine</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- Đơn Giá Cước Cơ Bản / Km -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Đơn Giá Cơ Bản / Km (VNĐ) (*)</label>
+          <input type="number" 
+                 step="500" 
+                 min="0" 
+                 id="cfg-ship-base-rate" 
+                 required 
+                 placeholder="5000" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-emerald-400 outline-none transition" />
+          <span class="text-[9.5px] text-slate-500 block">Đơn giá chuẩn (VD: 5.000đ/km).</span>
+        </div>
+
+        <!-- Phụ Phí Cao Điểm / Mưa Gió / Km -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Phụ Phí Mưa Gió/Cao Điểm (VNĐ/km)</label>
+          <input type="number" 
+                 step="500" 
+                 min="0" 
+                 id="cfg-ship-peak-surcharge" 
+                 placeholder="0" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 outline-none transition" />
+          <span class="text-[9.5px] text-slate-500 block">Cộng thêm khi thời tiết xấu hoặc giờ cao điểm.</span>
+        </div>
+
+        <!-- Bán Kính Đi Bộ Miễn Phí (Meters) -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Bán Kính Đi Bộ Miễn Phí (Mét) (*)</label>
+          <input type="number" 
+                 step="50" 
+                 min="0" 
+                 id="cfg-ship-walk-radius" 
+                 required 
+                 placeholder="300" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-emerald-400 outline-none transition" />
+          <span class="text-[9.5px] text-slate-500 block">Dưới cự ly này tính phí ship = 0đ (khách tại quán).</span>
+        </div>
+
+        <!-- Cước Ship Tối Thiểu Thu Khách -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Cước Tối Thiểu Thu Khách (VNĐ) (*)</label>
+          <input type="number" 
+                 step="1000" 
+                 min="0" 
+                 id="cfg-ship-min-fee" 
+                 required 
+                 placeholder="5000" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-emerald-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-emerald-400 outline-none transition" />
+          <span class="text-[9.5px] text-slate-500 block">Mức sàn thấp nhất khi vượt bán kính đi bộ.</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- PHÂN HỆ 6: TRUNG TÂM CHIẾN DỊCH KÍCH CẦU, VOUCHER & BƠM VÉ AOV   -->
+    <!-- ================================================================= -->
+    <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xs">
+            <i class="fa-solid fa-bullhorn"></i>
+          </span>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">6. Chiến Lược Khuyến Mãi, Voucher &amp; Bơm Vé AOV</h3>
+        </div>
+        <span class="text-[10px] text-slate-400 font-mono">Chốt chặn dòng tiền không bị âm</span>
+      </div>
+
+      <!-- Khối Thiết Lập Nấc Đơn 179k & Ép Điều Kiện 3 Chân Vạc -->
+      <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" 
+                   id="cfg-promo-tier-179k-enabled" 
+                   class="w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-0 cursor-pointer">
+            <label for="cfg-promo-tier-179k-enabled" class="font-bold text-slate-200 text-xs cursor-pointer">
+              Kích Hoạt Nấc Trợ Giá Ship Đơn Tiệc (Mặc Định 179k)
+            </label>
+          </div>
+          <span class="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+            Chiến Lược Tối Ưu Lợi Nhuận Gộp
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <!-- Tỷ Lệ Trợ Giá Ship (%) -->
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Tỷ Lệ Trợ Giá Cước Ship (%)</label>
+            <input type="number" 
+                   step="5" 
+                   min="0" 
+                   max="100" 
+                   id="cfg-promo-tier-179k-discount-pct" 
+                   placeholder="50" 
+                   class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 outline-none transition" />
+            <span class="text-[9.5px] text-slate-500 block">Ví dụ: 50 = Giảm 50% tiền ship đơn này.</span>
+          </div>
+
+          <!-- Công Tắc Bắt Buộc 3 Chân Vạc -->
+          <div class="space-y-1 sm:col-span-2 flex flex-col justify-center">
+            <label class="flex items-start gap-2.5 cursor-pointer pt-2 select-none">
+              <input type="checkbox" 
+                     id="cfg-promo-tier-179k-require-triplet" 
+                     class="w-4 h-4 rounded border-slate-700 text-amber-500 focus:ring-0 cursor-pointer mt-0.5">
+              <div>
+                <span class="font-bold text-white text-xs block">
+                  Bắt buộc cấu trúc giỏ hàng "3 Chân Vạc": [Món chính + Topping + Nước uống]
+                </span>
+                <span class="text-[10px] text-slate-400 block leading-relaxed">
+                  Lợi nhuận từ ly nước giải khát/topping sẽ bù đắp tiền ship, đảm bảo quán luôn đút túi lợi nhuận ròng.
+                </span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Khối Thiết Lập Quà Tặng Đơn Xa (>4km) -->
+      <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+          <span class="font-bold text-slate-200 text-xs flex items-center gap-2">
+            <i class="fa-solid fa-gift text-amber-400"></i>
+            <span>Chính Sách Tặng Topping Đơn Xa (Thay Vì Giảm Giá Tiền Mặt)</span>
+          </span>
+          <span class="text-[10px] text-slate-400 font-mono">Giữ Vững Định Vị Thương Hiệu</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Mốc Cự Ly Đơn Xa (Km)</label>
+            <input type="number" 
+                   step="0.5" 
+                   min="1" 
+                   id="cfg-promo-far-distance" 
+                   placeholder="4.0" 
+                   class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 outline-none transition" />
+            <span class="text-[9.5px] text-slate-500 block">Khách đặt từ cự ly này trở lên được quyền nhận quà.</span>
+          </div>
+
+          <div class="space-y-1">
+            <label class="font-bold text-slate-300 text-[11px] block">Topping Tặng Kèm Tri Ân</label>
+            <select id="cfg-promo-far-gift-topping" 
+                    class="w-full bg-slate-900 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-bold text-slate-200 outline-none transition">
+              <option value="TOP_TOP_MO">🥓 Hũ Tóp Mỡ Tỏi Ớt Chiên Giòn</option>
+              <option value="TOP_TRUNG">🥚 Trứng Lòng Đào Béo Ngậy</option>
+              <option value="TOP_BO_VIEN">🍡 Bò Viên Gân Giòn Thơm</option>
+            </select>
+            <span class="text-[9.5px] text-slate-500 block">Food cost topping chỉ 15-20%, giá trị cảm nhận của khách cao.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Các Chỉ Số An Toàn Tài Chính & Quản Lý Mã Voucher Động -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+        <!-- Mốc Đơn Hưởng Freeship Cơ Bản -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Mốc Đơn Freeship Cơ Bản (VNĐ) (*)</label>
+          <input type="number" 
+                 step="1000" 
+                 min="0" 
+                 id="cfg-promo-freeship-min" 
+                 required 
+                 placeholder="149000" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 outline-none transition" />
+          <span class="text-[9.5px] text-slate-500 block">Kích khách mua thêm topping chạm mốc.</span>
+        </div>
+
+        <!-- Trần Trợ Giá Ship Tối Đa Quán Chịu -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Trần Trợ Giá Ship Tối Đa / Đơn (VNĐ) (*)</label>
+          <input type="number" 
+                 step="1000" 
+                 min="0" 
+                 id="cfg-promo-max-subsidy" 
+                 required 
+                 placeholder="20000" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-amber-400 outline-none transition" />
+          <span class="text-[9.5px] text-slate-500 block">Quán chỉ bù tối đa mức này, phần dư khách trả.</span>
+        </div>
+
+        <!-- Khóa Trần Khuyến Mãi Toàn Đơn -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Khóa Trần Khuyến Mãi Toàn Đơn (*)</label>
+          <div class="relative">
+            <input type="number" 
+                   step="0.01" 
+                   min="0" 
+                   max="0.5" 
+                   id="cfg-promo-max-rate" 
+                   required 
+                   placeholder="0.15" 
+                   class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 rounded-xl pl-3 pr-16 py-2 text-xs font-mono font-bold text-amber-400 outline-none transition" />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-400">0.15 = 15%</span>
+          </div>
+          <span class="text-[9.5px] text-slate-500 block">Tổng giảm giá + bù ship không vượt quá 15% gộp.</span>
+        </div>
+      </div>
+
+      <!-- Bảng Quản Trị Danh Sách Mã Voucher Động (Dynamic Voucher Rules) -->
+      <div class="space-y-2 pt-2 border-t border-slate-800/80">
+        <div class="flex items-center justify-between">
+          <label class="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <i class="fa-solid fa-ticket text-amber-400"></i>
+            <span>Danh Sách Mã Voucher Giảm Giá Đang Hoạt Động:</span>
+          </label>
+          <button type="button" 
+                  onclick="TabConfigController.addNewVoucherRow()" 
+                  class="px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-bold transition flex items-center gap-1 active:scale-95">
+            <i class="fa-solid fa-plus text-[10px]"></i> Thêm Mã Mới
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-800">
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-950 text-slate-400 font-mono border-b border-slate-800">
+              <tr>
+                <th class="p-2.5">Mã Voucher</th>
+                <th class="p-2.5">Kiểu Giảm</th>
+                <th class="p-2.5">Giá Trị Giảm</th>
+                <th class="p-2.5">Đơn Tối Thiểu</th>
+                <th class="p-2.5 text-center">Xóa</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-voucher-rules-body" class="divide-y divide-slate-800/80 bg-slate-900 font-medium">
+              <!-- Render động danh sách voucher -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- PHÂN HỆ 7: CƠ CHẾ THƯỞNG & HẠN MỨC CÔNG NỢ SHIPPER                -->
+    <!-- ================================================================= -->
+    <div class="p-4 sm:p-5 rounded-3xl bg-slate-900 border border-slate-800 shadow-md space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-7 h-7 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs">
+            <i class="fa-solid fa-motorcycle"></i>
+          </span>
+          <h3 class="text-xs font-black text-white uppercase tracking-wider">7. Cơ Chế Thưởng &amp; Hạn Mức Công Nợ Shipper</h3>
+        </div>
+        <span class="text-[10px] text-slate-400 font-mono">Tiền trao cháo múc • Chống nợ xấu</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- Hạn Mức Nợ Tạm Bếp Tối Đa -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Hạn Mức Nợ Tạm Bếp Tối Đa (VNĐ) (*)</label>
+          <input type="number" 
+                 step="10000" 
+                 min="0" 
+                 id="cfg-dispatch-max-holding" 
+                 required 
+                 placeholder="300000" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-purple-400 outline-none transition" />
+          <span class="text-[9.5px] text-slate-500 block">Vượt quá 300.000đ hệ thống chặn không cho nhận thêm đơn mới.</span>
+        </div>
+
+        <!-- Thưởng Nóng Cuốc Cao Điểm -->
+        <div class="space-y-1">
+          <label class="font-bold text-slate-300 text-[11px] block">Tiền Thưởng Nóng Cuốc Giờ Cao Điểm (VNĐ/đơn) (*)</label>
+          <input type="number" 
+                 step="500" 
+                 min="0" 
+                 id="cfg-dispatch-driver-bonus" 
+                 required 
+                 placeholder="2000" 
+                 class="w-full bg-slate-950 border border-slate-800 focus:border-purple-500 rounded-xl px-3 py-2 text-xs font-mono font-bold text-purple-400 outline-none transition" />
+          <span class="text-[9.5px] text-slate-500 block">Khích lệ tài xế chạy nhanh trong khung giờ mưa gió/trưa cao điểm.</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- CỤM NÚT LƯU CẤU HÌNH TRUNG TÂM (STICKY BOTTOM SAVE BAR)            -->
+    <!-- ================================================================= -->
+    <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800 shadow-md flex flex-wrap items-center justify-between gap-3 sticky bottom-3 z-20 backdrop-blur-md bg-slate-900/90">
+      <div class="text-[11px] text-slate-400 flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span>Cập nhật có hiệu lực tức thì trên toàn bộ hệ thống client trong 0ms.</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" 
+                onclick="TabConfigController.resetConfigForm()" 
+                class="px-4 py-2.5 rounded-2xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 text-xs font-bold transition">
+          Khôi Phục Ban Đầu
+        </button>
+
+        <button type="submit" 
+                id="btn-save-system-config" 
+                class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-95 text-slate-950 text-xs font-black uppercase tracking-wider transition active:scale-95 shadow-lg shadow-orange-600/25 flex items-center gap-2">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>Lưu Toàn Bộ Cấu Hình Hệ Thống</span>
+        </button>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL XEM MÃ QR THIẾT LẬP GOOGLE AUTHENTICATOR (CHO SUPER ADMIN)          -->
+  <!-- ========================================================================= -->
+  <div id="modal-totp-setup" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4">
+    <div class="relative bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden p-6 space-y-4 animate-in zoom-in-95 duration-200 text-center text-xs">
+      
+      <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base mx-auto">
+        <i class="fa-solid fa-qrcode"></i>
+      </div>
+
+      <div class="space-y-1">
+        <h3 class="text-sm font-black text-white uppercase tracking-wider">Cài Đặt Google Authenticator</h3>
+        <p class="text-[11px] text-slate-400">Quét mã bằng app trên điện thoại của anh Hải Âu</p>
+      </div>
+
+      <!-- Vùng hiển thị ảnh QR -->
+      <div class="w-48 h-48 bg-white rounded-2xl p-2 mx-auto flex items-center justify-center shadow-inner overflow-hidden">
+        <img id="totp-setup-qr-img" src="" alt="Google Authenticator QR" class="w-full h-full object-contain" />
+      </div>
+
+      <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[10.5px] font-mono text-slate-300">
+        Khóa dự phòng: <strong id="totp-setup-secret-txt" class="text-amber-400 select-all">JBSWY3DPEHPK3PXP</strong>
+      </div>
+
+      <button type="button" 
+              onclick="TabConfigController.closeTotpSetupModal()" 
+              class="w-full py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition text-xs">
+        Đã Quét Xong &amp; Đóng Lại
+      </button>
+
+    </div>
+  </div>
+</div>
+<!-- ==========================================================================
+   FILE: tab-config.html - PHẦN [3/3]
+   BẮT ĐẦU TỪ: Thẻ mở <script> của TabConfigController
+   KẾT THÚC TẠI: Thẻ đóng </script> hoàn tất toàn bộ file
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [2/3] của tab-config.html
+   ========================================================================== -->
+<script>
+  /**
+   * =========================================================================
+   * CONTROLLER: TAB CONFIG SYSTEM MASTER (v3.5 DYNAMIC RULE ENGINE)
+   * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+   * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+   * Vai trò: Điều hành toàn bộ 7 Phân Khu Chiến Lược & Ghi Đè SYS_CONFIG
+   * =========================================================================
+   */
+  var TabConfigController = (function() {
+    var voucherList = [];
+
+    function init() {
+      loadConfigData();
+    }
+
+    /**
+     * NẠP DỮ LIỆU CẤU HÌNH 7 PHÂN KHU TỪ SHEET SYS_CONFIG QUA APPS SCRIPT
+     */
+    async function loadConfigData() {
+      try {
+        if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") return;
+
+        var masterKey = (window.AdminShellController && typeof window.AdminShellController.getMasterKey === "function") 
+                        ? window.AdminShellController.getMasterKey() 
+                        : (sessionStorage.getItem("thim5_master_key") || "");
+
+        var res = await window.Thim5API.callGAS("getSystemDynamicConfig", { masterKey: masterKey });
+        if (res && res.status === "success" && res.data) {
+          var c = res.data;
+
+          // 1. Phân hệ Nhận diện Quán & GPS Bếp
+          if (c.store) {
+            setVal("cfg-store-name", c.store.name || "Mì Trộn Xá Xíu Thím 5");
+            setVal("cfg-store-slogan", c.store.slogan || "Hương vị Đất Thánh Hòa Thành");
+            setVal("cfg-store-hotline", c.store.hotline || "0934220585");
+            setVal("cfg-store-icon", c.store.icon || "🍜");
+            setVal("cfg-store-lat", c.store.latitude || 11.285267);
+            setVal("cfg-store-lng", c.store.longitude || 106.133347);
+            setVal("cfg-store-address", c.store.address || "125 Hùng Vương, KP4, TT. Hòa Thành, Tây Ninh");
+          }
+
+          // 2. Phân hệ Cổng thanh toán VietQR & MoMo
+          if (c.payment) {
+            setVal("cfg-payment-bank-bin", c.payment.bankBin || "970422");
+            setVal("cfg-payment-account-no", c.payment.accountNo || "3939388888");
+            setVal("cfg-payment-account-name", c.payment.accountName || "NGUYEN HAI AU");
+            setVal("cfg-payment-momo-phone", c.payment.momoPhone || "0934220585");
+            setVal("cfg-payment-momo-name", c.payment.momoName || "NGUYEN HAI AU");
+            updateLiveQrPreview();
+          }
+
+          // 3. Phân hệ Bảo mật PIN Lv1/Lv2
+          if (c.security) {
+            setVal("cfg-sec-pin-lv1", c.security.pinAdminLv1 || "1985");
+            setVal("cfg-sec-pin-lv2", c.security.pinAdminLv2 || "2026");
+          }
+
+          // 4. Phân hệ Tài chính Phí sàn & Thuế HKD
+          if (c.finance) {
+            setVal("cfg-fin-master-fee", (c.finance.platformMasterFee !== undefined) ? c.finance.platformMasterFee : 0.05);
+            setVal("cfg-fin-tax-hkd", (c.finance.taxRateHkd !== undefined) ? c.finance.taxRateHkd : 0.045);
+          }
+
+          // 5. Phân hệ Động cơ Vận chuyển & Cước ship linh hoạt
+          if (c.shipping) {
+            setVal("cfg-ship-base-rate", c.shipping.baseRatePerKm || 5000);
+            setVal("cfg-ship-peak-surcharge", c.shipping.peakSurcharge || 0);
+            setVal("cfg-ship-walk-radius", c.shipping.walkRadiusMeters || 300);
+            setVal("cfg-ship-min-fee", c.shipping.minCustomerFee || 5000);
+          }
+
+          // 6. Phân hệ Chiến dịch Khuyến mãi, Voucher & AOV
+          if (c.promotions) {
+            setCheck("cfg-promo-tier-179k-enabled", !!c.promotions.tier179kEnabled);
+            setVal("cfg-promo-tier-179k-discount-pct", c.promotions.tier179kDiscountPct || 50);
+            setCheck("cfg-promo-tier-179k-require-triplet", !!c.promotions.tier179kRequireTriplet);
+            setVal("cfg-promo-far-distance", c.promotions.farDistanceKm || 4.0);
+            setVal("cfg-promo-far-gift-topping", c.promotions.farGiftToppingId || "TOP_TOP_MO");
+            setVal("cfg-promo-freeship-min", c.promotions.freeshipMinSubtotal || 149000);
+            setVal("cfg-promo-max-subsidy", c.promotions.maxShippingSubsidy || 20000);
+            setVal("cfg-promo-max-rate", (c.promotions.maxPromotionRate !== undefined) ? c.promotions.maxPromotionRate : 0.15);
+
+            if (Array.isArray(c.promotions.vouchers)) {
+              voucherList = c.promotions.vouchers;
+            } else if (typeof c.promotions.activeVouchersJson === "string" && c.promotions.activeVouchersJson.trim()) {
+              try { voucherList = JSON.parse(c.promotions.activeVouchersJson); } catch (eJson) { voucherList = []; }
+            } else {
+              voucherList = [
+                { code: "THIM5VIP", type: "PERCENT", value: 10, minOrder: 99000 },
+                { code: "FREESHIP15", type: "FIXED", value: 15000, minOrder: 120000 }
+              ];
+            }
+            renderVoucherTable();
+          }
+
+          // 7. Phân hệ Đội xe & Hạn mức Shipper
+          if (c.dispatch) {
+            setVal("cfg-dispatch-max-holding", c.dispatch.maxCodHoldingPerShipper || 300000);
+            setVal("cfg-dispatch-driver-bonus", c.dispatch.driverBonusPerOrder || 2000);
+          }
+        }
+      } catch (err) {
+        console.warn("⚠️ [TabConfig] Không thể tải dữ liệu cấu hình động:", err);
+      }
+    }
+
+    /**
+     * LƯU TOÀN BỘ 7 PHÂN KHU CẤU HÌNH VỀ BACKEND APPS SCRIPT
+     */
+    async function handleSaveSystemConfig(event) {
+      if (event) event.preventDefault();
+
+      var btn = document.getElementById("btn-save-system-config");
+      var origBtnText = btn ? btn.innerHTML : "";
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Lưu Cấu Hình Hệ Thống...';
+      }
+
+      var masterKey = (window.AdminShellController && typeof window.AdminShellController.getMasterKey === "function") 
+                      ? window.AdminShellController.getMasterKey() 
+                      : (sessionStorage.getItem("thim5_master_key") || "");
+
+      var newMasterKeyInput = document.getElementById("cfg-sec-master-key");
+      var newMasterKey = newMasterKeyInput ? newMasterKeyInput.value.trim() : "";
+
+      collectVoucherTableData();
+
+      var payload = {
+        masterKey: masterKey,
+        store: {
+          name: getVal("cfg-store-name"),
+          slogan: getVal("cfg-store-slogan"),
+          hotline: getVal("cfg-store-hotline"),
+          icon: getVal("cfg-store-icon"),
+          latitude: Number(getVal("cfg-store-lat")),
+          longitude: Number(getVal("cfg-store-lng")),
+          address: getVal("cfg-store-address")
+        },
+        payment: {
+          bankBin: getVal("cfg-payment-bank-bin"),
+          accountNo: getVal("cfg-payment-account-no"),
+          accountName: getVal("cfg-payment-account-name"),
+          momoPhone: getVal("cfg-payment-momo-phone"),
+          momoName: getVal("cfg-payment-momo-name")
+        },
+        security: {
+          newMasterKey: newMasterKey || undefined,
+          pinAdminLv1: getVal("cfg-sec-pin-lv1"),
+          pinAdminLv2: getVal("cfg-sec-pin-lv2")
+        },
+        finance: {
+          platformMasterFee: Number(getVal("cfg-fin-master-fee")),
+          taxRateHkd: Number(getVal("cfg-fin-tax-hkd"))
+        },
+        shipping: {
+          baseRatePerKm: Number(getVal("cfg-ship-base-rate")),
+          peakSurcharge: Number(getVal("cfg-ship-peak-surcharge")),
+          walkRadiusMeters: Number(getVal("cfg-ship-walk-radius")),
+          minCustomerFee: Number(getVal("cfg-ship-min-fee"))
+        },
+        promotions: {
+          tier179kEnabled: getCheck("cfg-promo-tier-179k-enabled"),
+          tier179kDiscountPct: Number(getVal("cfg-promo-tier-179k-discount-pct")),
+          tier179kRequireTriplet: getCheck("cfg-promo-tier-179k-require-triplet"),
+          farDistanceKm: Number(getVal("cfg-promo-far-distance")),
+          farGiftToppingId: getVal("cfg-promo-far-gift-topping"),
+          freeshipMinSubtotal: Number(getVal("cfg-promo-freeship-min")),
+          maxShippingSubsidy: Number(getVal("cfg-promo-max-subsidy")),
+          maxPromotionRate: Number(getVal("cfg-promo-max-rate")),
+          vouchers: voucherList,
+          activeVouchersJson: JSON.stringify(voucherList)
+        },
+        dispatch: {
+          maxCodHoldingPerShipper: Number(getVal("cfg-dispatch-max-holding")),
+          driverBonusPerOrder: Number(getVal("cfg-dispatch-driver-bonus"))
+        }
+      };
+
+      try {
+        if (!window.Thim5API || typeof window.Thim5API.callGAS !== "function") {
+          throw new Error("Không tìm thấy kết nối Thim5API Backend!");
+        }
+
+        var res = await window.Thim5API.callGAS("saveSystemDynamicConfig", payload);
+        if (res && res.status === "success") {
+          alert("🎉 ĐÃ LƯU THÀNH CÔNG! Toàn bộ 7 Phân khu cấu hình đã có hiệu lực trên toàn sàn trong 0ms.");
+          if (newMasterKey) {
+            sessionStorage.setItem("thim5_master_key", newMasterKey);
+            if (newMasterKeyInput) newMasterKeyInput.value = "";
+          }
+        } else {
+          alert("⛔ Lỗi lưu cấu hình: " + (res && res.message ? res.message : "Không xác định"));
+        }
+      } catch (err) {
+        alert("❌ Lỗi kết nối lưu cấu hình: " + err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origBtnText || '<i class="fa-solid fa-floppy-disk"></i> Lưu Toàn Bộ Cấu Hình Hệ Thống';
+        }
+      }
+    }
+
+    /**
+     * QUẢN TRỊ BẢNG MÃ VOUCHER ĐỘNG
+     */
+    function renderVoucherTable() {
+      var tbody = document.getElementById("tbl-voucher-rules-body");
+      if (!tbody) return;
+
+      if (!voucherList || voucherList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-3 text-center text-slate-500 text-xs">Chưa có mã voucher nào. Bấm "Thêm Mã Mới" để kích hoạt!</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = voucherList.map(function(v, idx) {
+        return `
+          <tr data-voucher-idx="${idx}">
+            <td class="p-2">
+              <input type="text" value="${v.code || ''}" placeholder="MÃ" class="inp-v-code w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs font-mono font-bold text-amber-400 uppercase outline-none focus:border-amber-500">
+            </td>
+            <td class="p-2">
+              <select class="inp-v-type w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs font-bold text-slate-200 outline-none focus:border-amber-500">
+                <option value="PERCENT" ${v.type === 'PERCENT' ? 'selected' : ''}>% Giảm</option>
+                <option value="FIXED" ${v.type === 'FIXED' ? 'selected' : ''}>VNĐ Cố định</option>
+              </select>
+            </td>
+            <td class="p-2">
+              <input type="number" value="${v.value || 0}" placeholder="Giá trị" class="inp-v-val w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs font-mono font-bold text-emerald-400 outline-none focus:border-amber-500">
+            </td>
+            <td class="p-2">
+              <input type="number" step="1000" value="${v.minOrder || 0}" placeholder="Đơn tối thiểu" class="inp-v-min w-full bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs font-mono text-slate-300 outline-none focus:border-amber-500">
+            </td>
+            <td class="p-2 text-center">
+              <button type="button" onclick="TabConfigController.removeVoucherRow(${idx})" class="w-7 h-7 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition active:scale-95 inline-flex items-center justify-center">
+                <i class="fa-solid fa-trash-can text-xs"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function addNewVoucherRow() {
+      collectVoucherTableData();
+      voucherList.push({ code: "NEW" + Math.floor(10 + Math.random() * 90), type: "FIXED", value: 10000, minOrder: 89000 });
+      renderVoucherTable();
+    }
+
+    function removeVoucherRow(idx) {
+      collectVoucherTableData();
+      voucherList.splice(idx, 1);
+      renderVoucherTable();
+    }
+
+    function collectVoucherTableData() {
+      var rows = document.querySelectorAll("#tbl-voucher-rules-body tr");
+      var updated = [];
+      rows.forEach(function(r) {
+        var codeInp = r.querySelector(".inp-v-code");
+        var typeSel = r.querySelector(".inp-v-type");
+        var valInp = r.querySelector(".inp-v-val");
+        var minInp = r.querySelector(".inp-v-min");
+
+        if (codeInp && typeSel && valInp && minInp) {
+          var cCode = codeInp.value.trim().toUpperCase();
+          if (cCode) {
+            updated.push({
+              code: cCode,
+              type: typeSel.value,
+              value: Number(valInp.value) || 0,
+              minOrder: Number(minInp.value) || 0
+            });
+          }
+        }
+      });
+      voucherList = updated;
+    }
+
+    /**
+     * CẬP NHẬT ẢNH MÃ VIETQR TRỰC TIẾP
+     */
+    function updateLiveQrPreview() {
+      var bankBin = getVal("cfg-payment-bank-bin") || "970422";
+      var accNo = getVal("cfg-payment-account-no") || "";
+      var img = document.getElementById("live-qr-preview-img");
+
+      if (img && bankBin && accNo) {
+        img.src = "https://img.vietqr.io/image/" + bankBin + "-" + accNo + "-compact2.png?amount=10000&addInfo=TEST%20THIM%205";
+      }
+    }
+
+    /**
+     * LẤY ĐỊNH VỊ GPS VỆ TINH TỪ TRÌNH DUYỆT THIẾT BỊ
+     */
+    function fetchCurrentBrowserGps() {
+      if (!navigator.geolocation) {
+        alert("Trình duyệt không hỗ trợ cảm biến GPS!");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        setVal("cfg-store-lat", pos.coords.latitude.toFixed(6));
+        setVal("cfg-store-lng", pos.coords.longitude.toFixed(6));
+        alert("📍 Đã cập nhật tọa độ GPS Bếp Thím 5 thành công!");
+      }, function(err) {
+        alert("Không thể lấy GPS: " + err.message);
+      });
+    }
+
+    /**
+     * MODAL XEM MÃ QR THIẾT LẬP GOOGLE AUTHENTICATOR 2FA
+     */
+    async function openTotpSetupModal() {
+      try {
+        var masterKey = (window.AdminShellController && typeof window.AdminShellController.getMasterKey === "function") 
+                        ? window.AdminShellController.getMasterKey() 
+                        : (sessionStorage.getItem("thim5_master_key") || "");
+
+        var res = await window.Thim5API.callGAS("getTotpSetupQrData", { masterKey: masterKey });
+        if (res && res.status === "success" && res.data) {
+          var qrImg = document.getElementById("totp-setup-qr-img");
+          var secretTxt = document.getElementById("totp-setup-secret-txt");
+          var modal = document.getElementById("modal-totp-setup");
+
+          if (qrImg) qrImg.src = res.data.qrImageUrl;
+          if (secretTxt) secretTxt.innerText = res.data.secretKey;
+          if (modal) modal.classList.remove("hidden");
+        } else {
+          alert("⛔ " + (res && res.message ? res.message : "Không thể lấy mã QR xác thực!"));
+        }
+      } catch (e) {
+        alert("Lỗi kết nối QR 2FA: " + e.message);
+      }
+    }
+
+    function closeTotpSetupModal() {
+      var m = document.getElementById("modal-totp-setup");
+      if (m) m.classList.add("hidden");
+    }
+
+    function resetConfigForm() {
+      if (confirm("Khôi phục lại dữ liệu cấu hình ban đầu từ máy chủ?")) {
+        loadConfigData();
+      }
+    }
+
+    // Tiện ích đọc / ghi DOM an toàn
+    function getVal(id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; }
+    function setVal(id, v) { var el = document.getElementById(id); if (el) el.value = v; }
+    function getCheck(id) { var el = document.getElementById(id); return el ? el.checked : false; }
+    function setCheck(id, b) { var el = document.getElementById(id); if (el) el.checked = !!b; }
+
+    return {
+      init: init,
+      handleSaveSystemConfig: handleSaveSystemConfig,
+      addNewVoucherRow: addNewVoucherRow,
+      removeVoucherRow: removeVoucherRow,
+      updateLiveQrPreview: updateLiveQrPreview,
+      fetchCurrentBrowserGps: fetchCurrentBrowserGps,
+      openTotpSetupModal: openTotpSetupModal,
+      closeTotpSetupModal: closeTotpSetupModal,
+      resetConfigForm: resetConfigForm
+    };
+  })();
+
+  // Tự động kích hoạt khi được nạp vào DOM của Admin Shell
+  TabConfigController.init();
+</script>

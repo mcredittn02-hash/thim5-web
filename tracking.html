@@ -1,0 +1,1284 @@
+<!-- ==========================================================================
+   FILE: tracking.html - PHẦN [1/4]
+   BẮT ĐẦU TỪ: Khai báo DOCTYPE, Meta PWA, Tailwind CSS CDN, Dynamic Seasonal Theme Engine,
+                Header nhận diện thương hiệu, Thanh trạng thái, Banner CRM lượt quay chưa dùng
+   KẾT THÚC TẠI: Thẻ đóng </div> của Khung Stepper 5 bước và Hộp hiển thị thời gian giao dự kiến (#box-eta-status)
+   HƯỚNG DẪN: Tạo mới hoặc ghi đè phần đầu tiên của file tracking.html
+   ========================================================================== -->
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Theo Dõi Đơn Hàng • Mì Trộn Thím 5</title>
+    
+    <!-- PWA Metadata & Favicon -->
+    <meta name="theme-color" content="#020617">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛵</text></svg>">
+
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['monospace']
+                    },
+                    colors: {
+                        brand: {
+                            primary: 'var(--brand-primary)',
+                            secondary: 'var(--brand-secondary)',
+                            accent: 'var(--brand-accent)',
+                            bg: 'var(--brand-bg)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- DYNAMIC SEASONAL THEME ENGINE STYLES (ĐỒNG BỘ THEME CÙNG INDEX.HTML) -->
+    <style>
+        :root {
+            /* MẶC ĐỊNH: Đất Thánh Thím 5 (Đỏ - Cam - Hổ Phách) */
+            --brand-primary: #f59e0b;
+            --brand-secondary: #dc2626;
+            --brand-accent: #10b981;
+            --brand-bg: #020617;
+            --brand-gradient: linear-gradient(135deg, #dc2626, #ea580c, #f59e0b);
+        }
+
+        /* SKIN: HALLOWEEN (Cam Bí Ngô & Tím Huyền Bí) */
+        html.skin-halloween {
+            --brand-primary: #f97316;
+            --brand-secondary: #9333ea;
+            --brand-accent: #a855f7;
+            --brand-bg: #090314;
+            --brand-gradient: linear-gradient(135deg, #7e22ce, #c2410c, #ea580c);
+        }
+
+        /* SKIN: GIÁNG SINH / NOEL (Đỏ Tuyết & Xanh Thông) */
+        html.skin-xmas {
+            --brand-primary: #ef4444;
+            --brand-secondary: #059669;
+            --brand-accent: #38bdf8;
+            --brand-bg: #02120e;
+            --brand-gradient: linear-gradient(135deg, #dc2626, #16a34a, #059669);
+        }
+
+        /* SKIN: TẾT NGUYÊN ĐÁN (Đỏ May Mắn & Vàng Hoàng Kim) */
+        html.skin-tet {
+            --brand-primary: #eab308;
+            --brand-secondary: #b91c1c;
+            --brand-accent: #fbbf24;
+            --brand-bg: #150204;
+            --brand-gradient: linear-gradient(135deg, #991b1b, #dc2626, #eab308);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+        body { 
+            background-color: var(--brand-bg); 
+            color: #f8fafc; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            transition: background-color 0.4s ease;
+        }
+        .custom-scroll::-webkit-scrollbar { display: none; }
+        .custom-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes stepPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+        }
+        .step-active-pulse {
+            animation: stepPulse 2s infinite;
+        }
+
+        @keyframes pulseAlertRing {
+            0%, 100% { border-color: rgba(245, 158, 11, 0.5); }
+            50% { border-color: rgba(245, 158, 11, 0.9); }
+        }
+        .alert-card-pulse {
+            animation: pulseAlertRing 2.5s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- ========================================================================= -->
+    <!-- 1. HEADER NHẬN DIỆN THƯƠNG HIỆU & NÚT VỀ TRANG CHỦ                       -->
+    <!-- ========================================================================= -->
+    <header class="w-full bg-slate-950/95 border-b border-slate-800/80 sticky top-0 z-40 backdrop-blur-md px-3 sm:px-4 py-2.5">
+        <div class="max-w-md mx-auto flex items-center justify-between gap-2">
+            
+            <div class="flex items-center gap-2.5 min-w-0">
+                <a href="index.html" class="w-9 h-9 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition active:scale-95" title="Về trang đặt món">
+                    <i class="fa-solid fa-arrow-left text-xs"></i>
+                </a>
+                <div class="min-w-0">
+                    <h1 class="text-xs sm:text-sm font-black text-white tracking-wide truncate uppercase">
+                        Trạng Thái Đơn Hàng
+                    </h1>
+                    <div class="flex items-center gap-1.5 text-[10.5px]">
+                        <span id="disp-order-code-badge" class="text-amber-400 font-mono font-bold tracking-tight">
+                            DH...
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="shrink-0 flex items-center gap-1.5">
+                <button type="button" 
+                        id="btn-manual-refresh" 
+                        onclick="OrderTrackingController.refreshStatus()" 
+                        class="w-9 h-9 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-amber-400 flex items-center justify-center text-xs transition active:scale-90" 
+                        title="Tải lại trạng thái">
+                    <i id="icon-refresh" class="fa-solid fa-rotate-right"></i>
+                </button>
+
+                <a id="link-tracking-hotline" href="tel:0934220585" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-mono font-bold shadow-sm transition active:scale-95">
+                    <i class="fa-solid fa-phone-volume text-[10px]"></i>
+                    <span id="disp-tracking-hotline-text">0934.220.585</span>
+                </a>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- 2. KHUNG TIẾN TRÌNH 5 BƯỚC THỜI GIAN THỰC                                 -->
+    <!-- ========================================================================= -->
+    <main class="w-full max-w-md mx-auto px-3 pt-3 pb-24 space-y-3.5 flex-1">
+        
+        <!-- BANNER KHUYẾN MÃI CRM: LƯỢT QUAY CHƯA DÙNG DÀNH CHO ĐƠN >= 79K -->
+        <div id="box-unused-spin-banner" class="hidden p-3 rounded-2xl bg-gradient-to-r from-purple-950 via-slate-900 to-amber-950 border border-amber-500/40 shadow-xl flex items-center justify-between gap-3 animate-in fade-in duration-300">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-base shrink-0 animate-bounce">
+                    <i class="fa-solid fa-dharmachakra"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-xs font-black text-amber-300 block truncate">Quý Khách Có 1 Lượt Quay!</span>
+                    <p class="text-[10px] text-slate-300 truncate">Tích lũy theo đơn từ 79k để nhận quà cho lần đặt sau.</p>
+                </div>
+            </div>
+            <a href="index.html" class="shrink-0 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] uppercase transition shadow active:scale-95">
+                Quay Ngay
+            </a>
+        </div>
+
+        <!-- CARD 1: BANNER TRẠNG THÁI HIỆN TẠI & TIẾN ĐỘ -->
+        <div class="p-4 rounded-3xl bg-slate-900 border border-slate-800/90 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 text-8xl text-amber-500/5 pointer-events-none -rotate-12">
+                <i id="bg-status-icon" class="fa-solid fa-bowl-rice"></i>
+            </div>
+
+            <div class="relative z-10 flex items-start justify-between gap-3">
+                <div class="space-y-1 min-w-0">
+                    <span id="disp-status-subtag" class="px-2 py-0.5 rounded-full text-[9px] font-mono font-extrabold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 inline-block">
+                        Bếp Đã Nhận Đơn
+                    </span>
+                    <h2 id="disp-status-headline" class="text-base sm:text-lg font-black text-white leading-snug">
+                        Đang Cập Nhật Tiến Độ...
+                    </h2>
+                    <p id="disp-status-subtext" class="text-xs text-slate-400 leading-relaxed">
+                        Hệ thống đang đồng bộ dữ liệu thời gian thực từ Bếp Thím 5.
+                    </p>
+                </div>
+
+                <div id="disp-status-avatar-box" class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl shrink-0 shadow-inner step-active-pulse">
+                    <i id="disp-status-main-icon" class="fa-solid fa-fire-burner"></i>
+                </div>
+            </div>
+
+            <!-- TIẾN TRÌNH 5 BƯỚC ĐỒNG BỘ 100% VỚI ORDER ENGINE -->
+            <div class="pt-5 border-t border-slate-800/80 mt-4">
+                <div class="relative flex items-center justify-between">
+                    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-800 z-0"></div>
+                    <div id="stepper-progress-line" class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-emerald-400 z-0 transition-all duration-700" style="width: 10%;"></div>
+
+                    <!-- Bước 1: Tiếp nhận đơn (Step 0) -->
+                    <div class="relative z-10 flex flex-col items-center gap-1.5" id="step-node-1">
+                        <div class="w-7 h-7 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <span class="text-[9px] font-bold text-slate-300">Nhận Đơn</span>
+                    </div>
+
+                    <!-- Bước 2: Bếp đang nấu (Step 2) -->
+                    <div class="relative z-10 flex flex-col items-center gap-1.5" id="step-node-2">
+                        <div class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 font-bold text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300">
+                            <i class="fa-solid fa-fire-burner"></i>
+                        </div>
+                        <span class="text-[9px] font-medium text-slate-500">Đang Nấu</span>
+                    </div>
+
+                    <!-- Bước 3: Đóng gói (Step 2.5) -->
+                    <div class="relative z-10 flex flex-col items-center gap-1.5" id="step-node-3">
+                        <div class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 font-bold text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300">
+                            <i class="fa-solid fa-box-open"></i>
+                        </div>
+                        <span class="text-[9px] font-medium text-slate-500">Đóng Gói</span>
+                    </div>
+
+                    <!-- Bước 4: Đang giao (Step 3) -->
+                    <div class="relative z-10 flex flex-col items-center gap-1.5" id="step-node-4">
+                        <div class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 font-bold text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300">
+                            <i class="fa-solid fa-motorcycle"></i>
+                        </div>
+                        <span class="text-[9px] font-medium text-slate-500">Đang Giao</span>
+                    </div>
+
+                    <!-- Bước 5: Đã giao (Step 4) -->
+                    <div class="relative z-10 flex flex-col items-center gap-1.5" id="step-node-5">
+                        <div class="w-7 h-7 rounded-full bg-slate-800 text-slate-400 font-bold text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300">
+                            <i class="fa-solid fa-house-chimney"></i>
+                        </div>
+                        <span class="text-[9px] font-medium text-slate-500">Đã Giao</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="box-eta-status" class="mt-4 p-2.5 rounded-2xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2 text-slate-400">
+                    <i class="fa-regular fa-clock text-amber-400"></i>
+                    <span>Thời gian giao dự kiến:</span>
+                </div>
+                <strong id="disp-eta-time" class="font-mono font-black text-amber-400 text-xs">
+                    20 - 30 Phút
+                </strong>
+            </div>
+
+        </div>
+        <!-- ==========================================================================
+   FILE: tracking.html - PHẦN [2/4]
+   BẮT ĐẦU TỪ: Thẻ Tài Xế Thông Minh (#box-shipper-card)
+   KẾT THÚC TẠI: Thẻ script nạp thư viện api.js ở cuối phân vùng giao diện HTML
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [1/4] của file tracking.html
+   ========================================================================== -->
+
+        <!-- CARD BỔ SUNG: THÔNG TIN TÀI XẾ ĐIỀU PHỐI (THÔNG MINH NỘI BỘ VS ĐỐI TÁC NGOÀI) -->
+        <div id="box-shipper-card" class="hidden p-3.5 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-2.5 animate-in fade-in duration-300">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                <span class="text-[11px] font-black text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-person-biking text-amber-400"></i> Đơn Vị Giao Hàng
+                </span>
+                <span id="disp-shipper-type-badge" class="px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    Shipper Quán
+                </span>
+            </div>
+
+            <!-- Phân hệ 1: Tài Xế Nội Bộ (Thím 5 Express) -->
+            <div id="shipper-internal-view" class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg shrink-0">
+                        <i class="fa-solid fa-helmet-safety"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <strong id="disp-shipper-name" class="text-white text-xs font-black truncate block">Bác Tài Thím 5</strong>
+                        <span id="disp-shipper-plate" class="text-[10.5px] text-slate-400 font-mono block">Biển số: Đang cập nhật</span>
+                    </div>
+                </div>
+
+                <a id="btn-call-shipper" href="tel:" class="shrink-0 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs transition active:scale-95 shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-phone-volume text-[11px]"></i>
+                    <span>Gọi Tài Xế</span>
+                </a>
+            </div>
+
+            <!-- Phân hệ 2: Đối Tác Sàn Ngoài (Grab / Xanh SM / Vill / Ahamove / beDelivery) -->
+            <div id="shipper-external-view" class="hidden p-2.5 rounded-2xl bg-slate-950 border border-slate-800/80 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-lg shrink-0">
+                    <i class="fa-solid fa-cube"></i>
+                </div>
+                <div class="min-w-0">
+                    <strong id="disp-external-partner-name" class="text-amber-400 text-xs font-black block">Đối Tác Công Nghệ Đang Giao</strong>
+                    <p class="text-[10px] text-slate-400 leading-tight mt-0.5">Món ăn đang được chuyển tới bạn siêu tốc. Vui lòng để ý chuông điện thoại!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD BỔ SUNG: CẢNH BÁO TIỀN MẶT COD VS ONLINE (TRÁNH THU NHẦM TIỀN KHÁCH) -->
+        <div id="box-payment-alert" class="p-3.5 rounded-3xl border shadow-xl flex items-center justify-between gap-3 bg-slate-900 border-amber-500/30 alert-card-pulse">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div id="payment-alert-icon-box" class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg shrink-0">
+                    <i id="payment-alert-icon" class="fa-solid fa-hand-holding-dollar"></i>
+                </div>
+                <div class="min-w-0">
+                    <span id="payment-alert-title" class="text-xs font-black text-white block truncate">Thanh Toán Tiền Mặt (COD)</span>
+                    <p id="payment-alert-subtext" class="text-[10.5px] text-slate-400 truncate">Vui lòng chuẩn bị sẵn tiền mặt khi nhận món:</p>
+                </div>
+            </div>
+            <strong id="payment-alert-amount" class="text-sm sm:text-base font-black text-amber-400 font-mono shrink-0">
+                0 đ
+            </strong>
+        </div>
+
+        <!-- CARD 2: THÔNG TIN GIAO HÀNG & ĐỊNH VỊ GPS -->
+        <div id="box-delivery-info" class="p-4 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 shadow-lg">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                <span class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-location-dot text-red-500"></i> Nơi Nhận Món
+                </span>
+                <span id="disp-delivery-distance-badge" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                    Cự ly: ~1.2 km
+                </span>
+            </div>
+
+            <div class="space-y-1.5 text-xs">
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400">Khách hàng:</span>
+                    <strong id="disp-cust-name" class="text-white font-bold">Đang tải...</strong>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400">Số điện thoại:</span>
+                    <strong id="disp-cust-phone" class="text-white font-mono">Đang tải...</strong>
+                </div>
+                <div class="pt-1">
+                    <span class="text-slate-400 block text-[11px] mb-0.5">Địa chỉ giao tận nơi:</span>
+                    <p id="disp-cust-address" class="text-slate-200 font-medium bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[11.5px] leading-relaxed">
+                        Đang đồng bộ địa chỉ nhận món...
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 3: CHI TIẾT ĐƠN HÀNG & TỔNG DÒNG TIỀN -->
+        <div id="box-tracking-bill" class="p-4 rounded-3xl bg-slate-900 border border-slate-800 space-y-3 shadow-lg">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                <span class="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-receipt text-amber-400"></i> Chi Tiết Món Ăn
+                </span>
+                <span id="disp-tracking-pay-status" class="px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">
+                    Đang kiểm tra thanh toán...
+                </span>
+            </div>
+
+            <div id="tracking-items-list" class="space-y-2 text-xs">
+                <div class="p-2 rounded-xl bg-slate-950/60 border border-slate-800/60 animate-pulse flex justify-between">
+                    <div class="h-3 bg-slate-800 rounded w-1/2"></div>
+                    <div class="h-3 bg-slate-800 rounded w-1/4"></div>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-800 space-y-1.5 text-xs">
+                <div class="flex justify-between text-slate-400 text-[11px]">
+                    <span>Tiền Món Ăn:</span>
+                    <span id="disp-bill-subtotal" class="font-mono font-bold text-white">0 đ</span>
+                </div>
+                <div class="flex justify-between text-slate-400 text-[11px]">
+                    <span>Phí Giao Hàng:</span>
+                    <span id="disp-bill-shipping-fee" class="font-mono font-bold text-white">0 đ</span>
+                </div>
+                <div class="flex justify-between text-emerald-400 text-[11px]">
+                    <span>Trợ Giá Cước Ship:</span>
+                    <span id="disp-bill-subsidy" class="font-mono font-bold">-0 đ</span>
+                </div>
+                <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-sm">
+                    <span class="font-black text-white">TỔNG THANH TOÁN:</span>
+                    <strong id="disp-bill-final-total" class="font-mono font-black text-amber-400 text-base">0 đ</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỤM NÚT HÀNH ĐỘNG SAU GIAO HÀNG -->
+        <div class="space-y-2 pt-1">
+            <a href="index.html" id="btn-return-home" class="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-95 text-white text-xs font-black uppercase tracking-wider text-center transition flex items-center justify-center gap-2 active:scale-95 shadow-lg shadow-red-600/20">
+                <i class="fa-solid fa-bowl-food"></i>
+                <span id="txt-return-home-btn">Đặt Thêm Món Ăn Khác</span>
+            </a>
+            <a id="link-report-hotline" href="tel:0934220585" class="w-full py-2.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-bold text-center transition flex items-center justify-center gap-2 active:scale-95 shadow">
+                <i class="fa-solid fa-phone text-red-400"></i>
+                <span>Cần Khiếu Nại / Hỗ Trợ Đơn Này (0934.220.585)</span>
+            </a>
+        </div>
+
+        <!-- BANNER KÍCH HOẠT VÒNG QUAY KHI ĐƠN HÀNG GIAO XONG -->
+        <div id="box-lucky-wheel-trigger" class="hidden mt-4 p-4 rounded-3xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-red-500/20 border-2 border-amber-500/60 shadow-xl text-center space-y-2 animate-in fade-in zoom-in duration-300">
+            <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 text-2xl font-black shadow-lg shadow-amber-500/40 animate-bounce">
+                🎁
+            </div>
+            <div>
+                <h3 class="text-sm font-black text-amber-400 uppercase tracking-wider">Đơn Hàng Đã Giao Thành Công!</h3>
+                <p class="text-[11px] text-slate-300">Bếp Thím 5 thân tặng bạn 01 lượt quay may mắn nhận quà tri ân đặc quyền.</p>
+            </div>
+            <button type="button" 
+                    id="btn-open-lucky-wheel"
+                    onclick="TrackingLuckyWheelEngine.openModal()" 
+                    class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/30 transition active:scale-95 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-dharmachakra fa-spin" style="--fa-animation-duration: 4s;"></i>
+                <span>VÀO QUAY MAY MẮN NGAY</span>
+            </button>
+        </div>
+
+        <!-- POPUP MODAL VÒNG QUAY MAY MẮN TRI ÂN (STACKING CONTEXT Z-50 AN TOÀN) -->
+        <div id="modal-tracking-lucky-wheel" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
+            <div class="relative w-full max-w-sm rounded-3xl bg-slate-900 border-2 border-amber-500/50 shadow-2xl p-5 text-center flex flex-col items-center space-y-4">
+                
+                <!-- Nút Đóng Modal -->
+                <button type="button" 
+                        onclick="TrackingLuckyWheelEngine.closeModal()" 
+                        class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-90">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+
+                <!-- Tiêu Đề Popup -->
+                <div class="space-y-1 pt-1">
+                    <div class="inline-block px-3 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-black text-amber-400 uppercase tracking-widest font-mono">
+                        Tri Ân Khách Quý
+                    </div>
+                    <h3 class="text-base font-black text-white uppercase tracking-wider">VÒNG QUAY MAY MẮN</h3>
+                    <p class="text-[11px] text-slate-400">100% Khách có quà xinh từ Bếp Thím 5</p>
+                </div>
+
+                <!-- Khung Canvas Vòng Quay & Kim Chỉ Định Vị -->
+                <div class="relative w-[260px] h-[260px] flex items-center justify-center select-none my-1">
+                    <!-- Kim chỉ điểm trúng thưởng ở đỉnh 12h -->
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-rose-500 text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] filter">
+                        <i class="fa-solid fa-location-pin"></i>
+                    </div>
+
+                    <!-- Canvas vẽ các nan quạt quà tặng -->
+                    <canvas id="wheelCanvas" width="260" height="260" class="rounded-full shadow-2xl border-4 border-amber-500/60"></canvas>
+
+                    <!-- Trục giữa vòng quay -->
+                    <div class="absolute inset-0 m-auto w-12 h-12 rounded-full bg-slate-950 border-2 border-amber-400 shadow-inner flex items-center justify-center z-10">
+                        <span class="text-xs font-black text-amber-400 font-mono">T5</span>
+                    </div>
+                </div>
+
+                <!-- Nút Bấm Quay Ngay -->
+                <div class="w-full space-y-2">
+                    <button type="button" 
+                            id="btn-spin-wheel"
+                            onclick="TrackingLuckyWheelEngine.spin()" 
+                            class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 hover:opacity-95 text-slate-950 font-black text-xs uppercase tracking-widest shadow-lg shadow-orange-500/40 transition active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play"></i>
+                        <span>QUAY NGAY</span>
+                    </button>
+
+                    <div id="wheel-result-msg" class="hidden p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold space-y-1">
+                        <!-- Kết quả trúng thưởng render tại đây -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Adapter kết nối Headless GAS API v3.5 Enterprise -->
+    <script src="api.js?v=20261004"></script>
+    <!-- ==========================================================================
+   FILE: tracking.html - PHẦN [3/4]
+   BẮT ĐẦU TỪ: Khai báo thẻ <script> và khởi tạo module OrderTrackingController
+   KẾT THÚC TẠI: Thẻ đóng ngoặc nhọn } của khối cập nhật hộp cảnh báo thanh toán trong hàm renderOrderUI()
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [2/4] của file tracking.html
+   ========================================================================== -->
+
+    <!-- ========================================================================= -->
+    <!-- 3. BỘ NÃO JAVASCRIPT QUẢN TRỊ THEO DÕI ĐƠN HÀNG (SMART POLLING ENGINE)    -->
+    <!-- ========================================================================= -->
+    <script>
+    /**
+     * =========================================================================
+     * CONTROLLER: ORDER TRACKING SUITE (THEO DÕI ĐƠN HÀNG THỜI GIAN THỰC v3.5)
+     * Tác giả: Đu Đủ - Cố vấn Chiến lược & Kỹ sư Trưởng hệ thống SaaS
+     * Bản quyền: Bếp Thím 5 & LongHoaFood Master (Năm 2026)
+     * Kiến trúc: Headless GAS API, Instant First-Paint 20ms, Adaptive 5-Step Stepper
+     * =========================================================================
+     */
+    var OrderTrackingController = (function() {
+        var currentOrderCode = "";
+        var pollTimer = null;
+        var pollCount = 0;
+        var isRefreshing = false;
+
+        // BẢNG ĐỊNH NGHĨA TRẠNG THÁI 5 BƯỚC ĐỒNG BỘ 100% VỚI ORDER ENGINE SSOT
+        var STATUS_DEFINITIONS = {
+            "RECEIVED": {
+                step: 1,
+                percent: "10%",
+                subtag: "Bếp Đã Nhận Đơn",
+                headline: "Đơn Hàng Đang Chờ Xác Nhận",
+                subtext: "Hệ thống đã ghi nhận đơn về Bếp Thím 5. Bếp sẽ liên hệ xác nhận đơn COD hoặc mở bếp nấu ngay!",
+                icon: "fa-receipt",
+                eta: "25 - 35 Phút"
+            },
+            "COOKING": {
+                step: 2,
+                percent: "35%",
+                subtag: "Bếp Đang Chế Biến",
+                headline: "Bếp Đang Trộn Mì Nóng Hổi",
+                subtext: "Sốt sa tế tỏi giòn đang được quyện đều cùng sợi mì dai vàng óng ánh.",
+                icon: "fa-fire-burner",
+                eta: "20 - 30 Phút"
+            },
+            "PACKED": {
+                step: 3,
+                percent: "60%",
+                subtag: "Đóng Gói Xong",
+                headline: "Món Đã Sẵn Sàng Chờ Giao",
+                subtext: "Đồ ăn đã được đóng hộp giữ nhiệt kèm súp nóng và nước chấm đầy đủ.",
+                icon: "fa-box-open",
+                eta: "15 - 20 Phút"
+            },
+            "DELIVERING": {
+                step: 4,
+                percent: "85%",
+                subtag: "Đang Giao Hàng",
+                headline: "Shipper Đang Trên Đường Tới",
+                subtext: "Bác tài đang vít ga giao món nóng tận tay. Quý khách vui lòng để ý điện thoại!",
+                icon: "fa-motorcycle",
+                eta: "5 - 10 Phút"
+            },
+            "COMPLETED": {
+                step: 5,
+                percent: "100%",
+                subtag: "Giao Thành Công",
+                headline: "Chúc Quý Khách Ngon Miệng!",
+                subtext: "Đơn hàng đã được giao trọn vẹn. Thím 5 xin chân thành cảm ơn quý khách!",
+                icon: "fa-house-chimney",
+                eta: "Đã Nhận Món"
+            },
+            "CANCELLED": {
+                step: 0,
+                percent: "0%",
+                subtag: "Đơn Đã Hủy",
+                headline: "Đơn Hàng Đã Hủy",
+                subtext: "Đơn hàng đã được hủy theo yêu cầu hoặc do sự cố. Vui lòng liên hệ Hotline Bếp!",
+                icon: "fa-ban",
+                eta: "--"
+            }
+        };
+
+        /**
+         * KHỞI TẠO VÀ TRÍCH XUẤT MÃ ĐƠN TỪ URL (HỖ TRỢ INSTANT FIRST-PAINT 20MS)
+         */
+        function init() {
+            // Nạp theme skin lễ hội từ localStorage đồng bộ với index.html
+            try {
+                var cachedCfg = JSON.parse(localStorage.getItem("T5_CACHED_CONFIG") || "{}");
+                if (cachedCfg && cachedCfg.activeSkin) {
+                    var htmlEl = document.documentElement;
+                    var code = String(cachedCfg.activeSkin).toUpperCase().trim();
+                    if (code === "HALLOWEEN") htmlEl.classList.add("skin-halloween");
+                    else if (code === "XMAS" || code === "NOEL") htmlEl.classList.add("skin-xmas");
+                    else if (code === "TET") htmlEl.classList.add("skin-tet");
+                }
+                if (cachedCfg && cachedCfg.phone) {
+                    var hotlineEl = document.getElementById("disp-tracking-hotline-text");
+                    var hotlineLink = document.getElementById("link-tracking-hotline");
+                    var reportLink = document.getElementById("link-report-hotline");
+                    if (hotlineEl) hotlineEl.innerText = cachedCfg.phone;
+                    if (hotlineLink) hotlineLink.href = "tel:" + cachedCfg.phone;
+                    if (reportLink) reportLink.href = "tel:" + cachedCfg.phone;
+                }
+            } catch (e) {}
+
+            var params = new URLSearchParams(window.location.search);
+            currentOrderCode = (params.get("order") || params.get("code") || "").trim();
+
+            var badgeEl = document.getElementById("disp-order-code-badge");
+            if (badgeEl) {
+                badgeEl.innerText = currentOrderCode ? currentOrderCode : "CHƯA CÓ ĐƠN";
+            }
+
+            if (!currentOrderCode) {
+                renderNotFoundState("Không tìm thấy mã đơn hàng. Quý khách vui lòng kiểm tra lại liên kết!");
+                return;
+            }
+
+            // TẦNG 1: NẠP TỨC THÌ TRONG 20MS TỪ SESSIONSTORAGE NẾU VỪA ĐẶT MÓN TẠI INDEX.HTML
+            var cachedStr = sessionStorage.getItem("thim5_last_order");
+            if (cachedStr) {
+                try {
+                    var cachedObj = JSON.parse(cachedStr);
+                    var cachedCode = String(cachedObj.orderCode || cachedObj.orderId || cachedObj.code || "").trim();
+                    if (cachedObj && cachedCode === currentOrderCode) {
+                        if (!cachedObj.status) {
+                            cachedObj.status = (cachedObj.paymentMethod === "VIETQR" || cachedObj.paymentMethod === "MOMO") ? "COOKING" : "RECEIVED";
+                            cachedObj.step = (cachedObj.paymentMethod === "VIETQR" || cachedObj.paymentMethod === "MOMO") ? 2 : 0;
+                        }
+                        renderOrderUI(cachedObj);
+                    }
+                } catch (parseErr) {}
+            }
+
+            fetchOrderData(false);
+            startSmartPolling();
+        }
+
+        /**
+         * BẮT ĐẦU SMART POLLING TIẾT KIỆM QUOTA GOOGLE APPS SCRIPT
+         */
+        function startSmartPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+
+            // 15 giây/lần trong 2 phút đầu (8 lần), sau đó giãn ra 30 giây/lần
+            pollTimer = setInterval(function() {
+                pollCount++;
+                fetchOrderData(true);
+
+                if (pollCount === 8) {
+                    clearInterval(pollTimer);
+                    pollTimer = setInterval(function() {
+                        fetchOrderData(true);
+                    }, 30000);
+                }
+            }, 15000);
+        }
+
+        /**
+         * LẤY DỮ LIỆU ĐƠN HÀNG TỪ BACKEND GAS HOẶC FALLBACK SESSIONSTORAGE
+         */
+        async function fetchOrderData(isSilent) {
+            if (!isSilent) {
+                var iconRef = document.getElementById("icon-refresh");
+                if (iconRef) iconRef.classList.add("fa-spin");
+            }
+
+            try {
+                var order = null;
+
+                // GỌI TRỰC TIẾP API GETORDERTRACKING TỪ GAS
+                if (window.Thim5API && typeof window.Thim5API.callGAS === "function") {
+                    try {
+                        var res = await window.Thim5API.callGAS("getOrderTracking", { orderCode: currentOrderCode });
+                        if (res) {
+                            if (res.data) order = res.data;
+                            else if (res.order) order = res.order;
+                            else if (res.code === 200 || res.status === "success") order = res;
+                        }
+                    } catch (apiErr) {
+                        console.warn("⚠️ API getOrderTracking chưa phản hồi:", apiErr.message);
+                    }
+                }
+
+                // NẾU API CHƯA PHẢN HỒI, DÙNG TẠM CACHE TỪ SESSIONSTORAGE
+                if (!order) {
+                    var cachedStr = sessionStorage.getItem("thim5_last_order");
+                    if (cachedStr) {
+                        try {
+                            var cachedObj = JSON.parse(cachedStr);
+                            var cachedCode = String(cachedObj.orderCode || cachedObj.orderId || cachedObj.code || "").trim();
+                            if (cachedObj && cachedCode === currentOrderCode) {
+                                order = cachedObj;
+                                if (!order.status) {
+                                    order.status = (order.paymentMethod === "VIETQR" || order.paymentMethod === "MOMO") ? "COOKING" : "RECEIVED";
+                                }
+                            }
+                        } catch (parseErr) {}
+                    }
+                }
+
+                // NẾU HOÀN TOÀN KHÔNG TÌM THẤY DỮ LIỆU
+                if (!order) {
+                    renderNotFoundState("Không tìm thấy dữ liệu cho mã đơn " + currentOrderCode + ". Vui lòng kiểm tra lại hoặc liên hệ hotline Bếp!");
+                    return;
+                }
+
+                renderOrderUI(order);
+
+                // KIỂM TOÁN VÒNG ĐỜI: DỪNG POLLING NẾU ĐƠN ĐÃ HOÀN TẤT HOẶC ĐÃ HỦY
+                var st = String(order.status || "").toUpperCase().trim();
+                var sp = Number(order.step !== undefined ? order.step : -99);
+                if (st === "COMPLETED" || st === "HOÀN TẤT" || st === "DELIVERED" || sp === 4 || st === "CANCELLED" || st === "ĐÃ HỦY" || sp === -1) {
+                    if (pollTimer) {
+                        clearInterval(pollTimer);
+                        pollTimer = null;
+                    }
+                }
+
+            } catch (err) {
+                console.error("❌ Lỗi truy vấn đơn hàng:", err);
+                if (!isSilent) {
+                    alert("Không thể làm mới trạng thái đơn hàng: " + err.message);
+                }
+            } finally {
+                var iconRef2 = document.getElementById("icon-refresh");
+                if (iconRef2) iconRef2.classList.remove("fa-spin");
+                isRefreshing = false;
+            }
+        }
+
+        /**
+         * RENDER TOÀN BỘ GIAO DIỆN TRACKING TỪ DỮ LIỆU THẬT & KÍCH HOẠT VÒNG QUAY
+         */
+        function renderOrderUI(order) {
+            if (!order) return;
+
+            // Chuẩn hóa trạng thái từ step hoặc status string khớp với OrderEngine
+            var rawStatus = String(order.status || "").toUpperCase().trim();
+            var stepNum = Number(order.step !== undefined ? order.step : -99);
+
+            var mappedKey = "RECEIVED";
+            if (rawStatus === "CANCELLED" || rawStatus === "ĐÃ HỦY" || stepNum === -1) {
+                mappedKey = "CANCELLED";
+            } else if (rawStatus === "COMPLETED" || rawStatus === "HOÀN TẤT" || rawStatus === "DELIVERED" || stepNum === 4) {
+                mappedKey = "COMPLETED";
+            } else if (rawStatus === "DELIVERING" || rawStatus === "ASSIGNED" || rawStatus === "PICKED_UP" || rawStatus === "ĐANG GIAO" || stepNum === 3) {
+                mappedKey = "DELIVERING";
+            } else if (rawStatus === "PACKED" || rawStatus === "READY" || rawStatus === "ĐÓNG GÓI" || stepNum === 2.5) {
+                mappedKey = "PACKED";
+            } else if (rawStatus === "COOKING" || rawStatus === "CONFIRMED" || rawStatus === "ĐANG NẤU" || stepNum === 2) {
+                mappedKey = "COOKING";
+            } else {
+                mappedKey = "RECEIVED";
+            }
+
+            var statusCfg = (typeof STATUS_DEFINITIONS !== "undefined" && STATUS_DEFINITIONS[mappedKey]) 
+                ? STATUS_DEFINITIONS[mappedKey] 
+                : STATUS_DEFINITIONS["RECEIVED"];
+
+            // 1. Cập nhật thẻ trạng thái Banner
+            var subtagEl = document.getElementById("disp-status-subtag");
+            var headlineEl = document.getElementById("disp-status-headline");
+            var subtextEl = document.getElementById("disp-status-subtext");
+            var etaEl = document.getElementById("disp-eta-time");
+            var mainIconEl = document.getElementById("disp-status-main-icon");
+            var bgIconEl = document.getElementById("bg-status-icon");
+
+            if (subtagEl) subtagEl.innerText = statusCfg.subtag;
+            if (headlineEl) headlineEl.innerText = statusCfg.headline;
+            if (subtextEl) subtextEl.innerText = statusCfg.subtext;
+            if (etaEl) etaEl.innerText = statusCfg.eta;
+
+            if (mainIconEl) mainIconEl.className = "fa-solid " + statusCfg.icon;
+            if (bgIconEl) bgIconEl.className = "fa-solid " + statusCfg.icon;
+
+            // 2. Cập nhật thanh tiến trình Stepper 5 bước
+            var progLine = document.getElementById("stepper-progress-line");
+            if (progLine) progLine.style.width = statusCfg.percent;
+
+            for (var i = 1; i <= 5; i++) {
+                var node = document.getElementById("step-node-" + i);
+                if (!node) continue;
+
+                var circle = node.querySelector("div");
+                var label = node.querySelector("span");
+
+                if (i < statusCfg.step) {
+                    if (circle) {
+                        circle.className = "w-7 h-7 rounded-full bg-emerald-500 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300";
+                        circle.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    }
+                    if (label) label.className = "text-[9px] font-bold text-slate-300";
+                } else if (i === statusCfg.step) {
+                    if (circle) {
+                        circle.className = "w-7 h-7 rounded-full bg-amber-500 text-slate-950 font-black text-[10px] flex items-center justify-center border-2 border-slate-950 shadow step-active-pulse transition-all duration-300";
+                        circle.innerHTML = '<i class="fa-solid ' + statusCfg.icon + '"></i>';
+                    }
+                    if (label) label.className = "text-[9px] font-black text-amber-400";
+                } else {
+                    if (circle) {
+                        circle.className = "w-7 h-7 rounded-full bg-slate-800 text-slate-500 font-bold text-[10px] flex items-center justify-center border-2 border-slate-950 shadow transition-all duration-300";
+                        circle.innerHTML = '<i class="fa-solid fa-circle text-[6px]"></i>';
+                    }
+                    if (label) label.className = "text-[9px] font-medium text-slate-500";
+                }
+            }
+
+            // 3. Cập nhật Thẻ Tài Xế Thông Minh (Tự động phân tách Quán vs Grab / Xanh / Vill)
+            var shipperBox = document.getElementById("box-shipper-card");
+            var internalView = document.getElementById("shipper-internal-view");
+            var externalView = document.getElementById("shipper-external-view");
+            var shipperBadge = document.getElementById("disp-shipper-type-badge");
+            var rawShipper = String(order.shipper || order.shipperInfo || order.assignedShipper || "").trim();
+            var rawShipperUpper = rawShipper.toUpperCase();
+
+            // Chỉ hiển thị thẻ tài xế khi đơn đang ở bước giao hàng hoặc hoàn tất
+            if (shipperBox && (mappedKey === "DELIVERING" || mappedKey === "COMPLETED") && rawShipper) {
+                shipperBox.classList.remove("hidden");
+
+                var isExternalPartner = (
+                    rawShipperUpper.indexOf("GRAB") !== -1 ||
+                    rawShipperUpper.indexOf("XANH") !== -1 ||
+                    rawShipperUpper.indexOf("VILL") !== -1 ||
+                    rawShipperUpper.indexOf("AHAMOVE") !== -1 ||
+                    rawShipperUpper.indexOf("BE") !== -1
+                );
+
+                if (isExternalPartner) {
+                    if (internalView) internalView.classList.add("hidden");
+                    if (externalView) externalView.classList.remove("hidden");
+                    if (shipperBadge) {
+                        shipperBadge.innerText = "Đối Tác Công Nghệ";
+                        shipperBadge.className = "px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-sky-500/10 text-sky-400 border border-sky-500/20";
+                    }
+                    var extNameEl = document.getElementById("disp-external-partner-name");
+                    if (extNameEl) {
+                        var pLabel = "Đối Tác Giao Hàng";
+                        if (rawShipperUpper.indexOf("GRAB") !== -1) pLabel = "GrabExpress";
+                        else if (rawShipperUpper.indexOf("XANH") !== -1) pLabel = "Xanh SM Bike";
+                        else if (rawShipperUpper.indexOf("VILL") !== -1) pLabel = "VillShip";
+                        else if (rawShipperUpper.indexOf("AHAMOVE") !== -1) pLabel = "Ahamove";
+                        else if (rawShipperUpper.indexOf("BE") !== -1) pLabel = "beDelivery";
+                        extNameEl.innerText = pLabel + " Đang Giao Nóng Hổi";
+                    }
+                } else {
+                    if (internalView) internalView.classList.remove("hidden");
+                    if (externalView) externalView.classList.add("hidden");
+                    if (shipperBadge) {
+                        shipperBadge.innerText = "Shipper Quán";
+                        shipperBadge.className = "px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                    }
+
+                    var sNameEl = document.getElementById("disp-shipper-name");
+                    var sPlateEl = document.getElementById("disp-shipper-plate");
+                    var callBtn = document.getElementById("btn-call-shipper");
+
+                    var sName = rawShipper.split("(")[0].replace(/[\[\]]/g, "").trim() || "Bác Tài Thím 5";
+                    var sPhone = (rawShipper.match(/(\d{9,11})/) || ["", ""])[1] || String(order.shipperPhone || "");
+                    var sPlate = (rawShipper.match(/\[(.*?)\]/) || ["", ""])[1] || (rawShipper.match(/\((.*?)\)/) || ["", ""])[1] || "";
+
+                    if (sNameEl) sNameEl.innerText = sName;
+                    if (sPlateEl) sPlateEl.innerText = sPlate ? ("Biển số: " + sPlate) : "Đội xe chuyên nghiệp Thím 5";
+                    if (callBtn) {
+                        if (sPhone) {
+                            callBtn.href = "tel:" + sPhone;
+                            callBtn.classList.remove("hidden");
+                        } else {
+                            callBtn.classList.add("hidden");
+                        }
+                    }
+                }
+            } else if (shipperBox) {
+                shipperBox.classList.add("hidden");
+            }
+
+            // 4. Cập nhật Hộp Cảnh Báo Tiền Mặt COD vs VietQR
+            var payAlertBox = document.getElementById("box-payment-alert");
+            var payAlertTitle = document.getElementById("payment-alert-title");
+            var payAlertSub = document.getElementById("payment-alert-subtext");
+            var payAlertAmount = document.getElementById("payment-alert-amount");
+            var payAlertIcon = document.getElementById("payment-alert-icon");
+            var payAlertIconBox = document.getElementById("payment-alert-icon-box");
+
+            var pMethodUpper = String(order.paymentMethod || order.method || "COD").toUpperCase();
+            var isOnlinePaid = (pMethodUpper.indexOf("VIETQR") !== -1 || pMethodUpper.indexOf("BANK") !== -1 || pMethodUpper.indexOf("MOMO") !== -1 || pMethodUpper.indexOf("PAID") !== -1);
+            var subtotalVal = Number(order.subtotal || order.itemsTotal || 0);
+            var shipFeeVal = Number(order.shippingFee || order.shipFee || 12000);
+            var subsidyVal = Number(order.shippingSubsidy || 0);
+            var finalTotalVal = Number(order.finalTotal || order.total || (subtotalVal + Math.max(0, shipFeeVal - subsidyVal)));
+
+            if (payAlertBox) {
+                if (isOnlinePaid) {
+                    payAlertBox.className = "p-3.5 rounded-3xl border shadow-xl flex items-center justify-between gap-3 bg-slate-900 border-emerald-500/40";
+                    if (payAlertTitle) payAlertTitle.innerText = "Đã Thanh Toán Trực Tuyến";
+                    if (payAlertSub) payAlertSub.innerText = "Tiền đã vào két • Không trả thêm tiền khi nhận:";
+                    if (payAlertAmount) {
+                        payAlertAmount.innerText = "0 đ";
+                        payAlertAmount.className = "text-sm sm:text-base font-black text-emerald-400 font-mono shrink-0";
+                    }
+                    if (payAlertIconBox) payAlertIconBox.className = "w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-lg shrink-0";
+                    if (payAlertIcon) payAlertIcon.className = "fa-solid fa-circle-check";
+                } else {
+                    payAlertBox.className = "p-3.5 rounded-3xl border shadow-xl flex items-center justify-between gap-3 bg-slate-900 border-amber-500/40 alert-card-pulse";
+                    if (payAlertTitle) payAlertTitle.innerText = "Thanh Toán Tiền Mặt (COD)";
+                    if (payAlertSub) payAlertSub.innerText = "Vui lòng chuẩn bị sẵn tiền mặt khi nhận món:";
+                    if (payAlertAmount) {
+                        payAlertAmount.innerText = finalTotalVal.toLocaleString("vi-VN") + " đ";
+                        payAlertAmount.className = "text-sm sm:text-base font-black text-amber-400 font-mono shrink-0";
+                    }
+                    if (payAlertIconBox) payAlertIconBox.className = "w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg shrink-0";
+                    if (payAlertIcon) payAlertIcon.className = "fa-solid fa-hand-holding-dollar";
+                }
+            }
+            /* ==========================================================================
+   FILE: tracking.html - PHẦN [4/4] (PHẦN CUỐI CÙNG - HOÀN TẤT FILE)
+   BẮT ĐẦU TỪ: Khối cập nhật thông tin giao hàng khách & cự ly trong hàm renderOrderUI()
+   KẾT THÚC TẠI: Thẻ đóng </html> hoàn tất trọn vẹn tệp tracking.html
+   HƯỚNG DẪN: Copy nối tiếp ngay sau Phần [3/4] của file tracking.html
+   ========================================================================== */
+
+            // 5. Cập nhật thông tin giao hàng & cự ly cước ship 0.5km
+            var cust = order.customer || {};
+            var custName = order.name || cust.name || "Quý Khách";
+            var custPhone = String(order.phone || cust.phone || "");
+            var custAddr = order.address || cust.address || "Nhận tại Bếp";
+
+            var nameEl = document.getElementById("disp-cust-name");
+            var phoneEl = document.getElementById("disp-cust-phone");
+            var addrEl = document.getElementById("disp-cust-address");
+            var distBadge = document.getElementById("disp-delivery-distance-badge");
+
+            if (nameEl) nameEl.innerText = custName;
+            if (phoneEl) {
+                // Che 3 số giữa bảo mật thông tin cá nhân khách hàng
+                phoneEl.innerText = (custPhone.length >= 7) ? (custPhone.slice(0, 4) + " xxx " + custPhone.slice(-3)) : custPhone;
+            }
+            if (addrEl) addrEl.innerText = custAddr;
+
+            if (distBadge) {
+                var d = Number(order.distanceKm || order.dist || cust.distanceKm) || 1.2;
+                var billedD = Number(order.billedDistanceKm) || (Math.ceil(d * 2) / 2);
+                if (d < 0.3) {
+                    distBadge.innerHTML = '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-location-dot"></i> Tại quán (< 300m)</span>';
+                } else {
+                    distBadge.innerText = `Cự ly: ~${d.toFixed(1)} km (Tính cước: ${billedD.toFixed(1)} km)`;
+                }
+            }
+
+            // 6. Cập nhật danh sách món ăn (Multi-format Parser cho mảng items & note text)
+            var itemsBox = document.getElementById("tracking-items-list");
+            if (itemsBox) {
+                var itemsArr = [];
+                if (Array.isArray(order.items) && order.items.length > 0) {
+                    itemsArr = order.items;
+                } else if (typeof order.note === "string" && order.note.trim()) {
+                    // Phân tích cú pháp chuỗi phân cấp bậc thang từ Cột P (COL_NOTE)
+                    var rawBlocks = order.note.split("\n\n");
+                    rawBlocks.forEach(function(block) {
+                        var lines = block.split("\n");
+                        var mainLine = lines[0] || "";
+                        if (mainLine.indexOf("•") !== -1) {
+                            var itemObj = { name: mainLine.replace(/^[•\s\d+x]+/, "").replace(/\(.*?\)/, "").trim(), quantity: 1, price: 0, toppings: [] };
+                            var qtyMatch = mainLine.match(/(\d+)x/);
+                            if (qtyMatch) itemObj.quantity = Number(qtyMatch[1]);
+                            for (var k = 1; k < lines.length; k++) {
+                                var sub = lines[k].trim();
+                                if (sub.indexOf("Khẩu vị:") !== -1) itemObj.taste = sub.replace("• Khẩu vị:", "").trim();
+                                else if (sub.indexOf("Nước chấm:") !== -1) itemObj.sauce = sub.replace("↳ Nước chấm:", "").trim();
+                                else if (sub.indexOf("Topping:") !== -1 || sub.indexOf("↳") !== -1) itemObj.toppings.push(sub.replace("↳", "").trim());
+                            }
+                            itemsArr.push(itemObj);
+                        }
+                    });
+                }
+
+                if (itemsArr.length > 0) {
+                    var htmlItems = itemsArr.map(function(it) {
+                        var itQty = it.quantity || it.qty || 1;
+                        var itPrice = Number(it.price || it.basePrice || 0);
+                        var toppingsStr = "";
+                        if (Array.isArray(it.toppings) && it.toppings.length > 0) {
+                            toppingsStr = it.toppings.map(function(t) { return (typeof t === "object") ? t.name : t; }).join(" • ");
+                        }
+
+                        return `
+                            <div class="p-2.5 rounded-2xl bg-slate-950 border border-slate-800 flex items-start justify-between gap-2">
+                                <div class="min-w-0">
+                                    <div class="font-bold text-white text-xs truncate">
+                                        <span class="text-amber-400 font-mono font-black">${itQty}x</span> ${it.name}
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 space-x-1.5 mt-0.5">
+                                        ${it.taste ? `<span class="text-amber-400/90 font-semibold">• Khẩu vị: ${it.taste}</span>` : ''}
+                                        ${it.sauce ? `<span class="text-amber-300">• ${it.sauce}</span>` : ''}
+                                    </div>
+                                    ${toppingsStr ? `<div class="text-[9.5px] text-emerald-400 mt-0.5 truncate">↳ ${toppingsStr}</div>` : ''}
+                                </div>
+                                <span class="font-mono font-bold text-xs text-white shrink-0">
+                                    ${itPrice > 0 ? (itPrice * itQty).toLocaleString("vi-VN") + " đ" : ""}
+                                </span>
+                            </div>
+                        `;
+                    }).join("");
+
+                    // Hiển thị phần quà 0đ nếu có
+                    var giftName = (order.gift && order.gift.name) || order.giftName || "";
+                    if (giftName) {
+                        htmlItems += `
+                            <div class="p-2.5 rounded-2xl bg-amber-500/5 border border-amber-500/30 flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="w-6 h-6 rounded-lg bg-gradient-to-tr from-amber-500 to-red-500 flex items-center justify-center text-white text-[10px] shrink-0">
+                                        <i class="fa-solid fa-gift"></i>
+                                    </span>
+                                    <span class="text-xs font-bold text-white truncate">🎁 ${giftName}</span>
+                                </div>
+                                <span class="px-2 py-0.5 rounded text-[9px] font-mono font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                    FREE 0đ
+                                </span>
+                            </div>
+                        `;
+                    }
+
+                    itemsBox.innerHTML = htmlItems;
+                }
+            }
+
+            // 7. Cập nhật bảng dòng tiền
+            var subtotalEl = document.getElementById("disp-bill-subtotal");
+            var feeEl = document.getElementById("disp-bill-shipping-fee");
+            var subEl = document.getElementById("disp-bill-subsidy");
+            var finalEl = document.getElementById("disp-bill-final-total");
+            var payBadge = document.getElementById("disp-tracking-pay-status");
+
+            var subtotal = Number(order.subtotal || order.itemsTotal || 0);
+            var shipFee = Number(order.shippingFee || order.shipFee || 12000);
+            var subsidy = Number(order.shippingSubsidy || 0);
+            var finalTotal = Number(order.finalTotal || order.total || (subtotal + Math.max(0, shipFee - subsidy)));
+
+            if (subtotalEl) subtotalEl.innerText = subtotal.toLocaleString("vi-VN") + " đ";
+            if (feeEl) feeEl.innerText = shipFee.toLocaleString("vi-VN") + " đ";
+
+            if (subEl) {
+                if (subsidy > 0) {
+                    subEl.innerText = "-" + subsidy.toLocaleString("vi-VN") + " đ" + (order.subsidyReason ? " (" + order.subsidyReason + ")" : "");
+                } else {
+                    subEl.innerText = "-0 đ";
+                }
+            }
+
+            if (finalEl) finalEl.innerText = finalTotal.toLocaleString("vi-VN") + " đ";
+
+            if (payBadge) {
+                var pMethod = String(order.paymentMethod || order.method || "COD").toUpperCase();
+                if (pMethod.indexOf("VIETQR") !== -1 || pMethod.indexOf("BANK") !== -1) {
+                    payBadge.className = "px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                    payBadge.innerText = "Đã Thanh Toán (VietQR)";
+                } else if (pMethod.indexOf("MOMO") !== -1) {
+                    payBadge.className = "px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-pink-500/10 text-pink-400 border border-pink-500/20";
+                    payBadge.innerText = "Đã Thanh Toán (Ví MoMo)";
+                } else {
+                    payBadge.className = "px-2 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                    payBadge.innerText = "Thu Tiền Mặt (COD)";
+                }
+            }
+
+            // 8. KÍCH HOẠT VÒNG QUAY MAY MẮN TRI ÂN (TRACKING GAMIFICATION TRIGGER)
+            if (typeof TrackingLuckyWheelEngine !== "undefined" && typeof TrackingLuckyWheelEngine.checkAndTrigger === "function") {
+                TrackingLuckyWheelEngine.checkAndTrigger(order);
+            }
+
+            // 9. CẬP NHẬT NÚT HÀNH ĐỘNG SAU KHI GIAO HOÀN TẤT
+            var returnHomeBtnTxt = document.getElementById("txt-return-home-btn");
+            if (returnHomeBtnTxt && mappedKey === "COMPLETED") {
+                returnHomeBtnTxt.innerText = "🎉 Đã Nhận Món • Đặt Đơn Mới";
+            }
+        }
+
+        function renderNotFoundState(msg) {
+            var main = document.querySelector("main");
+            if (main) {
+                main.innerHTML = `
+                    <div class="p-8 text-center space-y-4 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl my-auto">
+                        <div class="w-16 h-16 rounded-3xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 text-2xl mx-auto">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-base font-black text-white">Không Tìm Thấy Đơn Hàng</h3>
+                            <p class="text-xs text-slate-400">${msg}</p>
+                        </div>
+                        <div class="pt-2 flex justify-center gap-2">
+                            <a href="index.html" class="px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs">Về Trang Đặt Món</a>
+                            <a href="tel:0934220585" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs border border-slate-700">Gọi Hotline Bếp</a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function refreshStatus() {
+            if (isRefreshing) return;
+            isRefreshing = true;
+            fetchOrderData(false);
+        }
+
+        return {
+            init: init,
+            refreshStatus: refreshStatus
+        };
+    })();
+
+    document.addEventListener("DOMContentLoaded", function() {
+        OrderTrackingController.init();
+    });
+
+    /**
+     * =========================================================================
+     * BỘ NÃO ĐIỀU KHIỂN VÒNG QUAY MAY MẮN TRI ÂN (TRACKING GAMIFICATION ENGINE)
+     * Kiến trúc: SaaS F&B LongHoaFood Master - Cố vấn: Đu Đủ
+     * =========================================================================
+     */
+    var TrackingLuckyWheelEngine = (function() {
+        var canvas = null;
+        var ctx = null;
+        var isSpinning = false;
+        var currentAngle = 0;
+
+        // 6 Ô QUÀ TẶNG CHIẾN LƯỢC F&B THÍM 5 (TỐI ƯU FOOD COST & TĂNG AOV ĐƠN SAU)
+        var PRIZES = [
+            { label: "Trứng Lòng Đào", color: "#f59e0b", textColor: "#0f172a", code: "GIFT_TRUNG" },
+            { label: "Voucher 10K",    color: "#ef4444", textColor: "#ffffff", code: "VOUCHER_10K" },
+            { label: "Tóp Mỡ Giòn",    color: "#10b981", textColor: "#ffffff", code: "GIFT_TOPMO" },
+            { label: "Thêm May Mắn",   color: "#64748b", textColor: "#ffffff", code: "LUCK_NEXT" },
+            { label: "Trà Đào 1 Ly",   color: "#f97316", textColor: "#0f172a", code: "GIFT_TRADAO" },
+            { label: "Voucher 15K",    color: "#8b5cf6", textColor: "#ffffff", code: "VOUCHER_15K" }
+        ];
+
+        function initCanvas() {
+            canvas = document.getElementById("wheelCanvas");
+            if (!canvas) return;
+            ctx = canvas.getContext("2d");
+            drawWheel(0);
+        }
+
+        function drawWheel(angleOffset) {
+            if (!ctx || !canvas) return;
+            var numPrizes = PRIZES.length;
+            var arcSize = (2 * Math.PI) / numPrizes;
+            var centerX = canvas.width / 2;
+            var centerY = canvas.height / 2;
+            var radius = centerX - 6;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (var i = 0; i < numPrizes; i++) {
+                var prizeAngle = angleOffset + (i * arcSize);
+                
+                // Vẽ từng nan quạt màu
+                ctx.beginPath();
+                ctx.fillStyle = PRIZES[i].color;
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, prizeAngle, prizeAngle + arcSize);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#1e293b";
+                ctx.stroke();
+
+                // Vẽ chữ tên quà tặng
+                ctx.save();
+                ctx.fillStyle = PRIZES[i].textColor;
+                ctx.font = "bold 11px sans-serif";
+                ctx.textAlign = "right";
+                ctx.textBaseline = "middle";
+
+                var textAngle = prizeAngle + (arcSize / 2);
+                ctx.translate(centerX, centerY);
+                ctx.rotate(textAngle);
+                ctx.fillText(PRIZES[i].label, radius - 14, 0);
+                ctx.restore();
+            }
+        }
+
+        function openModal() {
+            var modal = document.getElementById("modal-tracking-lucky-wheel");
+            if (modal) {
+                modal.classList.remove("hidden");
+                initCanvas();
+            }
+        }
+
+        function closeModal() {
+            var modal = document.getElementById("modal-tracking-lucky-wheel");
+            if (modal) modal.classList.add("hidden");
+        }
+
+        function spin() {
+            if (isSpinning) return;
+
+            // Kiểm tra chống quay nhiều lần trên cùng 1 mã đơn hàng
+            var urlParams = new URLSearchParams(window.location.search);
+            var currentOrderCode = urlParams.get("order") || urlParams.get("code") || "DH_DEFAULT";
+            var playedKey = "thim5_wheel_played_" + currentOrderCode;
+
+            if (localStorage.getItem(playedKey)) {
+                var prevGift = localStorage.getItem(playedKey);
+                alert("🎉 Đơn hàng này quý khách đã nhận quà: [" + prevGift + "]. Quà đã được lưu và tự động áp dụng khi quý khách đặt đơn kế tiếp!");
+                return;
+            }
+
+            isSpinning = true;
+            var btnSpin = document.getElementById("btn-spin-wheel");
+            var resultBox = document.getElementById("wheel-result-msg");
+            if (btnSpin) btnSpin.disabled = true;
+            if (resultBox) resultBox.classList.add("hidden");
+
+            // Chọn ngẫu nhiên ô trúng thưởng
+            var prizeIndex = Math.floor(Math.random() * PRIZES.length);
+            var prize = PRIZES[prizeIndex];
+
+            var numPrizes = PRIZES.length;
+            var arcDeg = 360 / numPrizes;
+            // Quay tối thiểu 5 vòng + căn kim định vị ở đỉnh 12h (270 độ)
+            var totalRounds = 5 + Math.floor(Math.random() * 3);
+            var stopDeg = 270 - (prizeIndex * arcDeg) - (arcDeg / 2);
+            var targetRotation = (totalRounds * 360) + stopDeg;
+
+            var startTime = performance.now();
+            var spinDuration = 4500; // Quay trong 4.5 giây mượt mà
+
+            function animate(currentTime) {
+                var elapsed = currentTime - startTime;
+                var progress = Math.min(elapsed / spinDuration, 1);
+
+                // Gia tốc giảm dần mượt mà (Cubic Ease Out)
+                var easeProgress = 1 - Math.pow(1 - progress, 3);
+                var currentDeg = currentAngle + (targetRotation * easeProgress);
+
+                drawWheel(currentDeg * Math.PI / 180);
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    isSpinning = false;
+                    currentAngle = currentDeg % 360;
+                    if (btnSpin) btnSpin.disabled = false;
+
+                    // Lưu vết đơn đã quay thưởng thành công
+                    localStorage.setItem(playedKey, prize.label);
+
+                    // CẤP TOKEN QUÀ TẶNG CHUẨN ĐỂ INDEX.HTML TỰ ĐỘNG NHẬN DIỆN LẦN ĐẶT SAU
+                    var generatedGiftToken = `${prize.code}_${currentOrderCode.slice(-4)}`;
+                    var giftPayload = {
+                        name: prize.label,
+                        giftToken: generatedGiftToken,
+                        rewardCode: prize.code,
+                        sourceOrder: currentOrderCode,
+                        timestamp: new Date().toISOString()
+                    };
+                    localStorage.setItem("T5_STORED_GIFT_TOKEN", JSON.stringify(giftPayload));
+
+                    // Hiển thị phần quà
+                    if (resultBox) {
+                        resultBox.classList.remove("hidden");
+                        resultBox.innerHTML = `
+                            <div class="text-sm font-black text-amber-400">🎉 CHÚC MỪNG QUÝ KHÁCH!</div>
+                            <div>Quý khách đã trúng: <span class="text-white underline font-bold">${prize.label}</span></div>
+                            <div class="text-[10px] text-slate-400">Mã Token: <strong class="text-emerald-400 font-mono">${generatedGiftToken}</strong> (Đã tự động lưu vào máy, sẽ nhận khi đặt đơn sau!)</div>
+                        `;
+                    }
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        /**
+         * TỰ ĐỘNG BẬT BANNER GỢI Ý KHI ĐƠN HÀNG Ở TRẠNG THÁI GIAO HOÀN TẤT
+         */
+        function checkAndTrigger(order) {
+            if (!order) return;
+            var stepNum = Number(order.step !== undefined ? order.step : 0);
+            var statusStr = String(order.status || "").toUpperCase();
+
+            // Nếu đơn ở bước hoàn thành (step >= 4 hoặc COMPLETED / DELIVERED)
+            if (stepNum >= 4 || statusStr === "COMPLETED" || statusStr === "DELIVERED") {
+                var triggerBox = document.getElementById("box-lucky-wheel-trigger");
+                if (triggerBox) {
+                    triggerBox.classList.remove("hidden");
+                }
+            }
+        }
+
+        return {
+            openModal: openModal,
+            closeModal: closeModal,
+            spin: spin,
+            checkAndTrigger: checkAndTrigger
+        };
+    })();
+    </script>
+</body>
+</html>
