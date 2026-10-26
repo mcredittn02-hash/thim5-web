@@ -1503,3 +1503,281 @@ function updatePromoConfig(payload) {
     }
   });
 }
+
+
+/**
+ * =========================================================================
+ * MODULE QUẢN LÝ CHIẾN DỊCH KHUYẾN MÃI (PROMO CAMPAIGNS CONTROLLER)
+ * =========================================================================
+ */
+
+/**
+ * ĐỌC DANH SÁCH CHIẾN DỊCH KHUYẾN MÃI (API: getPromoCampaigns)
+ * @returns {Object} Phản hồi chuẩn hóa API
+ */
+function getPromoCampaigns() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = getOrInitSysConfigSheet(ss);
+    var data = sheet.getDataRange().getValues();
+
+    var campaignsJson = "";
+    var isMasterEnabled = true;
+
+    for (var r = 1; r < data.length; r++) {
+      var k = String(data[r][0] || "").trim().toUpperCase();
+      if (k === "PROMO_CAMPAIGNS_JSON") {
+        campaignsJson = String(data[r][1] || "").trim();
+      } else if (k === "PROMO_MODULE_MASTER_ENABLED") {
+        var v = String(data[r][1] || "").trim().toLowerCase();
+        isMasterEnabled = (v !== "false");
+      }
+    }
+
+    var campaigns = [];
+    if (campaignsJson) {
+      try {
+        campaigns = JSON.parse(campaignsJson);
+      } catch (eParse) {
+        campaigns = DEFAULT_PROMO_CAMPAIGNS.slice();
+      }
+    } else {
+      campaigns = DEFAULT_PROMO_CAMPAIGNS.slice();
+    }
+
+    return {
+      status: "success",
+      code: 200,
+      isMasterEnabled: isMasterEnabled,
+      data: campaigns
+    };
+  } catch (err) {
+    return {
+      status: "success",
+      code: 200,
+      isMasterEnabled: true,
+      data: DEFAULT_PROMO_CAMPAIGNS.slice()
+    };
+  }
+}
+
+/**
+ * LƯU HOẶC CẬP NHẬT CHIẾN DỊCH KHUYẾN MÃI (API: savePromoCampaign)
+ * @param {Object} payload - Dữ liệu chiến dịch cần lưu
+ * @returns {Object} Phản hồi chuẩn hóa API
+ */
+function savePromoCampaign(payload) {
+  if (!payload || typeof payload !== "object") {
+    return { status: "error", code: 400, message: "Dữ liệu chiến dịch không hợp lệ!" };
+  }
+
+  var res = getPromoCampaigns();
+  var campaigns = res.data || [];
+
+  var cmpId = String(payload.id || payload.campaignId || ("CMP_" + Date.now())).trim();
+  var existingIdx = -1;
+
+  for (var i = 0; i < campaigns.length; i++) {
+    if (campaigns[i].id === cmpId) {
+      existingIdx = i;
+      break;
+    }
+  }
+
+  var campaignRecord = {
+    id: cmpId,
+    name: String(payload.name || "Chiến Dịch Khuyến Mãi").trim(),
+    status: String(payload.status || "ACTIVE").toUpperCase() === "PAUSED" ? "PAUSED" : "ACTIVE",
+    minMainDishes: Number(payload.minMainDishes) || 0,
+    minToppings: Number(payload.minToppings) || 0,
+    minDrinks: Number(payload.minDrinks) || 0,
+    minBoosterItems: Number(payload.minBoosterItems) || 0,
+    minSubtotal: Number(payload.minSubtotal) || 0,
+    minRetainedNetProfit: Number(payload.minRetainedNetProfit) || 25000,
+    shipDiscountPct: Number(payload.shipDiscountPct) || 0,
+    maxShipDiscount: Number(payload.maxShipDiscount) || 10000,
+    freeBoosterMaxPrice: Number(payload.freeBoosterMaxPrice) || 0,
+    freeGiftType: payload.freeGiftType ? String(payload.freeGiftType).trim() : null,
+    freeGiftDesc: payload.freeGiftDesc ? String(payload.freeGiftDesc).trim() : null,
+    description: String(payload.description || "").trim()
+  };
+
+  if (existingIdx !== -1) {
+    campaigns[existingIdx] = campaignRecord;
+  } else {
+    campaigns.push(campaignRecord);
+  }
+
+  // Lưu vào SYS_CONFIG
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = getOrInitSysConfigSheet(ss);
+  var data = sheet.getDataRange().getValues();
+  var jsonStr = JSON.stringify(campaigns);
+  var foundRow = -1;
+
+  for (var r = 1; r < data.length; r++) {
+    if (String(data[r][0] || "").trim().toUpperCase() === "PROMO_CAMPAIGNS_JSON") {
+      foundRow = r + 1;
+      break;
+    }
+  }
+
+  var nowStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+  if (foundRow !== -1) {
+    sheet.getRange(foundRow, 2).setValue(jsonStr);
+    sheet.getRange(foundRow, 4).setValue(nowStr);
+  } else {
+    sheet.appendRow(["PROMO_CAMPAIGNS_JSON", jsonStr, "Danh sách chiến dịch khuyến mãi (JSON)", nowStr]);
+  }
+
+  // Xóa Cache
+  try {
+    CacheService.getScriptCache().remove(CONFIG_MANAGER_CONSTANTS.CACHE_KEY_CONFIG);
+  } catch (eC) {}
+
+  return {
+    status: "success",
+    code: 200,
+    message: "Đã lưu chiến dịch khuyến mãi thành công!",
+    data: campaignRecord
+  };
+}
+
+/**
+ * BẬT/TẮT TRẠNG THÁI CHIẾN DỊCH KHUYẾN MÃI (API: togglePromoCampaignStatus)
+ * @param {Object} payload - { campaignId, status, masterEnabled }
+ * @returns {Object} Phản hồi chuẩn hóa API
+ */
+function togglePromoCampaignStatus(payload) {
+  payload = payload || {};
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = getOrInitSysConfigSheet(ss);
+  var nowStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+
+  // Nếu là công tắc tổng
+  if (payload.masterEnabled !== undefined) {
+    var isEnabled = Boolean(payload.masterEnabled);
+    var data = sheet.getDataRange().getValues();
+    var foundMaster = -1;
+    for (var r = 1; r < data.length; r++) {
+      if (String(data[r][0] || "").trim().toUpperCase() === "PROMO_MODULE_MASTER_ENABLED") {
+        foundMaster = r + 1;
+        break;
+      }
+    }
+    if (foundMaster !== -1) {
+      sheet.getRange(foundMaster, 2).setValue(String(isEnabled));
+      sheet.getRange(foundMaster, 4).setValue(nowStr);
+    } else {
+      sheet.appendRow(["PROMO_MODULE_MASTER_ENABLED", String(isEnabled), "Công tắc tổng Module Khuyến Mãi", nowStr]);
+    }
+
+    try { CacheService.getScriptCache().remove(CONFIG_MANAGER_CONSTANTS.CACHE_KEY_CONFIG); } catch (eC) {}
+    return {
+      status: "success",
+      code: 200,
+      message: isEnabled ? "Đã bật toàn bộ Module Khuyến Mãi!" : "Đã tạm dừng toàn bộ Module Khuyến Mãi!",
+      masterEnabled: isEnabled
+    };
+  }
+
+  // Bật/tắt từng chiến dịch
+  var cmpId = String(payload.campaignId || payload.id || "").trim();
+  if (!cmpId) {
+    return { status: "error", code: 400, message: "Thiếu mã chiến dịch cần thay đổi trạng thái!" };
+  }
+
+  var res = getPromoCampaigns();
+  var campaigns = res.data || [];
+  var targetCmp = null;
+
+  for (var i = 0; i < campaigns.length; i++) {
+    if (campaigns[i].id === cmpId) {
+      targetCmp = campaigns[i];
+      if (payload.status) {
+        targetCmp.status = String(payload.status).toUpperCase();
+      } else {
+        targetCmp.status = (targetCmp.status === "ACTIVE") ? "PAUSED" : "ACTIVE";
+      }
+      break;
+    }
+  }
+
+  if (!targetCmp) {
+    return { status: "error", code: 404, message: "Không tìm thấy chiến dịch: " + cmpId };
+  }
+
+  // Ghi lại JSON vào Sheet
+  var dataSheet = sheet.getDataRange().getValues();
+  var jsonRow = -1;
+  for (var j = 1; j < dataSheet.length; j++) {
+    if (String(dataSheet[j][0] || "").trim().toUpperCase() === "PROMO_CAMPAIGNS_JSON") {
+      jsonRow = j + 1;
+      break;
+    }
+  }
+
+  var updatedJson = JSON.stringify(campaigns);
+  if (jsonRow !== -1) {
+    sheet.getRange(jsonRow, 2).setValue(updatedJson);
+    sheet.getRange(jsonRow, 4).setValue(nowStr);
+  } else {
+    sheet.appendRow(["PROMO_CAMPAIGNS_JSON", updatedJson, "Danh sách chiến dịch khuyến mãi (JSON)", nowStr]);
+  }
+
+  try { CacheService.getScriptCache().remove(CONFIG_MANAGER_CONSTANTS.CACHE_KEY_CONFIG); } catch (eC) {}
+
+  return {
+    status: "success",
+    code: 200,
+    message: "Đã chuyển trạng thái chiến dịch sang: " + targetCmp.status,
+    data: targetCmp
+  };
+}
+
+/**
+ * XÓA CHIẾN DỊCH KHUYẾN MÃI (API: deletePromoCampaign)
+ * @param {Object} payload - { campaignId }
+ * @returns {Object} Phản hồi chuẩn hóa API
+ */
+function deletePromoCampaign(payload) {
+  payload = payload || {};
+  var cmpId = String(payload.campaignId || payload.id || "").trim();
+  if (!cmpId) {
+    return { status: "error", code: 400, message: "Thiếu mã chiến dịch cần xóa!" };
+  }
+
+  var res = getPromoCampaigns();
+  var campaigns = res.data || [];
+  var filtered = campaigns.filter(function(c) { return c.id !== cmpId; });
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = getOrInitSysConfigSheet(ss);
+  var data = sheet.getDataRange().getValues();
+  var nowStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+
+  var jsonRow = -1;
+  for (var r = 1; r < data.length; r++) {
+    if (String(data[r][0] || "").trim().toUpperCase() === "PROMO_CAMPAIGNS_JSON") {
+      jsonRow = r + 1;
+      break;
+    }
+  }
+
+  var updatedJson = JSON.stringify(filtered);
+  if (jsonRow !== -1) {
+    sheet.getRange(jsonRow, 2).setValue(updatedJson);
+    sheet.getRange(jsonRow, 4).setValue(nowStr);
+  } else {
+    sheet.appendRow(["PROMO_CAMPAIGNS_JSON", updatedJson, "Danh sách chiến dịch khuyến mãi (JSON)", nowStr]);
+  }
+
+  try { CacheService.getScriptCache().remove(CONFIG_MANAGER_CONSTANTS.CACHE_KEY_CONFIG); } catch (eC) {}
+
+  return {
+    status: "success",
+    code: 200,
+    message: "Đã xóa chiến dịch " + cmpId + " thành công!",
+    data: filtered
+  };
+}

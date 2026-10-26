@@ -551,6 +551,15 @@
             <i class="fa-solid fa-satellite-dish w-4 text-center text-sm"></i>
             <span class="truncate font-bold">Trung Tâm Chiến Dịch</span>
           </button>
+          <!-- Tab 7: Quản Lý Khuyến Mãi F&B & Trợ Giá Ship Động (Super Admin Lv3) -->
+          <button type="button" 
+                  id="sidebar-btn-promos" 
+                  data-tab="promos" 
+                  onclick="AdminShellController.switchMainTab('promos', this)" 
+                  class="sidebar-nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl transition text-amber-400 hover:text-white hover:bg-slate-800/60">
+            <i class="fa-solid fa-gift w-4 text-center text-sm"></i>
+            <span class="truncate font-bold">Khuyến Mãi & Trợ Giá</span>
+          </button>
         </div>
 
       </nav>
@@ -892,7 +901,7 @@
        */
       async function switchMainTab(tabKey, btnElement) {
         var isSuperAdmin = (currentRole === "SUPER_ADMIN" || currentRole === "SUPER_ADMIN_LV3");
-        if (tabKey === "config" && !isSuperAdmin) {
+        if ((tabKey === "config" || tabKey === "promos") && !isSuperAdmin) {
           alert("⛔ TỪ CHỐI TRUY CẬP: Phân hệ Cấu Hình Toàn Hệ Thống chỉ dành riêng cho Super Admin!");
           return;
         }
@@ -992,6 +1001,8 @@
             window.TabConfigController.init();
           } else if (tabKey === "campaign" && window.TabCampaignController && typeof window.TabCampaignController.init === "function") {
             window.TabCampaignController.init();
+          } else if (tabKey === "promos" && window.TabPromosController && typeof window.TabPromosController.init === "function") {
+            window.TabPromosController.init();
           } else if (tabKey === "menu") {
             if (window.TabMenuController && typeof window.TabMenuController.init === "function") {
               window.TabMenuController.init();
@@ -1027,6 +1038,7 @@
           "pl": "Báo Cáo Tài Chính P&L & Dòng Tiền",
           "shippers": "Trạm Điều Phối Đội Xe & Shipper",
           "campaign": "Trung Tâm Chiến Dịch Geo-Fencing & Voucher",
+          "promos": "Quản Lý Chiến Dịch Khuyến Mãi F&B & Trợ Giá Ship",
           "config": "Bộ Não Trung Tâm & Cấu Hình Hệ Thống"
         };
 

@@ -694,3 +694,106 @@ $$\text{MaxShipDiscount} = \min(\text{ShipFee}, \text{ProfitAllow}, \text{CapAll
 
 3. **Dashboard Kiểm Thử Tự Động (`FRONTEND_WEB/system-test.html`):**
    - `#res-mod3-smart-ship-voucher`: Thẻ kết quả kiểm thử hàm `evaluateSmartShipVoucher` tại MOD 3.
+
+
+## 10. PHÂN HỆ QUẢN LÝ ĐA CHIẾN DỊCH KHUYẾN MÃI (MULTI-CAMPAIGN PROMO ENGINE & TAB-PROMOS.HTML v3.5)
+
+### 10.1. Kiến Trúc Multi-Campaign SSOT & Bảo Vệ LNR 65%
+Phân hệ Multi-Campaign Promo v3.5 thay thế cơ chế cứng nhắc bằng động cơ khuyến mãi đa tầng linh hoạt, tự động đối soát điều kiện giỏ hàng (Món Chính, Topping, Nước Uống, Tổng Tiền) và thẩm định ngân sách tài trợ dựa trên Lợi Nhuận Ròng (LNR) thực tế của đơn hàng:
+
+$$\text{LNR}_{\text{before}} = \text{Subtotal} - \text{TotalCOGS} - \text{Subtotal} \times \frac{\text{MasterFee} + \text{TaxHKD}}{100}$$
+$$\text{ProfitShare} = \max\left(0, (\text{LNR}_{\text{before}} - \text{MinRetainedNetProfit}) \times 0.65\right)$$
+$$\text{PromoCap} = \max\left(0, \text{Subtotal} \times \frac{\text{MaxPromoCapPct}}{100} - \text{OtherDiscount}\right)$$
+$$\text{MaxFreeBudget} = \min(\text{ProfitShare}, \text{PromoCap})$$
+
+- **Bảo Vệ Lợi Nhuận Ròng:** Quán giữ lại tối thiểu `MinRetainedNetProfit` (mặc định 15k - 35k), chỉ trích tối đa 65% thặng dư lợi nhuận ròng để bù cước ship.
+- **Trần Khuyến Mãi SSOT:** Tự động cắt giảm nếu tổng ưu đãi (Voucher Ship + Hội Viên VIP) vượt trần `MAX_PROMO_CAP_PCT` (15%).
+- **Quà Tặng Booster Kèm:** Topping/Nước uống tặng kèm được tính theo giá vốn COGS $\le 20\%$ giá trị quà tặng, chỉ cấp khi ngân sách thặng dư đủ chi trả.
+- **Gợi Ý Upsell Nudge Thông Minh:** Tự động đề xuất bậc khuyến mãi tiếp theo gần nhất (ví dụ: *Chọn thêm 1 Nước & 1 Topping, mua thêm 19.000đ để mở khóa Freeship 100%*).
+
+### 10.2. Bộ Action APIs SSOT Khuyến Mãi Hai Đầu
+Được đồng bộ 100% giữa `FRONTEND_WEB/thim5-master-dictionary.js` và `BACKEND_APPSCRIPT/MasterDictionary.gs`:
+1. `GET_PROMO_CAMPAIGNS` (`getPromoCampaigns`): Nạp danh sách chiến dịch đang chạy từ Sheet `SYS_CONFIG` (khóa `PROMO_CAMPAIGNS_JSON`) với bộ nhớ đệm CacheService.
+2. `SAVE_PROMO_CAMPAIGN` (`savePromoCampaign`): Thêm mới hoặc cập nhật thông số chiến dịch F&B (Món chính, Topping, Nước, Subtotal, Giảm ship, Quà tặng).
+3. `TOGGLE_PROMO_CAMPAIGN_STATUS` (`togglePromoCampaignStatus`): Bật/Tắt tức thời trạng thái `ACTIVE` / `PAUSED` của từng chiến dịch.
+4. `DELETE_PROMO_CAMPAIGN` (`deletePromoCampaign`): Xóa bỏ chiến dịch khỏi hệ thống.
+5. `EVALUATE_ORDER_PROMO_CAMPAIGNS` (`evaluateOrderPromoCampaigns`): Hàm toán học thuần túy đánh giá giỏ hàng tức thì, dùng chung cho cả Frontend D2C và Backend GAS Router.
+
+### 10.3. Phụ Lục DOM ID Phân Hệ `tab-promos.html` & `admin-shell.html`
+1. **Giao Diện Quản Trị `FRONTEND_WEB/tab-promos.html` (392 dòng $\le 400$ dòng):**
+   - `#chk-promo-master`: Công tắc tổng Bật/Tắt toàn bộ hệ thống khuyến mãi.
+   - `#btn-create-campaign`: Nút bấm mở modal tạo chiến dịch mới.
+   - `#campaigns-grid-container`: Bảng lưới hiển thị danh thiếp các chiến dịch khuyến mãi kèm công tắc trạng thái.
+   - `#modal-campaign-editor`: Modal popup tạo và chỉnh sửa chiến dịch.
+   - `#form-campaign-editor`: Biểu mẫu nhập liệu thông số chiến dịch.
+   - `#inp-camp-id`, `#inp-camp-name`, `#sel-camp-status`: Các trường định danh và trạng thái.
+   - `#inp-camp-min-mains`, `#inp-camp-min-toppings`, `#inp-camp-min-drinks`, `#inp-camp-min-subtotal`: Điều kiện số lượng món và giá trị giỏ hàng.
+   - `#inp-camp-profit-floor`: Ngưỡng sàn Lợi Nhuận Ròng giữ lại cho quán.
+   - `#inp-camp-ship-disc-pct`, `#inp-camp-max-ship-disc`: Tỷ lệ giảm cước ship và mức giảm tối đa.
+   - `#sel-camp-gift-type`, `#inp-camp-gift-desc`, `#inp-camp-gift-max-price`: Cấu hình quà tặng kèm (Nước / Topping).
+   - `#btn-save-campaign`, `#btn-close-modal`: Nút lưu và đóng modal.
+
+2. **Sidebar Menu `FRONTEND_WEB/admin-shell.html`:**
+   - `#sidebar-btn-promos`: Nút điều hướng Tab Khuyến Mãi F&B, khóa bảo mật nghiêm ngặt chỉ hiển thị và cho phép truy cập bởi Super Admin (Lv3).
+
+3. **Giao Diện Storefront `FRONTEND_WEB/index.html`:**
+   - `#box-smart-ship-voucher`: Hộp hiển thị Voucher Trợ Giá Ship động theo LNR.
+   - `#badge-ship-voucher-status`: Huy hiệu hiển thị tên chiến dịch đã kích hoạt.
+   - `#txt-ship-voucher-title`, `#txt-ship-voucher-desc`: Tiêu đề và mô tả chi tiết nguồn trợ giá.
+   - `#box-ship-upsell-nudge`, `#txt-ship-upsell-nudge`: Thanh thông điệp gợi ý nâng cấp bậc chiến dịch kế tiếp.
+   - `#btn-quick-add-upsell`: Nút 1-Click thêm ngay Topping hoặc Nước uống để mở khóa khuyến mãi cao hơn.
+
+### 10.4. Kết Quả Kiểm Thử System Test Suite
+- Đạt **26/26 PASS (0 FAIL, 0 WARN)** trên toàn bộ 5 Module của `FRONTEND_WEB/system-test.html`.
+
+
+## 10. PHÂN HỆ QUẢN LÝ ĐA CHIẾN DỊCH KHUYẾN MÃI (MULTI-CAMPAIGN PROMO ENGINE & TAB-PROMOS.HTML v3.5)
+
+### 10.1. Kiến Trúc Multi-Campaign SSOT & Bảo Vệ LNR 65%
+Phân hệ Multi-Campaign Promo v3.5 thay thế cơ chế cứng nhắc bằng động cơ khuyến mãi đa tầng linh hoạt, tự động đối soát điều kiện giỏ hàng (Món Chính, Topping, Nước Uống, Tổng Tiền) và thẩm định ngân sách tài trợ dựa trên Lợi Nhuận Ròng (LNR) thực tế của đơn hàng:
+
+$$\text{LNR}_{\text{before}} = \text{Subtotal} - \text{TotalCOGS} - \text{Subtotal} \times \frac{\text{MasterFee} + \text{TaxHKD}}{100}$$
+$$\text{ProfitShare} = \max\left(0, (\text{LNR}_{\text{before}} - \text{MinRetainedNetProfit}) \times 0.65\right)$$
+$$\text{PromoCap} = \max\left(0, \text{Subtotal} \times \frac{\text{MaxPromoCapPct}}{100} - \text{OtherDiscount}\right)$$
+$$\text{MaxFreeBudget} = \min(\text{ProfitShare}, \text{PromoCap})$$
+
+- **Bảo Vệ Lợi Nhuận Ròng:** Quán giữ lại tối thiểu `MinRetainedNetProfit` (mặc định 15k - 35k), chỉ trích tối đa 65% thặng dư lợi nhuận ròng để bù cước ship.
+- **Trần Khuyến Mãi SSOT:** Tự động cắt giảm nếu tổng ưu đãi (Voucher Ship + Hội Viên VIP) vượt trần `MAX_PROMO_CAP_PCT` (15%).
+- **Quà Tặng Booster Kèm:** Topping/Nước uống tặng kèm được tính theo giá vốn COGS $\le 20\%$ giá trị quà tặng, chỉ cấp khi ngân sách thặng dư đủ chi trả.
+- **Gợi Ý Upsell Nudge Thông Minh:** Tự động đề xuất bậc khuyến mãi tiếp theo gần nhất (ví dụ: *Chọn thêm 1 Nước & 1 Topping, mua thêm 19.000đ để mở khóa Freeship 100%*).
+
+### 10.2. Bộ Action APIs SSOT Khuyến Mãi Hai Đầu
+Được đồng bộ 100% giữa `FRONTEND_WEB/thim5-master-dictionary.js` và `BACKEND_APPSCRIPT/MasterDictionary.gs`:
+1. `GET_PROMO_CAMPAIGNS` (`getPromoCampaigns`): Nạp danh sách chiến dịch đang chạy từ Sheet `SYS_CONFIG` (khóa `PROMO_CAMPAIGNS_JSON`) với bộ nhớ đệm CacheService.
+2. `SAVE_PROMO_CAMPAIGN` (`savePromoCampaign`): Thêm mới hoặc cập nhật thông số chiến dịch F&B (Món chính, Topping, Nước, Subtotal, Giảm ship, Quà tặng).
+3. `TOGGLE_PROMO_CAMPAIGN_STATUS` (`togglePromoCampaignStatus`): Bật/Tắt tức thời trạng thái `ACTIVE` / `PAUSED` của từng chiến dịch.
+4. `DELETE_PROMO_CAMPAIGN` (`deletePromoCampaign`): Xóa bỏ chiến dịch khỏi hệ thống.
+5. `EVALUATE_ORDER_PROMO_CAMPAIGNS` (`evaluateOrderPromoCampaigns`): Hàm toán học thuần túy đánh giá giỏ hàng tức thì, dùng chung cho cả Frontend D2C và Backend GAS Router.
+
+### 10.3. Phụ Lục DOM ID Phân Hệ `tab-promos.html` & `admin-shell.html`
+1. **Giao Diện Quản Trị `FRONTEND_WEB/tab-promos.html` (392 dòng $\le 400$ dòng):**
+   - `#chk-promo-master`: Công tắc tổng Bật/Tắt toàn bộ hệ thống khuyến mãi.
+   - `#btn-create-campaign`: Nút bấm mở modal tạo chiến dịch mới.
+   - `#campaigns-grid-container`: Bảng lưới hiển thị danh thiếp các chiến dịch khuyến mãi kèm công tắc trạng thái.
+   - `#modal-campaign-editor`: Modal popup tạo và chỉnh sửa chiến dịch.
+   - `#form-campaign-editor`: Biểu mẫu nhập liệu thông số chiến dịch.
+   - `#inp-camp-id`, `#inp-camp-name`, `#sel-camp-status`: Các trường định danh và trạng thái.
+   - `#inp-camp-min-mains`, `#inp-camp-min-toppings`, `#inp-camp-min-drinks`, `#inp-camp-min-subtotal`: Điều kiện số lượng món và giá trị giỏ hàng.
+   - `#inp-camp-profit-floor`: Ngưỡng sàn Lợi Nhuận Ròng giữ lại cho quán.
+   - `#inp-camp-ship-disc-pct`, `#inp-camp-max-ship-disc`: Tỷ lệ giảm cước ship và mức giảm tối đa.
+   - `#sel-camp-gift-type`, `#inp-camp-gift-desc`, `#inp-camp-gift-max-price`: Cấu hình quà tặng kèm (Nước / Topping).
+   - `#btn-save-campaign`, `#btn-close-modal`: Nút lưu và đóng modal.
+
+2. **Sidebar Menu `FRONTEND_WEB/admin-shell.html`:**
+   - `#sidebar-btn-promos`: Nút điều hướng Tab Khuyến Mãi F&B, khóa bảo mật nghiêm ngặt chỉ hiển thị và cho phép truy cập bởi Super Admin (Lv3).
+
+3. **Giao Diện Storefront `FRONTEND_WEB/index.html`:**
+   - `#box-smart-ship-voucher`: Hộp hiển thị Voucher Trợ Giá Ship động theo LNR.
+   - `#badge-ship-voucher-status`: Huy hiệu hiển thị tên chiến dịch đã kích hoạt.
+   - `#txt-ship-voucher-title`, `#txt-ship-voucher-desc`: Tiêu đề và mô tả chi tiết nguồn trợ giá.
+   - `#box-ship-upsell-nudge`, `#txt-ship-upsell-nudge`: Thanh thông điệp gợi ý nâng cấp bậc chiến dịch kế tiếp.
+   - `#btn-quick-add-upsell`: Nút 1-Click thêm ngay Topping hoặc Nước uống để mở khóa khuyến mãi cao hơn.
+
+### 10.4. Kết Quả Kiểm Thử System Test Suite
+- Đạt **26/26 PASS (0 FAIL, 0 WARN)** trên toàn bộ 5 Module của `FRONTEND_WEB/system-test.html`.
+

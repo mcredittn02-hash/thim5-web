@@ -48,6 +48,8 @@ var T5_SSOT = Object.freeze({
       MAX_PROMOTION_RATE: 0.15,
       TAX_RATE_HKD: 0.045,
       MAX_COD_HOLDING_PER_SHIPPER: 300000,
+            PROMO_MODULE_MASTER_ENABLED: true,
+      PROMO_CAMPAIGNS_JSON: "",
       PROMO_SMART_SHIP_VOUCHER_ENABLED: true,
       PROMO_TIER_25_ENABLED: true,
       PROMO_TIER_50_ENABLED: true,
@@ -276,6 +278,8 @@ var T5_SSOT = Object.freeze({
     D2C_BUFFER_PERCENT: "D2C_BUFFER_PERCENT",
     TAX_RATE_HKD: "TAX_RATE_HKD",
     MAX_PROMOTION_RATE: "MAX_PROMOTION_RATE",
+        PROMO_MODULE_MASTER_ENABLED: "PROMO_MODULE_MASTER_ENABLED",
+    PROMO_CAMPAIGNS_JSON: "PROMO_CAMPAIGNS_JSON",
     PROMO_SMART_SHIP_VOUCHER_ENABLED: "PROMO_SMART_SHIP_VOUCHER_ENABLED",
     PROMO_TIER_25_ENABLED: "PROMO_TIER_25_ENABLED",
     PROMO_TIER_50_ENABLED: "PROMO_TIER_50_ENABLED",
@@ -325,6 +329,11 @@ var T5_SSOT = Object.freeze({
     // Hợp Đồng Hệ Thống & Kiểm Tra Sức Khỏe
     GET_SYSTEM_CONTRACT: "getSystemContract",
     EVALUATE_SMART_SHIP_VOUCHER: "evaluateSmartShipVoucher",
+        GET_PROMO_CAMPAIGNS: "getPromoCampaigns",
+    SAVE_PROMO_CAMPAIGN: "savePromoCampaign",
+    TOGGLE_PROMO_CAMPAIGN_STATUS: "togglePromoCampaignStatus",
+    DELETE_PROMO_CAMPAIGN: "deletePromoCampaign",
+    EVALUATE_ORDER_PROMO_CAMPAIGNS: "evaluateOrderPromoCampaigns",
     UPDATE_PROMO_CONFIG: "updatePromoConfig",
     PING: "ping",
     HEALTH_CHECK: "healthCheck",
@@ -982,5 +991,223 @@ function evaluateSmartShipVoucher(params) {
     capAllow: capAllow,
     maxShipDiscount: maxShipDiscount,
     nextTier: nextTierInfo
+  };
+}
+
+
+var DEFAULT_PROMO_CAMPAIGNS = Object.freeze([
+  {
+    id: "CMP_SOLO_COMBO",
+    name: "Đơn Đủ Bộ: 1 Món Chính + Topping + Nước",
+    status: "ACTIVE",
+    minMainDishes: 1,
+    minToppings: 1,
+    minDrinks: 1,
+    minBoosterItems: 2,
+    minSubtotal: 75000,
+    minRetainedNetProfit: 28000,
+    shipDiscountPct: 35,
+    maxShipDiscount: 10000,
+    freeBoosterMaxPrice: 15000,
+    freeGiftType: "TOPPING_OR_DRINK",
+    freeGiftDesc: "Tặng 1 Topping hoặc Nước uống (tối đa 15k, COGS <= 20%)",
+    description: "Giảm 35% Phí Ship (tối đa 10k) hoặc tặng 1 Topping/Nước"
+  },
+  {
+    id: "CMP_DUO_FEAST",
+    name: "Combo Nhóm 2 Người: 2 Món Chính + Topping/Nước",
+    status: "ACTIVE",
+    minMainDishes: 2,
+    minToppings: 0,
+    minDrinks: 0,
+    minBoosterItems: 2,
+    minSubtotal: 135000,
+    minRetainedNetProfit: 52000,
+    shipDiscountPct: 70,
+    maxShipDiscount: 15000,
+    freeBoosterMaxPrice: 12000,
+    freeGiftType: "TOPPING",
+    freeGiftDesc: "Tặng kèm 1 Topping tươi ngon",
+    description: "Giảm 50% - 70% Phí Ship (tối đa 15k) + Tặng 1 Topping"
+  },
+  {
+    id: "CMP_PARTY_3PLUS",
+    name: "Đại Tiệc Nhóm 3+ Người: 3 Món Chính + Topping/Nước",
+    status: "ACTIVE",
+    minMainDishes: 3,
+    minToppings: 0,
+    minDrinks: 0,
+    minBoosterItems: 3,
+    minSubtotal: 199000,
+    minRetainedNetProfit: 75000,
+    shipDiscountPct: 100,
+    maxShipDiscount: 20000,
+    freeBoosterMaxPrice: 25000,
+    freeGiftType: "DRINK_AND_TOPPING",
+    freeGiftDesc: "Tặng Free 1 Nước uống & 1 Topping",
+    description: "FREESHIP 100% (tối đa 20k) + Tặng Free 1 Nước uống & 1 Topping"
+  }
+]);
+
+function evaluateOrderPromoCampaigns(params) {
+  params = params || {};
+  var config = params.config || {};
+  var items = Array.isArray(params.items) ? params.items : (Array.isArray(params.cartItems) ? params.cartItems : []);
+  var subtotal = Number(params.subtotal) || 0;
+  var totalCogs = Number(params.totalCogs);
+  var distanceKm = Number(params.distanceKm) || 1.8;
+  var otherDiscount = Number(params.otherDiscount) || 0;
+
+  var mainDishesCount = 0;
+  var toppingsCount = 0;
+  var drinksCount = 0;
+  var calcSubtotal = 0;
+  var calcCogs = 0;
+
+  for (var i = 0; i < items.length; i++) {
+    var it = items[i];
+    if (it.isGift) continue;
+    var q = Number(it.quantity || it.qty || 1);
+    var p = Number(it.price || it.d2cPrice || 0);
+    var c = Number(it.cogs || it.costPrice || (p * 0.40));
+    calcSubtotal += (p * q);
+    calcCogs += (c * q);
+
+    var cat = String(it.category || it.catId || it.cat || "").toUpperCase();
+    var dId = String(it.dishId || it.id || it.code || "").toUpperCase();
+    var name = String(it.name || "").toLowerCase();
+    var role = String(it.role || it.roleTag || "").toUpperCase();
+
+    var isDrink = cat.indexOf("NUOC") !== -1 || cat.indexOf("DRINK") !== -1 || cat.indexOf("BEVERAGE") !== -1 || 
+                  dId.indexOf("NUOC_") === 0 || name.indexOf("nước") !== -1 || name.indexOf("trà") !== -1 || 
+                  name.indexOf("cà phê") !== -1 || name.indexOf("pepsi") !== -1 || name.indexOf("coca") !== -1;
+
+    var isTopping = cat.indexOf("TOPPING") !== -1 || dId.indexOf("TOP") === 0 || (role === "BOOSTER" && !isDrink);
+
+    if (isDrink) drinksCount += q;
+    else if (isTopping) toppingsCount += q;
+    else if (p >= 30000 || role === "CORE" || role === "TRAFFIC" || cat.indexOf("MI") !== -1 || cat.indexOf("COM") !== -1) mainDishesCount += q;
+    else toppingsCount += q;
+  }
+
+  if (subtotal === 0) subtotal = calcSubtotal;
+  if (isNaN(totalCogs) || totalCogs <= 0) totalCogs = calcCogs > 0 ? calcCogs : Math.round(subtotal * 0.40);
+  var boosterItemsCount = toppingsCount + drinksCount;
+
+  var isMasterEnabled = config.PROMO_MODULE_MASTER_ENABLED !== false && String(config.PROMO_MODULE_MASTER_ENABLED) !== "false";
+  var masterFeePct = Number(config.MASTER_PLATFORM_FEE_PCT !== undefined ? config.MASTER_PLATFORM_FEE_PCT : 5.0);
+  var taxHkdPct = Number(config.TAX_HKD_PCT !== undefined ? config.TAX_HKD_PCT : (config.TAX_RATE_HKD !== undefined ? config.TAX_RATE_HKD : 4.5));
+  var maxPromoCapPct = Number(config.MAX_PROMO_CAP_PCT !== undefined ? config.MAX_PROMO_CAP_PCT : (config.MAX_PROMOTION_RATE !== undefined ? config.MAX_PROMOTION_RATE : 15));
+  if (maxPromoCapPct > 0 && maxPromoCapPct < 1) maxPromoCapPct = maxPromoCapPct * 100;
+
+  var custRatePerKm = Number(config.SHIP_CUST_RATE_PER_KM || config.SHIPPING_RATE_CUSTOMER_PER_KM || 5000);
+  var surgeMultiplier = Number(config.SHIP_SURGE_MULTIPLIER || 1.0);
+  var minCustFee = Number(config.SHIP_BASE_FEE_CUST || config.SHIPPING_MIN_CUSTOMER_FEE || 5000);
+  var billableKm = Math.max(1, Math.ceil(distanceKm));
+  var shipFee = Math.max(minCustFee, Math.round(billableKm * custRatePerKm * surgeMultiplier));
+
+  var masterFee = Math.round(subtotal * (masterFeePct / 100));
+  var taxHkd = Math.round(subtotal * (taxHkdPct / 100));
+  var lnrBefore = Math.max(0, subtotal - totalCogs - masterFee - taxHkd);
+
+  var campaigns = Array.isArray(params.campaigns) && params.campaigns.length > 0 
+      ? params.campaigns 
+      : (Array.isArray(config.promoCampaigns) ? config.promoCampaigns : DEFAULT_PROMO_CAMPAIGNS);
+
+  var activeResults = [];
+  var bestCampaign = null;
+  var primaryUpsellHint = "";
+
+  if (isMasterEnabled && subtotal > 0) {
+    var sortedCampaigns = campaigns.slice().sort(function(a, b) {
+      return (b.minSubtotal || 0) - (a.minSubtotal || 0);
+    });
+
+    for (var cIdx = 0; cIdx < sortedCampaigns.length; cIdx++) {
+      var cmp = sortedCampaigns[cIdx];
+      if (cmp.status === "PAUSED" || cmp.status === false) continue;
+
+      var meetsMains = mainDishesCount >= (cmp.minMainDishes || 0);
+      var meetsToppings = toppingsCount >= (cmp.minToppings || 0);
+      var meetsDrinks = drinksCount >= (cmp.minDrinks || 0);
+      var meetsBoosters = boosterItemsCount >= (cmp.minBoosterItems || 0);
+      var meetsSubtotal = subtotal >= (cmp.minSubtotal || 0);
+
+      var isConditionsMet = meetsMains && meetsToppings && meetsDrinks && meetsBoosters && meetsSubtotal;
+
+      var retainedFloor = Number(cmp.minRetainedNetProfit || 25000);
+      var surplusProfit = Math.max(0, lnrBefore - retainedFloor);
+      var profitShare = Math.round(surplusProfit * 0.65);
+      var promoCap = Math.max(0, Math.round(subtotal * (maxPromoCapPct / 100)) - otherDiscount);
+      var maxFreeBudget = Math.min(profitShare, promoCap);
+
+      var targetShipDiscount = Math.round(shipFee * ((cmp.shipDiscountPct || 0) / 100));
+      var allowedShipDiscount = Math.min(targetShipDiscount, (cmp.maxShipDiscount || shipFee), maxFreeBudget);
+
+      var giftCogsCost = Math.round((cmp.freeBoosterMaxPrice || 0) * 0.20);
+      var remBudgetForGift = Math.max(0, maxFreeBudget - allowedShipDiscount);
+      var isGiftAwarded = (giftCogsCost > 0 && remBudgetForGift >= giftCogsCost && cmp.freeGiftType);
+
+      var isUnlocked = isConditionsMet && (allowedShipDiscount > 0 || isGiftAwarded);
+
+      var hint = "";
+      if (!isUnlocked) {
+        var hints = [];
+        if (!meetsMains) hints.push("thêm " + (cmp.minMainDishes - mainDishesCount) + " Món Chính");
+        if (!meetsBoosters && (cmp.minBoosterItems || 0) > boosterItemsCount) hints.push("thêm " + (cmp.minBoosterItems - boosterItemsCount) + " Topping/Nước");
+        else {
+          if (!meetsToppings) hints.push("thêm " + (cmp.minToppings - toppingsCount) + " Topping");
+          if (!meetsDrinks) hints.push("thêm " + (cmp.minDrinks - drinksCount) + " Nước uống");
+        }
+        if (!meetsSubtotal) {
+          var gapMoney = Math.ceil((cmp.minSubtotal - subtotal) / 1000) * 1000;
+          hints.push("mua thêm " + gapMoney.toLocaleString("vi-VN") + "đ");
+        }
+        hint = hints.length > 0 ? ("Chọn " + hints.join(", ") + " để mở khóa: " + cmp.name) : "";
+      }
+
+      var resItem = {
+        campaignId: cmp.id,
+        name: cmp.name,
+        unlocked: isUnlocked,
+        meetsConditions: isConditionsMet,
+        shipDiscountPct: cmp.shipDiscountPct || 0,
+        shipDiscountAmount: allowedShipDiscount,
+        freeGiftAwarded: isGiftAwarded,
+        freeGiftType: isGiftAwarded ? cmp.freeGiftType : null,
+        freeGiftDesc: isGiftAwarded ? cmp.freeGiftDesc : null,
+        maxFreeBudget: maxFreeBudget,
+        lnrBefore: lnrBefore,
+        upsellHint: hint
+      };
+
+      activeResults.push(resItem);
+
+      if (isUnlocked && !bestCampaign) bestCampaign = resItem;
+      if (!primaryUpsellHint && hint) primaryUpsellHint = hint;
+    }
+  }
+
+  return {
+    enabled: isMasterEnabled,
+    subtotal: subtotal,
+    totalCogs: totalCogs,
+    lnrBefore: lnrBefore,
+    shipFee: shipFee,
+    cartSummary: {
+      mainDishes: mainDishesCount,
+      toppings: toppingsCount,
+      drinks: drinksCount,
+      boosterItems: boosterItemsCount
+    },
+    campaigns: activeResults,
+    bestCampaign: bestCampaign,
+    appliedCampaign: bestCampaign ? { id: bestCampaign.campaignId, name: bestCampaign.name, minRetainedNetProfit: bestCampaign.minRetainedNetProfit } : null,
+    unlocked: Boolean(bestCampaign && bestCampaign.unlocked),
+    primaryUpsellHint: primaryUpsellHint,
+    appliedDiscount: bestCampaign ? bestCampaign.shipDiscountAmount : 0,
+    shipDiscount: bestCampaign ? bestCampaign.shipDiscountAmount : 0,
+    appliedGift: (bestCampaign && bestCampaign.freeGiftAwarded) ? bestCampaign.freeGiftDesc : null,
+    giftReward: (bestCampaign && bestCampaign.freeGiftAwarded) ? { type: bestCampaign.freeGiftType, desc: bestCampaign.freeGiftDesc } : null
   };
 }

@@ -1,0 +1,393 @@
+<!-- FRONTEND_WEB/tab-promos.html: Giao diện Quản Lý Chiến Dịch Khuyến Mãi F&B (Super Admin Only) -->
+<div class="max-w-7xl mx-auto space-y-6 pb-12">
+  <!-- Header Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+    <div>
+      <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+        <span class="text-2xl">🎁</span> Quản Lý Chiến Dịch Khuyến Mãi F&B
+      </h2>
+      <p class="text-xs text-slate-500 mt-1">Cấu hình voucher trợ giá ship động và quà tặng đính kèm tự động bảo vệ Lợi Nhuận Ròng.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Master Toggle -->
+      <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-100 transition">
+        <span class="text-xs font-semibold text-slate-700">Bật Toàn Bộ Khuyến Mãi:</span>
+        <input type="checkbox" id="chk-promo-master" class="sr-only peer" onchange="TabPromosController.toggleMaster(this.checked)">
+        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600 relative"></div>
+      </label>
+      <button id="btn-create-campaign" onclick="TabPromosController.openEditor()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-200 flex items-center gap-1.5 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <span>+ Tạo Chiến Dịch Mới</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats & Notification Overview -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-200 rounded-2xl p-4">
+      <div class="text-xs font-semibold text-amber-800">Chiến dịch đang chạy</div>
+      <div id="stat-active-campaigns" class="text-2xl font-black text-amber-700 mt-1">--</div>
+      <div class="text-[11px] text-amber-600/80 mt-1">Áp dụng trực tiếp tại giỏ hàng D2C</div>
+    </div>
+    <div class="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-200 rounded-2xl p-4">
+      <div class="text-xs font-semibold text-emerald-800">Trần Khuyến Mãi SSOT</div>
+      <div class="text-2xl font-black text-emerald-700 mt-1">15% Subtotal</div>
+      <div class="text-[11px] text-emerald-600/80 mt-1">Khóa cứng bởi MAX_PROMO_CAP_PCT</div>
+    </div>
+    <div class="bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-200 rounded-2xl p-4">
+      <div class="text-xs font-semibold text-blue-800">Bảo Vệ Lợi Nhuận Ròng (LNR)</div>
+      <div class="text-2xl font-black text-blue-700 mt-1">65% LNR Thặng Dư</div>
+      <div class="text-[11px] text-blue-600/80 mt-1">Tự động chặn thâm hụt giá vốn COGS</div>
+    </div>
+  </div>
+
+  <!-- Campaigns Grid Container -->
+  <div id="campaigns-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="col-span-full py-12 text-center text-slate-400">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mb-2"></div>
+      <p class="text-xs">Đang tải danh sách chiến dịch...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Campaign Editor -->
+<div id="modal-campaign-editor" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
+    <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+      <h3 id="modal-editor-title" class="text-base font-bold text-slate-800">Thêm / Chỉnh Sửa Chiến Dịch</h3>
+      <button id="btn-close-modal" onclick="TabPromosController.closeEditor()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+    </div>
+    <form id="form-campaign-editor" onsubmit="TabPromosController.saveCampaign(event)" class="p-6 overflow-y-auto space-y-4 text-xs">
+      <input type="hidden" id="inp-camp-id">
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Tên Chiến Dịch (*)</label>
+          <input type="text" id="inp-camp-name" required placeholder="VD: Combo Solo Tiết Kiệm" class="w-full px-3 py-2 border rounded-xl border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Trạng Thái</label>
+          <select id="sel-camp-status" class="w-full px-3 py-2 border rounded-xl border-slate-200 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+            <option value="ACTIVE">ACTIVE (Đang Chạy)</option>
+            <option value="PAUSED">PAUSED (Tạm Dừng)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Điều Kiện Kích Hoạt -->
+      <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-2">
+        <div class="font-bold text-slate-800 text-[11px] uppercase tracking-wide">1. Điều Kiện Kích Hoạt Đơn Hàng</div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div>
+            <label class="block text-slate-600 text-[11px] mb-0.5">Món chính tối thiểu</label>
+            <input type="number" id="inp-camp-min-mains" min="0" value="1" class="w-full px-2 py-1.5 border rounded-lg border-slate-200">
+          </div>
+          <div>
+            <label class="block text-slate-600 text-[11px] mb-0.5">Topping tối thiểu</label>
+            <input type="number" id="inp-camp-min-toppings" min="0" value="0" class="w-full px-2 py-1.5 border rounded-lg border-slate-200">
+          </div>
+          <div>
+            <label class="block text-slate-600 text-[11px] mb-0.5">Nước tối thiểu</label>
+            <input type="number" id="inp-camp-min-drinks" min="0" value="0" class="w-full px-2 py-1.5 border rounded-lg border-slate-200">
+          </div>
+          <div>
+            <label class="block text-slate-600 text-[11px] mb-0.5">Giá trị đơn tối thiểu (đ)</label>
+            <input type="number" id="inp-camp-min-subtotal" min="0" step="5000" value="50000" class="w-full px-2 py-1.5 border rounded-lg border-slate-200">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-600 text-[11px] mb-0.5">Ngưỡng LNR Giữ Lại Tối Thiểu (đ) (Mặc định 15.000đ)</label>
+          <input type="number" id="inp-camp-profit-floor" min="0" step="5000" value="15000" class="w-full px-2 py-1.5 border rounded-lg border-slate-200">
+          <p class="text-[10px] text-slate-400 mt-0.5">Khuyến mãi chỉ trích từ thặng dư lợi nhuận ròng vượt mức này.</p>
+        </div>
+      </div>
+
+      <!-- Phần Thưởng -->
+      <div class="bg-amber-50/50 p-3.5 rounded-2xl border border-amber-200/80 space-y-2">
+        <div class="font-bold text-amber-900 text-[11px] uppercase tracking-wide">2. Quyền Lợi & Phần Thưởng</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-600 text-[11px] mb-0.5">% Giảm Cước Ship (0 - 100%)</label>
+            <input type="number" id="inp-camp-ship-disc-pct" min="0" max="100" value="35" class="w-full px-2 py-1.5 border rounded-lg border-slate-200">
+          </div>
+          <div>
+            <label class="block text-slate-600 text-[11px] mb-0.5">Giảm ship tối đa (đ)</label>
+            <input type="number" id="inp-camp-max-ship-disc" min="0" step="1000" value="15000" class="w-full px-2 py-1.5 border rounded-lg border-slate-200">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          <div>
+            <label class="block text-slate-600 text-[11px] mb-0.5">Loại Quà Tặng Kèm</label>
+            <select id="sel-camp-gift-type" class="w-full px-2 py-1.5 border rounded-lg border-slate-200">
+              <option value="NONE">Không tặng quà</option>
+              <option value="TOPPING">Tặng Topping tự chọn</option>
+              <option value="DRINK">Tặng Nước Uống tự chọn</option>
+              <option value="DRINK_AND_TOPPING">Tặng Combo Nước & Topping</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-slate-600 text-[11px] mb-0.5">Mô tả quà tặng hiển thị khách</label>
+            <input type="text" id="inp-camp-gift-desc" placeholder="VD: Tặng 1 Trà Đào Cam Sả mát lạnh" class="w-full px-2 py-1.5 border rounded-lg border-slate-200">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-600 text-[11px] mb-0.5">Giá vốn món tặng tối đa (đ) (Thường <= 20% giá trị quà)</label>
+          <input type="number" id="inp-camp-gift-max-price" min="0" step="1000" value="0" class="w-full px-2 py-1.5 border rounded-lg border-slate-200">
+        </div>
+      </div>
+
+      <div class="pt-2 flex items-center justify-end gap-2">
+        <button type="button" onclick="TabPromosController.closeEditor()" class="px-4 py-2 border rounded-xl text-slate-600 hover:bg-slate-50 transition">Hủy</button>
+        <button type="submit" id="btn-save-campaign" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-md transition">Lưu Chiến Dịch</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+window.TabPromosController = {
+  campaigns: [],
+  masterEnabled: true,
+
+  init: function() {
+    this.loadCampaigns();
+  },
+
+  loadCampaigns: function() {
+    var self = this;
+    var container = document.getElementById("campaigns-grid-container");
+    if (container) {
+      container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400"><div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mb-2"></div><p class="text-xs">Đang tải danh sách chiến dịch...</p></div>';
+    }
+
+    var apiCall = window.Thim5Dictionary ? window.Thim5Dictionary.ACTIONS.GET_PROMO_CAMPAIGNS : "getPromoCampaigns";
+    var payload = { action: apiCall };
+
+    if (window.AdminShellController && typeof window.AdminShellController.callBackend === "function") {
+      window.AdminShellController.callBackend(payload, function(res) {
+        self.handleLoadSuccess(res);
+      }, function() {
+        self.handleLoadFallback();
+      });
+    } else {
+      self.handleLoadFallback();
+    }
+  },
+
+  handleLoadSuccess: function(res) {
+    if (res && res.data) {
+      this.masterEnabled = res.data.masterEnabled !== false;
+      this.campaigns = Array.isArray(res.data.campaigns) ? res.data.campaigns : [];
+    } else {
+      this.handleLoadFallback();
+      return;
+    }
+    this.render();
+  },
+
+  handleLoadFallback: function() {
+    var dict = window.Thim5Dictionary;
+    this.masterEnabled = true;
+    this.campaigns = (dict && dict.DEFAULT_PROMO_CAMPAIGNS) ? JSON.parse(JSON.stringify(dict.DEFAULT_PROMO_CAMPAIGNS)) : [];
+    this.render();
+  },
+
+  render: function() {
+    var chkMaster = document.getElementById("chk-promo-master");
+    if (chkMaster) chkMaster.checked = this.masterEnabled;
+
+    var statActive = document.getElementById("stat-active-campaigns");
+    var activeCount = this.campaigns.filter(function(c) { return c.status === "ACTIVE"; }).length;
+    if (statActive) statActive.innerText = activeCount + " / " + this.campaigns.length;
+
+    var container = document.getElementById("campaigns-grid-container");
+    if (!container) return;
+
+    if (!this.campaigns || this.campaigns.length === 0) {
+      container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200"><p class="text-xs">Chưa có chiến dịch nào được cấu hình.</p></div>';
+      return;
+    }
+
+    var html = "";
+    var self = this;
+    this.campaigns.forEach(function(c) {
+      var isActive = c.status === "ACTIVE";
+      var statusBadge = isActive 
+        ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-md">ACTIVE</span>'
+        : '<span class="px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-md">PAUSED</span>';
+
+      var condParts = [];
+      if (c.minMains > 0) condParts.push(c.minMains + " Món chính");
+      if (c.minToppings > 0) condParts.push(c.minToppings + " Topping");
+      if (c.minDrinks > 0) condParts.push(c.minDrinks + " Nước");
+      if (c.minSubtotal > 0) condParts.push("Đơn từ " + (c.minSubtotal / 1000) + "k");
+
+      var rewardParts = [];
+      if (c.shipDiscountPct > 0) {
+        rewardParts.push("Giảm <b>" + c.shipDiscountPct + "%</b> cước ship (tối đa " + (c.maxShipDiscount ? (c.maxShipDiscount / 1000) + "k" : "vô hạn") + ")");
+      }
+      if (c.giftType && c.giftType !== "NONE") {
+        rewardParts.push("🎁 " + (c.giftDesc || c.giftType));
+      }
+
+      html += '<div class="bg-white rounded-2xl p-5 border ' + (isActive ? 'border-amber-200 shadow-sm' : 'border-slate-200 opacity-75') + ' flex flex-col justify-between space-y-4 transition hover:shadow-md">' +
+        '<div>' +
+          '<div class="flex items-start justify-between gap-2">' +
+            '<div>' +
+              '<h4 class="font-bold text-slate-800 text-sm">' + (c.name || c.id) + '</h4>' +
+              '<p class="text-[10px] text-slate-400 font-mono mt-0.5">Mã: ' + c.id + '</p>' +
+            '</div>' +
+            statusBadge +
+          '</div>' +
+          '<div class="mt-3 space-y-2 text-xs">' +
+            '<div class="bg-slate-50 p-2.5 rounded-xl text-slate-600">' +
+              '<div class="text-[10px] uppercase font-bold text-slate-400">Điều kiện kích hoạt:</div>' +
+              '<div class="mt-0.5 font-medium">' + (condParts.join(" + ") || "Tất cả đơn hàng") + '</div>' +
+              '<div class="text-[10px] text-slate-400 mt-1">Giữ lại LNR tối thiểu: <b>' + ((c.minRetainedNetProfit || 0) / 1000) + 'k</b></div>' +
+            '</div>' +
+            '<div class="bg-amber-50/60 p-2.5 rounded-xl text-amber-900">' +
+              '<div class="text-[10px] uppercase font-bold text-amber-600">Phần thưởng:</div>' +
+              '<div class="mt-0.5">' + (rewardParts.join("<br>") || "Không có") + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="pt-3 border-t border-slate-100 flex items-center justify-between">' +
+          '<div class="flex items-center gap-1.5">' +
+            '<button onclick="TabPromosController.toggleStatus(\'' + c.id + '\', \'' + (isActive ? 'PAUSED' : 'ACTIVE') + '\')" class="px-2.5 py-1 text-[11px] font-semibold rounded-lg border ' + (isActive ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100' : 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100') + '">' +
+              (isActive ? 'Tạm Dừng' : 'Kích Hoạt') +
+            '</button>' +
+            '<button onclick="TabPromosController.openEditor(\'' + c.id + '\')" class="px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100">Sửa</button>' +
+          '</div>' +
+          '<button onclick="TabPromosController.deleteCampaign(\'' + c.id + '\')" class="text-rose-500 hover:text-rose-700 text-xs font-semibold px-2 py-1">Xóa</button>' +
+        '</div>' +
+      '</div>';
+    });
+
+    container.innerHTML = html;
+  },
+
+  toggleMaster: function(val) {
+    this.masterEnabled = val;
+    var payload = {
+      action: window.Thim5Dictionary ? window.Thim5Dictionary.ACTIONS.SAVE_PROMO_CAMPAIGN : "savePromoCampaign",
+      masterEnabled: val
+    };
+    if (window.AdminShellController && typeof window.AdminShellController.callBackend === "function") {
+      window.AdminShellController.callBackend(payload, function() {
+        if (window.AdminShellController.showToast) window.AdminShellController.showToast("Cập nhật Master Toggle thành công!", "success");
+      });
+    }
+  },
+
+  toggleStatus: function(campId, newStatus) {
+    var c = this.campaigns.find(function(x) { return x.id === campId; });
+    if (c) c.status = newStatus;
+    this.render();
+
+    var payload = {
+      action: window.Thim5Dictionary ? window.Thim5Dictionary.ACTIONS.TOGGLE_PROMO_CAMPAIGN_STATUS : "togglePromoCampaignStatus",
+      id: campId,
+      status: newStatus
+    };
+    if (window.AdminShellController && typeof window.AdminShellController.callBackend === "function") {
+      window.AdminShellController.callBackend(payload, function() {
+        if (window.AdminShellController.showToast) window.AdminShellController.showToast("Đã đổi trạng thái " + campId + " -> " + newStatus, "success");
+      });
+    }
+  },
+
+  openEditor: function(campId) {
+    var modal = document.getElementById("modal-campaign-editor");
+    var title = document.getElementById("modal-editor-title");
+    if (!modal) return;
+
+    var c = campId ? this.campaigns.find(function(x) { return x.id === campId; }) : null;
+    if (title) title.innerText = c ? "Chỉnh Sửa Chiến Dịch: " + c.name : "Tạo Chiến Dịch Khuyến Mãi Mới";
+
+    document.getElementById("inp-camp-id").value = c ? c.id : "";
+    document.getElementById("inp-camp-name").value = c ? c.name : "";
+    document.getElementById("sel-camp-status").value = c ? c.status : "ACTIVE";
+    document.getElementById("inp-camp-min-mains").value = c ? (c.minMains || 0) : 1;
+    document.getElementById("inp-camp-min-toppings").value = c ? (c.minToppings || 0) : 0;
+    document.getElementById("inp-camp-min-drinks").value = c ? (c.minDrinks || 0) : 0;
+    document.getElementById("inp-camp-min-subtotal").value = c ? (c.minSubtotal || 0) : 50000;
+    document.getElementById("inp-camp-profit-floor").value = c ? (c.minRetainedNetProfit || 0) : 15000;
+    document.getElementById("inp-camp-ship-disc-pct").value = c ? (c.shipDiscountPct || 0) : 35;
+    document.getElementById("inp-camp-max-ship-disc").value = c ? (c.maxShipDiscount || 0) : 15000;
+    document.getElementById("sel-camp-gift-type").value = c ? (c.giftType || "NONE") : "NONE";
+    document.getElementById("inp-camp-gift-desc").value = c ? (c.giftDesc || "") : "";
+    document.getElementById("inp-camp-gift-max-price").value = c ? (c.giftMaxPrice || 0) : 0;
+
+    modal.classList.remove("hidden");
+  },
+
+  closeEditor: function() {
+    var modal = document.getElementById("modal-campaign-editor");
+    if (modal) modal.classList.add("hidden");
+  },
+
+  saveCampaign: function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    var id = document.getElementById("inp-camp-id").value;
+    var name = document.getElementById("inp-camp-name").value.trim();
+    if (!name) return;
+
+    if (!id) {
+      id = "CMP_" + Date.now().toString(36).toUpperCase();
+    }
+
+    var campaignObj = {
+      id: id,
+      name: name,
+      status: document.getElementById("sel-camp-status").value,
+      minMains: parseInt(document.getElementById("inp-camp-min-mains").value, 10) || 0,
+      minToppings: parseInt(document.getElementById("inp-camp-min-toppings").value, 10) || 0,
+      minDrinks: parseInt(document.getElementById("inp-camp-min-drinks").value, 10) || 0,
+      minSubtotal: parseFloat(document.getElementById("inp-camp-min-subtotal").value) || 0,
+      minRetainedNetProfit: parseFloat(document.getElementById("inp-camp-profit-floor").value) || 0,
+      shipDiscountPct: parseFloat(document.getElementById("inp-camp-ship-disc-pct").value) || 0,
+      maxShipDiscount: parseFloat(document.getElementById("inp-camp-max-ship-disc").value) || 0,
+      giftType: document.getElementById("sel-camp-gift-type").value,
+      giftDesc: document.getElementById("inp-camp-gift-desc").value.trim(),
+      giftMaxPrice: parseFloat(document.getElementById("inp-camp-gift-max-price").value) || 0
+    };
+
+    var existingIdx = this.campaigns.findIndex(function(x) { return x.id === id; });
+    if (existingIdx >= 0) {
+      this.campaigns[existingIdx] = campaignObj;
+    } else {
+      this.campaigns.push(campaignObj);
+    }
+
+    this.render();
+    this.closeEditor();
+
+    var payload = {
+      action: window.Thim5Dictionary ? window.Thim5Dictionary.ACTIONS.SAVE_PROMO_CAMPAIGN : "savePromoCampaign",
+      campaign: campaignObj
+    };
+    if (window.AdminShellController && typeof window.AdminShellController.callBackend === "function") {
+      window.AdminShellController.callBackend(payload, function() {
+        if (window.AdminShellController.showToast) window.AdminShellController.showToast("Đã lưu chiến dịch: " + name, "success");
+      });
+    }
+  },
+
+  deleteCampaign: function(campId) {
+    if (!confirm("Bạn có chắc chắn muốn xóa chiến dịch này không?")) return;
+    this.campaigns = this.campaigns.filter(function(x) { return x.id !== campId; });
+    this.render();
+
+    var payload = {
+      action: window.Thim5Dictionary ? window.Thim5Dictionary.ACTIONS.DELETE_PROMO_CAMPAIGN : "deletePromoCampaign",
+      id: campId
+    };
+    if (window.AdminShellController && typeof window.AdminShellController.callBackend === "function") {
+      window.AdminShellController.callBackend(payload, function() {
+        if (window.AdminShellController.showToast) window.AdminShellController.showToast("Đã xóa chiến dịch " + campId, "info");
+      });
+    }
+  }
+};
+</script>
+

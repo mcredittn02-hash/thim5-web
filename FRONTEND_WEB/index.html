@@ -2343,18 +2343,85 @@
                     }
                 });
 
-                var freeshipThreshold = Number(STORE_BASE_CONFIG.freeshipMinSubtotal) || 149000;
-                var maxSubsidy = Number(STORE_BASE_CONFIG.maxShippingSubsidy) || 20000;
+                // ĐÁNH GIÁ CHIẾN DỊCH VOUCHER & TRỢ GIÁ SHIP ĐỘNG THUẦN KHIẾT SSOT
+                var promoEval = null;
+                if (window.Thim5Dictionary && typeof window.Thim5Dictionary.evaluateOrderPromoCampaigns === "function") {
+                    promoEval = window.Thim5Dictionary.evaluateOrderPromoCampaigns({
+                        cartItems: appState.cartItems,
+                        shippingFee: calcFee,
+                        campaigns: appState.promoCampaigns,
+                        masterFeePct: Number(STORE_BASE_CONFIG.masterPlatformFeeRate) || 5,
+                        taxPct: Number(STORE_BASE_CONFIG.taxHkdRate) || 4.5,
+                        maxPromoCapPct: Number(STORE_BASE_CONFIG.maxPromotionRate) || 15
+                    });
+                }
 
-                if (subtotal >= freeshipThreshold && subtotal > 0) {
-                    sub = Math.min(calcFee, maxSubsidy);
-                    reason = "Freeship đơn từ " + (freeshipThreshold / 1000) + "k";
-                } else if (billedDist >= 4.0 && (subtotal >= 110000 && hasHighMarginItem)) {
-                    sub = Math.min(calcFee, Math.min(15000, maxSubsidy));
-                    reason = "Hỗ trợ đơn xa > 4km";
-                } else if (billedDist >= 3.5 && subtotal >= 120000) {
-                    sub = Math.min(calcFee, Math.min(10000, maxSubsidy));
-                    reason = "Hỗ trợ đơn xa > 3.5km";
+                if (promoEval && promoEval.appliedCampaign) {
+                    sub = promoEval.shipDiscount || 0;
+                    reason = promoEval.appliedCampaign.name || "Voucher Trợ Giá Ship";
+                    appState.smartShipVoucher = {
+                        unlocked: true,
+                        campaign: promoEval.appliedCampaign,
+                        giftReward: promoEval.giftReward,
+                        shipDiscount: sub
+                    };
+                } else {
+                    // Fallback theo ngưỡng giá trị giỏ hàng truyền thống
+                    var freeshipThreshold = Number(STORE_BASE_CONFIG.freeshipMinSubtotal) || 149000;
+                    var maxSubsidy = Number(STORE_BASE_CONFIG.maxShippingSubsidy) || 20000;
+                    if (subtotal >= freeshipThreshold && subtotal > 0) {
+                        sub = Math.min(calcFee, maxSubsidy);
+                        reason = "Freeship đơn từ " + (freeshipThreshold / 1000) + "k";
+                    } else if (billedDist >= 4.0 && (subtotal >= 110000 && hasHighMarginItem)) {
+                        sub = Math.min(calcFee, Math.min(15000, maxSubsidy));
+                        reason = "Hỗ trợ đơn xa > 4km";
+                    } else if (billedDist >= 3.5 && subtotal >= 120000) {
+                        sub = Math.min(calcFee, Math.min(10000, maxSubsidy));
+                        reason = "Hỗ trợ đơn xa > 3.5km";
+                    }
+                    appState.smartShipVoucher = { unlocked: sub > 0, campaign: null, giftReward: null, shipDiscount: sub };
+                }
+
+                // Cập nhật giao diện Smart Voucher Box & Upsell Nudge
+                var badgeVoucher = document.getElementById("badge-ship-voucher-status");
+                var txtVoucherTitle = document.getElementById("txt-ship-voucher-title");
+                var txtVoucherDesc = document.getElementById("txt-ship-voucher-desc");
+                var boxNudge = document.getElementById("box-ship-upsell-nudge");
+                var txtNudge = document.getElementById("txt-ship-upsell-nudge");
+
+                if (promoEval && promoEval.appliedCampaign) {
+                    if (badgeVoucher) {
+                        badgeVoucher.className = "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                        badgeVoucher.innerText = "ĐÃ MỞ KHÓA: " + promoEval.appliedCampaign.name;
+                    }
+                    if (txtVoucherTitle) {
+                        var giftText = promoEval.giftReward ? " + 🎁 " + (promoEval.giftReward.desc || "Quà Tặng") : "";
+                        txtVoucherTitle.innerText = "Giảm " + (sub.toLocaleString("vi-VN")) + "đ ship" + giftText;
+                    }
+                    if (txtVoucherDesc) {
+                        txtVoucherDesc.innerText = "Trợ giá bảo vệ Lợi Nhuận Ròng (LNR) từ Bếp Thím 5";
+                    }
+                } else {
+                    if (badgeVoucher) {
+                        badgeVoucher.className = "px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700";
+                        badgeVoucher.innerText = sub > 0 ? "ƯU ĐÃI ĐƠN HÀNG" : "CHƯA ĐẠT ĐIỀU KIỆN";
+                    }
+                    if (txtVoucherTitle) {
+                        txtVoucherTitle.innerText = sub > 0 ? ("Giảm " + sub.toLocaleString("vi-VN") + "đ ship") : "Chưa đủ điều kiện trợ giá";
+                    }
+                    if (txtVoucherDesc) {
+                        txtVoucherDesc.innerText = sub > 0 ? reason : "Tài trợ từ Lợi Nhuận Ròng thặng dư của Bếp";
+                    }
+                }
+
+                if (boxNudge && txtNudge) {
+                    if (promoEval && promoEval.primaryUpsellHint) {
+                        boxNudge.classList.remove("hidden");
+                        txtNudge.innerText = promoEval.primaryUpsellHint;
+                        appState.lastUpsellHint = promoEval.primaryUpsellHint;
+                    } else {
+                        boxNudge.classList.add("hidden");
+                    }
                 }
             }
 
@@ -2495,15 +2562,32 @@
         }
 
         function quickAddBooster() {
-            // Tự động thêm 1 phần Trứng Lòng Đào hoặc Topping Booster có sẵn
-            var booster = TOPPING_PRESETS[0]; // Trứng lòng đào 6k
-            if (booster) {
-                appState.cartItems.push({
-                    dishId: booster.id,
-                    name: booster.name,
-                    price: booster.price,
-                    d2cPrice: booster.price,
-                    cogs: Math.round(booster.price * 0.20),
+            var hint = appState.lastUpsellHint || "";
+            var itemToAdd = null;
+
+            if (hint.indexOf("Nước") !== -1 || hint.indexOf("Đồ Uống") !== -1) {
+                itemToAdd = {
+                    dishId: "D_TRA_DAO",
+                    name: "Trà Đào Cam Sả Mát Lạnh",
+                    price: 20000,
+                    d2cPrice: 20000,
+                    cogs: 4000,
+                    quantity: 1,
+                    isGift: false,
+                    toppingIds: [],
+                    taste: "Thơm Ngọt Dịu",
+                    soup: "",
+                    sauce: "",
+                    sauceFee: 0
+                };
+            } else {
+                var booster = (typeof TOPPING_PRESETS !== "undefined" && TOPPING_PRESETS.length > 0) ? TOPPING_PRESETS[0] : null;
+                itemToAdd = {
+                    dishId: booster ? booster.id : "TP_TRUNG_LONG_DAO",
+                    name: booster ? booster.name : "Trứng Lòng Đào",
+                    price: booster ? booster.price : 6000,
+                    d2cPrice: booster ? booster.price : 6000,
+                    cogs: booster ? Math.round(booster.price * 0.20) : 1500,
                     quantity: 1,
                     isGift: false,
                     toppingIds: [],
@@ -2511,9 +2595,17 @@
                     soup: "",
                     sauce: "",
                     sauceFee: 0
-                });
+                };
+            }
+
+            if (itemToAdd) {
+                appState.cartItems.push(itemToAdd);
                 renderCartDrawerItems(0);
-                updateCheckoutSummary();
+                renderCheckoutReviewTree(0);
+                recalculateShippingFee();
+                if (window.showToastNotification) {
+                    window.showToastNotification("Đã thêm: " + itemToAdd.name + "!", "success");
+                }
             }
         }
 

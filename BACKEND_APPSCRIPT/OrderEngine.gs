@@ -44,9 +44,43 @@ function fetchDynamicConfigFromSheet(ss) {
     }
   }
 
-  var cfgSheet = ss.getSheetByName(T5_SSOT.SHEETS.CONFIG);
+    var cfgSheet = ss ? ss.getSheetByName(T5_SSOT.SHEETS.CONFIG) : null;
   if (!cfgSheet) {
-    throw new Error("LỖI HỆ THỐNG: Không tìm thấy sheet [SYS_CONFIG] trên CSDL!");
+    Logger.log("⚠️ Không tìm thấy sheet [SYS_CONFIG]. Kích hoạt bộ giá trị Fallback an toàn SSOT.");
+    return {
+      STORE_STATUS: "OPEN",
+      STORE_NAME: "Mì Trộn Thím 5",
+      MASTER_PLATFORM_FEE_PCT: 5.0,
+      PLATFORM_MASTER_FEE: 5.0,
+      SHIP_CUST_RATE_PER_KM: 5000,
+      SHIP_PARTNER_RATE_PER_KM: 4500,
+      SHIPPING_RATE_CUSTOMER_PER_KM: 5000,
+      SHIPPING_RATE_DRIVER_PER_KM: 4500,
+      SHIPPING_MIN_CUSTOMER_FEE: 5000,
+      SHIPPING_MIN_DRIVER_FEE: 5000,
+      SHIP_BASE_FEE_CUST: 5000,
+      SHIP_BASE_MIN_FEE_DRIVER: 5000,
+      SHIP_SURGE_MULTIPLIER: 1.0,
+      SHIPPING_LOCAL_WALK_METERS: 300,
+      SHIPPING_AUTO_SUBSIDY: "true",
+      SHIPPING_ROUNDING_MODE: "CEIL_1KM",
+      FREESHIP_MIN_SUBTOTAL: 149000,
+      MAX_SHIPPING_SUBSIDY: 20000,
+      MAX_PROMO_CAP_PCT: 15,
+      MAX_PROMOTION_RATE: 15,
+      COD_HOLDING_LIMIT: 300000,
+      MAX_COD_HOLDING_PER_SHIPPER: 300000,
+      TAX_HKD_PCT: 4.5,
+      TAX_RATE_HKD: 4.5,
+      PROMO_MODULE_MASTER_ENABLED: "true",
+      PROMO_SMART_SHIP_VOUCHER_ENABLED: "true",
+      PROMO_TIER_25_ENABLED: "true",
+      PROMO_TIER_50_ENABLED: "true",
+      PROMO_TIER_100_ENABLED: "true",
+      PROMO_UPSELL_NUDGE_ENABLED: "true",
+      PROMO_MIN_NET_PROFIT_FLOOR: 25000,
+      PROMO_SURPLUS_SHARE_RATIO: 0.7
+    };
   }
 
   var lastRow = cfgSheet.getLastRow();
