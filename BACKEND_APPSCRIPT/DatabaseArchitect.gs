@@ -26,14 +26,14 @@ var DATABASE_SCHEMA_CONSTANTS = Object.freeze({
  * DANH MỤC ĐA NGÀNH HÀNG MẶC ĐỊNH CHO BẢNG SYS_CATEGORIES
  */
 var DEFAULT_CATEGORIES_DATA = [
+  ["CAT_MI_TRON", "🍜", "Mì Trộn Chủ Lực (Core)", "mi-tron-chu-luc", 45.0],
+  ["CAT_MON_MOI", "🔥", "Món Mồi Kéo Khách (Traffic)", "mon-moi-keo-khach", 55.0],
+  ["CAT_NUOC_TOPPING", "🧋", "Nước Uống & Topping (Booster)", "nuoc-uong-topping", 20.0],
   ["CAT_COM", "🍛", "Món Cơm Đất Thánh", "com", 38.0],
   ["CAT_MI", "🍜", "Mì Trộn Đặc Sản", "mi-tron", 38.0],
   ["CAT_COMBO", "🍱", "Combo Đại Tiệc D2C", "combo", 35.0],
   ["CAT_SOUP", "🥣", "Súp Booster Kéo Vé", "sup", 20.0],
-  ["CAT_DRINK", "🥤", "Đồ Uống Khổng Lồ 1L", "do-uong", 18.0],
-  ["CAT_TOPPING", "🥓", "Topping Thịt Trứng", "topping", 22.0],
-  ["CAT_SPECIAL", "🌶️", "Đặc Sản Bánh Tráng", "dac-san", 40.0],
-  ["CAT_EXTEND", "🍗", "Món Mở Rộng Fastfood", "fastfood", 45.0]
+  ["CAT_DRINK", "🥤", "Đồ Uống Khổng Lồ 1L", "do-uong", 18.0]
 ];
 
 /**

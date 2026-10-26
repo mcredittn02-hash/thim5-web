@@ -517,13 +517,21 @@ function syncDatabaseSchema(optSs) {
     // 3. Đồng bộ bảng SYS_CATEGORIES (5 cột chuẩn)
     var catSheet = ss.getSheetByName(T5_SSOT.SHEETS.CATEGORIES);
     var expectedCatHeaders = ["Mã Danh Mục", "Icon", "Tên Danh Mục", "Slug D2C", "Trần Food Cost (%)"];
-    if (!catSheet) {
+        if (!catSheet) {
       catSheet = ss.insertSheet(T5_SSOT.SHEETS.CATEGORIES);
       catSheet.appendRow(expectedCatHeaders);
       catSheet.getRange(1, 1, 1, expectedCatHeaders.length)
         .setBackground("#0f172a").setFontColor("#f8fafc").setFontWeight("bold");
       catSheet.setFrozenRows(1);
-      logs.push("Khởi tạo mới bảng SYS_CATEGORIES với 5 cột chuẩn hóa.");
+      catSheet.appendRow(["CAT_MI_TRON", "🍜", "Mì Trộn Chủ Lực (Core)", "mi-tron-chu-luc", 45]);
+      catSheet.appendRow(["CAT_MON_MOI", "🔥", "Món Mồi Kéo Khách (Traffic)", "mon-moi-keo-khach", 55]);
+      catSheet.appendRow(["CAT_NUOC_TOPPING", "🧋", "Nước Uống & Topping (Booster)", "nuoc-uong-topping", 20]);
+      logs.push("Khởi tạo mới bảng SYS_CATEGORIES với 5 cột chuẩn hóa và 3 danh mục mặc định.");
+    } else if (catSheet.getLastRow() < 2) {
+      catSheet.appendRow(["CAT_MI_TRON", "🍜", "Mì Trộn Chủ Lực (Core)", "mi-tron-chu-luc", 45]);
+      catSheet.appendRow(["CAT_MON_MOI", "🔥", "Món Mồi Kéo Khách (Traffic)", "mon-moi-keo-khach", 55]);
+      catSheet.appendRow(["CAT_NUOC_TOPPING", "🧋", "Nước Uống & Topping (Booster)", "nuoc-uong-topping", 20]);
+      logs.push("Nạp 3 danh mục mặc định vào bảng SYS_CATEGORIES rỗng.");
     }
 
     // 4. Đồng bộ bảng SYS_CONFIG (2 cột chuẩn Key - Value)

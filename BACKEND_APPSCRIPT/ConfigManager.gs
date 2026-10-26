@@ -879,7 +879,7 @@ function getCachedCategories(optArg) {
     var catSheetName = (typeof T5_SSOT !== "undefined" && T5_SSOT.SHEETS && T5_SSOT.SHEETS.CATEGORIES) 
                        ? T5_SSOT.SHEETS.CATEGORIES 
                        : CONFIG_MANAGER_CONSTANTS.SHEET_CATEGORIES;
-    var catSheet = ss.getSheetByName(catSheetName);
+    var catSheet = (typeof ensureSheetWithHeaders === "function") ? ensureSheetWithHeaders(ss, catSheetName) : ss.getSheetByName(catSheetName);
 
     var categories = [];
     if (catSheet && catSheet.getLastRow() > 1) {
@@ -907,10 +907,9 @@ function getCachedCategories(optArg) {
     // Nếu sheet rỗng, nạp danh mục dự phòng chuẩn của Bếp Thím 5
     if (categories.length === 0) {
       categories = [
-        { code: "CAT_MI", icon: "🍜", name: "Mì Trộn Đất Thánh", slug: "mi-tron", maxFc: 45 },
-        { code: "CAT_COM", icon: "🍛", name: "Cơm Chiên & Món Nóng", slug: "com", maxFc: 40 },
-        { code: "CAT_TOPPING", icon: "🥟", name: "Topping Thêm & Ăn Kèm", slug: "topping", maxFc: 20 },
-        { code: "CAT_NUOC", icon: "🥤", name: "Trà & Nước Giải Khát", slug: "nuoc", maxFc: 18 }
+                { code: "CAT_MI_TRON", icon: "🍜", name: "Mì Trộn Chủ Lực (Core)", slug: "mi-tron-chu-luc", maxFc: 45 },
+        { code: "CAT_MON_MOI", icon: "🔥", name: "Món Mồi Kéo Khách (Traffic)", slug: "mon-moi-keo-khach", maxFc: 55 },
+        { code: "CAT_NUOC_TOPPING", icon: "🧋", name: "Nước Uống & Topping (Booster)", slug: "nuoc-uong-topping", maxFc: 20 }
       ];
     }
 
@@ -920,6 +919,7 @@ function getCachedCategories(optArg) {
 
     return {
       status: "success",
+      success: true,
       code: 200,
       fromCache: false,
       data: categories

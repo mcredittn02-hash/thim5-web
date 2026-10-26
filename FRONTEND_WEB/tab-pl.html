@@ -540,6 +540,7 @@ var TabPlController = (function() {
 
     // Bóc tách đa tầng chống lệch pha tên trường
     var netRev = parseSafeNum(kpi.netRevenue || kpi.netSales || kpi.revenue || kpi.NET_REVENUE);
+    var cogs = parseSafeNum(kpi.totalCogs || kpi.cogs || kpi.TOTAL_COGS);
     var grossProfit = parseSafeNum(kpi.grossProfit || kpi.grossMargin || kpi.GROSS_PROFIT);
     var netProfit = parseSafeNum(kpi.netProfit || kpi.netIncome || kpi.NET_PROFIT);
     var bankCollected = parseSafeNum(kpi.cashInBankOnline || kpi.bankCollected || kpi.vietQrCollected || kpi.onlineCollected);

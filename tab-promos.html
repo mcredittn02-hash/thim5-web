@@ -448,5 +448,10 @@ window.TabPromosController = {
     }
   }
 };
+
+// Tự động khởi chạy Controller khi component được nạp vào DOM
+if (window.TabPromosController && typeof window.TabPromosController.init === "function") {
+  window.TabPromosController.init();
+}
 </script>
 

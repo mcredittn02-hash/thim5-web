@@ -1027,8 +1027,11 @@
           }
         }
 
-        var outlet = document.getElementById("dynamic-tab-outlet");
-        if (!outlet) return;
+        var outlet = document.getElementById("main-tab-content") || document.getElementById("dynamic-tab-outlet");
+        if (!outlet) {
+          console.error("🚨 [AdminShell] Không tìm thấy vùng hiển thị #main-tab-content hoặc #dynamic-tab-outlet!");
+          return;
+        }
 
         toggleSidebar(false);
 
@@ -1080,22 +1083,34 @@
         }
       }
 
+            /**
+       * THỰC THI SCRIPT CHO FRAGMENT COMPONENT (HYDRATE SCRIPTS)
+       * Duyệt qua toàn bộ thẻ <script> trong fragment vừa chèn vào DOM và kích hoạt lại
+       */
+      function hydrateFragmentScripts(container) {
+        if (!container) return;
+        var scripts = Array.from(container.querySelectorAll("script"));
+        scripts.forEach(function(oldScript) {
+          var newScript = document.createElement("script");
+          Array.from(oldScript.attributes).forEach(function(attr) {
+            newScript.setAttribute(attr.name, attr.value);
+          });
+          if (oldScript.src) {
+            newScript.src = oldScript.src;
+          } else {
+            newScript.text = oldScript.text || oldScript.textContent || oldScript.innerHTML || "";
+          }
+          oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+      }
+
       /**
        * BƠM NỘI DUNG VÀ TÁI THỰC THI SCRIPT CỦA TAB CON AN TOÀN
        */
       function injectTabContent(container, tabKey, html) {
         if (!container) return;
         container.innerHTML = html;
-
-        var scripts = container.querySelectorAll("script");
-        scripts.forEach(function(oldScript) {
-          var newScript = document.createElement("script");
-          Array.from(oldScript.attributes).forEach(function(attr) {
-            newScript.setAttribute(attr.name, attr.value);
-          });
-          newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-          oldScript.parentNode.replaceChild(newScript, oldScript);
-        });
+        hydrateFragmentScripts(container);
 
         // Kích hoạt vòng đời khởi chạy tương ứng của từng Controller con nếu có
         try {
@@ -1125,6 +1140,17 @@
                   }
                 };
                 document.body.appendChild(scriptEl);
+              } else {
+                var attempts = 0;
+                var poll = setInterval(function() {
+                  attempts++;
+                  if (window.TabMenuController && typeof window.TabMenuController.init === "function") {
+                    clearInterval(poll);
+                    window.TabMenuController.init();
+                  } else if (attempts > 30) {
+                    clearInterval(poll);
+                  }
+                }, 100);
               }
             }
           }
@@ -1279,6 +1305,7 @@
         submitSuperAdminAuth: submitSuperAdminAuth,
         requestEmergencyBackupOtp: requestEmergencyBackupOtp,
         switchMainTab: switchMainTab,
+        hydrateFragmentScripts: hydrateFragmentScripts,
         toggleSidebar: toggleSidebar,
         handleLogout: handleLogout,
         refreshCurrentTab: refreshCurrentTab,
@@ -1288,8 +1315,11 @@
       };
     })();
 
-    if (typeof window !== "undefined") {
+        if (typeof window !== "undefined") {
       window.AdminShellController = AdminShellController;
+      window.switchTab = async function(tabId, btnElement) {
+        return AdminShellController.switchMainTab(tabId, btnElement);
+      };
     }
   </script>
   

@@ -810,3 +810,32 @@ Phân hệ Omni-Ingestion v3.5 giải quyết triệt để rào cản nạp mó
 - Đạt **27/27 PASS (0 FAIL, 0 WARN)** trên toàn bộ 5 Module của `FRONTEND_WEB/system-test.html`.
 - Bổ sung Test #27 (`MOD3.7`): Kiểm tra toàn diện bộ nén `SmartCanvasCompressor` (2 modes `DISH_PHOTO`, `MENU_OCR`, hàm `formatBytes`) và hàm chuẩn hóa CDN Google Drive `normalizeDriveImageUrl`.
 
+
+
+---
+
+## 🏛️ PHỤ LỤC 12: BẢNG ÁNH XẠ TOÀN DIỆN CÁC PHÂN HỆ TAB CỦA ADMIN-SHELL.HTML & CƠ CHẾ TỰ CHỮA LÀNH (SELF-HEALING ARCHITECTURE)
+
+### 12.1. Bảng Ánh Xạ Các Tab Điều Phối & Phân Quyền RBAC Tại `admin-shell.html`
+
+| STT | Mã Tab (`data-tab`) | File Component | Nút Kích Hoạt (`DOM ID`) | Cấp Quyền Tối Thiểu | Controller Quản Lý | Chức Năng Chính & Cơ Chế Nạp |
+|:---:|:---|:---|:---|:---|:---|:---|
+| **1** | `pl` | `tab-pl.html` | `#btn-tab-pl` | `POS_STAFF` / `TENANT_ADMIN` / `SUPER_ADMIN` | `window.TabPlController` | Báo Cáo Tài Chính P&L & Dòng Tiền. Khởi chạy `loadPlData()`, tự ẩn skeleton trong khối `finally`, không bao giờ treo vòng xoay. |
+| **2** | `menu` | `tab-menu.html` | `#btn-tab-menu` | `POS_STAFF` / `TENANT_ADMIN` / `SUPER_ADMIN` | `window.TabMenuController` | Thực Đơn & Định Giá 13 Cột Reverse-Pricing. Tự động nạp `tab-menu.js`, liên kết mở `menu-manager.html` độc lập. |
+| **3** | `orders` / KDS | `kitchen.html` | `#btn-tab-orders` | `KITCHEN_LEAD` / `POS_STAFF` / `SUPER_ADMIN` | `window.KitchenController` | Trạm Bếp KDS Realtime (Mở cửa sổ riêng hoặc nhúng trực tiếp điều phối bếp 1 chạm). |
+| **4** | `shippers` | `tab-shippers.html` | `#btn-tab-shippers` | `POS_STAFF` / `TENANT_ADMIN` / `SUPER_ADMIN` | `window.TabShippersController` | Trạm Điều Phối Đội Xe, Tất toán COD Shipper, Chuyển kênh đối tác 3PL (Grab/Vill/XanhSM). |
+| **5** | `config` | `tab-config.html` | `#sidebar-btn-config` | `SUPER_ADMIN` (Khóa cứng Level 3) | `window.TabConfigController` | Bộ Não Trung Tâm: 33 tham số tài chính `SYS_CONFIG`, VietQR Bank, Ngưỡng Freeship, TOTP 2FA. |
+| **6** | `campaign` | `tab-campaign.html` | `#sidebar-btn-campaign` | `SUPER_ADMIN` (Khóa cứng Level 3) | `window.TabCampaignController` | Trung Tâm Chiến Dịch Geo-Fencing, Bán Kính Phục Vụ, Phí Ship Thặng Dư & Voucher Toàn Sàn. |
+| **7** | `promos` | `tab-promos.html` | `#sidebar-btn-promos` | `SUPER_ADMIN` (Khóa cứng Level 3) | `window.TabPromosController` | Quản Lý Chiến Dịch Khuyến Mãi F&B & Trợ Giá Ship Động Theo Lợi Nhuận Ròng (Smart Ship Subsidy). |
+| **--** | Modal Promo | Pop-up trực tiếp | `#btn-open-promo-modal` | `SUPER_ADMIN` / `TENANT_ADMIN` | `window.AdminPromoControl` | Cửa sổ trượt nhanh thiết lập tỷ lệ trích thặng dư LNR & các bậc trợ giá ship ngay trên Topbar. |
+| **--** | Menu Studio | `menu-manager.html` | Header Link Topbar | `TENANT_ADMIN` / `SUPER_ADMIN` | `window.TabMenuController` | Studio nạp ảnh Canvas, OCR thị giác và quản lý 8 danh mục `SYS_CATEGORIES`. |
+| **--** | System Test | `system-test.html` | Header Link Topbar | Toàn quyền kiểm thử | `window.SystemTestDashboard` | Trung tâm kiểm thử tự động 5 Module, 28 Test Cases toàn diện. |
+
+### 12.2. Cơ Chế Tự Chữa Lành 7 Sheet SSOT (Self-Healing Zero-Defect Architecture)
+1. **Loại bỏ hoàn toàn lỗi `ERR_SHEET_NOT_FOUND`**:
+   - Mọi thao tác truy xuất dữ liệu từ `CatalogService.gs`, `DatabaseArchitect.gs`, `ConfigManager.gs` và `Financereport.gs` đều đi qua hàm `ensureSheetWithHeaders(ss, sheetName)`.
+   - Nếu sheet chưa tồn tại hoặc rỗng, hệ thống tự động `insertSheet()`, tạo dòng tiêu đề chuẩn SSOT và nạp bộ dữ liệu mặc định chuẩn F&B (`CAT_MI_TRON`, `CAT_MON_MOI`, `CAT_NUOC_TOPPING`).
+2. **Cơ chế Hydrate Fragment Scripts Client-Side**:
+   - Khi `admin-shell.html` nạp component động thông qua `fetch()`, hàm `hydrateFragmentScripts(container)` sẽ chủ động duyệt và tái kích hoạt toàn bộ các thẻ `<script>` con, đảm bảo Controller của từng Tab được chạy đúng vòng đời (`init()`) và giải quyết dứt điểm hiện tượng đơ chuyển tab.
+3. **Kết Quả Kiểm Thử System Test Suite**:
+   - Đạt **28/28 PASS (0 FAIL, 0 WARN)** trên toàn bộ 5 Module của `FRONTEND_WEB/system-test.html`.
