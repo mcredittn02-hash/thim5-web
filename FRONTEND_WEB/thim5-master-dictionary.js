@@ -1438,6 +1438,212 @@
     /**
      * 15. ─É├ôNG G├ôI V├Ç XUß║ñT Bß║óN TH╞» VIß╗åN TO├ÇN Cß╗ñC SSOT
      */
+    // =========================================================================
+    // SMART CANVAS COMPRESSOR & GOOGLE DRIVE MEDIA UTILITIES (v3.5 OMNI-INGESTION)
+    // =========================================================================
+
+    function normalizeDriveImageUrl(urlOrFileId) {
+        if (!urlOrFileId) return "";
+        var str = String(urlOrFileId).trim();
+        if (!str) return "";
+
+        var fileId = null;
+
+        var matchD = str.match(/\/file\/d\/([a-zA-Z0-9_-]{25,})/);
+        if (matchD && matchD[1]) {
+            fileId = matchD[1];
+        }
+        if (!fileId) {
+            var matchId = str.match(/[?&]id=([a-zA-Z0-9_-]{25,})/);
+            if (matchId && matchId[1]) {
+                fileId = matchId[1];
+            }
+        }
+        if (!fileId) {
+            var matchLh3 = str.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]{25,})/);
+            if (matchLh3 && matchLh3[1]) {
+                fileId = matchLh3[1];
+            }
+        }
+        if (!fileId && !str.includes("/") && !str.includes(":") && str.length >= 25 && str.length <= 55) {
+            fileId = str;
+        }
+
+        if (fileId) {
+            return "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w800";
+        }
+        return str;
+    }
+
+    var SmartCanvasCompressor = {
+        MODES: {
+            DISH_PHOTO: {
+                name: "DISH_PHOTO",
+                maxDimension: 800,
+                quality: 0.78,
+                mimeType: "image/webp",
+                fallbackMime: "image/jpeg",
+                targetMaxKb: 80
+            },
+            MENU_OCR: {
+                name: "MENU_OCR",
+                maxDimension: 1280,
+                quality: 0.85,
+                mimeType: "image/jpeg",
+                fallbackMime: "image/jpeg",
+                targetMaxKb: 150
+            }
+        },
+
+        formatBytes: function(bytes) {
+            if (!bytes || bytes === 0) return "0 B";
+            var k = 1024;
+            var sizes = ["B", "KB", "MB", "GB"];
+            var i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+        },
+
+        compress: function(fileOrBlob, modeName, callback) {
+            var self = this;
+            var mode = (typeof modeName === "object" && modeName) ? modeName : (self.MODES[modeName] || self.MODES.DISH_PHOTO);
+
+            return new Promise(function(resolve, reject) {
+                function handleErr(err) {
+                    if (typeof callback === "function") callback(err, null);
+                    reject(err);
+                }
+                function handleSuccess(res) {
+                    if (typeof callback === "function") callback(null, res);
+                    resolve(res);
+                }
+
+                if (!fileOrBlob) {
+                    return handleErr(new Error("Không có tệp hình ảnh để nén!"));
+                }
+
+                if (typeof document === "undefined" || typeof window === "undefined" || !window.FileReader) {
+                    var mockOriginalSize = (fileOrBlob && fileOrBlob.size) ? fileOrBlob.size : 100000;
+                    var mockCompressedSize = Math.round(mockOriginalSize * 0.15);
+                    var mockRes = {
+                        dataUrl: "data:image/webp;base64,MOCK_DATA",
+                        base64: "MOCK_DATA",
+                        mimeType: mode.mimeType,
+                        width: 800,
+                        height: 600,
+                        originalSizeBytes: mockOriginalSize,
+                        compressedSizeBytes: mockCompressedSize,
+                        originalSizeKb: Math.round(mockOriginalSize / 1024),
+                        compressedSizeKb: Math.round(mockCompressedSize / 1024),
+                        savedRatioPct: 85,
+                        summaryText: self.formatBytes(mockOriginalSize) + " -> " + self.formatBytes(mockCompressedSize) + " (-85%)"
+                    };
+                    return handleSuccess(mockRes);
+                }
+
+                var originalSize = fileOrBlob.size || 0;
+                var reader = new FileReader();
+
+                reader.onerror = function() {
+                    handleErr(new Error("Không thể đọc tệp hình ảnh!"));
+                };
+
+                reader.onload = function(e) {
+                    var img = new Image();
+                    img.onerror = function() {
+                        handleErr(new Error("Tệp không phải là hình ảnh hợp lệ!"));
+                    };
+                    img.onload = function() {
+                        var width = img.naturalWidth || img.width;
+                        var height = img.naturalHeight || img.height;
+                        var maxDim = mode.maxDimension || 800;
+
+                        if (width > height) {
+                            if (width > maxDim) {
+                                height = Math.round((height * maxDim) / width);
+                                width = maxDim;
+                            }
+                        } else {
+                            if (height > maxDim) {
+                                width = Math.round((width * maxDim) / height);
+                                height = maxDim;
+                            }
+                        }
+
+                        var canvas = document.createElement("canvas");
+                        canvas.width = width;
+                        canvas.height = height;
+                        var ctx = canvas.getContext("2d");
+
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = "high";
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        var targetMime = mode.mimeType || "image/webp";
+                        var dataUrl = "";
+                        try {
+                            dataUrl = canvas.toDataURL(targetMime, mode.quality);
+                            if (!dataUrl || dataUrl.indexOf("data:" + targetMime) !== 0) {
+                                targetMime = mode.fallbackMime || "image/jpeg";
+                                dataUrl = canvas.toDataURL(targetMime, mode.quality);
+                            }
+                        } catch (canvasErr) {
+                            targetMime = "image/jpeg";
+                            dataUrl = canvas.toDataURL(targetMime, 0.8);
+                        }
+
+                        var base64 = dataUrl.split(",")[1] || "";
+                        var compressedSize = Math.round((base64.length * 3) / 4);
+                        var originalSizeKb = Math.round(originalSize / 1024);
+                        var compressedSizeKb = Math.round(compressedSize / 1024);
+                        var savedPct = originalSize > 0 
+                            ? Math.max(0, Math.round(((originalSize - compressedSize) / originalSize) * 100))
+                            : 0;
+
+                        var summaryText = self.formatBytes(originalSize) + " -> " + self.formatBytes(compressedSize) + " (-" + savedPct + "%)";
+
+                        handleSuccess({
+                            dataUrl: dataUrl,
+                            base64: base64,
+                            mimeType: targetMime,
+                            width: width,
+                            height: height,
+                            originalSizeBytes: originalSize,
+                            compressedSizeBytes: compressedSize,
+                            originalSizeKb: originalSizeKb,
+                            compressedSizeKb: compressedSizeKb,
+                            savedRatioPct: savedPct,
+                            summaryText: summaryText
+                        });
+                    };
+                    img.src = e.target.result;
+                };
+
+                reader.readAsDataURL(fileOrBlob);
+            });
+        },
+
+        compressBatch: async function(files, modeName, onProgress) {
+            var results = [];
+            var total = files.length;
+            var mode = this.MODES[modeName] || this.MODES.DISH_PHOTO;
+
+            for (var i = 0; i < total; i++) {
+                var file = files[i];
+                try {
+                    var comp = await this.compress(file, mode);
+                    results.push({ file: file, name: file.name, success: true, result: comp });
+                } catch (err) {
+                    results.push({ file: file, name: file.name, success: false, error: err });
+                }
+                if (typeof onProgress === "function") {
+                    var pct = Math.round(((i + 1) / total) * 100);
+                    onProgress({ current: i + 1, total: total, percent: pct, file: file });
+                }
+            }
+            return results;
+        }
+    };
+
     return {
         CONSTANTS: BASE_FALLBACK_CONFIG,
         SHEETS: SHEETS,
@@ -1467,6 +1673,8 @@
         evaluateSmartShipVoucher: evaluateSmartShipVoucher,
         evaluateOrderPromoCampaigns: evaluateOrderPromoCampaigns,
         DEFAULT_PROMO_CAMPAIGNS: DEFAULT_PROMO_CAMPAIGNS,
+        normalizeDriveImageUrl: normalizeDriveImageUrl,
+        SmartCanvasCompressor: SmartCanvasCompressor,
         pricing: {
             calculateReversePricing: calculateReversePricing,
             calculateDynamicShippingFee: calculateDynamicShippingFee,

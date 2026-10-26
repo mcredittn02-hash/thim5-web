@@ -377,6 +377,10 @@
               <span class="text-slate-300">Động cơ Multi-Campaign &amp; Bảo Vệ LNR 65% <code class="text-emerald-300 font-mono">evaluateOrderPromoCampaigns()</code></span>
               <span id="res-mod3-promo-eval" class="font-mono text-[11px] text-slate-500">Chưa kiểm tra</span>
             </div>
+            <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-slate-800/80">
+              <span class="text-slate-300">Nén Ảnh Smart Canvas &amp; Link Drive CDN <code class="text-sky-300 font-mono">SmartCanvasCompressor</code></span>
+              <span id="res-mod3-canvas-drive" class="font-mono text-[11px] text-slate-500">Chưa kiểm tra</span>
+            </div>
           </div>
         </div>
 
@@ -844,7 +848,7 @@
         var subResIds = [
           'res-mod1-dict', 'res-mod1-sheets', 'res-mod1-menu-schema', 'res-mod1-orders-schema', 'res-mod1-order-status',
           'res-mod2-menu', 'res-mod2-pl', 'res-mod2-shippers', 'res-mod2-storefront', 'res-mod2-shell',
-          'res-mod3-rp', 'res-mod3-fc-caps', 'res-mod3-promo-cap', 'res-mod3-shipping-math', 'res-mod3-master-cod', 'res-mod3-smart-ship-voucher',
+          'res-mod3-rp', 'res-mod3-fc-caps', 'res-mod3-promo-cap', 'res-mod3-shipping-math', 'res-mod3-master-cod', 'res-mod3-smart-ship-voucher', 'res-mod3-promo-eval', 'res-mod3-canvas-drive',
           'res-mod4-b1', 'res-mod4-b2', 'res-mod4-b3', 'res-mod4-b4', 'res-mod4-b5'
         ];
         subResIds.forEach(function(id) {
@@ -1030,7 +1034,10 @@
               'modalCatName', 'modalCatSlug', 'modalCatMaxFc', 'categoryModalTitle', 'btnSubmitSaveCategory',
               'subWorkspaceMenuItems', 'subWorkspaceCategories', 'subWorkspaceIngestion', 'ingestionExcelStatus',
               'ingestionOcrStatus', 'ingestionTargetUrl', 'ingestionUrlStatus', 'ingestionPreviewTableBody',
-              'ingestionPreviewCountBadge', 'btnCommitBatchImport'
+              'ingestionPreviewCountBadge', 'btnCommitBatchImport',
+              'ingestionDropZoneMulti', 'inputBatchDishImages', 'btnModeOcrMenu', 'btnModeBatchImages',
+              'batchImageProgressBox', 'inpBulkDiscount', 'btnBulkApplyDiscount', 'btnBulkCalculateReversePricing',
+              'btnStagingAddRow', 'btnStagingClear'
             ]
           },
           {
@@ -1282,6 +1289,24 @@
         if (elPc) {
           elPc.className = pcPass ? 'font-mono text-[11px] text-emerald-400 font-bold' : 'font-mono text-[11px] text-rose-400 font-bold';
           elPc.innerText = pcPass ? 'PASS (Bảo Vệ LNR)' : 'FAIL';
+        }
+
+        // 3.7 Kiểm thử Nén Ảnh Smart Canvas & Link Drive CDN
+        var cv0 = performance.now();
+        var driveTestUrl = "https://drive.google.com/file/d/1xTEST1234567890abcdefghijklmnopqrstuv/view?usp=sharing";
+        var normDriveUrl = typeof dict.normalizeDriveImageUrl === "function" ? dict.normalizeDriveImageUrl(driveTestUrl) : "";
+        var isNormUrlPass = (normDriveUrl === "https://drive.google.com/thumbnail?id=1xTEST1234567890abcdefghijklmnopqrstuv&sz=w800");
+
+        var compressor = dict.SmartCanvasCompressor;
+        var hasCompressor = (compressor && compressor.MODES && compressor.MODES.DISH_PHOTO && compressor.MODES.MENU_OCR);
+        var isModesPass = hasCompressor && (compressor.MODES.DISH_PHOTO.maxDimension === 800) && (compressor.MODES.MENU_OCR.maxDimension === 1280);
+
+        var canvasDrivePass = isNormUrlPass && isModesPass;
+        logAssertion('mod3', 'Tài Chính F&B', 'Chuẩn Hóa Smart Canvas Compressor & Link Drive CDN', canvasDrivePass, performance.now() - cv0, 'Drive Link chuẩn sz=w800 không chặn CORS; Canvas nén DISH 800px & OCR 1280px');
+        var elCv = document.getElementById('res-mod3-canvas-drive');
+        if (elCv) {
+          elCv.className = canvasDrivePass ? 'font-mono text-[11px] text-emerald-400 font-bold' : 'font-mono text-[11px] text-rose-400 font-bold';
+          elCv.innerText = canvasDrivePass ? 'PASS (Canvas & Drive)' : 'FAIL';
         }
 
         var duration = Math.round(performance.now() - t0);

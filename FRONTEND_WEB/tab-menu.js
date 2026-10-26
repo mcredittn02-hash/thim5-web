@@ -1763,8 +1763,585 @@ var TabMenuController = (function() {
         reader.readAsDataURL(file);
     }
 
+        // =========================================================================
+    // 30. OMNI-INGESTION CONTROLLER & SMART CANVAS VISUAL PIPELINE
+    // =========================================================================
+
+    var currentIngestionMode = 'OCR_MENU';
+
+    function switchIngestionMode(mode) {
+        currentIngestionMode = mode;
+        var boxOcr = document.getElementById("boxModeOcrMenu");
+        var boxBatch = document.getElementById("boxModeBatchImages");
+        var btnOcr = document.getElementById("btnModeOcrMenu");
+        var btnBatch = document.getElementById("btnModeBatchImages");
+
+        if (mode === 'OCR_MENU') {
+            if (boxOcr) boxOcr.classList.remove("hidden");
+            if (boxBatch) boxBatch.classList.add("hidden");
+            if (btnOcr) btnOcr.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-sky-500/20 text-sky-300 border border-sky-500/40";
+            if (btnBatch) btnBatch.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-slate-800 text-slate-400 hover:text-white border border-slate-700";
+        } else {
+            if (boxOcr) boxOcr.classList.add("hidden");
+            if (boxBatch) boxBatch.classList.remove("hidden");
+            if (btnOcr) btnOcr.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-slate-800 text-slate-400 hover:text-white border border-slate-700";
+            if (btnBatch) btnBatch.className = "px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+        }
+    }
+
     /**
-     * 30. NGUỒN 2 OMNI-INGESTION: GEMINI 1.5 FLASH VISION OCR BÓC TÁCH ẢNH MENU
+     * Bóc tách tên món ăn và giá tiền từ tên file ảnh thông minh
+     * VD: "Hu_Tieu_Nam_Vang_55k.jpg" -> { name: "Hủ Tiếu Nam Vang", appPrice: 55000, category: "Mì Trộn", role: "CORE" }
+     */
+    function extractDishInfoFromFileName(fileName) {
+        if (!fileName) return { name: "Món mới", appPrice: 45000, category: "Mì Trộn", role: "CORE" };
+        var clean = fileName.replace(/\.[^/.]+$/, ""); // bỏ ext
+        
+        // Tìm giá tiền trong tên file: 55k, 45000, 60.000, 35k
+        var appPrice = 45000;
+        var priceMatch = clean.match(/(\d{1,3}(?:[\.,]\d{3})+|\b\d{2,3}k\b|\b\d{4,7}\b)/i);
+        if (priceMatch) {
+            var rawP = priceMatch[1].toLowerCase().replace('k', '000').replace(/[^\d]/g, '');
+            var pNum = Number(rawP);
+            if (!isNaN(pNum) && pNum >= 5000 && pNum <= 1000000) {
+                appPrice = pNum;
+            }
+            clean = clean.replace(priceMatch[0], "");
+        }
+
+        // Làm sạch tên món: chuyển dấu gạch ngang/dưới thành khoảng trắng
+        var rawName = clean.replace(/[-_+=]/g, " ").replace(/\s+/g, " ").trim();
+        if (!rawName) rawName = "Món ăn mới";
+
+        // Viết hoa chữ cái đầu
+        var words = rawName.split(" ").map(function(w) {
+            return w.charAt(0).toUpperCase() + w.slice(1);
+        });
+        var formattedName = words.join(" ");
+
+        // Nhận diện danh mục và vai trò sơ bộ
+        var lower = formattedName.toLowerCase();
+        var cat = "Mì Trộn";
+        var role = "CORE";
+        var defaultCogs = Math.round(appPrice * 0.38);
+
+        if (lower.indexOf("trà") !== -1 || lower.indexOf("nước") !== -1 || lower.indexOf("cà phê") !== -1 || 
+            lower.indexOf("pepsi") !== -1 || lower.indexOf("coca") !== -1 || lower.indexOf("sinh tố") !== -1) {
+            cat = "Nước Uống";
+            role = "BOOSTER";
+            defaultCogs = Math.round(appPrice * 0.18);
+        } else if (lower.indexOf("trứng") !== -1 || lower.indexOf("tóp mỡ") !== -1 || lower.indexOf("phô mai") !== -1 || lower.indexOf("topping") !== -1) {
+            cat = "Topping";
+            role = "BOOSTER";
+            defaultCogs = Math.round(appPrice * 0.20);
+        } else if (lower.indexOf("cơm") !== -1) {
+            cat = "Món Cơm";
+            role = "CORE";
+            defaultCogs = Math.round(appPrice * 0.38);
+        } else if (lower.indexOf("gà ủ muối") !== -1) {
+            cat = "Gà Ủ Muối";
+            role = "CORE";
+            defaultCogs = Math.round(appPrice * 0.45);
+        }
+
+        return {
+            name: formattedName,
+            appPrice: appPrice,
+            category: cat,
+            role: role,
+            cogs: defaultCogs
+        };
+    }
+
+    /**
+     * TẢI LÊN HÀNG LOẠT NHIỀU ẢNH MÓN ĂN (CONCURRENCY = 2 + PROGRESS BAR)
+     */
+    async function handleBatchImageUpload(eventOrFiles) {
+        var files = [];
+        if (eventOrFiles && eventOrFiles.target && eventOrFiles.target.files) {
+            files = Array.from(eventOrFiles.target.files);
+        } else if (Array.isArray(eventOrFiles)) {
+            files = eventOrFiles;
+        } else if (eventOrFiles instanceof FileList) {
+            files = Array.from(eventOrFiles);
+        }
+
+        if (!files || files.length === 0) return;
+
+        var progressBox = document.getElementById("batchImageProgressBox");
+        var progressBar = document.getElementById("batchImageProgressBar");
+        var progressText = document.getElementById("batchImageProgressText");
+        var progressPct = document.getElementById("batchImageProgressPct");
+
+        if (progressBox) progressBox.classList.remove("hidden");
+        if (progressText) progressText.innerText = "Đang nén Canvas " + files.length + " ảnh...";
+
+        var total = files.length;
+        var compressor = (window.Thim5Dictionary && window.Thim5Dictionary.SmartCanvasCompressor) 
+            ? window.Thim5Dictionary.SmartCanvasCompressor 
+            : null;
+
+        var processedItems = [];
+
+        for (var i = 0; i < total; i++) {
+            var file = files[i];
+            var currentNum = i + 1;
+            var pct = Math.round(((i + 1) / total) * 100);
+
+            if (progressText) progressText.innerText = "Đang nén & tải ảnh " + currentNum + "/" + total + " (" + file.name + ")...";
+            if (progressBar) progressBar.style.width = pct + "%";
+            if (progressPct) progressPct.innerText = pct + "%";
+
+            try {
+                var compRes = null;
+                if (compressor) {
+                    compRes = await compressor.compress(file, 'DISH_PHOTO');
+                } else {
+                    compRes = await new Promise(function(resolve, reject) {
+                        compressImageClientSide_(file, 800, 0.78, function(err, res) {
+                            if (err) reject(err); else resolve(res);
+                        });
+                    });
+                }
+
+                // Gửi lên Drive
+                var actionName = (window.T5_DICT && window.T5_DICT.ACTIONS && window.T5_DICT.ACTIONS.UPLOAD_MENU_IMAGE) 
+                    ? window.T5_DICT.ACTIONS.UPLOAD_MENU_IMAGE 
+                    : "uploadDishMediaImage";
+
+                var uploadPayload = {
+                    base64: compRes.base64,
+                    mimeType: compRes.mimeType,
+                    fileName: file.name
+                };
+
+                var driveRes = await Thim5API.callGAS(actionName, uploadPayload);
+                var imageUrl = "";
+                if (driveRes && (driveRes.imageUrl || (driveRes.data && driveRes.data.imageUrl))) {
+                    imageUrl = driveRes.imageUrl || driveRes.data.imageUrl;
+                } else if (driveRes && driveRes.fileId) {
+                    imageUrl = "https://drive.google.com/thumbnail?id=" + driveRes.fileId + "&sz=w800";
+                } else {
+                    imageUrl = compRes.dataUrl;
+                }
+
+                var parsedInfo = extractDishInfoFromFileName(file.name);
+                var itDisc = 15;
+                var d2cPrice = Math.round((parsedInfo.appPrice * (1 - (itDisc / 100))) / 1000) * 1000;
+                var netProfit = Math.max(0, d2cPrice - parsedInfo.cogs - Math.round(d2cPrice * 0.05));
+
+                processedItems.push({
+                    code: "M_" + Date.now().toString(36).toUpperCase() + "_" + (i + 1),
+                    name: parsedInfo.name,
+                    category: parsedInfo.category,
+                    appPrice: parsedInfo.appPrice,
+                    discountPercent: itDisc,
+                    d2cPrice: d2cPrice,
+                    cogs: parsedInfo.cogs,
+                    netProfit: netProfit,
+                    status: "ACTIVE",
+                    description: "",
+                    imageUrl: imageUrl,
+                    boosterSoup: "",
+                    role: parsedInfo.role
+                });
+
+            } catch (err) {
+                console.warn("⚠️ [handleBatchImageUpload] Lỗi ảnh " + file.name + ":", err);
+            }
+        }
+
+        if (progressText) progressText.innerText = "✓ Hoàn tất xử lý " + processedItems.length + "/" + total + " ảnh!";
+        setTimeout(function() {
+            if (progressBox) progressBox.classList.add("hidden");
+        }, 2000);
+
+        if (processedItems.length > 0) {
+            if (!Array.isArray(state.excelImportBuffer)) state.excelImportBuffer = [];
+            state.excelImportBuffer = state.excelImportBuffer.concat(processedItems);
+            renderIngestionPreviewTable(state.excelImportBuffer);
+        }
+    }
+
+    /**
+     * KHỞI TẠO LẮNG NGHE SỰ KIỆN KÉO THẢ & DÁN ẢNH CTRL+V
+     */
+    function setupOmniIngestionListeners() {
+        var dropZone = document.getElementById("ingestionDropZoneMulti");
+        if (dropZone && !dropZone.__hasListener) {
+            dropZone.__hasListener = true;
+
+            ['dragenter', 'dragover'].forEach(function(eventName) {
+                dropZone.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropZone.classList.add("border-amber-400", "bg-slate-900");
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(function(eventName) {
+                dropZone.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropZone.classList.remove("border-amber-400", "bg-slate-900");
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', function(e) {
+                var dt = e.dataTransfer;
+                var files = dt ? Array.from(dt.files) : [];
+                if (!files || files.length === 0) return;
+
+                if (currentIngestionMode === 'OCR_MENU') {
+                    triggerGeminiVisionOcr({ target: { files: [files[0]] } });
+                } else {
+                    handleBatchImageUpload(files);
+                }
+            }, false);
+        }
+
+        if (!window.__hasGlobalPasteListener) {
+            window.__hasGlobalPasteListener = true;
+            document.addEventListener("paste", function(e) {
+                var ingWorkspace = document.getElementById("subWorkspaceIngestion");
+                if (!ingWorkspace || ingWorkspace.classList.contains("hidden")) return;
+
+                var clipItems = (e.clipboardData || (e.originalEvent && e.originalEvent.clipboardData)) ? (e.clipboardData || e.originalEvent.clipboardData).items : [];
+                var imageFiles = [];
+                for (var i = 0; i < clipItems.length; i++) {
+                    if (clipItems[i].type.indexOf("image") !== -1) {
+                        var file = clipItems[i].getAsFile();
+                        if (file) imageFiles.push(file);
+                    }
+                }
+
+                if (imageFiles.length > 0) {
+                    e.preventDefault();
+                    if (currentIngestionMode === 'OCR_MENU') {
+                        triggerGeminiVisionOcr({ target: { files: [imageFiles[0]] } });
+                    } else {
+                        handleBatchImageUpload(imageFiles);
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * CẬP NHẬT 1 Ô TRONG BẢNG NHÁP & TỰ ĐỘNG TÍNH LẠI GIÁ
+     */
+    function updateStagingItem(index, field, value) {
+        if (!state.excelImportBuffer || !state.excelImportBuffer[index]) return;
+        var it = state.excelImportBuffer[index];
+
+        if (field === 'appPrice' || field === 'discountPercent' || field === 'cogs') {
+            it[field] = Number(value) || 0;
+            var disc = Number(it.discountPercent) || 0;
+            it.d2cPrice = Math.round((it.appPrice * (1 - (disc / 100))) / 1000) * 1000;
+            it.netProfit = Math.max(0, it.d2cPrice - it.cogs - Math.round(it.d2cPrice * 0.05));
+        } else if (field === 'd2cPrice') {
+            it.d2cPrice = Number(value) || 0;
+            it.netProfit = Math.max(0, it.d2cPrice - it.cogs - Math.round(it.d2cPrice * 0.05));
+        } else {
+            it[field] = value;
+        }
+
+        renderIngestionPreviewTable(state.excelImportBuffer);
+    }
+
+    function removeStagingRow(index) {
+        if (!state.excelImportBuffer) return;
+        state.excelImportBuffer.splice(index, 1);
+        renderIngestionPreviewTable(state.excelImportBuffer);
+    }
+
+    function addEmptyStagingRow() {
+        if (!Array.isArray(state.excelImportBuffer)) state.excelImportBuffer = [];
+        var newIdx = state.excelImportBuffer.length + 1;
+        state.excelImportBuffer.push({
+            code: "M_" + Date.now().toString(36).toUpperCase() + "_" + newIdx,
+            name: "Món mới " + newIdx,
+            category: "Mì Trộn",
+            appPrice: 50000,
+            discountPercent: 15,
+            d2cPrice: 42000,
+            cogs: 16000,
+            netProfit: 23900,
+            status: "ACTIVE",
+            description: "",
+            imageUrl: "",
+            boosterSoup: "",
+            role: "CORE"
+        });
+        renderIngestionPreviewTable(state.excelImportBuffer);
+    }
+
+    function clearStagingBuffer() {
+        if (state.excelImportBuffer && state.excelImportBuffer.length > 0) {
+            if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ bảng nháp không?")) return;
+        }
+        state.excelImportBuffer = [];
+        renderIngestionPreviewTable([]);
+    }
+
+    /**
+     * THAO TÁC BULK TOÀN BẢNG
+     */
+    function bulkApplyDiscount() {
+        var inp = document.getElementById("inpBulkDiscount");
+        var val = Number(inp ? inp.value : 15);
+        if (isNaN(val) || val < 0 || val > 90) return;
+        if (!Array.isArray(state.excelImportBuffer)) return;
+
+        state.excelImportBuffer.forEach(function(it) {
+            it.discountPercent = val;
+            if (it.appPrice > 0) {
+                it.d2cPrice = Math.round((it.appPrice * (1 - (val / 100))) / 1000) * 1000;
+                it.netProfit = Math.max(0, it.d2cPrice - (it.cogs || 0) - Math.round(it.d2cPrice * 0.05));
+            }
+        });
+        renderIngestionPreviewTable(state.excelImportBuffer);
+    }
+
+    function bulkApplyCategory() {
+        var sel = document.getElementById("selBulkCategory");
+        var val = sel ? sel.value : "";
+        if (!val || !Array.isArray(state.excelImportBuffer)) return;
+
+        state.excelImportBuffer.forEach(function(it) {
+            it.category = val;
+        });
+        renderIngestionPreviewTable(state.excelImportBuffer);
+    }
+
+    function bulkApplyRole() {
+        var sel = document.getElementById("selBulkRole");
+        var val = sel ? sel.value : "CORE";
+        if (!Array.isArray(state.excelImportBuffer)) return;
+
+        state.excelImportBuffer.forEach(function(it) {
+            it.role = val;
+        });
+        bulkCalculateReversePricing();
+    }
+
+    function bulkCalculateReversePricing() {
+        if (!Array.isArray(state.excelImportBuffer) || state.excelImportBuffer.length === 0) return;
+
+        state.excelImportBuffer.forEach(function(it) {
+            var p = Number(it.d2cPrice || it.price || 0);
+            if (p <= 0 && it.appPrice > 0) {
+                var d = Number(it.discountPercent) || 15;
+                p = Math.round((it.appPrice * (1 - (d / 100))) / 1000) * 1000;
+                it.d2cPrice = p;
+            }
+
+            var r = String(it.role || "CORE").toUpperCase();
+            if (r === "BOOSTER") {
+                it.cogs = Math.round(p * 0.18);
+            } else if (r === "TRAFFIC") {
+                it.cogs = Math.round(p * 0.48);
+            } else {
+                it.cogs = Math.round(p * 0.38);
+            }
+
+            it.netProfit = Math.max(0, p - it.cogs - Math.round(p * 0.05));
+        });
+
+        renderIngestionPreviewTable(state.excelImportBuffer);
+    }
+
+    async function uploadSingleRowImage(index) {
+        var fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "image/*";
+        fileInput.onchange = async function(e) {
+            var file = e.target.files ? e.target.files[0] : null;
+            if (!file) return;
+
+            var compressor = (window.Thim5Dictionary && window.Thim5Dictionary.SmartCanvasCompressor)
+                ? window.Thim5Dictionary.SmartCanvasCompressor
+                : null;
+
+            try {
+                var compRes = compressor 
+                    ? await compressor.compress(file, 'DISH_PHOTO')
+                    : await new Promise(function(resolve, reject) {
+                        compressImageClientSide_(file, 800, 0.78, function(err, r) { if (err) reject(err); else resolve(r); });
+                    });
+
+                var actionName = (window.T5_DICT && window.T5_DICT.ACTIONS && window.T5_DICT.ACTIONS.UPLOAD_MENU_IMAGE) 
+                    ? window.T5_DICT.ACTIONS.UPLOAD_MENU_IMAGE 
+                    : "uploadDishMediaImage";
+
+                var driveRes = await Thim5API.callGAS(actionName, {
+                    base64: compRes.base64,
+                    mimeType: compRes.mimeType,
+                    fileName: file.name
+                });
+
+                var imageUrl = driveRes.imageUrl || (driveRes.data ? driveRes.data.imageUrl : compRes.dataUrl);
+                if (state.excelImportBuffer && state.excelImportBuffer[index]) {
+                    state.excelImportBuffer[index].imageUrl = imageUrl;
+                    renderIngestionPreviewTable(state.excelImportBuffer);
+                }
+            } catch (err) {
+                alert("Lỗi tải ảnh món: " + (err.message || err));
+            }
+        };
+        fileInput.click();
+    }
+
+    /**
+     * BẢNG NHÁP KIỂM DUYỆT TRỰC QUAN (INTERACTIVE 13-COLUMN STAGING GRID)
+     */
+    function renderIngestionPreviewTable(items) {
+        var tbody = document.getElementById("ingestionPreviewTableBody");
+        var countBadge = document.getElementById("ingestionPreviewCountBadge");
+        var btnCommit = document.getElementById("btnCommitBatchImport");
+        var btnCommitText = document.getElementById("btnCommitText");
+
+        var total = items ? items.length : 0;
+        if (countBadge) countBadge.textContent = total + " món chờ nạp";
+        if (btnCommitText) btnCommitText.textContent = "Lưu Tất Cả Vào Thực Đơn (" + total + " Món)";
+        if (btnCommit) btnCommit.disabled = (total === 0);
+
+        var selBulkCat = document.getElementById("selBulkCategory");
+        if (selBulkCat && (!selBulkCat.options || selBulkCat.options.length <= 1) && state.categories) {
+            selBulkCat.innerHTML = state.categories.map(function(c) {
+                return '<option value="' + c.name + '">' + (c.icon || '') + ' ' + c.name + '</option>';
+            }).join("");
+        }
+
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        if (!items || items.length === 0) {
+            var emptyRow = document.createElement("tr");
+            emptyRow.innerHTML = "<td colspan='13' class='py-12 text-center text-slate-500 text-xs font-mono'>Chưa có dữ liệu nào trong bảng nháp. Vui lòng quét ảnh menu AI, tải chùm ảnh hoặc dán ảnh (Ctrl+V).</td>";
+            tbody.appendChild(emptyRow);
+            return;
+        }
+
+        var availableCats = (state.categories && state.categories.length > 0) 
+            ? state.categories.map(function(c) { return c.name; })
+            : ["Mì Trộn", "Món Cơm", "Nước Uống", "Topping", "Gà Ủ Muối", "Đặc Sản", "Combo"];
+
+        items.forEach(function(it, idx) {
+            var tr = document.createElement("tr");
+            tr.className = "hover:bg-slate-800/40 border-b border-slate-800/80 text-xs transition";
+
+            var code = String(it.code || ("M_" + (idx + 1))).trim();
+            var name = String(it.name || "Món mới").trim();
+            var category = String(it.category || "Mì Trộn").trim();
+            var appPrice = Number(it.appPrice || 0);
+            var discountPercent = (it.discountPercent !== undefined && it.discountPercent !== null) ? Number(it.discountPercent) : 15;
+            var d2cPrice = Number(it.d2cPrice || it.price || (appPrice > 0 ? Math.round(appPrice * (1 - (discountPercent / 100))) : 0));
+            var cogs = Number(it.cogs || it.cost || 0);
+            var netProfit = Number(it.netProfit || Math.max(0, d2cPrice - cogs - Math.round(d2cPrice * 0.05)));
+            var role = String(it.role || it.tag || "CORE").toUpperCase();
+            var imgUrl = String(it.imageUrl || it.image || "").trim();
+
+            var fcPct = d2cPrice > 0 ? Math.round((cogs / d2cPrice) * 100) : 0;
+            var lnrPct = d2cPrice > 0 ? Math.round((netProfit / d2cPrice) * 100) : 0;
+
+            var fcColor = "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+            if (role === "BOOSTER" && fcPct > 20) fcColor = "text-rose-400 bg-rose-500/10 border-rose-500/30";
+            else if (role === "CORE" && fcPct > 45) fcColor = "text-rose-400 bg-rose-500/10 border-rose-500/30";
+            else if (role === "TRAFFIC" && fcPct > 55) fcColor = "text-rose-400 bg-rose-500/10 border-rose-500/30";
+
+            var catOptionsHtml = availableCats.map(function(cName) {
+                return '<option value="' + cName + '" ' + (cName === category ? 'selected' : '') + '>' + cName + '</option>';
+            }).join("");
+
+            var imgDisplay = imgUrl 
+                ? '<img src="' + imgUrl + '" onclick="TabMenuController.uploadSingleRowImage(' + idx + ')" title="Bấm để đổi ảnh" class="w-10 h-10 object-cover rounded-xl border border-slate-700 cursor-pointer hover:opacity-80 mx-auto">'
+                : '<button type="button" onclick="TabMenuController.uploadSingleRowImage(' + idx + ')" title="Thêm ảnh món" class="w-10 h-10 rounded-xl bg-slate-900 border border-dashed border-slate-700 hover:border-amber-400 text-slate-400 text-[10px] flex flex-col items-center justify-center mx-auto transition"><i class="fa-solid fa-camera"></i></button>';
+
+            tr.innerHTML =
+                '<td class="py-2 px-2 text-center font-mono text-slate-500">' + (idx + 1) + '</td>' +
+                '<td class="py-2 px-2 text-center">' + imgDisplay + '</td>' +
+                '<td class="py-2 px-2"><input type="text" value="' + code + '" onchange="TabMenuController.updateStagingItem(' + idx + ', \'code\', this.value)" class="w-20 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 font-mono text-[11px] text-slate-300"></td>' +
+                '<td class="py-2 px-3"><input type="text" value="' + name + '" onchange="TabMenuController.updateStagingItem(' + idx + ', \'name\', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 font-bold text-slate-100 text-xs"></td>' +
+                '<td class="py-2 px-2"><select onchange="TabMenuController.updateStagingItem(' + idx + ', \'category\', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-[11px] text-slate-300">' + catOptionsHtml + '</select></td>' +
+                '<td class="py-2 px-2 text-right"><input type="number" step="1000" value="' + appPrice + '" onchange="TabMenuController.updateStagingItem(' + idx + ', \'appPrice\', this.value)" class="w-20 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 font-mono text-right text-slate-300"></td>' +
+                '<td class="py-2 px-2 text-center"><input type="number" step="1" value="' + discountPercent + '" onchange="TabMenuController.updateStagingItem(' + idx + ', \'discountPercent\', this.value)" class="w-12 bg-slate-900 border border-slate-800 rounded-lg px-1 py-1 font-mono text-center font-bold text-emerald-400"></td>' +
+                '<td class="py-2 px-2 text-right font-mono font-bold text-amber-400">' + d2cPrice.toLocaleString('vi-VN') + 'đ</td>' +
+                '<td class="py-2 px-2 text-right"><input type="number" step="1000" value="' + cogs + '" onchange="TabMenuController.updateStagingItem(' + idx + ', \'cogs\', this.value)" class="w-20 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 font-mono text-right text-slate-300"></td>' +
+                '<td class="py-2 px-2 text-right font-mono font-bold text-emerald-400">' + netProfit.toLocaleString('vi-VN') + 'đ<br><span class="text-[9.5px] font-normal text-slate-500">(' + lnrPct + '%)</span></td>' +
+                '<td class="py-2 px-2"><select onchange="TabMenuController.updateStagingItem(' + idx + ', \'role\', this.value)" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-1.5 py-1 text-[10.5px] font-mono text-slate-300">' +
+                    '<option value="CORE" ' + (role === "CORE" ? "selected" : "") + '>CORE</option>' +
+                    '<option value="TRAFFIC" ' + (role === "TRAFFIC" ? "selected" : "") + '>TRAFFIC</option>' +
+                    '<option value="BOOSTER" ' + (role === "BOOSTER" ? "selected" : "") + '>BOOSTER</option>' +
+                '</select></td>' +
+                '<td class="py-2 px-2 text-center"><span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold border ' + fcColor + '">' + fcPct + '%</span></td>' +
+                '<td class="py-2 px-2 text-center"><button type="button" onclick="TabMenuController.removeStagingRow(' + idx + ')" class="text-slate-500 hover:text-rose-400 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button></td>';
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    /**
+     * NGUỒN 1 OMNI-INGESTION: NẠP FILE EXCEL / CSV
+     */
+    function handleExcelFileSelect(event) {
+        var file = event && event.target && event.target.files ? event.target.files[0] : null;
+        if (!file) return;
+
+        var statusSpan = document.getElementById("ingestionExcelStatus");
+        if (statusSpan) {
+            statusSpan.textContent = "⏳ Đang phân tích tệp Excel & tính Reverse-Pricing...";
+            statusSpan.className = "text-xs font-mono text-amber-400 inline-block animate-pulse";
+        }
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var base64Data = e.target.result;
+            if (base64Data.indexOf(";base64,") !== -1) {
+                base64Data = base64Data.split(";base64,")[1];
+            }
+
+            var actionName = (window.T5_DICT && window.T5_DICT.ACTIONS)
+                ? (window.T5_DICT.ACTIONS.PARSE_EXCEL_MENU_BUFFER || "parseUploadedSpreadsheetBuffer")
+                : "parseUploadedSpreadsheetBuffer";
+
+            var payload = {
+                base64: base64Data,
+                fileName: file.name
+            };
+
+            Thim5API.callGAS(actionName, payload)
+                .then(function(res) {
+                    var audit = (window.T5_DICT && typeof window.T5_DICT.auditApiResponse === 'function')
+                        ? window.T5_DICT.auditApiResponse(actionName, res)
+                        : { valid: res && res.status === "success", data: res ? res.data : null };
+
+                    if (!audit.valid) {
+                        throw new Error(res ? res.message : "Lỗi bóc tách file Excel từ máy chủ!");
+                    }
+
+                    var parsedItems = (audit.data && audit.data.items) || (res.data ? res.data.items : []);
+                    state.excelImportBuffer = parsedItems;
+                    renderIngestionPreviewTable(parsedItems);
+
+                    if (statusSpan) {
+                        statusSpan.textContent = "✓ Đã bóc tách thành công " + parsedItems.length + " món ăn từ file!";
+                        statusSpan.className = "text-xs font-mono text-emerald-400 font-bold";
+                    }
+                })
+                .catch(function(err) {
+                    console.error("🚨 [TabMenuController.handleExcelFileSelect] Thất bại:", err);
+                    if (statusSpan) {
+                        statusSpan.textContent = "❌ Lỗi đọc file: " + (err.message || err);
+                        statusSpan.className = "text-xs font-mono text-rose-400";
+                    }
+                });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /**
+     * NGUỒN 2 OMNI-INGESTION: GEMINI 1.5 FLASH VISION OCR BÓC TÁCH ẢNH MENU
      */
     function triggerGeminiVisionOcr(event) {
         var file = event && event.target && event.target.files ? event.target.files[0] : null;
@@ -1772,26 +2349,22 @@ var TabMenuController = (function() {
 
         var statusSpan = document.getElementById("ingestionOcrStatus");
         if (statusSpan) {
-            statusSpan.textContent = "⏳ Đang nén ảnh & phân tích qua Gemini 1.5 Flash Vision...";
+            statusSpan.textContent = "⏳ Đang nén ảnh (MENU_OCR) & phân tích qua Gemini 1.5 Flash Vision...";
             statusSpan.className = "text-xs font-mono text-amber-400 inline-block animate-pulse";
         }
 
-        compressImageClientSide_(file, 1200, 0.85, function(err, compressed) {
-            if (err || !compressed) {
-                if (statusSpan) {
-                    statusSpan.textContent = "❌ Lỗi nén ảnh OCR: " + (err ? err.message : "Không xác định");
-                    statusSpan.className = "text-xs font-mono text-rose-400";
-                }
-                return;
-            }
+        var compressor = (window.Thim5Dictionary && window.Thim5Dictionary.SmartCanvasCompressor)
+            ? window.Thim5Dictionary.SmartCanvasCompressor
+            : null;
 
+        function doCallOcr(compRes) {
             var actionName = (window.T5_DICT && window.T5_DICT.ACTIONS)
                 ? (window.T5_DICT.ACTIONS.PROCESS_MENU_OCR_WITH_GEMINI || "processMenuOcrWithGemini")
                 : "processMenuOcrWithGemini";
 
             var payload = {
-                base64: compressed.base64,
-                mimeType: compressed.mimeType
+                base64: compRes.base64,
+                mimeType: compRes.mimeType
             };
 
             Thim5API.callGAS(actionName, payload)
@@ -1809,7 +2382,7 @@ var TabMenuController = (function() {
                     renderIngestionPreviewTable(extractedItems);
 
                     if (statusSpan) {
-                        statusSpan.textContent = "✓ Gemini Vision đã trích xuất " + extractedItems.length + " món ăn!";
+                        statusSpan.textContent = "✓ Gemini Vision đã trích xuất " + extractedItems.length + " món ăn (" + (compRes.summaryText || "") + ")!";
                         statusSpan.className = "text-xs font-mono text-emerald-400 font-bold";
                     }
                 })
@@ -1820,11 +2393,33 @@ var TabMenuController = (function() {
                         statusSpan.className = "text-xs font-mono text-rose-400";
                     }
                 });
-        });
+        }
+
+        if (compressor) {
+            compressor.compress(file, 'MENU_OCR')
+                .then(doCallOcr)
+                .catch(function(err) {
+                    if (statusSpan) {
+                        statusSpan.textContent = "❌ Lỗi nén ảnh OCR: " + (err ? err.message : "Không xác định");
+                        statusSpan.className = "text-xs font-mono text-rose-400";
+                    }
+                });
+        } else {
+            compressImageClientSide_(file, 1280, 0.85, function(err, compressed) {
+                if (err || !compressed) {
+                    if (statusSpan) {
+                        statusSpan.textContent = "❌ Lỗi nén ảnh OCR: " + (err ? err.message : "Không xác định");
+                        statusSpan.className = "text-xs font-mono text-rose-400";
+                    }
+                    return;
+                }
+                doCallOcr(compressed);
+            });
+        }
     }
 
     /**
-     * 31. NGUỒN 3 OMNI-INGESTION: TRÍCH XUẤT THỰC ĐƠN TỪ ĐƯỜNG DẪN CÔNG KHAI (URL)
+     * NGUỒN 3 OMNI-INGESTION: TRÍCH XUẤT THỰC ĐƠN TỪ ĐƯỜNG DẪN CÔNG KHAI (URL)
      */
     function handleUrlExtraction() {
         var inputUrl = document.getElementById("ingestionTargetUrl");
@@ -1875,62 +2470,11 @@ var TabMenuController = (function() {
     }
 
     /**
-     * 32. VẼ BẢNG DUYỆT TRƯỚC VÙNG ĐỆM INGESTION TRƯỚC KHI NẠP CSDL
-     * Cho phép kiểm tra 13 cột và đối soát dữ liệu
-     */
-    function renderIngestionPreviewTable(items) {
-        var tbody = document.getElementById("ingestionPreviewTableBody");
-        var countBadge = document.getElementById("ingestionPreviewCountBadge");
-        var btnCommit = document.getElementById("btnCommitBatchImport");
-
-        if (countBadge) {
-            countBadge.textContent = (items ? items.length : 0) + " món chờ nạp";
-        }
-
-        if (btnCommit) {
-            btnCommit.disabled = (!items || items.length === 0);
-        }
-
-        if (!tbody) return;
-        tbody.innerHTML = "";
-
-        if (!items || items.length === 0) {
-            var emptyRow = document.createElement("tr");
-            emptyRow.innerHTML = "<td colspan='6' class='py-8 text-center text-slate-500 text-xs'>Chưa có dữ liệu nào trong vùng đệm trích xuất.</td>";
-            tbody.appendChild(emptyRow);
-            return;
-        }
-
-        items.forEach(function(it, idx) {
-            var tr = document.createElement("tr");
-            tr.className = "hover:bg-slate-800/40 border-b border-slate-800/80 text-xs";
-
-            var code = String(it.code || ("SKU_NEW_" + (idx + 1))).trim();
-            var name = String(it.name || "Món chưa đặt tên").trim();
-            var category = String(it.category || "Món Cơm").trim();
-            var d2cPrice = Number(it.d2cPrice || it.price || 0);
-            var itDisc = Number(it.discountPercent) || getDefaultDiscountPercent_();
-            var appPrice = Number(it.appPrice || (d2cPrice > 0 ? Math.round((d2cPrice / (1 - (itDisc / 100))) / 1000) * 1000 : 0));
-            var cogs = Number(it.cogs || it.cost || 0);
-
-            tr.innerHTML =
-                "<td class='py-2.5 px-3 font-mono text-slate-400'>" + code + "</td>" +
-                "<td class='py-2.5 px-3 font-bold text-slate-200'>" + name + "</td>" +
-                "<td class='py-2.5 px-3'><span class='px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700/60 text-[11px]'>" + category + "</span></td>" +
-                "<td class='py-2.5 px-3 text-right font-mono text-slate-400'>" + appPrice.toLocaleString('vi-VN') + "đ</td>" +
-                "<td class='py-2.5 px-3 text-right font-mono font-bold text-amber-400'>" + d2cPrice.toLocaleString('vi-VN') + "đ</td>" +
-                "<td class='py-2.5 px-3 text-right font-mono text-slate-400'>" + cogs.toLocaleString('vi-VN') + "đ</td>";
-
-            tbody.appendChild(tr);
-        });
-    }
-
-    /**
-     * 33. XÁC NHẬN NẠP VÙNG ĐỆM HÀNG LOẠT VÀO SHEET DATA_MENU (BATCH IMPORT)
+     * XÁC NHẬN NẠP VÙNG ĐỆM HÀNG LOẠT VÀO SHEET DATA_MENU (BATCH IMPORT)
      */
     function commitBatchImport() {
         if (!Array.isArray(state.excelImportBuffer) || state.excelImportBuffer.length === 0) {
-            alert("Vùng đệm trích xuất rỗng! Vui lòng tải file Excel hoặc chụp ảnh OCR trước.");
+            alert("Vùng đệm trích xuất rỗng! Vui lòng quét ảnh OCR hoặc tải ảnh món ăn trước.");
             return;
         }
 
@@ -1938,9 +2482,10 @@ var TabMenuController = (function() {
         if (!confirm(confirmMsg)) return;
 
         var btnCommit = document.getElementById("btnCommitBatchImport");
+        var btnCommitText = document.getElementById("btnCommitText");
         if (btnCommit) {
             btnCommit.disabled = true;
-            btnCommit.innerHTML = "<span class='inline-block animate-spin mr-1'>⏳</span> Đang nạp hàng loạt vào Google Sheets...";
+            if (btnCommitText) btnCommitText.textContent = "Đang nạp " + state.excelImportBuffer.length + " món vào CSDL...";
         }
 
         var actionName = (window.T5_DICT && window.T5_DICT.ACTIONS)
@@ -1974,12 +2519,12 @@ var TabMenuController = (function() {
             .finally(function() {
                 if (btnCommit) {
                     btnCommit.disabled = false;
-                    btnCommit.innerHTML = "<span>🚀</span> Xác Nhận Nạp Vào CSDL";
+                    if (btnCommitText) btnCommitText.textContent = "Lưu Tất Cả Vào Thực Đơn (0 Món)";
                 }
             });
     }
 
-    // ĐÓNG GÓI DUY NHẤT MỘT PUBLIC API EXPORT Ở CUỐI MODULE SINGLETON IIFE
+// ĐÓNG GÓI DUY NHẤT MỘT PUBLIC API EXPORT Ở CUỐI MODULE SINGLETON IIFE
     var exportedApi = {
         init: init,
         loadAdminCatalog: loadAdminCatalog,
@@ -1998,6 +2543,18 @@ var TabMenuController = (function() {
         saveCategoryForm: saveCategoryForm,
         deleteMenuCategory: deleteMenuCategory,
         switchSubTab: switchSubTab,
+        switchIngestionMode: switchIngestionMode,
+        handleBatchImageUpload: handleBatchImageUpload,
+        updateStagingItem: updateStagingItem,
+        removeStagingRow: removeStagingRow,
+        addEmptyStagingRow: addEmptyStagingRow,
+        clearStagingBuffer: clearStagingBuffer,
+        bulkApplyDiscount: bulkApplyDiscount,
+        bulkApplyCategory: bulkApplyCategory,
+        bulkApplyRole: bulkApplyRole,
+        bulkCalculateReversePricing: bulkCalculateReversePricing,
+        uploadSingleRowImage: uploadSingleRowImage,
+        setupOmniIngestionListeners: setupOmniIngestionListeners,
         handleExcelFileSelect: handleExcelFileSelect,
         triggerGeminiVisionOcr: triggerGeminiVisionOcr,
         handleUrlExtraction: handleUrlExtraction,

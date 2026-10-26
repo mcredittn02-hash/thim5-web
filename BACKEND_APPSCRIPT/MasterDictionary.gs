@@ -1211,3 +1211,42 @@ function evaluateOrderPromoCampaigns(params) {
     giftReward: (bestCampaign && bestCampaign.freeGiftAwarded) ? { type: bestCampaign.freeGiftType, desc: bestCampaign.freeGiftDesc } : null
   };
 }
+
+
+/**
+ * HÀM TIỆN ÍCH SSOT: CHUẨN HÓA LINK GOOGLE DRIVE THÀNH DIRECT CDN URL KHÔNG BỊ CHẶN CORS
+ * @param {string} urlOrFileId
+ * @returns {string} Link thumbnail direct Google Drive
+ */
+function normalizeDriveImageUrl(urlOrFileId) {
+  if (!urlOrFileId) return "";
+  var str = String(urlOrFileId).trim();
+  if (!str) return "";
+
+  var fileId = null;
+
+  var matchD = str.match(/\/file\/d\/([a-zA-Z0-9_-]{25,})/);
+  if (matchD && matchD[1]) {
+    fileId = matchD[1];
+  }
+  if (!fileId) {
+    var matchId = str.match(/[?&]id=([a-zA-Z0-9_-]{25,})/);
+    if (matchId && matchId[1]) {
+      fileId = matchId[1];
+    }
+  }
+  if (!fileId) {
+    var matchLh3 = str.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]{25,})/);
+    if (matchLh3 && matchLh3[1]) {
+      fileId = matchLh3[1];
+    }
+  }
+  if (!fileId && !str.includes("/") && !str.includes(":") && str.length >= 25 && str.length <= 55) {
+    fileId = str;
+  }
+
+  if (fileId) {
+    return "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w800";
+  }
+  return str;
+}
