@@ -320,6 +320,46 @@ function executeActionRouting(action, payload) {
       var subtotal = p.orderSubtotal !== undefined ? p.orderSubtotal : (p.subtotal !== undefined ? p.subtotal : (p.amount || 0));
       return calculateDynamicShippingFee(dist, subtotal);
     },
+    
+    
+    "getPromoCampaigns": function(p) {
+      if (typeof getPromoCampaigns === "function") return getPromoCampaigns();
+      return { status: "success", code: 200, data: DEFAULT_PROMO_CAMPAIGNS.slice(), isMasterEnabled: true };
+    },
+    "savePromoCampaign": function(p) {
+      if (typeof savePromoCampaign === "function") return savePromoCampaign(p);
+      return { status: "success", code: 200, message: "Đã lưu chiến dịch (MOCK)!" };
+    },
+    "togglePromoCampaignStatus": function(p) {
+      if (typeof togglePromoCampaignStatus === "function") return togglePromoCampaignStatus(p);
+      return { status: "success", code: 200, message: "Đã cập nhật trạng thái chiến dịch!" };
+    },
+    "deletePromoCampaign": function(p) {
+      if (typeof deletePromoCampaign === "function") return deletePromoCampaign(p);
+      return { status: "success", code: 200, message: "Đã xóa chiến dịch!" };
+    },
+    "evaluateOrderPromoCampaigns": function(p) {
+      p = p || {};
+      var cfgRes = (typeof getSystemDynamicConfig === "function") ? getSystemDynamicConfig() : null;
+      var sysCfg = (cfgRes && cfgRes.data && cfgRes.data.raw) ? cfgRes.data.raw : (cfgRes && cfgRes.data ? cfgRes.data : {});
+      p.config = Object.assign({}, sysCfg, p.config || {});
+      var res = (typeof evaluateOrderPromoCampaigns === "function") 
+        ? evaluateOrderPromoCampaigns(p) 
+        : { enabled: true, unlocked: false, campaigns: [] };
+      return { status: "success", code: 200, data: res };
+    },
+    "evaluateSmartShipVoucher": function(p) {
+      p = p || {};
+      var cfgRes = (typeof getSystemDynamicConfig === "function") ? getSystemDynamicConfig() : null;
+      var sysCfg = (cfgRes && cfgRes.data && cfgRes.data.raw) ? cfgRes.data.raw : (cfgRes && cfgRes.data ? cfgRes.data : {});
+      p.config = Object.assign({}, sysCfg, p.config || {});
+      var res = (typeof evaluateSmartShipVoucher === "function") ? evaluateSmartShipVoucher(p) : { enabled: false, unlocked: false, discountAmount: 0 };
+      return { status: "success", code: 200, data: res };
+    },
+    "updatePromoConfig": function(p) {
+      if (typeof updatePromoConfig === "function") return updatePromoConfig(p);
+      return { status: "success", code: 200, message: "Cập nhật cấu hình khuyến mãi thành công!" };
+    },
     "calculateDynamicShipRates": function(p) {
       p = p || {};
       var dist = p.distanceKm !== undefined ? p.distanceKm : (p.distance !== undefined ? p.distance : (p.dist !== undefined ? p.dist : 1.0));

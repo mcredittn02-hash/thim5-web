@@ -647,3 +647,166 @@ flowchart LR
      git checkout main
      git merge stag
      ```
+
+
+---
+
+## 9. MODULE KHUYẾN MÃI VOUCHER TRỢ GIÁ SHIP ĐỘNG THEO LỢI NHUẬN RÒNG (SMART SHIP VOUCHER v3.5)
+
+### 9.1. Kiến Trúc Thuật Toán & Tham Số Hệ Thống
+Hệ thống LongHoaFood Master v3.5 bổ sung thuật toán **Smart Ship Voucher** tự động thẩm định và trích thưởng phí vận chuyển dựa trên **Lợi Nhuận Ròng Thặng Dư** của giỏ hàng thay vì giảm giá cào bằng làm thâm hụt dòng tiền quán:
+
+$$\text{CartNetProfit} = \text{Subtotal} - \text{TotalCOGS} - \text{Subtotal} \times (\text{MasterFee} + \text{TaxHKD})$$
+$$\text{ProfitAllow} = \max\left(0, (\text{CartNetProfit} - \text{PROMO\_MIN\_NET\_PROFIT\_FLOOR}) \times \text{PROMO\_SURPLUS\_SHARE\_RATIO}\right)$$
+$$\text{CapAllow} = \max\left(0, \text{Subtotal} \times \text{MAX\_PROMO\_CAP\_PCT} - \text{OtherDiscount}\right)$$
+$$\text{MaxShipDiscount} = \min(\text{ShipFee}, \text{ProfitAllow}, \text{CapAllow})$$
+
+### 9.2. Danh Mục Khóa Cấu Hình SSOT Trên `SYS_CONFIG`
+| Tên Tham Số | Giá Trị Mặc Định | Kiểu | Ý Nghĩa Vận Hành |
+| :--- | :--- | :--- | :--- |
+| `PROMO_SMART_SHIP_VOUCHER_ENABLED` | `true` | Boolean | Công tắc tổng Bật/Tắt tính năng Voucher Ship Động |
+| `PROMO_TIER_25_ENABLED` | `true` | Boolean | Bật/Tắt mốc giảm 25% phí ship (`SHIP_25`) |
+| `PROMO_TIER_50_ENABLED` | `true` | Boolean | Bật/Tắt mốc giảm 50% phí ship (`SHIP_50`) |
+| `PROMO_TIER_100_ENABLED` | `true` | Boolean | Bật/Tắt mốc giảm 100% freeship (`SHIP_100`) |
+| `PROMO_UPSELL_NUDGE_ENABLED` | `true` | Boolean | Bật/Tắt gợi ý 1-Click mua thêm Topping/Nước uống (`Food Cost <= 20%`) |
+| `PROMO_MIN_NET_PROFIT_FLOOR` | `25000` | Number | Mức sàn Lợi Nhuận Ròng (VNĐ) quán giữ lại tối thiểu trước khi trích bù ship |
+| `PROMO_SURPLUS_SHARE_RATIO` | `0.7` | Number | Tỷ lệ trích tối đa 70% phần Lợi Nhuận Ròng thặng dư để tài trợ Voucher |
+
+### 9.3. Bổ Sung Phụ Lục DOM ID Mới
+1. **Storefront (`FRONTEND_WEB/index.html`):**
+   - `#box-smart-ship-voucher`: Hộp hiển thị Voucher Trợ Giá Ship Dành Riêng Cho Đơn Hàng.
+   - `#badge-ship-voucher-status`: Huy hiệu trạng thái mở khóa (`TRỢ GIÁ SHIP 50%`, `FREESHIP 100%`...).
+   - `#txt-ship-voucher-title`: Tiêu đề Voucher hiển thị số tiền tiết kiệm.
+   - `#txt-ship-voucher-desc`: Giải thích nguồn tài trợ từ Lợi Nhuận Ròng thặng dư.
+   - `#btn-apply-ship-voucher`: Nút bấm áp dụng / bỏ áp dụng voucher.
+   - `#box-ship-upsell-nudge`: Thanh thông điệp gợi ý thêm món.
+   - `#btn-quick-add-upsell`: Nút 1-Click thêm Topping Booster.
+
+2. **Admin Control Plane (`FRONTEND_WEB/admin-shell.html`):**
+   - `#btn-open-promo-modal`: Nút mở Modal Quản Lý Khuyến Mãi trên Header Topbar.
+   - `#modal-promo-config`: Modal Quản Lý Khuyến Mãi & Voucher Ship Động.
+   - `#toggle-promo-smart-ship`: Nút gạt công tắc tổng tính năng.
+   - `#toggle-promo-tier-25`, `#toggle-promo-tier-50`, `#toggle-promo-tier-100`: Nút gạt các bậc trợ giá.
+   - `#toggle-promo-upsell-nudge`: Nút gạt tính năng gợi ý Upsell.
+   - `#inp-promo-min-profit-floor`: Ô nhập Sàn Lợi Nhuận Ròng bảo vệ quán.
+   - `#inp-promo-surplus-ratio`: Ô nhập Tỷ lệ trích thặng dư.
+   - `#btn-save-promo-config`: Nút lưu trực tiếp vào Sheet `SYS_CONFIG`.
+
+3. **Dashboard Kiểm Thử Tự Động (`FRONTEND_WEB/system-test.html`):**
+   - `#res-mod3-smart-ship-voucher`: Thẻ kết quả kiểm thử hàm `evaluateSmartShipVoucher` tại MOD 3.
+
+
+## 10. PHÂN HỆ QUẢN LÝ ĐA CHIẾN DỊCH KHUYẾN MÃI (MULTI-CAMPAIGN PROMO ENGINE & TAB-PROMOS.HTML v3.5)
+
+### 10.1. Kiến Trúc Multi-Campaign SSOT & Bảo Vệ LNR 65%
+Phân hệ Multi-Campaign Promo v3.5 thay thế cơ chế cứng nhắc bằng động cơ khuyến mãi đa tầng linh hoạt, tự động đối soát điều kiện giỏ hàng (Món Chính, Topping, Nước Uống, Tổng Tiền) và thẩm định ngân sách tài trợ dựa trên Lợi Nhuận Ròng (LNR) thực tế của đơn hàng:
+
+$$\text{LNR}_{\text{before}} = \text{Subtotal} - \text{TotalCOGS} - \text{Subtotal} \times \frac{\text{MasterFee} + \text{TaxHKD}}{100}$$
+$$\text{ProfitShare} = \max\left(0, (\text{LNR}_{\text{before}} - \text{MinRetainedNetProfit}) \times 0.65\right)$$
+$$\text{PromoCap} = \max\left(0, \text{Subtotal} \times \frac{\text{MaxPromoCapPct}}{100} - \text{OtherDiscount}\right)$$
+$$\text{MaxFreeBudget} = \min(\text{ProfitShare}, \text{PromoCap})$$
+
+- **Bảo Vệ Lợi Nhuận Ròng:** Quán giữ lại tối thiểu `MinRetainedNetProfit` (mặc định 15k - 35k), chỉ trích tối đa 65% thặng dư lợi nhuận ròng để bù cước ship.
+- **Trần Khuyến Mãi SSOT:** Tự động cắt giảm nếu tổng ưu đãi (Voucher Ship + Hội Viên VIP) vượt trần `MAX_PROMO_CAP_PCT` (15%).
+- **Quà Tặng Booster Kèm:** Topping/Nước uống tặng kèm được tính theo giá vốn COGS $\le 20\%$ giá trị quà tặng, chỉ cấp khi ngân sách thặng dư đủ chi trả.
+- **Gợi Ý Upsell Nudge Thông Minh:** Tự động đề xuất bậc khuyến mãi tiếp theo gần nhất (ví dụ: *Chọn thêm 1 Nước & 1 Topping, mua thêm 19.000đ để mở khóa Freeship 100%*).
+
+### 10.2. Bộ Action APIs SSOT Khuyến Mãi Hai Đầu
+Được đồng bộ 100% giữa `FRONTEND_WEB/thim5-master-dictionary.js` và `BACKEND_APPSCRIPT/MasterDictionary.gs`:
+1. `GET_PROMO_CAMPAIGNS` (`getPromoCampaigns`): Nạp danh sách chiến dịch đang chạy từ Sheet `SYS_CONFIG` (khóa `PROMO_CAMPAIGNS_JSON`) với bộ nhớ đệm CacheService.
+2. `SAVE_PROMO_CAMPAIGN` (`savePromoCampaign`): Thêm mới hoặc cập nhật thông số chiến dịch F&B (Món chính, Topping, Nước, Subtotal, Giảm ship, Quà tặng).
+3. `TOGGLE_PROMO_CAMPAIGN_STATUS` (`togglePromoCampaignStatus`): Bật/Tắt tức thời trạng thái `ACTIVE` / `PAUSED` của từng chiến dịch.
+4. `DELETE_PROMO_CAMPAIGN` (`deletePromoCampaign`): Xóa bỏ chiến dịch khỏi hệ thống.
+5. `EVALUATE_ORDER_PROMO_CAMPAIGNS` (`evaluateOrderPromoCampaigns`): Hàm toán học thuần túy đánh giá giỏ hàng tức thì, dùng chung cho cả Frontend D2C và Backend GAS Router.
+
+### 10.3. Phụ Lục DOM ID Phân Hệ `tab-promos.html` & `admin-shell.html`
+1. **Giao Diện Quản Trị `FRONTEND_WEB/tab-promos.html` (392 dòng $\le 400$ dòng):**
+   - `#chk-promo-master`: Công tắc tổng Bật/Tắt toàn bộ hệ thống khuyến mãi.
+   - `#btn-create-campaign`: Nút bấm mở modal tạo chiến dịch mới.
+   - `#campaigns-grid-container`: Bảng lưới hiển thị danh thiếp các chiến dịch khuyến mãi kèm công tắc trạng thái.
+   - `#modal-campaign-editor`: Modal popup tạo và chỉnh sửa chiến dịch.
+   - `#form-campaign-editor`: Biểu mẫu nhập liệu thông số chiến dịch.
+   - `#inp-camp-id`, `#inp-camp-name`, `#sel-camp-status`: Các trường định danh và trạng thái.
+   - `#inp-camp-min-mains`, `#inp-camp-min-toppings`, `#inp-camp-min-drinks`, `#inp-camp-min-subtotal`: Điều kiện số lượng món và giá trị giỏ hàng.
+   - `#inp-camp-profit-floor`: Ngưỡng sàn Lợi Nhuận Ròng giữ lại cho quán.
+   - `#inp-camp-ship-disc-pct`, `#inp-camp-max-ship-disc`: Tỷ lệ giảm cước ship và mức giảm tối đa.
+   - `#sel-camp-gift-type`, `#inp-camp-gift-desc`, `#inp-camp-gift-max-price`: Cấu hình quà tặng kèm (Nước / Topping).
+   - `#btn-save-campaign`, `#btn-close-modal`: Nút lưu và đóng modal.
+
+2. **Sidebar Menu `FRONTEND_WEB/admin-shell.html`:**
+   - `#sidebar-btn-promos`: Nút điều hướng Tab Khuyến Mãi F&B, khóa bảo mật nghiêm ngặt chỉ hiển thị và cho phép truy cập bởi Super Admin (Lv3).
+
+3. **Giao Diện Storefront `FRONTEND_WEB/index.html`:**
+   - `#box-smart-ship-voucher`: Hộp hiển thị Voucher Trợ Giá Ship động theo LNR.
+   - `#badge-ship-voucher-status`: Huy hiệu hiển thị tên chiến dịch đã kích hoạt.
+   - `#txt-ship-voucher-title`, `#txt-ship-voucher-desc`: Tiêu đề và mô tả chi tiết nguồn trợ giá.
+   - `#box-ship-upsell-nudge`, `#txt-ship-upsell-nudge`: Thanh thông điệp gợi ý nâng cấp bậc chiến dịch kế tiếp.
+   - `#btn-quick-add-upsell`: Nút 1-Click thêm ngay Topping hoặc Nước uống để mở khóa khuyến mãi cao hơn.
+
+### 10.4. Kết Quả Kiểm Thử System Test Suite
+- Đạt **26/26 PASS (0 FAIL, 0 WARN)** trên toàn bộ 5 Module của `FRONTEND_WEB/system-test.html`.
+
+
+## 11. PHÂN HỆ NHẬP THỰC ĐƠN NHANH TRỰC QUAN & QUẢN TRỊ ẢNH DRIVE (SMART VISUAL OMNI-INGESTION v3.5)
+
+### 11.1. Kiến Trúc Bộ Nén Ảnh Smart Canvas Client-Side & Google Drive CDN
+Phân hệ Omni-Ingestion v3.5 giải quyết triệt để rào cản nạp món ăn thủ công cho chủ quán F&B bằng cơ chế xử lý đồ họa nén trực tiếp trên trình duyệt kết hợp Google Drive Cloud Storage:
+- **Client-Side Smart Canvas Compression:**
+  - `SmartCanvasCompressor`: Dùng HTML5 Canvas xử lý đa luồng với 2 preset cấu hình chuyên biệt:
+    + `DISH_PHOTO`: Kích thước tối đa $800 \times 800$px, chất lượng nén `image/jpeg` 0.78, dung lượng tối ưu $< 80$KB (tiết kiệm 85-92% băng thông và dung lượng lưu trữ Drive).
+    + `MENU_OCR`: Kích thước tối đa $1280 \times 1280$px, chất lượng nén 0.85, dung lượng $< 150$KB, đảm bảo độ sắc nét nhận diện ký tự quang học Gemini AI Vision.
+  - Hỗ trợ nén hàng loạt `compressBatch(files, mode, onProgress)` hiển thị thanh tiến trình trực quan theo thời gian thực.
+- **Chuẩn Hóa CDN Ảnh Google Drive SSOT (`normalizeDriveImageUrl`):**
+  - Đồng bộ giữa `FRONTEND_WEB/thim5-master-dictionary.js` và `BACKEND_APPSCRIPT/MasterDictionary.gs`.
+  - Tự động trích xuất File ID từ mọi định dạng URL Drive (`drive.google.com/file/d/ID`, `drive.google.com/open?id=ID`, `drive.google.com/thumbnail?id=ID`, `lh3.googleusercontent.com/d/ID` hoặc ID gốc).
+  - Trả về URL thumbnail CDN trực tiếp: `https://drive.google.com/thumbnail?id={FILE_ID}&sz=w800` giúp hiển thị ảnh mượt mà, tải nhanh và vượt qua mọi rào cản hạn chế CORS của Google Drive trên web storefront D2C.
+- **Tự Động Khởi Tạo & Phân Quyền Thư Mục Drive:**
+  - Backend `uploadImageToMenuDriveFolder` (`IngestionEngine.gs`) tự động kiểm tra khóa cấu hình `MENU_DRIVE_FOLDER_ID` trong Sheet `SYS_CONFIG`.
+  - Nếu chưa có, tự động tạo thư mục `"LongHoaFood_Menu_Images"`, cấp quyền công khai xem ảnh (`ANYONE_WITH_LINK, VIEW`), và tự động lưu `MENU_DRIVE_FOLDER_ID` vào `SYS_CONFIG` cho các lần dùng tiếp theo.
+  - Tự động chuyển đổi tên món thành file name chuẩn hóa SEO dạng slug kèm mã ngẫu nhiên (ví dụ: `hu-tieu-nam-vang-a7b2c9.jpg`).
+
+### 11.2. Quy Trình Nạp Thực Đơn Hàng Loạt 3 Bước Thao Tác Trực Quan
+1. **Bước 1: Tải Ảnh / Quét Menu Đa Phương Thức:**
+   - Hỗ trợ kéo & thả (Drag & Drop) nhiều file ảnh cùng lúc hoặc dán trực tiếp từ bộ nhớ tạm Clipboard (`Ctrl + V`).
+   - Hai chế độ linh hoạt:
+     + **Chế độ 1 - Quét Menu Bằng AI (OCR):** Tự động nhận diện ảnh chụp menu, trích xuất tên món, giá bán, danh mục, gợi ý Cost phân loại vai trò F&B (`CORE` ~38% FC, `TRAFFIC` ~48% FC, `BOOSTER` ~18% FC).
+     + **Chế độ 2 - Nạp Ảnh Món Hàng Loạt:** Tự động phân tích tên file ảnh (ví dụ: `Hu Tieu Nam Vang 55k.jpg`, `Tra Dao Cam Sa 25000.png`) để tự trích xuất Tên Món và Giá Bán, tự động nén Canvas và đẩy lên Drive để lấy link CDN gán vào món.
+2. **Bước 2: Thanh Công Cụ Thiết Lập Giá & Phân Loại Hàng Loạt (Bulk Pricing Toolbar):**
+   - Thiết lập Giảm Giá % đồng loạt toàn bộ bảng đệm (Bulk Discount %).
+   - Gán Danh Mục Món đồng loạt (Bulk Category).
+   - Phân vai trò F&B đồng loạt (Bulk Role: `CORE`, `TRAFFIC`, `BOOSTER`).
+   - Nút ma thuật: `⚡ Tự Động Tính Giá Vốn & Lợi Nhuận Ròng Toàn Bảng` (Bulk Reverse Pricing) tự tính toán COGS và Net Profit theo tỷ lệ Food Cost chuẩn SSOT cho từng danh mục.
+3. **Bước 3: Bảng Đệm Soát Lỗi Trực Quan 13 Cột Chuẩn SSOT & 1-Click Lưu Menu:**
+   - Cho phép sửa trực tiếp (Inline Editing) từng ô: Tên món, Danh mục, Giá gốc, Giảm giá %, Giá D2C, Giá vốn COGS, Lợi nhuận ròng, Vai trò món, Tag, Ảnh món (cho phép kéo thả thay ảnh riêng từng món).
+   - Nút Thêm Món Thủ Công (`#btnStagingAddRow`), Xóa Trắng Bảng (`#btnStagingClear`), và Nút Lưu Thực Đơn (`#btnCommitBatchImport`).
+   - Cơ chế UPSERT thông minh tại Backend `CatalogService.gs`: Nếu mã món (`dishCode`) đã tồn tại trong `DATA_MENU` thì ghi đè cập nhật; nếu món mới thì tự động sinh SKU tiền tố chuẩn (`M_` cho Món Chính, `D_` cho Nước Uống, `TOP_` cho Topping) và chèn thêm dòng mới với 13 cột đầy đủ trong duy nhất một lệnh `setValues` ghi hàng loạt, đồng thời tự động xóa bộ nhớ đệm `CacheService`.
+
+### 11.3. Phụ Lục DOM ID Mới Của Phân Hệ Omni-Ingestion (`tab-menu.html` & `menu-manager.html`)
+
+| Phân Vùng Chức Năng | DOM ID Chuẩn | Loại Thẻ | Vai Trò & Nghiệp Vụ UI |
+|:---|:---|:---:|:---|
+| **Vùng Thao Tác Nạp Nhanh** | `#ingestionDropZoneMulti` | `div` | Vùng kéo thả file ảnh & lắng nghe sự kiện dán ảnh Clipboard `Ctrl+V` |
+| | `#btnModeOcrMenu` | `button` | Chuyển sang Chế độ 1: Quét Menu Bằng AI Vision |
+| | `#btnModeBatchImages` | `button` | Chuyển sang Chế độ 2: Tải Lên Nhiều Ảnh Món Hàng Loạt |
+| | `#inputBatchDishImages` | `input` | File input chọn hàng loạt ảnh món ăn |
+| | `#batchImageProgressBox` | `div` | Khung tiến trình nén Canvas và tải lên Drive theo thời gian thực |
+| | `#batchImageProgressBar` | `div` | Thanh đo phần trăm tiến độ tải ảnh |
+| | `#batchImageProgressText`| `span` | Nội dung mô tả trạng thái nén & tải ảnh |
+| **Thanh Công Cụ Hàng Loạt** | `#inpBulkDiscount` | `input` | Ô nhập % giảm giá chung cho toàn bộ bảng đệm |
+| | `#btnBulkApplyDiscount` | `button` | Nút áp dụng giảm giá hàng loạt |
+| | `#selBulkCategory` | `select` | Menu chọn danh mục áp dụng chung |
+| | `#btnBulkApplyCategory` | `button` | Nút gán danh mục hàng loạt |
+| | `#selBulkRole` | `select` | Menu chọn vai trò F&B (`CORE`, `TRAFFIC`, `BOOSTER`) |
+| | `#btnBulkApplyRole` | `button` | Nút gán vai trò hàng loạt |
+| | `#btnBulkCalculateReversePricing` | `button` | Nút tính tự động Giá Vốn COGS và Lợi Nhuận Ròng toàn bảng |
+| **Bảng Đệm Staging 13 Cột** | `#ingestionStagingContainer` | `div` | Khung bao bọc bảng dữ liệu chuẩn bị nạp |
+| | `#ingestionStagingCount` | `span` | Đếm số lượng món ăn trong bảng đệm |
+| | `#ingestionPreviewTableBody`| `tbody` | Thân bảng chứa các dòng món ăn chờ duyệt |
+| | `#btnStagingAddRow` | `button` | Nút thêm 1 dòng món mới trống vào bảng |
+| | `#btnStagingClear` | `button` | Nút xóa trắng toàn bộ dữ liệu bảng đệm |
+| | `#btnCommitBatchImport` | `button` | Nút 1-Click lưu toàn bộ thực đơn vào Sheet `DATA_MENU` |
+
+### 11.4. Kết Quả Kiểm Thử System Test Suite
+- Đạt **27/27 PASS (0 FAIL, 0 WARN)** trên toàn bộ 5 Module của `FRONTEND_WEB/system-test.html`.
+- Bổ sung Test #27 (`MOD3.7`): Kiểm tra toàn diện bộ nén `SmartCanvasCompressor` (2 modes `DISH_PHOTO`, `MENU_OCR`, hàm `formatBytes`) và hàm chuẩn hóa CDN Google Drive `normalizeDriveImageUrl`.
+

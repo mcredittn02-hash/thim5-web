@@ -65,7 +65,20 @@ var DEFAULT_SYSTEM_CONFIG_MAP = Object.freeze({
   D2C_DISCOUNT_PERCENT: "10",              // % Web D2C giảm giá so với App sàn
   D2C_BUFFER_PERCENT: "15",                // % Quỹ đệm D2C (Bù ship + Vòng quay + Thuế)
   TAX_RATE_HKD: "4.5",                     // Thuế khoán hộ kinh doanh 4.5%
-  MAX_PROMOTION_RATE: "15",                // Trần khuyến mãi toàn đơn tối đa 15%
+  MAX_PROMOTION_RATE: "15",
+  // 3b. Module Khuyến Mãi Voucher Ship Động Theo Lợi Nhuận Ròng
+  PROMO_SMART_SHIP_VOUCHER_ENABLED: "true",
+  PROMO_TIER_25_ENABLED: "true",
+  PROMO_TIER_50_ENABLED: "true",
+  PROMO_TIER_100_ENABLED: "true",
+  PROMO_UPSELL_NUDGE_ENABLED: "true",
+  PROMO_MIN_NET_PROFIT_FLOOR: "25000",
+  PROMO_SURPLUS_SHARE_RATIO: "0.7",
+  SHIP_CUST_RATE_PER_KM: "5000",
+  SHIP_PARTNER_RATE_PER_KM: "4500",
+  MAX_PROMO_CAP_PCT: "15",
+  COD_HOLDING_LIMIT: "300000",
+  TAX_HKD_PCT: "4.5",                // Trần khuyến mãi toàn đơn tối đa 15%
 
   // 4. Thanh toán & Ngân hàng
   BANK_BIN: "970422",
@@ -351,6 +364,16 @@ function getSystemDynamicConfig(optArg) {
         status: String(config.STORE_STATUS || "OPEN").toUpperCase(),
         closedMessage: config.STORE_CLOSED_MESSAGE || ""
       },
+      
+      promo: {
+        smartShipVoucherEnabled: config.PROMO_SMART_SHIP_VOUCHER_ENABLED !== false && String(config.PROMO_SMART_SHIP_VOUCHER_ENABLED) !== "false",
+        tier25Enabled: config.PROMO_TIER_25_ENABLED !== false && String(config.PROMO_TIER_25_ENABLED) !== "false",
+        tier50Enabled: config.PROMO_TIER_50_ENABLED !== false && String(config.PROMO_TIER_50_ENABLED) !== "false",
+        tier100Enabled: config.PROMO_TIER_100_ENABLED !== false && String(config.PROMO_TIER_100_ENABLED) !== "false",
+        upsellNudgeEnabled: config.PROMO_UPSELL_NUDGE_ENABLED !== false && String(config.PROMO_UPSELL_NUDGE_ENABLED) !== "false",
+        minNetProfitFloor: Number(config.PROMO_MIN_NET_PROFIT_FLOOR) || 25000,
+        surplusShareRatio: Number(config.PROMO_SURPLUS_SHARE_RATIO) || 0.7
+      },
       shipping: {
         customerRatePerKm: customerRate,
         driverRatePerKm: driverRate,
@@ -487,6 +510,30 @@ function saveSystemDynamicConfig(payload) {
     }
 
     // 2. Biểu phí Ship D2C Linh Hoạt (Mô hình v3.5: 5k thu khách / 4.5k trả shipper)
+    
+    // 3b. Cấu hình Khuyến Mãi & Voucher Ship Động Theo Lợi Nhuận Ròng
+    if (payload.promo) {
+      if (payload.promo.smartShipVoucherEnabled !== undefined) setConfigKey("PROMO_SMART_SHIP_VOUCHER_ENABLED", payload.promo.smartShipVoucherEnabled, "Bật/Tắt Voucher Ship động");
+      if (payload.promo.tier25Enabled !== undefined) setConfigKey("PROMO_TIER_25_ENABLED", payload.promo.tier25Enabled, "Bật/Tắt mốc giảm 25% ship");
+      if (payload.promo.tier50Enabled !== undefined) setConfigKey("PROMO_TIER_50_ENABLED", payload.promo.tier50Enabled, "Bật/Tắt mốc giảm 50% ship");
+      if (payload.promo.tier100Enabled !== undefined) setConfigKey("PROMO_TIER_100_ENABLED", payload.promo.tier100Enabled, "Bật/Tắt mốc giảm 100% ship");
+      if (payload.promo.upsellNudgeEnabled !== undefined) setConfigKey("PROMO_UPSELL_NUDGE_ENABLED", payload.promo.upsellNudgeEnabled, "Bật/Tắt gợi ý upsell mua thêm");
+      if (payload.promo.minNetProfitFloor !== undefined) setConfigKey("PROMO_MIN_NET_PROFIT_FLOOR", payload.promo.minNetProfitFloor, "Sàn lợi nhuận ròng tối thiểu");
+      if (payload.promo.surplusShareRatio !== undefined) setConfigKey("PROMO_SURPLUS_SHARE_RATIO", payload.promo.surplusShareRatio, "Tỷ lệ trích thặng dư trợ giá ship");
+    }
+
+    var promoKeyList = [
+      "PROMO_SMART_SHIP_VOUCHER_ENABLED", "PROMO_TIER_25_ENABLED", "PROMO_TIER_50_ENABLED",
+      "PROMO_TIER_100_ENABLED", "PROMO_UPSELL_NUDGE_ENABLED", "PROMO_MIN_NET_PROFIT_FLOOR",
+      "PROMO_SURPLUS_SHARE_RATIO"
+    ];
+    for (var pki = 0; pki < promoKeyList.length; pki++) {
+      var pkName = promoKeyList[pki];
+      if (payload[pkName] !== undefined) {
+        setConfigKey(pkName, payload[pkName], "Cấu hình Khuyến Mãi Smart Ship");
+      }
+    }
+
     if (payload.shipping) {
       if (payload.shipping.customerRatePerKm !== undefined) {
         setConfigKey("SHIPPING_RATE_CUSTOMER_PER_KM", payload.shipping.customerRatePerKm, "Cước thu khách/km (Legacy)");
@@ -1431,4 +1478,306 @@ function getStoreOperationalStatus() {
       closedMessage: ""
     };
   }
+}
+
+/**
+ * CẬP NHẬT NHANH CẤU HÌNH KHUYẾN MÃI VOUCHER SHIP ĐỘNG (API: updatePromoConfig)
+ * Dành riêng cho Master Admin từ Dashboard hoặc Modal Quản Lý Khuyến Mãi
+ * 
+ * @param {Object} payload - { smartShipVoucherEnabled, tier25Enabled, tier50Enabled, tier100Enabled, upsellNudgeEnabled, minNetProfitFloor, surplusShareRatio, masterKey }
+ * @returns {Object} Phản hồi chuẩn hóa API
+ */
+function updatePromoConfig(payload) {
+  payload = payload || {};
+  var masterKey = payload.masterKey || CONFIG_MANAGER_CONSTANTS.SUPER_ADMIN_DEFAULT_KEY;
+  return saveSystemDynamicConfig({
+    masterKey: masterKey,
+    promo: {
+      smartShipVoucherEnabled: payload.smartShipVoucherEnabled !== undefined ? payload.smartShipVoucherEnabled : payload.PROMO_SMART_SHIP_VOUCHER_ENABLED,
+      tier25Enabled: payload.tier25Enabled !== undefined ? payload.tier25Enabled : payload.PROMO_TIER_25_ENABLED,
+      tier50Enabled: payload.tier50Enabled !== undefined ? payload.tier50Enabled : payload.PROMO_TIER_50_ENABLED,
+      tier100Enabled: payload.tier100Enabled !== undefined ? payload.tier100Enabled : payload.PROMO_TIER_100_ENABLED,
+      upsellNudgeEnabled: payload.upsellNudgeEnabled !== undefined ? payload.upsellNudgeEnabled : payload.PROMO_UPSELL_NUDGE_ENABLED,
+      minNetProfitFloor: payload.minNetProfitFloor !== undefined ? payload.minNetProfitFloor : payload.PROMO_MIN_NET_PROFIT_FLOOR,
+      surplusShareRatio: payload.surplusShareRatio !== undefined ? payload.surplusShareRatio : payload.PROMO_SURPLUS_SHARE_RATIO
+    }
+  });
+}
+
+
+/**
+ * =========================================================================
+ * MODULE QUẢN LÝ CHIẾN DỊCH KHUYẾN MÃI (PROMO CAMPAIGNS CONTROLLER)
+ * =========================================================================
+ */
+
+/**
+ * ĐỌC DANH SÁCH CHIẾN DỊCH KHUYẾN MÃI (API: getPromoCampaigns)
+ * @returns {Object} Phản hồi chuẩn hóa API
+ */
+function getPromoCampaigns() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = getOrInitSysConfigSheet(ss);
+    var data = sheet.getDataRange().getValues();
+
+    var campaignsJson = "";
+    var isMasterEnabled = true;
+
+    for (var r = 1; r < data.length; r++) {
+      var k = String(data[r][0] || "").trim().toUpperCase();
+      if (k === "PROMO_CAMPAIGNS_JSON") {
+        campaignsJson = String(data[r][1] || "").trim();
+      } else if (k === "PROMO_MODULE_MASTER_ENABLED") {
+        var v = String(data[r][1] || "").trim().toLowerCase();
+        isMasterEnabled = (v !== "false");
+      }
+    }
+
+    var campaigns = [];
+    if (campaignsJson) {
+      try {
+        campaigns = JSON.parse(campaignsJson);
+      } catch (eParse) {
+        campaigns = DEFAULT_PROMO_CAMPAIGNS.slice();
+      }
+    } else {
+      campaigns = DEFAULT_PROMO_CAMPAIGNS.slice();
+    }
+
+    return {
+      status: "success",
+      code: 200,
+      isMasterEnabled: isMasterEnabled,
+      data: campaigns
+    };
+  } catch (err) {
+    return {
+      status: "success",
+      code: 200,
+      isMasterEnabled: true,
+      data: DEFAULT_PROMO_CAMPAIGNS.slice()
+    };
+  }
+}
+
+/**
+ * LƯU HOẶC CẬP NHẬT CHIẾN DỊCH KHUYẾN MÃI (API: savePromoCampaign)
+ * @param {Object} payload - Dữ liệu chiến dịch cần lưu
+ * @returns {Object} Phản hồi chuẩn hóa API
+ */
+function savePromoCampaign(payload) {
+  if (!payload || typeof payload !== "object") {
+    return { status: "error", code: 400, message: "Dữ liệu chiến dịch không hợp lệ!" };
+  }
+
+  var res = getPromoCampaigns();
+  var campaigns = res.data || [];
+
+  var cmpId = String(payload.id || payload.campaignId || ("CMP_" + Date.now())).trim();
+  var existingIdx = -1;
+
+  for (var i = 0; i < campaigns.length; i++) {
+    if (campaigns[i].id === cmpId) {
+      existingIdx = i;
+      break;
+    }
+  }
+
+  var campaignRecord = {
+    id: cmpId,
+    name: String(payload.name || "Chiến Dịch Khuyến Mãi").trim(),
+    status: String(payload.status || "ACTIVE").toUpperCase() === "PAUSED" ? "PAUSED" : "ACTIVE",
+    minMainDishes: Number(payload.minMainDishes) || 0,
+    minToppings: Number(payload.minToppings) || 0,
+    minDrinks: Number(payload.minDrinks) || 0,
+    minBoosterItems: Number(payload.minBoosterItems) || 0,
+    minSubtotal: Number(payload.minSubtotal) || 0,
+    minRetainedNetProfit: Number(payload.minRetainedNetProfit) || 25000,
+    shipDiscountPct: Number(payload.shipDiscountPct) || 0,
+    maxShipDiscount: Number(payload.maxShipDiscount) || 10000,
+    freeBoosterMaxPrice: Number(payload.freeBoosterMaxPrice) || 0,
+    freeGiftType: payload.freeGiftType ? String(payload.freeGiftType).trim() : null,
+    freeGiftDesc: payload.freeGiftDesc ? String(payload.freeGiftDesc).trim() : null,
+    description: String(payload.description || "").trim()
+  };
+
+  if (existingIdx !== -1) {
+    campaigns[existingIdx] = campaignRecord;
+  } else {
+    campaigns.push(campaignRecord);
+  }
+
+  // Lưu vào SYS_CONFIG
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = getOrInitSysConfigSheet(ss);
+  var data = sheet.getDataRange().getValues();
+  var jsonStr = JSON.stringify(campaigns);
+  var foundRow = -1;
+
+  for (var r = 1; r < data.length; r++) {
+    if (String(data[r][0] || "").trim().toUpperCase() === "PROMO_CAMPAIGNS_JSON") {
+      foundRow = r + 1;
+      break;
+    }
+  }
+
+  var nowStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+  if (foundRow !== -1) {
+    sheet.getRange(foundRow, 2).setValue(jsonStr);
+    sheet.getRange(foundRow, 4).setValue(nowStr);
+  } else {
+    sheet.appendRow(["PROMO_CAMPAIGNS_JSON", jsonStr, "Danh sách chiến dịch khuyến mãi (JSON)", nowStr]);
+  }
+
+  // Xóa Cache
+  try {
+    CacheService.getScriptCache().remove(CONFIG_MANAGER_CONSTANTS.CACHE_KEY_CONFIG);
+  } catch (eC) {}
+
+  return {
+    status: "success",
+    code: 200,
+    message: "Đã lưu chiến dịch khuyến mãi thành công!",
+    data: campaignRecord
+  };
+}
+
+/**
+ * BẬT/TẮT TRẠNG THÁI CHIẾN DỊCH KHUYẾN MÃI (API: togglePromoCampaignStatus)
+ * @param {Object} payload - { campaignId, status, masterEnabled }
+ * @returns {Object} Phản hồi chuẩn hóa API
+ */
+function togglePromoCampaignStatus(payload) {
+  payload = payload || {};
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = getOrInitSysConfigSheet(ss);
+  var nowStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+
+  // Nếu là công tắc tổng
+  if (payload.masterEnabled !== undefined) {
+    var isEnabled = Boolean(payload.masterEnabled);
+    var data = sheet.getDataRange().getValues();
+    var foundMaster = -1;
+    for (var r = 1; r < data.length; r++) {
+      if (String(data[r][0] || "").trim().toUpperCase() === "PROMO_MODULE_MASTER_ENABLED") {
+        foundMaster = r + 1;
+        break;
+      }
+    }
+    if (foundMaster !== -1) {
+      sheet.getRange(foundMaster, 2).setValue(String(isEnabled));
+      sheet.getRange(foundMaster, 4).setValue(nowStr);
+    } else {
+      sheet.appendRow(["PROMO_MODULE_MASTER_ENABLED", String(isEnabled), "Công tắc tổng Module Khuyến Mãi", nowStr]);
+    }
+
+    try { CacheService.getScriptCache().remove(CONFIG_MANAGER_CONSTANTS.CACHE_KEY_CONFIG); } catch (eC) {}
+    return {
+      status: "success",
+      code: 200,
+      message: isEnabled ? "Đã bật toàn bộ Module Khuyến Mãi!" : "Đã tạm dừng toàn bộ Module Khuyến Mãi!",
+      masterEnabled: isEnabled
+    };
+  }
+
+  // Bật/tắt từng chiến dịch
+  var cmpId = String(payload.campaignId || payload.id || "").trim();
+  if (!cmpId) {
+    return { status: "error", code: 400, message: "Thiếu mã chiến dịch cần thay đổi trạng thái!" };
+  }
+
+  var res = getPromoCampaigns();
+  var campaigns = res.data || [];
+  var targetCmp = null;
+
+  for (var i = 0; i < campaigns.length; i++) {
+    if (campaigns[i].id === cmpId) {
+      targetCmp = campaigns[i];
+      if (payload.status) {
+        targetCmp.status = String(payload.status).toUpperCase();
+      } else {
+        targetCmp.status = (targetCmp.status === "ACTIVE") ? "PAUSED" : "ACTIVE";
+      }
+      break;
+    }
+  }
+
+  if (!targetCmp) {
+    return { status: "error", code: 404, message: "Không tìm thấy chiến dịch: " + cmpId };
+  }
+
+  // Ghi lại JSON vào Sheet
+  var dataSheet = sheet.getDataRange().getValues();
+  var jsonRow = -1;
+  for (var j = 1; j < dataSheet.length; j++) {
+    if (String(dataSheet[j][0] || "").trim().toUpperCase() === "PROMO_CAMPAIGNS_JSON") {
+      jsonRow = j + 1;
+      break;
+    }
+  }
+
+  var updatedJson = JSON.stringify(campaigns);
+  if (jsonRow !== -1) {
+    sheet.getRange(jsonRow, 2).setValue(updatedJson);
+    sheet.getRange(jsonRow, 4).setValue(nowStr);
+  } else {
+    sheet.appendRow(["PROMO_CAMPAIGNS_JSON", updatedJson, "Danh sách chiến dịch khuyến mãi (JSON)", nowStr]);
+  }
+
+  try { CacheService.getScriptCache().remove(CONFIG_MANAGER_CONSTANTS.CACHE_KEY_CONFIG); } catch (eC) {}
+
+  return {
+    status: "success",
+    code: 200,
+    message: "Đã chuyển trạng thái chiến dịch sang: " + targetCmp.status,
+    data: targetCmp
+  };
+}
+
+/**
+ * XÓA CHIẾN DỊCH KHUYẾN MÃI (API: deletePromoCampaign)
+ * @param {Object} payload - { campaignId }
+ * @returns {Object} Phản hồi chuẩn hóa API
+ */
+function deletePromoCampaign(payload) {
+  payload = payload || {};
+  var cmpId = String(payload.campaignId || payload.id || "").trim();
+  if (!cmpId) {
+    return { status: "error", code: 400, message: "Thiếu mã chiến dịch cần xóa!" };
+  }
+
+  var res = getPromoCampaigns();
+  var campaigns = res.data || [];
+  var filtered = campaigns.filter(function(c) { return c.id !== cmpId; });
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = getOrInitSysConfigSheet(ss);
+  var data = sheet.getDataRange().getValues();
+  var nowStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+
+  var jsonRow = -1;
+  for (var r = 1; r < data.length; r++) {
+    if (String(data[r][0] || "").trim().toUpperCase() === "PROMO_CAMPAIGNS_JSON") {
+      jsonRow = r + 1;
+      break;
+    }
+  }
+
+  var updatedJson = JSON.stringify(filtered);
+  if (jsonRow !== -1) {
+    sheet.getRange(jsonRow, 2).setValue(updatedJson);
+    sheet.getRange(jsonRow, 4).setValue(nowStr);
+  } else {
+    sheet.appendRow(["PROMO_CAMPAIGNS_JSON", updatedJson, "Danh sách chiến dịch khuyến mãi (JSON)", nowStr]);
+  }
+
+  try { CacheService.getScriptCache().remove(CONFIG_MANAGER_CONSTANTS.CACHE_KEY_CONFIG); } catch (eC) {}
+
+  return {
+    status: "success",
+    code: 200,
+    message: "Đã xóa chiến dịch " + cmpId + " thành công!",
+    data: filtered
+  };
 }

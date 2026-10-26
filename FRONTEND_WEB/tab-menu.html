@@ -241,10 +241,11 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 5. SUB-WORKSPACE 3: TRUNG TÂM NẠP DỮ LIỆU ĐA KÊNH HÀNG LOẠT (OMNI-INGESTION) -->
+  <!-- 5. SUB-WORKSPACE 3: SMART VISUAL OMNI-INGESTION (NHẬP THỰC ĐƠN NHANH TRỰC QUAN) -->
   <!-- ========================================================================= -->
   <div id="subWorkspaceIngestion" class="space-y-4 hidden">
-    <div class="flex items-center justify-between bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+    <!-- Header Điều Hướng -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
       <div class="flex items-center gap-2.5">
         <button type="button" 
                 onclick="TabMenuController.switchSubTab('MENU_ITEMS')" 
@@ -252,112 +253,210 @@
           <i class="fa-solid fa-arrow-left"></i>
           <span>Về Thực Đơn</span>
         </button>
-        <span class="text-xs font-black uppercase tracking-wider text-slate-200">Trung Tâm Nạp Thực Đơn Đa Kênh Tự Động (AI Vision + Excel + URL)</span>
-      </div>
-    </div>
-
-    <!-- 3 Kênh nạp dữ liệu thông minh -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      
-      <!-- Kênh 1: Nạp File Excel / CSV -->
-      <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
-        <div class="flex items-center gap-2 text-emerald-400">
-          <i class="fa-solid fa-file-excel text-lg"></i>
-          <span class="font-bold text-xs">Kênh 1: Tệp Excel / CSV</span>
-        </div>
-        <p class="text-[11px] text-slate-400 leading-relaxed">
-          Tải bảng tính Excel (.xlsx, .csv) chứa danh sách món. Hệ thống tự động bóc tách 13 cột và tính ngược giá Reverse-Pricing.
-        </p>
-        <div class="space-y-2">
-          <input type="file" 
-                 id="inputMenuExcelFile" 
-                 accept=".xlsx,.xls,.csv" 
-                 onchange="TabMenuController.handleExcelFileSelect(event)" 
-                 class="block w-full text-xs text-slate-400 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-500/20 file:text-emerald-300 hover:file:bg-emerald-500/30 file:cursor-pointer">
-          <span id="ingestionExcelStatus" class="block text-[10px] text-slate-500 font-mono">Chưa chọn file</span>
+        <div>
+          <h3 class="text-xs font-black uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+            <span class="text-amber-400">⚡</span> Nhập Thực Đơn Nhanh Bằng Canvas &amp; Google Drive (Smart Visual Omni-Ingestion)
+          </h3>
+          <p class="text-[10.5px] text-slate-400">Tự động nén Canvas &lt; 80KB, đẩy lên Drive và suy luận 13 cột Reverse-Pricing cho hàng chục món cùng lúc.</p>
         </div>
       </div>
-
-      <!-- Kênh 2: Quét Ảnh Thực Đơn Bằng AI Gemini Vision -->
-      <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
-        <div class="flex items-center gap-2 text-sky-400">
-          <i class="fa-solid fa-camera-viewfinder text-lg"></i>
-          <span class="font-bold text-xs">Kênh 2: Gemini 1.5 Vision OCR</span>
-        </div>
-        <p class="text-[11px] text-slate-400 leading-relaxed">
-          Chụp ảnh menu giấy hoặc bảng giá. Trợ lý AI Vision tự động nhận diện tên món, giá bán và phân nhóm danh mục thông minh.
-        </p>
-        <div class="space-y-2">
-          <input type="file" 
-                 id="inputMenuOcrImage" 
-                 accept="image/*" 
-                 onchange="TabMenuController.triggerGeminiVisionOcr(event)" 
-                 class="block w-full text-xs text-slate-400 file:mr-2.5 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-500/20 file:text-sky-300 hover:file:bg-sky-500/30 file:cursor-pointer">
-          <span id="ingestionOcrStatus" class="block text-[10px] text-slate-500 font-mono">Chưa chọn ảnh</span>
-        </div>
-      </div>
-
-      <!-- Kênh 3: Cào Dữ Liệu Từ Đường Dẫn URL Công Khai -->
-      <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
-        <div class="flex items-center gap-2 text-amber-400">
-          <i class="fa-solid fa-globe text-lg"></i>
-          <span class="font-bold text-xs">Kênh 3: Cào Từ Website / Fanpage</span>
-        </div>
-        <p class="text-[11px] text-slate-400 leading-relaxed">
-          Nhập đường dẫn trang menu công khai (ShopeeFood, Grab, Website). Hệ thống sẽ trích xuất danh sách món tự động.
-        </p>
-        <div class="space-y-2">
-          <div class="flex gap-1.5">
-            <input type="url" 
-                   id="ingestionTargetUrl" 
-                   placeholder="https://..." 
-                   class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 font-sans">
-            <button type="button" 
-                    onclick="TabMenuController.handleUrlExtraction()" 
-                    class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition shrink-0 active:scale-95">
-              Quét
-            </button>
-          </div>
-          <span id="ingestionUrlStatus" class="block text-[10px] text-slate-500 font-mono">Sẵn sàng nhận URL</span>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Bảng xem trước dữ liệu trích xuất trước khi ghi vào CSDL -->
-    <div class="rounded-2xl bg-slate-900/40 border border-slate-800 overflow-hidden shadow-xl space-y-3 p-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-black uppercase tracking-wider text-slate-200">Vùng Đệm Trích Xuất (Staging Preview Buffer)</span>
-          <span id="ingestionPreviewCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-slate-800 text-amber-300 border border-slate-700">0 món chờ nạp</span>
-        </div>
-
+      <div class="flex items-center gap-2">
         <button type="button" 
-                id="btnCommitBatchImport" 
-                onclick="TabMenuController.commitBatchImport()" 
-                disabled 
-                class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs transition flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 active:scale-95">
-          <span>🚀</span>
-          <span>Xác Nhận Nạp Vào CSDL</span>
+                id="btnModeOcrMenu" 
+                onclick="TabMenuController.switchIngestionMode('OCR_MENU')" 
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-sky-500/20 text-sky-300 border border-sky-500/40">
+          <i class="fa-solid fa-camera-retro"></i>
+          <span>1. Quét Tờ Menu Bằng AI</span>
+        </button>
+        <button type="button" 
+                id="btnModeBatchImages" 
+                onclick="TabMenuController.switchIngestionMode('BATCH_IMAGES')" 
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-slate-800 text-slate-400 hover:text-white border border-slate-700">
+          <i class="fa-solid fa-images"></i>
+          <span>2. Tải Chùm Ảnh Món Ăn</span>
         </button>
       </div>
+    </div>
 
-      <div class="overflow-x-auto custom-scroll border border-slate-800 rounded-xl">
+    <!-- BƯỚC 1: VÙNG KÉO THẢ ĐA NĂNG & DÁN NHANH CTRL+V -->
+    <div id="ingestionDropZoneMulti" 
+         class="relative p-6 rounded-3xl bg-gradient-to-br from-slate-900/90 to-slate-950 border-2 border-dashed border-amber-500/40 hover:border-amber-400 transition text-center space-y-4 shadow-xl">
+      
+      <!-- Chế độ 1: Quét Ảnh Tờ Menu Giấy / Scan Bằng Gemini OCR -->
+      <div id="boxModeOcrMenu" class="space-y-3">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xl shadow-inner">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-white">Chế Độ 1: Quét Ảnh Tờ Menu / Bảng Giá Giấy Bằng AI</h4>
+          <p class="text-xs text-slate-400 max-w-md mx-auto mt-1">
+            Kéo thả ảnh tờ menu, bấm nút bên dưới hoặc <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 font-mono text-[10px]">Ctrl+V</kbd> để dán ảnh trực tiếp từ màn hình/Zalo. AI sẽ tự đọc ra 10 - 30 món ăn cùng lúc!
+          </p>
+        </div>
+        <div class="flex items-center justify-center gap-3">
+          <label class="cursor-pointer px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-sky-600/20 active:scale-95">
+            <i class="fa-solid fa-camera"></i>
+            <span>Chọn Ảnh Tờ Menu Giấy</span>
+            <input type="file" id="inputMenuOcrImage" accept="image/*" onchange="TabMenuController.triggerGeminiVisionOcr(event)" class="hidden">
+          </label>
+        </div>
+        <div id="ingestionOcrStatus" class="text-xs font-mono text-slate-400">Sẵn sàng nhận ảnh tờ menu (Canvas tự nén chuẩn 1280px &lt; 150KB)...</div>
+      </div>
+
+      <!-- Chế độ 2: Tải Lên Hàng Loạt Ảnh Món Ăn (Tách tên món & giá từ file) -->
+      <div id="boxModeBatchImages" class="space-y-3 hidden">
+        <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl shadow-inner">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-white">Chế Độ 2: Tải Lên Hàng Loạt Nhiều Ảnh Món Ăn Cùng Lúc</h4>
+          <p class="text-xs text-slate-400 max-w-lg mx-auto mt-1">
+            Chọn 5, 10, 20 ảnh món ăn. Canvas tự động nén siêu nhẹ &lt; 80KB, đẩy lên Google Drive và tự động tách tên món &amp; giá tiền từ tên file (Ví dụ: <code class="text-amber-300 font-mono">Hu Tieu Nam Vang 55k.jpg</code>).
+          </p>
+        </div>
+        <div class="flex items-center justify-center gap-3">
+          <label class="cursor-pointer px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-600/20 active:scale-95">
+            <i class="fa-solid fa-images"></i>
+            <span>Chọn Nhiều Ảnh Món Ăn</span>
+            <input type="file" id="inputBatchDishImages" multiple accept="image/*" onchange="TabMenuController.handleBatchImageUpload(event)" class="hidden">
+          </label>
+        </div>
+        
+        <!-- Khung tiến trình nén & tải ảnh -->
+        <div id="batchImageProgressBox" class="hidden max-w-md mx-auto space-y-2 text-left">
+          <div class="flex justify-between text-[11px] font-mono text-slate-300">
+            <span id="batchImageProgressText">Đang xử lý ảnh: 0/0...</span>
+            <span id="batchImageProgressPct" class="text-amber-400 font-bold">0%</span>
+          </div>
+          <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+            <div id="batchImageProgressBar" class="bg-gradient-to-r from-amber-500 to-emerald-500 h-2 rounded-full transition-all duration-150" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kênh Bổ Trợ (Thu Gọn): Excel & URL (Giữ nguyên DOM ID SSOT) -->
+      <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400">
+        <div class="flex items-center gap-2 bg-slate-950/60 px-3 py-1.5 rounded-xl border border-slate-800">
+          <i class="fa-solid fa-file-excel text-emerald-400"></i>
+          <span>Excel:</span>
+          <input type="file" id="inputMenuExcelFile" accept=".xlsx,.xls,.csv" onchange="TabMenuController.handleExcelFileSelect(event)" class="text-[11px] file:mr-1 file:py-0.5 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:bg-emerald-500/20 file:text-emerald-300 file:cursor-pointer">
+          <span id="ingestionExcelStatus" class="text-[10px] text-slate-500 font-mono">Chưa chọn</span>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-950/60 px-3 py-1.5 rounded-xl border border-slate-800">
+          <i class="fa-solid fa-globe text-amber-400"></i>
+          <span>Link Menu:</span>
+          <input type="url" id="ingestionTargetUrl" placeholder="https://..." class="bg-slate-900 border border-slate-800 rounded-lg px-2 py-0.5 text-[11px] text-white w-36">
+          <button type="button" onclick="TabMenuController.handleUrlExtraction()" class="px-2 py-0.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-[10px] rounded-lg">Quét</button>
+          <span id="ingestionUrlStatus" class="text-[10px] text-slate-500 font-mono hidden">Sẵn sàng</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BƯỚC 2: THANH CÔNG CỤ ÁP DỤNG HÀNG LOẠT 1-CHẠM (BULK PRICING TOOLBAR) -->
+    <div class="bg-slate-900/90 p-4 rounded-2xl border border-slate-800 space-y-3">
+      <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+        <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Thanh Công Cụ Áp Dụng Hàng Loạt 1-Chạm (Bulk Pricing Toolbar)</span>
+        </span>
+        <span class="text-[10.5px] text-slate-400">Tự động hóa giá bán và biên lợi nhuận toàn bảng nháp</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+        <!-- Chỉnh % Giảm D2C chung -->
+        <div class="flex items-center gap-1.5 bg-slate-950 p-2 rounded-xl border border-slate-800">
+          <span class="text-slate-400 text-[11px] shrink-0">% Giảm D2C:</span>
+          <input type="number" id="inpBulkDiscount" value="15" min="0" max="90" class="w-14 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-center font-mono font-bold text-emerald-400">
+          <button type="button" id="btnBulkApplyDiscount" onclick="TabMenuController.bulkApplyDiscount()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-[10.5px] transition">Áp dụng</button>
+        </div>
+
+        <!-- Gán Danh Mục chung -->
+        <div class="flex items-center gap-1.5 bg-slate-950 p-2 rounded-xl border border-slate-800">
+          <span class="text-slate-400 text-[11px] shrink-0">Danh mục:</span>
+          <select id="selBulkCategory" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white">
+            <!-- Nạp động qua JS -->
+          </select>
+          <button type="button" id="btnBulkApplyCategory" onclick="TabMenuController.bulkApplyCategory()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-[10.5px] transition">Gán</button>
+        </div>
+
+        <!-- Gán Tag Chiến Lược chung -->
+        <div class="flex items-center gap-1.5 bg-slate-950 p-2 rounded-xl border border-slate-800">
+          <span class="text-slate-400 text-[11px] shrink-0">Tag:</span>
+          <select id="selBulkRole" class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white font-mono">
+            <option value="CORE">CORE (Chủ Lực ~38% FC)</option>
+            <option value="TRAFFIC">TRAFFIC (Mồi Vé ~48% FC)</option>
+            <option value="BOOSTER">BOOSTER (Nước/Top ~18% FC)</option>
+          </select>
+          <button type="button" id="btnBulkApplyRole" onclick="TabMenuController.bulkApplyRole()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-[10.5px] transition">Gán</button>
+        </div>
+
+        <!-- Nút Tự Động Tính Reverse-Pricing Toàn Bảng -->
+        <button type="button" 
+                id="btnBulkCalculateReversePricing" 
+                onclick="TabMenuController.bulkCalculateReversePricing()" 
+                class="px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-black rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/20 active:scale-95">
+          <span>⚡</span>
+          <span>Tự Động Tính Giá Vốn &amp; LNR Toàn Bảng</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- BƯỚC 3: BẢNG NHÁP KIỂM DUYỆT TRỰC QUAN (INTERACTIVE 13-COLUMN STAGING GRID) -->
+    <div class="rounded-3xl bg-slate-900/60 border border-slate-800 overflow-hidden shadow-2xl space-y-3 p-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-800/80 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xs font-black uppercase tracking-wider text-slate-200">Bảng Nháp Kiểm Duyệt (Interactive Staging Grid)</span>
+          <span id="ingestionPreviewCountBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">0 món chờ nạp</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button type="button" 
+                  id="btnStagingAddRow" 
+                  onclick="TabMenuController.addEmptyStagingRow()" 
+                  class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition flex items-center gap-1 border border-slate-700">
+            <i class="fa-solid fa-plus text-[10px]"></i>
+            <span>+ Thêm Dòng</span>
+          </button>
+          <button type="button" 
+                  id="btnStagingClear" 
+                  onclick="TabMenuController.clearStagingBuffer()" 
+                  class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold transition border border-rose-500/30">
+            <span>🧹 Xóa Hết</span>
+          </button>
+          <button type="button" 
+                  id="btnCommitBatchImport" 
+                  onclick="TabMenuController.commitBatchImport()" 
+                  disabled 
+                  class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs transition flex items-center gap-1.5 shadow-lg shadow-emerald-600/30 active:scale-95">
+            <span>🚀</span>
+            <span id="btnCommitText">Lưu Tất Cả Vào Thực Đơn (0 Món)</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto custom-scroll border border-slate-800/80 rounded-2xl bg-slate-950/40">
         <table class="w-full text-left border-collapse text-xs">
           <thead>
-            <tr class="bg-slate-950 text-slate-400 font-bold border-b border-slate-800 text-[10.5px] uppercase tracking-wider font-mono">
-              <th class="py-2.5 px-3">Mã SKU</th>
-              <th class="py-2.5 px-3">Tên Món Ăn</th>
-              <th class="py-2.5 px-3">Danh Mục</th>
-              <th class="py-2.5 px-3 text-right">Giá App (+25%)</th>
-              <th class="py-2.5 px-3 text-right text-amber-400">Giá Web D2C</th>
-              <th class="py-2.5 px-3 text-right">Giá Vốn COGS</th>
+            <tr class="bg-slate-950 text-slate-400 font-bold border-b border-slate-800 text-[10px] uppercase tracking-wider font-mono">
+              <th class="py-2.5 px-2.5 text-center w-10">STT</th>
+              <th class="py-2.5 px-2 text-center w-20">Ảnh Món</th>
+              <th class="py-2.5 px-2 w-24">Mã SKU</th>
+              <th class="py-2.5 px-3 min-w-[160px]">Tên Món Ăn (*)</th>
+              <th class="py-2.5 px-2 min-w-[120px]">Danh Mục</th>
+              <th class="py-2.5 px-2 text-right w-24">Giá App</th>
+              <th class="py-2.5 px-2 text-center w-16">% Giảm</th>
+              <th class="py-2.5 px-2 text-right w-24 text-amber-400">Giá Web D2C</th>
+              <th class="py-2.5 px-2 text-right w-24">Giá Vốn COGS</th>
+              <th class="py-2.5 px-2 text-right w-24 text-emerald-400">Lợi Nhuận (LNR)</th>
+              <th class="py-2.5 px-2 w-28">Tag Chiến Lược</th>
+              <th class="py-2.5 px-2 text-center w-24">Food Cost %</th>
+              <th class="py-2.5 px-2 text-center w-10">Xóa</th>
             </tr>
           </thead>
           <tbody id="ingestionPreviewTableBody" class="divide-y divide-slate-800/60 font-sans">
             <tr>
-              <td colspan="6" class="py-8 text-center text-slate-500 text-xs">
-                Chưa có dữ liệu nào trong vùng đệm trích xuất. Vui lòng tải file Excel, quét ảnh OCR hoặc nhập URL.
+              <td colspan="13" class="py-12 text-center text-slate-500 text-xs">
+                Chưa có dữ liệu nào trong bảng nháp. Vui lòng quét ảnh menu AI, tải chùm ảnh hoặc dán ảnh (Ctrl+V).
               </td>
             </tr>
           </tbody>

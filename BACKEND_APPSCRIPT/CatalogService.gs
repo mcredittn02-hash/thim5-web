@@ -727,10 +727,11 @@ var CatalogService = (function() {
    */
   function batchImportMenuItems(payload) {
     try {
-      var items = payload.items;
+      var items = payload ? (payload.items || payload.data) : null;
       if (!Array.isArray(items) || items.length === 0) {
         return {
           status: "error",
+          success: false,
           code: "ERR_INVALID_PAYLOAD",
           message: "Danh sách món nạp hàng loạt không được rỗng!"
         };
@@ -741,23 +742,52 @@ var CatalogService = (function() {
       if (!sheet) {
         return {
           status: "error",
+          success: false,
           code: "ERR_SHEET_NOT_FOUND",
           message: "Không tìm thấy sheet [DATA_MENU]!"
         };
       }
 
-      var rowsToAppend = [];
       var defaultDiscount = getDefaultD2cDiscount_();
+
+      // Đọc toàn bộ CSDL hiện có để hỗ trợ UPSERT (Cập nhật nếu trùng mã, Thêm mới nếu chưa có)
+      var existingData = [];
+      var lastRow = sheet.getLastRow();
+      if (lastRow > 1) {
+        existingData = sheet.getRange(2, 1, lastRow - 1, 13).getValues();
+      }
+
+      // Xây dựng map tra cứu theo mã món (Uppercase)
+      var codeToRowIndex = {};
+      for (var r = 0; r < existingData.length; r++) {
+        var existingCode = String(existingData[r][0] || "").trim().toUpperCase();
+        if (existingCode) {
+          codeToRowIndex[existingCode] = r; // Index trong existingData (row trong sheet = r + 2)
+        }
+      }
+
+      var updatedCount = 0;
+      var insertedCount = 0;
+      var newRowsToAppend = [];
 
       for (var i = 0; i < items.length; i++) {
         var it = items[i];
-        var code = String(it.code || ("M_" + (i + 1))).trim().toUpperCase();
         var name = String(it.name || "Món mới").trim();
         var category = String(it.category || "Món Cơm").trim();
+        var rawCode = String(it.code || "").trim().toUpperCase();
+        
+        // Tự sinh mã nếu chưa có
+        if (!rawCode) {
+          var prefix = "M_";
+          if (category.indexOf("Nước") !== -1 || category.indexOf("BOOSTER") !== -1) prefix = "D_";
+          else if (category.indexOf("Topping") !== -1) prefix = "TOP_";
+          rawCode = prefix + Date.now().toString(36).toUpperCase() + "_" + (i + 1);
+        }
+        var code = rawCode;
+
         var d2cPrice = Number(it.d2cPrice || it.price || 0) || 0;
         var rawAppPrice = Number(it.appPrice || 0) || 0;
 
-        // Nhận discountPercent động từ payload/Excel/OCR thay vì hardcode 20
         var rawDiscount = (it.discountPercent !== undefined && it.discountPercent !== null && it.discountPercent !== "")
           ? it.discountPercent
           : ((it.discount !== undefined && it.discount !== null && it.discount !== "")
@@ -775,7 +805,7 @@ var CatalogService = (function() {
           discountPercent = defaultDiscount;
         }
 
-        var discountMultiplier = (discountPercent > 0 && discountPercent < 100) ? (1 - discountPercent / 100) : 0.8;
+        var discountMultiplier = (discountPercent > 0 && discountPercent < 100) ? (1 - discountPercent / 100) : 0.85;
 
         var appPrice = rawAppPrice;
         if (appPrice <= 0 && d2cPrice > 0) {
@@ -783,38 +813,82 @@ var CatalogService = (function() {
         } else if (d2cPrice <= 0 && appPrice > 0) {
           d2cPrice = Math.round((appPrice * discountMultiplier) / 1000) * 1000;
         }
-        var cogs = Number(it.cogs || it.cost || 0) || 0;
-        var profit = Math.max(0, d2cPrice - cogs);
-        var status = "ACTIVE";
-        var desc = String(it.description || it.desc || "").trim();
-        var imageUrl = String(it.imageUrl || it.image || "").trim();
-        var boosterSoup = String(it.boosterSoup || "").trim();
-        var role = String(it.role || it.tag || "CORE").trim().toUpperCase();
 
-        rowsToAppend.push([
+        var cogs = Number(it.cogs || it.cost || 0) || 0;
+        if (cogs <= 0 && d2cPrice > 0) {
+          var catUpper = category.toUpperCase();
+          if (catUpper.indexOf("NƯỚC") !== -1 || catUpper.indexOf("DRINK") !== -1 || catUpper.indexOf("TOPPING") !== -1) {
+            cogs = Math.round(d2cPrice * 0.18);
+          } else {
+            cogs = Math.round(d2cPrice * 0.38);
+          }
+        }
+
+        var profit = Math.max(0, d2cPrice - cogs - Math.round(d2cPrice * 0.05));
+        var status = String(it.status || "ACTIVE").trim().toUpperCase();
+        if (status !== "ACTIVE" && status !== "OUT_OF_STOCK") status = "ACTIVE";
+
+        var desc = String(it.description || it.desc || "").trim();
+        var rawImg = String(it.imageUrl || it.image || it.directCdnUrl || "").trim();
+        var imageUrl = typeof normalizeDriveImageUrl === "function" ? normalizeDriveImageUrl(rawImg) : rawImg;
+        var boosterSoup = String(it.boosterSoup || it.crossSellSuggest || "").trim();
+        
+        var role = String(it.role || it.tag || "").trim().toUpperCase();
+        if (!role) {
+          var catUpper2 = category.toUpperCase();
+          if (catUpper2.indexOf("NƯỚC") !== -1 || catUpper2.indexOf("TOPPING") !== -1) role = "BOOSTER";
+          else if (cogs / d2cPrice >= 0.45) role = "TRAFFIC";
+          else role = "CORE";
+        }
+
+        var rowRecord = [
           code, name, category, appPrice, discountPercent,
           d2cPrice, cogs, profit, status, desc, imageUrl, boosterSoup, role
-        ]);
+        ];
+
+        // Nếu mã đã tồn tại -> Cập nhật trực tiếp vào existingData
+        if (codeToRowIndex[code] !== undefined) {
+          var exIdx = codeToRowIndex[code];
+          existingData[exIdx] = rowRecord;
+          updatedCount++;
+        } else {
+          // Thêm mới
+          newRowsToAppend.push(rowRecord);
+          codeToRowIndex[code] = existingData.length + newRowsToAppend.length - 1;
+          insertedCount++;
+        }
       }
 
-      if (rowsToAppend.length > 0) {
+      // Ghi cập nhật các dòng cũ nếu có
+      if (updatedCount > 0 && existingData.length > 0) {
+        sheet.getRange(2, 1, existingData.length, 13).setValues(existingData);
+      }
+
+      // Ghi thêm các dòng mới bằng 1 lần setValues siêu tốc
+      if (newRowsToAppend.length > 0) {
         var startRow = sheet.getLastRow() + 1;
-        sheet.getRange(startRow, 1, rowsToAppend.length, 13).setValues(rowsToAppend);
+        sheet.getRange(startRow, 1, newRowsToAppend.length, 13).setValues(newRowsToAppend);
       }
 
       invalidateCatalogCache_();
 
       return {
         status: "success",
+        success: true,
         code: "OK",
-        message: "Đã nạp thành công " + rowsToAppend.length + " món ăn vào CSDL DATA_MENU!",
-        data: { count: rowsToAppend.length }
+        message: "Đã nạp thành công " + (updatedCount + insertedCount) + " món vào CSDL DATA_MENU (" + insertedCount + " thêm mới, " + updatedCount + " cập nhật)!",
+        data: {
+          total: updatedCount + insertedCount,
+          inserted: insertedCount,
+          updated: updatedCount
+        }
       };
 
     } catch (e) {
       Logger.log("🚨 [CatalogService.batchImportMenuItems] Lỗi: " + e.message);
       return {
         status: "error",
+        success: false,
         code: "ERR_SCHEMA_MISMATCH",
         message: "Lỗi nạp thực đơn hàng loạt: " + e.message
       };

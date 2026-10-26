@@ -106,7 +106,23 @@
         FALLBACK_D2C_DISCOUNT_PERCENT: 10.0,  // Web D2C giß║úm 10% so vß╗¢i Gi├í App S├án
         FALLBACK_D2C_BUFFER_PERCENT: 15.0,    // Quß╗╣ ─æß╗çm D2C 15% (B├╣ ship + Qu├á + Thuß║┐)
         FALLBACK_TAX_RATE_HKD: 0.045,         // Thuß║┐ HKD 4.5%
-        FALLBACK_MAX_PROMOTION_RATE: 0.15,    // Kh├│a trß║ºn khuyß║┐n m├úi tß╗æi ─æa 15% doanh thu gß╗Öp
+        FALLBACK_MAX_PROMOTION_RATE: 0.15,
+        // Fallback Cấu hình Khuyến Mãi Smart Ship Voucher Theo Lợi Nhuận Ròng
+                PROMO_MODULE_MASTER_ENABLED: true,
+        PROMO_CAMPAIGNS_JSON: "",
+        PROMO_SMART_SHIP_VOUCHER_ENABLED: true,
+        PROMO_TIER_25_ENABLED: true,
+        PROMO_TIER_50_ENABLED: true,
+        PROMO_TIER_100_ENABLED: true,
+        PROMO_UPSELL_NUDGE_ENABLED: true,
+        PROMO_MIN_NET_PROFIT_FLOOR: 25000,
+        PROMO_SURPLUS_SHARE_RATIO: 0.7,
+        MASTER_PLATFORM_FEE_PCT: 5.0,
+        SHIP_CUST_RATE_PER_KM: 5000,
+        SHIP_PARTNER_RATE_PER_KM: 4500,
+        MAX_PROMO_CAP_PCT: 15,
+        COD_HOLDING_LIMIT: 300000,
+        TAX_HKD_PCT: 4.5,    // Kh├│a trß║ºn khuyß║┐n m├úi tß╗æi ─æa 15% doanh thu gß╗Öp
         MAX_COD_HOLDING_PER_SHIPPER: 300000,  // Hß║ín mß╗⌐c ├┤m tiß╗ün mß║╖t COD tß╗æi ─æa cß╗ºa Shipper
         MIN_AOV_LUCKY_WHEEL: 79000            // Mß╗æc ─æ╞ín tß╗æi thiß╗âu k├¡ch hoß║ít v├▓ng quay may mß║»n
     });
@@ -463,6 +479,13 @@
         SAVE_SYSTEM_DYNAMIC_CONFIG: "saveSystemDynamicConfig",
         SAVE_SYSTEM_CONFIG: "saveSystemDynamicConfig",
         CALCULATE_DYNAMIC_SHIPPING_FEE: "calculateDynamicShippingFee",
+        EVALUATE_SMART_SHIP_VOUCHER: "evaluateSmartShipVoucher",
+                GET_PROMO_CAMPAIGNS: "getPromoCampaigns",
+        SAVE_PROMO_CAMPAIGN: "savePromoCampaign",
+        TOGGLE_PROMO_CAMPAIGN_STATUS: "togglePromoCampaignStatus",
+        DELETE_PROMO_CAMPAIGN: "deletePromoCampaign",
+        EVALUATE_ORDER_PROMO_CAMPAIGNS: "evaluateOrderPromoCampaigns",
+        UPDATE_PROMO_CONFIG: "updatePromoConfig",
 
         // Trạm Bếp KDS & Bàn Giao Món
         GET_KITCHEN_KDS_ORDERS: "getKitchenKdsOrders",
@@ -655,7 +678,23 @@
         D2C_BUFFER_PERCENT: "D2C_BUFFER_PERCENT",                       // % Quß╗╣ ─æß╗çm D2C (B├╣ ship + V├▓ng quay + Thuß║┐)
         PLATFORM_MASTER_FEE: "PLATFORM_MASTER_FEE",                     // Ph├¡ nß╗ün tß║úng SaaS
         TAX_RATE_HKD: "TAX_RATE_HKD",                                   // Thuß║┐ kho├ín HKD 4.5%
-        MAX_PROMOTION_RATE: "MAX_PROMOTION_RATE",                       // Trß║ºn khuyß║┐n m├úi tß╗æi ─æa 15%
+        MAX_PROMOTION_RATE: "MAX_PROMOTION_RATE",
+        // Module Khuyến Mãi Voucher Ship Động Theo Lợi Nhuận Ròng
+                PROMO_MODULE_MASTER_ENABLED: "PROMO_MODULE_MASTER_ENABLED",
+        PROMO_CAMPAIGNS_JSON: "PROMO_CAMPAIGNS_JSON",
+        PROMO_SMART_SHIP_VOUCHER_ENABLED: "PROMO_SMART_SHIP_VOUCHER_ENABLED",
+        PROMO_TIER_25_ENABLED: "PROMO_TIER_25_ENABLED",
+        PROMO_TIER_50_ENABLED: "PROMO_TIER_50_ENABLED",
+        PROMO_TIER_100_ENABLED: "PROMO_TIER_100_ENABLED",
+        PROMO_UPSELL_NUDGE_ENABLED: "PROMO_UPSELL_NUDGE_ENABLED",
+        PROMO_MIN_NET_PROFIT_FLOOR: "PROMO_MIN_NET_PROFIT_FLOOR",
+        PROMO_SURPLUS_SHARE_RATIO: "PROMO_SURPLUS_SHARE_RATIO",
+        MASTER_PLATFORM_FEE_PCT: "MASTER_PLATFORM_FEE_PCT",
+        SHIP_CUST_RATE_PER_KM: "SHIP_CUST_RATE_PER_KM",
+        SHIP_PARTNER_RATE_PER_KM: "SHIP_PARTNER_RATE_PER_KM",
+        MAX_PROMO_CAP_PCT: "MAX_PROMO_CAP_PCT",
+        COD_HOLDING_LIMIT: "COD_HOLDING_LIMIT",
+        TAX_HKD_PCT: "TAX_HKD_PCT",                       // Trß║ºn khuyß║┐n m├úi tß╗æi ─æa 15%
 
         // Thanh to├ín ng├ón h├áng & MoMo
         BANK_BIN: "BANK_BIN",
@@ -980,6 +1019,390 @@
      * @param {number} [optBufferPercent] - % Quß╗╣ ─æß╗çm D2C (mß║╖c ─æß╗ïnh 15%)
      * @returns {Object} Chi tiß║┐t ph├ón t├¡ch Reverse-Pricing
      */
+    
+    /**
+     * TÍNH TOÁN VOUCHER TRỢ GIÁ SHIP ĐỘNG THEO KHOẢNG CÁCH & LỢI NHUẬN RÒNG (SMART SHIP VOUCHER)
+     * Thẩm định khả năng trợ giá ship dựa trên Lợi Nhuận Ròng thặng dư của giỏ hàng.
+     * Rào chắn:
+     *   1. Lợi nhuận ròng sàn tối thiểu quán phải giữ lại (PROMO_MIN_NET_PROFIT_FLOOR: 25.000đ).
+     *   2. Tỷ lệ trích thặng dư tối đa (PROMO_SURPLUS_SHARE_RATIO: 0.7 = 70%).
+     *   3. Khóa cứng trần khuyến mãi toàn đơn <= 15% Doanh Thu Gộp (MAX_PROMO_CAP_PCT).
+     *   4. Mở khóa bậc: 100% (Freeship), 50% (Giảm 50% ship), 25% (Giảm 25% ship).
+     *   5. Nudge Upsell: Gợi ý Topping / Nước uống (Food Cost <= 20%) để mở khóa bậc tiếp theo.
+     * 
+     * @param {Object} params - { subtotal, totalCogs, distanceKm, otherDiscount, config }
+     * @returns {Object} Kết quả đánh giá Voucher
+     */
+    
+    /**
+     * DANH MỤC 3 CHƯƠNG TRÌNH KHUYẾN MÃI MẪU (DEFAULT CAMPAIGNS - TỐI ƯU LỢI NHUẬN F&B)
+     */
+    var DEFAULT_PROMO_CAMPAIGNS = Object.freeze([
+        {
+            id: "CMP_SOLO_COMBO",
+            name: "Đơn Đủ Bộ: 1 Món Chính + Topping + Nước",
+            status: "ACTIVE",
+            minMainDishes: 1,
+            minToppings: 1,
+            minDrinks: 1,
+            minBoosterItems: 2,
+            minSubtotal: 75000,
+            minRetainedNetProfit: 28000,
+            shipDiscountPct: 35,
+            maxShipDiscount: 10000,
+            freeBoosterMaxPrice: 15000,
+            freeGiftType: "TOPPING_OR_DRINK",
+            freeGiftDesc: "Tặng 1 Topping hoặc Nước uống (tối đa 15k, COGS <= 20%)",
+            description: "Giảm 35% Phí Ship (tối đa 10k) hoặc tặng 1 Topping/Nước"
+        },
+        {
+            id: "CMP_DUO_FEAST",
+            name: "Combo Nhóm 2 Người: 2 Món Chính + Topping/Nước",
+            status: "ACTIVE",
+            minMainDishes: 2,
+            minToppings: 0,
+            minDrinks: 0,
+            minBoosterItems: 2,
+            minSubtotal: 135000,
+            minRetainedNetProfit: 52000,
+            shipDiscountPct: 70,
+            maxShipDiscount: 15000,
+            freeBoosterMaxPrice: 12000,
+            freeGiftType: "TOPPING",
+            freeGiftDesc: "Tặng kèm 1 Topping tươi ngon",
+            description: "Giảm 50% - 70% Phí Ship (tối đa 15k) + Tặng 1 Topping"
+        },
+        {
+            id: "CMP_PARTY_3PLUS",
+            name: "Đại Tiệc Nhóm 3+ Người: 3 Món Chính + Topping/Nước",
+            status: "ACTIVE",
+            minMainDishes: 3,
+            minToppings: 0,
+            minDrinks: 0,
+            minBoosterItems: 3,
+            minSubtotal: 199000,
+            minRetainedNetProfit: 75000,
+            shipDiscountPct: 100,
+            maxShipDiscount: 20000,
+            freeBoosterMaxPrice: 25000,
+            freeGiftType: "DRINK_AND_TOPPING",
+            freeGiftDesc: "Tặng Free 1 Nước uống & 1 Topping",
+            description: "FREESHIP 100% (tối đa 20k) + Tặng Free 1 Nước uống & 1 Topping"
+        }
+    ]);
+
+    /**
+     * BỘ MÁY THẨM ĐỊNH KHUYẾN MÃI ĐA CHIẾN DỊCH (MULTI-CAMPAIGN PROMO ENGINE)
+     * Thẩm định điều kiện giỏ hàng và tính toán phần thưởng tối ưu cho khách nhưng bảo vệ sàn Lợi Nhuận Ròng.
+     * 
+     * @param {Object} params - { items, subtotal, totalCogs, distanceKm, otherDiscount, config, campaigns }
+     * @returns {Object} Kết quả thẩm định các chiến dịch khuyến mãi
+     */
+    function evaluateOrderPromoCampaigns(params) {
+        params = params || {};
+        var config = params.config || {};
+        var items = Array.isArray(params.items) ? params.items : (Array.isArray(params.cartItems) ? params.cartItems : []);
+        var subtotal = Number(params.subtotal) || 0;
+        var totalCogs = Number(params.totalCogs);
+        var distanceKm = Number(params.distanceKm) || 1.8;
+        var otherDiscount = Number(params.otherDiscount) || 0;
+
+        // Phân loại mặt hàng trong giỏ
+        var mainDishesCount = 0;
+        var toppingsCount = 0;
+        var drinksCount = 0;
+        var calcSubtotal = 0;
+        var calcCogs = 0;
+
+        for (var i = 0; i < items.length; i++) {
+            var it = items[i];
+            if (it.isGift) continue;
+            var q = Number(it.quantity || it.qty || 1);
+            var p = Number(it.price || it.d2cPrice || 0);
+            var c = Number(it.cogs || it.costPrice || (p * 0.40));
+            calcSubtotal += (p * q);
+            calcCogs += (c * q);
+
+            var cat = String(it.category || it.catId || it.cat || "").toUpperCase();
+            var dId = String(it.dishId || it.id || it.code || "").toUpperCase();
+            var name = String(it.name || "").toLowerCase();
+            var role = String(it.role || it.roleTag || "").toUpperCase();
+
+            var isDrink = cat.indexOf("NUOC") !== -1 || cat.indexOf("DRINK") !== -1 || cat.indexOf("BEVERAGE") !== -1 || 
+                          dId.indexOf("NUOC_") === 0 || name.indexOf("nước") !== -1 || name.indexOf("trà") !== -1 || 
+                          name.indexOf("cà phê") !== -1 || name.indexOf("pepsi") !== -1 || name.indexOf("coca") !== -1;
+
+            var isTopping = cat.indexOf("TOPPING") !== -1 || dId.indexOf("TOP") === 0 || (role === "BOOSTER" && !isDrink);
+
+            if (isDrink) {
+                drinksCount += q;
+            } else if (isTopping) {
+                toppingsCount += q;
+            } else if (p >= 30000 || role === "CORE" || role === "TRAFFIC" || cat.indexOf("MI") !== -1 || cat.indexOf("COM") !== -1) {
+                mainDishesCount += q;
+            } else {
+                toppingsCount += q;
+            }
+        }
+
+        if (subtotal === 0) subtotal = calcSubtotal;
+        if (isNaN(totalCogs) || totalCogs <= 0) totalCogs = calcCogs > 0 ? calcCogs : Math.round(subtotal * 0.40);
+        var boosterItemsCount = toppingsCount + drinksCount;
+
+        // Cấu hình tài chính
+        var isMasterEnabled = config.PROMO_MODULE_MASTER_ENABLED !== false && String(config.PROMO_MODULE_MASTER_ENABLED) !== "false";
+        var masterFeePct = Number(config.MASTER_PLATFORM_FEE_PCT !== undefined ? config.MASTER_PLATFORM_FEE_PCT : 5.0);
+        var taxHkdPct = Number(config.TAX_HKD_PCT !== undefined ? config.TAX_HKD_PCT : (config.TAX_RATE_HKD !== undefined ? config.TAX_RATE_HKD : 4.5));
+        var maxPromoCapPct = Number(config.MAX_PROMO_CAP_PCT !== undefined ? config.MAX_PROMO_CAP_PCT : (config.MAX_PROMOTION_RATE !== undefined ? config.MAX_PROMOTION_RATE : 15));
+        if (maxPromoCapPct > 0 && maxPromoCapPct < 1) maxPromoCapPct = maxPromoCapPct * 100;
+
+        var custRatePerKm = Number(config.SHIP_CUST_RATE_PER_KM || config.SHIPPING_RATE_CUSTOMER_PER_KM || 5000);
+        var surgeMultiplier = Number(config.SHIP_SURGE_MULTIPLIER || 1.0);
+        var minCustFee = Number(config.SHIP_BASE_FEE_CUST || config.SHIPPING_MIN_CUSTOMER_FEE || 5000);
+        var billableKm = Math.max(1, Math.ceil(distanceKm));
+        var shipFee = Math.max(minCustFee, Math.round(billableKm * custRatePerKm * surgeMultiplier));
+
+        // Lợi nhuận ròng trước khuyến mãi
+        var masterFee = Math.round(subtotal * (masterFeePct / 100));
+        var taxHkd = Math.round(subtotal * (taxHkdPct / 100));
+        var lnrBefore = Math.max(0, subtotal - totalCogs - masterFee - taxHkd);
+
+        // Danh sách chiến dịch
+        var campaigns = Array.isArray(params.campaigns) && params.campaigns.length > 0 
+            ? params.campaigns 
+            : (Array.isArray(config.promoCampaigns) ? config.promoCampaigns : DEFAULT_PROMO_CAMPAIGNS);
+
+        var activeResults = [];
+        var bestCampaign = null;
+        var primaryUpsellHint = "";
+
+        if (isMasterEnabled && subtotal > 0) {
+            // Duyệt từ chiến dịch cao cấp nhất (Party -> Duo -> Solo)
+            var sortedCampaigns = campaigns.slice().sort(function(a, b) {
+                return (b.minSubtotal || 0) - (a.minSubtotal || 0);
+            });
+
+            for (var cIdx = 0; cIdx < sortedCampaigns.length; cIdx++) {
+                var cmp = sortedCampaigns[cIdx];
+                if (cmp.status === "PAUSED" || cmp.status === false) continue;
+
+                var meetsMains = mainDishesCount >= (cmp.minMainDishes || 0);
+                var meetsToppings = toppingsCount >= (cmp.minToppings || 0);
+                var meetsDrinks = drinksCount >= (cmp.minDrinks || 0);
+                var meetsBoosters = boosterItemsCount >= (cmp.minBoosterItems || 0);
+                var meetsSubtotal = subtotal >= (cmp.minSubtotal || 0);
+
+                var isConditionsMet = meetsMains && meetsToppings && meetsDrinks && meetsBoosters && meetsSubtotal;
+
+                // Thẩm định ngân sách tài trợ từ lợi nhuận thặng dư
+                var retainedFloor = Number(cmp.minRetainedNetProfit || 25000);
+                var surplusProfit = Math.max(0, lnrBefore - retainedFloor);
+                var profitShare = Math.round(surplusProfit * 0.65);
+                var promoCap = Math.max(0, Math.round(subtotal * (maxPromoCapPct / 100)) - otherDiscount);
+                var maxFreeBudget = Math.min(profitShare, promoCap);
+
+                var targetShipDiscount = Math.round(shipFee * ((cmp.shipDiscountPct || 0) / 100));
+                var allowedShipDiscount = Math.min(targetShipDiscount, (cmp.maxShipDiscount || shipFee), maxFreeBudget);
+
+                // Quà tặng kèm (Nước uống / Topping) tính theo giá vốn COGS <= 20%
+                var giftCogsCost = Math.round((cmp.freeBoosterMaxPrice || 0) * 0.20);
+                var remBudgetForGift = Math.max(0, maxFreeBudget - allowedShipDiscount);
+                var isGiftAwarded = (giftCogsCost > 0 && remBudgetForGift >= giftCogsCost && cmp.freeGiftType);
+
+                var isUnlocked = isConditionsMet && (allowedShipDiscount > 0 || isGiftAwarded);
+
+                var hint = "";
+                if (!isUnlocked) {
+                    var hints = [];
+                    if (!meetsMains) hints.push("thêm " + (cmp.minMainDishes - mainDishesCount) + " Món Chính");
+                    if (!meetsBoosters && (cmp.minBoosterItems || 0) > boosterItemsCount) hints.push("thêm " + (cmp.minBoosterItems - boosterItemsCount) + " Topping/Nước");
+                    else {
+                        if (!meetsToppings) hints.push("thêm " + (cmp.minToppings - toppingsCount) + " Topping");
+                        if (!meetsDrinks) hints.push("thêm " + (cmp.minDrinks - drinksCount) + " Nước uống");
+                    }
+                    if (!meetsSubtotal) {
+                        var gapMoney = Math.ceil((cmp.minSubtotal - subtotal) / 1000) * 1000;
+                        hints.push("mua thêm " + gapMoney.toLocaleString("vi-VN") + "đ");
+                    }
+                    hint = hints.length > 0 ? ("Chọn " + hints.join(", ") + " để mở khóa: " + cmp.name) : "";
+                }
+
+                var resItem = {
+                    campaignId: cmp.id,
+                    name: cmp.name,
+                    unlocked: isUnlocked,
+                    meetsConditions: isConditionsMet,
+                    shipDiscountPct: cmp.shipDiscountPct || 0,
+                    shipDiscountAmount: allowedShipDiscount,
+                    freeGiftAwarded: isGiftAwarded,
+                    freeGiftType: isGiftAwarded ? cmp.freeGiftType : null,
+                    freeGiftDesc: isGiftAwarded ? cmp.freeGiftDesc : null,
+                    maxFreeBudget: maxFreeBudget,
+                    lnrBefore: lnrBefore,
+                    upsellHint: hint
+                };
+
+                activeResults.push(resItem);
+
+                if (isUnlocked && !bestCampaign) {
+                    bestCampaign = resItem;
+                }
+                // Nudge thông minh: Gợi ý nâng cấp bậc kế tiếp gần nhất
+                if (hint && (!primaryUpsellHint || cmp.minSubtotal < 100000 || (bestCampaign && cmp.minSubtotal > bestCampaign.minSubtotal))) {
+                    primaryUpsellHint = hint;
+                }
+            }
+        }
+
+        return {
+            enabled: isMasterEnabled,
+            subtotal: subtotal,
+            totalCogs: totalCogs,
+            lnrBefore: lnrBefore,
+            shipFee: shipFee,
+            cartSummary: {
+                mainDishes: mainDishesCount,
+                toppings: toppingsCount,
+                drinks: drinksCount,
+                boosterItems: boosterItemsCount
+            },
+            campaigns: activeResults,
+            bestCampaign: bestCampaign,
+            appliedCampaign: bestCampaign ? { id: bestCampaign.campaignId, name: bestCampaign.name, minRetainedNetProfit: bestCampaign.minRetainedNetProfit } : null,
+            unlocked: Boolean(bestCampaign && bestCampaign.unlocked),
+            primaryUpsellHint: primaryUpsellHint,
+            appliedDiscount: bestCampaign ? bestCampaign.shipDiscountAmount : 0,
+            shipDiscount: bestCampaign ? bestCampaign.shipDiscountAmount : 0,
+            appliedGift: (bestCampaign && bestCampaign.freeGiftAwarded) ? bestCampaign.freeGiftDesc : null,
+            giftReward: (bestCampaign && bestCampaign.freeGiftAwarded) ? { type: bestCampaign.freeGiftType, desc: bestCampaign.freeGiftDesc } : null
+        };
+    }
+
+    function evaluateSmartShipVoucher(params) {
+        params = params || {};
+        var config = params.config || {};
+        var subtotal = Number(params.subtotal) || 0;
+        var totalCogs = Number(params.totalCogs);
+        if (isNaN(totalCogs) || totalCogs < 0) {
+            totalCogs = Math.round(subtotal * 0.40); // Ước tính 40% nếu không truyền giá vốn
+        }
+        var distanceKm = Number(params.distanceKm) || 1.0;
+        var otherDiscount = Number(params.otherDiscount) || 0;
+
+        // Cấu hình tham số (Fallback từ SSOT)
+        var isEnabled = config.PROMO_SMART_SHIP_VOUCHER_ENABLED !== false && String(config.PROMO_SMART_SHIP_VOUCHER_ENABLED) !== "false";
+        var tier25Enabled = config.PROMO_TIER_25_ENABLED !== false && String(config.PROMO_TIER_25_ENABLED) !== "false";
+        var tier50Enabled = config.PROMO_TIER_50_ENABLED !== false && String(config.PROMO_TIER_50_ENABLED) !== "false";
+        var tier100Enabled = config.PROMO_TIER_100_ENABLED !== false && String(config.PROMO_TIER_100_ENABLED) !== "false";
+        var upsellEnabled = config.PROMO_UPSELL_NUDGE_ENABLED !== false && String(config.PROMO_UPSELL_NUDGE_ENABLED) !== "false";
+
+        var profitFloor = Number(config.PROMO_MIN_NET_PROFIT_FLOOR !== undefined ? config.PROMO_MIN_NET_PROFIT_FLOOR : 25000);
+        var surplusRatio = Number(config.PROMO_SURPLUS_SHARE_RATIO !== undefined ? config.PROMO_SURPLUS_SHARE_RATIO : 0.7);
+        var custRatePerKm = Number(config.SHIP_CUST_RATE_PER_KM || config.SHIPPING_RATE_CUSTOMER_PER_KM || 5000);
+        var surgeMultiplier = Number(config.SHIP_SURGE_MULTIPLIER || 1.0);
+        var minCustFee = Number(config.SHIP_BASE_FEE_CUST || config.SHIPPING_MIN_CUSTOMER_FEE || 5000);
+        var maxPromoCapPct = Number(config.MAX_PROMO_CAP_PCT !== undefined ? config.MAX_PROMO_CAP_PCT : (config.MAX_PROMOTION_RATE !== undefined ? config.MAX_PROMOTION_RATE : 15));
+        if (maxPromoCapPct > 0 && maxPromoCapPct < 1) maxPromoCapPct = maxPromoCapPct * 100;
+        var masterFeePct = Number(config.MASTER_PLATFORM_FEE_PCT !== undefined ? config.MASTER_PLATFORM_FEE_PCT : 5.0);
+        if (masterFeePct > 0 && masterFeePct < 1) masterFeePct = masterFeePct * 100;
+        var taxHkdPct = Number(config.TAX_HKD_PCT !== undefined ? config.TAX_HKD_PCT : (config.TAX_RATE_HKD !== undefined ? config.TAX_RATE_HKD : 4.5));
+        if (taxHkdPct > 0 && taxHkdPct < 1) taxHkdPct = taxHkdPct * 100;
+
+        // 1. Phí ship gốc thu khách
+        var billableKm = Math.max(1, Math.ceil(distanceKm));
+        var shipFee = Math.max(minCustFee, Math.round(billableKm * custRatePerKm * surgeMultiplier));
+
+        // 2. Lợi nhuận ròng giỏ hàng (Sau khi trừ COGS, Phí Master 5% và Thuế HKD 4.5%)
+        var masterFee = Math.round(subtotal * (masterFeePct / 100));
+        var taxHkd = Math.round(subtotal * (taxHkdPct / 100));
+        var cartNetProfit = Math.max(0, subtotal - totalCogs - masterFee - taxHkd);
+
+        // 3. Ngân sách trợ giá ship từ Lợi nhuận thặng dư
+        var profitAllow = Math.max(0, Math.round((cartNetProfit - profitFloor) * surplusRatio));
+
+        // 4. Khóa trần tổng khuyến mãi <= 15% doanh thu gộp
+        var maxPromoAllowed = Math.round(subtotal * (maxPromoCapPct / 100));
+        var capAllow = Math.max(0, maxPromoAllowed - otherDiscount);
+
+        // 5. Ngân sách Voucher tối đa có thể cấp
+        var maxShipDiscount = Math.min(shipFee, profitAllow, capAllow);
+
+        var unlocked = false;
+        var voucherCode = "";
+        var tier = 0;
+        var discountPct = 0;
+        var discountAmount = 0;
+        var title = "";
+        var badgeText = "";
+
+        if (isEnabled && subtotal > 0 && maxShipDiscount > 0) {
+            if (tier100Enabled && maxShipDiscount >= shipFee) {
+                unlocked = true;
+                voucherCode = "SHIP_100";
+                tier = 100;
+                discountPct = 100;
+                discountAmount = shipFee;
+                title = "Freeship 100% Phí Vận Chuyển";
+                badgeText = "TIỆC LỚN FREESHIP 100%";
+            } else if (tier50Enabled && maxShipDiscount >= Math.round(shipFee * 0.5)) {
+                unlocked = true;
+                voucherCode = "SHIP_50";
+                tier = 50;
+                discountPct = 50;
+                discountAmount = Math.round(shipFee * 0.5);
+                title = "Giảm 50% Phí Vận Chuyển";
+                badgeText = "TRỢ GIÁ SHIP 50%";
+            } else if (tier25Enabled && maxShipDiscount >= Math.round(shipFee * 0.25)) {
+                unlocked = true;
+                voucherCode = "SHIP_25";
+                tier = 25;
+                discountPct = 25;
+                discountAmount = Math.round(shipFee * 0.25);
+                title = "Giảm 25% Phí Vận Chuyển";
+                badgeText = "TRỢ GIÁ SHIP 25%";
+            }
+        }
+
+        // 6. Tính toán Upsell Nudge để mở khóa bậc tiếp theo
+        var nextTierInfo = null;
+        if (isEnabled && upsellEnabled && tier < 100) {
+            var targetTier = (tier === 0) ? (tier25Enabled ? 25 : (tier50Enabled ? 50 : 100)) :
+                             (tier === 25) ? (tier50Enabled ? 50 : 100) : 100;
+            var targetDiscount = Math.round(shipFee * (targetTier / 100));
+            var neededNetProfit = Math.round(targetDiscount / (surplusRatio > 0 ? surplusRatio : 0.7)) + profitFloor;
+            var netProfitGap = Math.max(0, neededNetProfit - cartNetProfit);
+            // Nhóm Booster (Topping / Nước uống) có Food Cost <= 20%, biên lợi nhuận ròng ~65%
+            var suggestedSpend = netProfitGap > 0 ? Math.ceil((netProfitGap / 0.65) / 5000) * 5000 : 0;
+            if (suggestedSpend > 0) {
+                nextTierInfo = {
+                    targetTier: targetTier,
+                    targetDiscount: targetDiscount,
+                    netProfitGap: netProfitGap,
+                    suggestedSpend: suggestedSpend,
+                    nudgeMessage: "Chọn thêm Topping / Nước uống (~" + suggestedSpend.toLocaleString("vi-VN") + "đ) để mở khóa ngay Voucher giảm " + targetTier + "% phí ship!"
+                };
+            }
+        }
+
+        return {
+            enabled: isEnabled,
+            unlocked: unlocked,
+            voucherCode: voucherCode,
+            tier: tier,
+            discountPct: discountPct,
+            discountAmount: discountAmount,
+            title: title,
+            badgeText: badgeText,
+            shipFee: shipFee,
+            cartNetProfit: cartNetProfit,
+            profitFloor: profitFloor,
+            profitAllow: profitAllow,
+            capAllow: capAllow,
+            maxShipDiscount: maxShipDiscount,
+            nextTier: nextTierInfo
+        };
+    }
+
     function calculateReversePricing(appPrice, cogs, optDiscountPercent, optBufferPercent) {
         var rawAppPrice = Number(appPrice) || 0;
         var rawCogs = Number(cogs) || 0;
@@ -1015,6 +1438,212 @@
     /**
      * 15. ─É├ôNG G├ôI V├Ç XUß║ñT Bß║óN TH╞» VIß╗åN TO├ÇN Cß╗ñC SSOT
      */
+    // =========================================================================
+    // SMART CANVAS COMPRESSOR & GOOGLE DRIVE MEDIA UTILITIES (v3.5 OMNI-INGESTION)
+    // =========================================================================
+
+    function normalizeDriveImageUrl(urlOrFileId) {
+        if (!urlOrFileId) return "";
+        var str = String(urlOrFileId).trim();
+        if (!str) return "";
+
+        var fileId = null;
+
+        var matchD = str.match(/\/file\/d\/([a-zA-Z0-9_-]{25,})/);
+        if (matchD && matchD[1]) {
+            fileId = matchD[1];
+        }
+        if (!fileId) {
+            var matchId = str.match(/[?&]id=([a-zA-Z0-9_-]{25,})/);
+            if (matchId && matchId[1]) {
+                fileId = matchId[1];
+            }
+        }
+        if (!fileId) {
+            var matchLh3 = str.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]{25,})/);
+            if (matchLh3 && matchLh3[1]) {
+                fileId = matchLh3[1];
+            }
+        }
+        if (!fileId && !str.includes("/") && !str.includes(":") && str.length >= 25 && str.length <= 55) {
+            fileId = str;
+        }
+
+        if (fileId) {
+            return "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w800";
+        }
+        return str;
+    }
+
+    var SmartCanvasCompressor = {
+        MODES: {
+            DISH_PHOTO: {
+                name: "DISH_PHOTO",
+                maxDimension: 800,
+                quality: 0.78,
+                mimeType: "image/webp",
+                fallbackMime: "image/jpeg",
+                targetMaxKb: 80
+            },
+            MENU_OCR: {
+                name: "MENU_OCR",
+                maxDimension: 1280,
+                quality: 0.85,
+                mimeType: "image/jpeg",
+                fallbackMime: "image/jpeg",
+                targetMaxKb: 150
+            }
+        },
+
+        formatBytes: function(bytes) {
+            if (!bytes || bytes === 0) return "0 B";
+            var k = 1024;
+            var sizes = ["B", "KB", "MB", "GB"];
+            var i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+        },
+
+        compress: function(fileOrBlob, modeName, callback) {
+            var self = this;
+            var mode = (typeof modeName === "object" && modeName) ? modeName : (self.MODES[modeName] || self.MODES.DISH_PHOTO);
+
+            return new Promise(function(resolve, reject) {
+                function handleErr(err) {
+                    if (typeof callback === "function") callback(err, null);
+                    reject(err);
+                }
+                function handleSuccess(res) {
+                    if (typeof callback === "function") callback(null, res);
+                    resolve(res);
+                }
+
+                if (!fileOrBlob) {
+                    return handleErr(new Error("Không có tệp hình ảnh để nén!"));
+                }
+
+                if (typeof document === "undefined" || typeof window === "undefined" || !window.FileReader) {
+                    var mockOriginalSize = (fileOrBlob && fileOrBlob.size) ? fileOrBlob.size : 100000;
+                    var mockCompressedSize = Math.round(mockOriginalSize * 0.15);
+                    var mockRes = {
+                        dataUrl: "data:image/webp;base64,MOCK_DATA",
+                        base64: "MOCK_DATA",
+                        mimeType: mode.mimeType,
+                        width: 800,
+                        height: 600,
+                        originalSizeBytes: mockOriginalSize,
+                        compressedSizeBytes: mockCompressedSize,
+                        originalSizeKb: Math.round(mockOriginalSize / 1024),
+                        compressedSizeKb: Math.round(mockCompressedSize / 1024),
+                        savedRatioPct: 85,
+                        summaryText: self.formatBytes(mockOriginalSize) + " -> " + self.formatBytes(mockCompressedSize) + " (-85%)"
+                    };
+                    return handleSuccess(mockRes);
+                }
+
+                var originalSize = fileOrBlob.size || 0;
+                var reader = new FileReader();
+
+                reader.onerror = function() {
+                    handleErr(new Error("Không thể đọc tệp hình ảnh!"));
+                };
+
+                reader.onload = function(e) {
+                    var img = new Image();
+                    img.onerror = function() {
+                        handleErr(new Error("Tệp không phải là hình ảnh hợp lệ!"));
+                    };
+                    img.onload = function() {
+                        var width = img.naturalWidth || img.width;
+                        var height = img.naturalHeight || img.height;
+                        var maxDim = mode.maxDimension || 800;
+
+                        if (width > height) {
+                            if (width > maxDim) {
+                                height = Math.round((height * maxDim) / width);
+                                width = maxDim;
+                            }
+                        } else {
+                            if (height > maxDim) {
+                                width = Math.round((width * maxDim) / height);
+                                height = maxDim;
+                            }
+                        }
+
+                        var canvas = document.createElement("canvas");
+                        canvas.width = width;
+                        canvas.height = height;
+                        var ctx = canvas.getContext("2d");
+
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = "high";
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        var targetMime = mode.mimeType || "image/webp";
+                        var dataUrl = "";
+                        try {
+                            dataUrl = canvas.toDataURL(targetMime, mode.quality);
+                            if (!dataUrl || dataUrl.indexOf("data:" + targetMime) !== 0) {
+                                targetMime = mode.fallbackMime || "image/jpeg";
+                                dataUrl = canvas.toDataURL(targetMime, mode.quality);
+                            }
+                        } catch (canvasErr) {
+                            targetMime = "image/jpeg";
+                            dataUrl = canvas.toDataURL(targetMime, 0.8);
+                        }
+
+                        var base64 = dataUrl.split(",")[1] || "";
+                        var compressedSize = Math.round((base64.length * 3) / 4);
+                        var originalSizeKb = Math.round(originalSize / 1024);
+                        var compressedSizeKb = Math.round(compressedSize / 1024);
+                        var savedPct = originalSize > 0 
+                            ? Math.max(0, Math.round(((originalSize - compressedSize) / originalSize) * 100))
+                            : 0;
+
+                        var summaryText = self.formatBytes(originalSize) + " -> " + self.formatBytes(compressedSize) + " (-" + savedPct + "%)";
+
+                        handleSuccess({
+                            dataUrl: dataUrl,
+                            base64: base64,
+                            mimeType: targetMime,
+                            width: width,
+                            height: height,
+                            originalSizeBytes: originalSize,
+                            compressedSizeBytes: compressedSize,
+                            originalSizeKb: originalSizeKb,
+                            compressedSizeKb: compressedSizeKb,
+                            savedRatioPct: savedPct,
+                            summaryText: summaryText
+                        });
+                    };
+                    img.src = e.target.result;
+                };
+
+                reader.readAsDataURL(fileOrBlob);
+            });
+        },
+
+        compressBatch: async function(files, modeName, onProgress) {
+            var results = [];
+            var total = files.length;
+            var mode = this.MODES[modeName] || this.MODES.DISH_PHOTO;
+
+            for (var i = 0; i < total; i++) {
+                var file = files[i];
+                try {
+                    var comp = await this.compress(file, mode);
+                    results.push({ file: file, name: file.name, success: true, result: comp });
+                } catch (err) {
+                    results.push({ file: file, name: file.name, success: false, error: err });
+                }
+                if (typeof onProgress === "function") {
+                    var pct = Math.round(((i + 1) / total) * 100);
+                    onProgress({ current: i + 1, total: total, percent: pct, file: file });
+                }
+            }
+            return results;
+        }
+    };
+
     return {
         CONSTANTS: BASE_FALLBACK_CONFIG,
         SHEETS: SHEETS,
@@ -1040,7 +1669,18 @@
         registerAction: registerAction,
         normalizeOrderEntity: normalizeOrderEntity,
         calculateDynamicShippingFee: calculateDynamicShippingFee,
-        calculateReversePricing: calculateReversePricing
+        calculateReversePricing: calculateReversePricing,
+        evaluateSmartShipVoucher: evaluateSmartShipVoucher,
+        evaluateOrderPromoCampaigns: evaluateOrderPromoCampaigns,
+        DEFAULT_PROMO_CAMPAIGNS: DEFAULT_PROMO_CAMPAIGNS,
+        normalizeDriveImageUrl: normalizeDriveImageUrl,
+        SmartCanvasCompressor: SmartCanvasCompressor,
+        pricing: {
+            calculateReversePricing: calculateReversePricing,
+            calculateDynamicShippingFee: calculateDynamicShippingFee,
+            evaluateSmartShipVoucher: evaluateSmartShipVoucher,
+            evaluateOrderPromoCampaigns: evaluateOrderPromoCampaigns
+        }
     };
 
 }));

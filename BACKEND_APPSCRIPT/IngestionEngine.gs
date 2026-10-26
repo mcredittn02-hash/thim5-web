@@ -722,14 +722,18 @@ function normalizeMenuItemRecord(rawItem, index) {
     appPrice: appPrice,
     discountPercent: discountPercent,
     d2cPrice: pricing.d2cPrice,
+    price: pricing.d2cPrice,
     cost: cogs,
+    cogs: cogs,
     netProfit: pricing.netProfit,
     fcPercentD2c: pricing.fcPercentD2c,
     lnrMarginPercent: pricing.lnrMarginPercent,
     status: status,
     description: desc,
-    imageUrl: imgUrl,
+    imageUrl: typeof normalizeDriveImageUrl === "function" ? normalizeDriveImageUrl(imgUrl) : imgUrl,
     crossSellSuggest: crossSell,
+    boosterSoup: crossSell,
+    role: tag,
     tag: tag
   };
 }
@@ -1125,15 +1129,27 @@ function uploadImageToMenuDriveFolder(payload) {
   try {
     var base64String = payload ? (payload.base64 || payload.base64Data || payload.data) : null;
     if (!base64String) {
-      return { status: "error", code: 400, message: "Thiếu dữ liệu hình ảnh Base64!" };
+      return { status: "error", success: false, code: 400, message: "Thiếu dữ liệu hình ảnh Base64!" };
     }
 
     base64String = String(base64String);
     var itemCode = String(payload.itemCode || payload.code || "ITEM").trim().toUpperCase();
-    var rawFileName = String(payload.fileName || (itemCode + "_" + Date.now() + ".webp")).trim();
+    var dishName = String(payload.name || payload.dishName || "").trim();
+    
+    // Tạo tên file chuẩn hóa (slug tên món hoặc itemCode + timestamp)
+    var slug = dishName ? dishName.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d").replace(/[^a-z0-9]/g, "_")
+      .replace(/_+/g, "_") : itemCode.toLowerCase();
+    
+    var ext = "webp";
+    var contentType = String(payload.mimeType || "image/webp");
+    if (contentType.indexOf("jpeg") !== -1 || contentType.indexOf("jpg") !== -1) ext = "jpg";
+    else if (contentType.indexOf("png") !== -1) ext = "png";
+
+    var rawFileName = String(payload.fileName || (slug + "_" + Date.now() + "." + ext)).trim();
 
     // 1. Tách chuỗi header data URI nếu có
-    var contentType = String(payload.mimeType || "image/webp");
     var pureBase64 = base64String;
     if (base64String.indexOf("data:") !== -1 && base64String.indexOf(";base64,") !== -1) {
       var parts = base64String.split(";base64,");
@@ -1144,42 +1160,112 @@ function uploadImageToMenuDriveFolder(payload) {
     var decodedBytes = Utilities.base64Decode(pureBase64);
     var blob = Utilities.newBlob(decodedBytes, contentType, rawFileName);
 
-    // 2. Tìm hoặc tự động tạo thư mục công khai THIM5_MENU_MEDIA trên Drive của quán
-    var folderName = INGESTION_CONSTANTS.DRIVE_ASSET_FOLDER || "THIM5_MENU_MEDIA";
-    var folders = DriveApp.getFoldersByName(folderName);
+    // 2. Tìm hoặc tự động tạo thư mục công khai LongHoaFood_Menu_Images trên Drive
     var targetFolder = null;
+    var folderIdFromConfig = "";
+    var ss = null;
+    try { ss = SpreadsheetApp.getActiveSpreadsheet(); } catch (e) {}
 
-    if (folders.hasNext()) {
-      targetFolder = folders.next();
-    } else {
-      targetFolder = DriveApp.createFolder(folderName);
-      targetFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    // Kiểm tra cấu hình MENU_DRIVE_FOLDER_ID trên SYS_CONFIG
+    if (ss) {
+      var cfgSheet = ss.getSheetByName(T5_SSOT.SHEETS.CONFIG || "SYS_CONFIG");
+      if (cfgSheet && cfgSheet.getLastRow() > 1) {
+        var cfgData = cfgSheet.getDataRange().getValues();
+        for (var r = 1; r < cfgData.length; r++) {
+          var k = String(cfgData[r][0] || "").trim().toUpperCase();
+          if (k === "MENU_DRIVE_FOLDER_ID" || k === "MENU_IMAGE_FOLDER_ID") {
+            folderIdFromConfig = String(cfgData[r][1] || "").trim();
+            break;
+          }
+        }
+      }
     }
 
-    // 3. Tạo file ảnh và mở quyền truy cập công khai
+    if (folderIdFromConfig) {
+      try {
+        targetFolder = DriveApp.getFolderById(folderIdFromConfig);
+      } catch (errFolder) {
+        Logger.log("⚠️ Không tìm thấy thư mục từ ID cấu hình, sẽ tìm theo tên...");
+        targetFolder = null;
+      }
+    }
+
+    if (!targetFolder) {
+      var folderNamesToTry = ["LongHoaFood_Menu_Images", "THIM5_MENU_MEDIA"];
+      for (var f = 0; f < folderNamesToTry.length; f++) {
+        var fName = folderNamesToTry[f];
+        var folders = DriveApp.getFoldersByName(fName);
+        if (folders.hasNext()) {
+          targetFolder = folders.next();
+          break;
+        }
+      }
+
+      if (!targetFolder) {
+        targetFolder = DriveApp.createFolder("LongHoaFood_Menu_Images");
+      }
+      
+      try {
+        targetFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      } catch (eShare) {}
+
+      // Tự động lưu ID thư mục vào SYS_CONFIG nếu chưa có
+      if (ss && targetFolder) {
+        try {
+          var cfgSheet2 = ss.getSheetByName(T5_SSOT.SHEETS.CONFIG || "SYS_CONFIG");
+          if (cfgSheet2) {
+            var foundCfg = false;
+            var cData = cfgSheet2.getDataRange().getValues();
+            for (var r2 = 1; r2 < cData.length; r2++) {
+              if (String(cData[r2][0] || "").trim().toUpperCase() === "MENU_DRIVE_FOLDER_ID") {
+                cfgSheet2.getRange(r2 + 1, 2).setValue(targetFolder.getId());
+                foundCfg = true;
+                break;
+              }
+            }
+            if (!foundCfg) {
+              cfgSheet2.appendRow(["MENU_DRIVE_FOLDER_ID", targetFolder.getId(), "ID Thư mục lưu trữ hình ảnh thực đơn trên Google Drive"]);
+            }
+          }
+        } catch (eSaveCfg) {}
+      }
+    }
+
+    // 3. Tạo file ảnh và cấp quyền công khai Anyone With Link
     var createdFile = targetFolder.createFile(blob);
-    createdFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    try {
+      createdFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch (eFileShare) {}
 
     var fileId = createdFile.getId();
-    var directCdnUrl = "https://lh3.googleusercontent.com/d/" + fileId;
+    // Link chuẩn hóa không bị chặn CORS
+    var thumbnailCdnUrl = "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w800";
+    var directLh3Url = "https://lh3.googleusercontent.com/d/" + fileId;
 
     return {
-      status: "success",
+      status: "SUCCESS",
+      success: true,
       code: 200,
+      fileId: fileId,
+      fileName: rawFileName,
+      imageUrl: thumbnailCdnUrl,
+      directCdnUrl: thumbnailCdnUrl,
+      url: thumbnailCdnUrl,
+      lh3Url: directLh3Url,
+      viewUrl: createdFile.getUrl(),
       data: {
         fileId: fileId,
         fileName: rawFileName,
-        directCdnUrl: directCdnUrl,
-        imageUrl: directCdnUrl,
-        url: directCdnUrl,
+        imageUrl: thumbnailCdnUrl,
+        directCdnUrl: thumbnailCdnUrl,
+        url: thumbnailCdnUrl,
         viewUrl: createdFile.getUrl(),
-        googleDriveViewUrl: createdFile.getUrl(),
         message: "Đã lưu ảnh thành công vào Google Drive Media của quán!"
       }
     };
 
   } catch (err) {
-    return { status: "error", code: 500, message: "Lỗi lưu trữ hình ảnh: " + err.toString() };
+    return { status: "error", success: false, code: 500, message: "Lỗi lưu trữ hình ảnh: " + err.toString() };
   }
 }
 
